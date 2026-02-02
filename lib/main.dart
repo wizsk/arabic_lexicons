@@ -198,6 +198,7 @@ class _SearchWithSelectionState extends State<SearchWithSelection> {
                             return Padding(
                               padding: const EdgeInsets.only(left: 8),
                               child: ChoiceChip(
+                                showCheckmark: false,
                                 label: Text(word),
                                 selected: word == _selectedWord,
                                 onSelected: (_) => _selectWord(word),
@@ -225,6 +226,7 @@ class _SearchWithSelectionState extends State<SearchWithSelection> {
                             padding: const EdgeInsets.only(left: 8),
                             child: ChoiceChip(
                               label: Text(ar), // Arabic name
+                              showCheckmark: false,
                               selected: en == _selectedDict,
                               onSelected: (_) {
                                 if (_selectedDict != en) {

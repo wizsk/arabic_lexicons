@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_html/flutter_html.dart';
-import 'package:salah_time/dict/arEn.dart';
+import 'package:salah_time/data.dart';
+import 'package:salah_time/arEn.dart';
 import 'package:salah_time/db.dart';
+import 'package:salah_time/res.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -15,8 +16,27 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
+      title: 'Flutter Demo',
+      theme: ThemeData(
+        // This is the theme of your application.
+        //
+        // TRY THIS: Try running your application with "flutter run". You'll see
+        // the application has a purple toolbar. Then, without quitting the app,
+        // try changing the seedColor in the colorScheme below to Colors.green
+        // and then invoke "hot reload" (save your changes or press the "hot
+        // reload" button in a Flutter-supported IDE, or press "r" if you used
+        // the command line to start the app).
+        //
+        // Notice that the counter didn't reset back to zero; the application
+        // state is not lost during the reload. To reset the state, use hot
+        // restart instead.
+        //
+        // This works for code too, not just values: Most code changes can be
+        // tested with just a hot reload.
+        colorScheme: .fromSeed(seedColor: Colors.yellow),
+      ),
       home: SearchWithSelection(initialText: ''),
     );
   }
@@ -30,72 +50,6 @@ class SearchWithSelection extends StatefulWidget {
   @override
   State<SearchWithSelection> createState() => _SearchWithSelectionState();
 }
-
-class DictEntry {
-  final Dict d;
-  final String ar;
-
-  const DictEntry({required this.d, required this.ar});
-}
-
-enum Dict {
-  arEn,
-  hanswehr,
-  laneLexicon,
-  mujamulGhoni,
-  mujamulShihah,
-  lisanAlArab,
-  mujamulMuashiroh,
-  mujamulWasith,
-  mujamulMuhith,
-}
-
-String getDictTableName(Dict d) {
-  switch (d) {
-    case Dict.arEn:
-      return "arEn";
-    case Dict.hanswehr:
-      return "hanswehr";
-    case Dict.laneLexicon:
-      return "lanelexcon";
-    case Dict.mujamulGhoni:
-      return "mujamul_ghoni";
-    case Dict.mujamulShihah:
-      return "mujamul_shihah";
-    case Dict.lisanAlArab:
-      return "lisanularab";
-    case Dict.mujamulMuashiroh:
-      return "mujamul_muashiroh";
-    case Dict.mujamulWasith:
-      return "mujamul_wasith";
-    case Dict.mujamulMuhith:
-      return "mujamul_muhith";
-  }
-}
-
-final List<DictEntry> _dictNames = [
-  DictEntry(d: Dict.arEn, ar: "مباشر"),
-  DictEntry(d: Dict.hanswehr, ar: "هانز"),
-  DictEntry(d: Dict.laneLexicon, ar: "لين"),
-  DictEntry(d: Dict.mujamulGhoni, ar: "الغني"),
-  DictEntry(d: Dict.mujamulShihah, ar: "مختار"),
-  DictEntry(d: Dict.lisanAlArab, ar: "لسان"),
-  DictEntry(d: Dict.mujamulMuashiroh, ar: "المعاصرة"),
-  DictEntry(d: Dict.mujamulWasith, ar: "الوسيط"),
-  DictEntry(d: Dict.mujamulMuhith, ar: "المحيط"),
-];
-
-// final List<DictEntry> _dictNames = [
-//   DictEntry(d: Dict.ArEn, ar: "مباشر"),
-//   DictEntry(d: Dict.hanswehr, ar: "هانز"),
-//   DictEntry(d: Dict.lanelexcon, ar: "لين"),
-//   DictEntry(d: Dict.mujamul_ghoni, ar: "الغني"),
-//   DictEntry(d: Dict.mujamul_shihah, ar: "مختار"),
-//   DictEntry(d: Dict.lisanularab, ar: "لسان"),
-//   DictEntry(d: Dict.mujamul_muashiroh, ar: "المعاصرة"),
-//   DictEntry(d: Dict.mujamul_wasith, ar: "الوسيط"),
-//   DictEntry(d: Dict.mujamul_muhith, ar: "المحيط"),
-// ];
 
 class _SearchWithSelectionState extends State<SearchWithSelection> {
   late final TextEditingController _controller;
@@ -116,7 +70,7 @@ class _SearchWithSelectionState extends State<SearchWithSelection> {
     _controller = TextEditingController(text: widget.initialText);
     _onTextChanged(widget.initialText);
 
-    _selectedDict = _dictNames.first.d;
+    _selectedDict = dictNames.first.d;
   }
 
   void _onTextChanged(String value) async {
@@ -144,10 +98,6 @@ class _SearchWithSelectionState extends State<SearchWithSelection> {
       }
     });
   }
-
-  // ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-  //      content: Text("Sending Message"),
-  // ));
 
   void _selectWord(String word) {
     setState(() {
@@ -212,11 +162,24 @@ class _SearchWithSelectionState extends State<SearchWithSelection> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('بحث')),
+      // appBar: AppBar(title: const Text('بحث')),
       body: SafeArea(
         child: Column(
           children: [
             Expanded(child: showRes(_selectedDict, _dbRes, _arEnRes)),
+
+            Material(
+              elevation: 10, // 👈 shadow strength
+              shadowColor: Colors.black26,
+              color: Theme.of(context).scaffoldBackgroundColor,
+              child: Container(
+                decoration: BoxDecoration(
+                  border: Border(
+                    top: BorderSide(color: Colors.grey.withAlpha(25), width: 1),
+                  ),
+                ),
+              ),
+            ),
             Padding(
               padding: const EdgeInsets.all(12),
               child: Column(
@@ -254,7 +217,7 @@ class _SearchWithSelectionState extends State<SearchWithSelection> {
                       scrollDirection: Axis.horizontal,
                       reverse: true, // 🔴 critical for RTL
                       child: Row(
-                        children: _dictNames.reversed.map((entry) {
+                        children: dictNames.reversed.map((entry) {
                           final en = entry.d;
                           final ar = entry.ar;
 
@@ -307,90 +270,4 @@ class _SearchWithSelectionState extends State<SearchWithSelection> {
       ),
     );
   }
-}
-
-Widget showArEnRes(List<Entry>? entries) {
-  if (entries == null || entries.isEmpty) {
-    return const Center(child: Text('No results'));
-  }
-
-  return SingleChildScrollView(
-    child: Center(
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: DataTable(
-          columnSpacing: 24.0,
-          columns: const [
-            DataColumn(label: Text('Word')),
-            DataColumn(label: Text('Definition')),
-            DataColumn(label: Text('Root')),
-          ],
-          rows: entries.map((e) {
-            return DataRow(
-              cells: [
-                DataCell(Text(e.word)),
-                DataCell(Text(e.def)),
-                DataCell(Text(e.root)),
-              ],
-            );
-          }).toList(),
-        ),
-      ),
-    ),
-  );
-}
-
-Widget showRes(
-  Dict curDict,
-  List<Map<String, dynamic>>? dbRes,
-  List<Entry>? arEnRes,
-) {
-  switch (curDict) {
-    case Dict.arEn:
-      return showArEnRes(arEnRes);
-    // case "":
-    default:
-  }
-
-  var dir = TextDirection.rtl;
-  var al = TextAlign.right;
-  if (curDict == Dict.hanswehr || curDict == Dict.laneLexicon) {
-    al = TextAlign.left;
-    dir = TextDirection.ltr;
-  }
-  if (dbRes != null && dbRes.isNotEmpty) {
-    return ListView.separated(
-      itemCount: dbRes.length,
-      separatorBuilder: (context, index) =>
-          const Divider(height: 24, thickness: 1),
-      itemBuilder: (context, index) {
-        final row = dbRes[index];
-        // return RichText(text: TextSpan(text: row['meanings']));
-        return ListTile(
-          title: Text(row['word'] ?? '', textDirection: dir, textAlign: al),
-          subtitle: meaningView(row['meanings'] ?? '', dir, al),
-        );
-      },
-    );
-  }
-  return Center(child: Text("loading"));
-}
-
-Widget meaningView(String html, TextDirection dir, TextAlign al) {
-  return Directionality(
-    textDirection: TextDirection.rtl, // Arabic
-    child: Html(
-      data: html,
-      style: {
-        'body': Style(
-          fontSize: FontSize(16),
-          lineHeight: LineHeight.number(1.6),
-          direction: dir,
-          textAlign: al,
-        ),
-        'strong': Style(fontWeight: FontWeight.bold),
-        'i': Style(fontStyle: FontStyle.italic),
-      },
-    ),
-  );
 }

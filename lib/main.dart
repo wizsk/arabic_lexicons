@@ -23,7 +23,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         textTheme: Theme.of(context).textTheme.apply(
           fontFamily: fontKitab,
-          fontSizeFactor: 1.1,
+          fontSizeFactor: 1.2,
           fontSizeDelta: 2.0,
           bodyColor: null,
           displayColor: null,

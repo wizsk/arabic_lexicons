@@ -1,3 +1,4 @@
+import 'package:ara_dict/alphabets.dart';
 import 'package:flutter/material.dart';
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/ar_en.dart';
@@ -92,11 +93,7 @@ class _SearchWithSelectionState extends State<SearchWithSelection> {
   }
 
   void _onTextChanged(String value) async {
-    final parts = value
-        .trim()
-        .split(RegExp(r'\s+'))
-        .where((e) => e.isNotEmpty)
-        .toList();
+    final parts = cleanQeury(value);
 
     setState(() {
       _words = parts;
@@ -293,6 +290,8 @@ class _SearchWithSelectionState extends State<SearchWithSelection> {
                           _controller.clear();
                           _selectedWord = null;
                           _words = [];
+                          _dbRes = [];
+                          _arEnRes = null;
                         }),
 
                         icon: Icon(Icons.clear),

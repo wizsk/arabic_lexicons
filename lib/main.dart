@@ -145,6 +145,10 @@ class _SearchWithSelectionState extends State<SearchWithSelection> {
     });
   }
 
+  // ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+  //      content: Text("Sending Message"),
+  // ));
+
   void _selectWord(String word) {
     setState(() {
       _selectedWord = word;
@@ -209,93 +213,96 @@ class _SearchWithSelectionState extends State<SearchWithSelection> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('بحث')),
-      body: showRes(_selectedDict, _dbRes, _arEnRes),
+      body: SafeArea(
+        child: Column(
+          children: [
+            Expanded(child: showRes(_selectedDict, _dbRes, _arEnRes)),
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  if (_words.length > 1)
+                    SizedBox(
+                      height: 40,
+                      child: SingleChildScrollView(
+                        controller: _chipScrollController,
+                        scrollDirection: Axis.horizontal,
+                        reverse: true, // 🔴 critical for RTL
+                        child: Row(
+                          children: _words.reversed.map((word) {
+                            return Padding(
+                              padding: const EdgeInsets.only(left: 8),
+                              child: ChoiceChip(
+                                label: Text(word),
+                                selected: word == _selectedWord,
+                                onSelected: (_) => _selectWord(word),
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                      ),
+                    ),
 
-      bottomNavigationBar: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              if (_words.length > 1)
-                SizedBox(
-                  height: 40,
-                  child: SingleChildScrollView(
-                    controller: _chipScrollController,
-                    scrollDirection: Axis.horizontal,
-                    reverse: true, // 🔴 critical for RTL
-                    child: Row(
-                      children: _words.reversed.map((word) {
-                        return Padding(
-                          padding: const EdgeInsets.only(left: 8),
-                          child: ChoiceChip(
-                            label: Text(word),
-                            selected: word == _selectedWord,
-                            onSelected: (_) => _selectWord(word),
-                          ),
-                        );
-                      }).toList(),
+                  if (_words.length > 1) const SizedBox(height: 8),
+
+                  SizedBox(
+                    height: 40,
+                    child: SingleChildScrollView(
+                      controller: _chipScrollController,
+                      scrollDirection: Axis.horizontal,
+                      reverse: true, // 🔴 critical for RTL
+                      child: Row(
+                        children: _dictNames.reversed.map((entry) {
+                          final en = entry.d;
+                          final ar = entry.ar;
+
+                          return Padding(
+                            padding: const EdgeInsets.only(left: 8),
+                            child: ChoiceChip(
+                              label: Text(ar), // Arabic name
+                              selected: en == _selectedDict,
+                              onSelected: (_) {
+                                if (_selectedDict != en) {
+                                  setState(() {
+                                    _selectedDict = en;
+                                  });
+                                  _loadWord();
+                                }
+                              },
+                            ),
+                          );
+                        }).toList(),
+                      ),
                     ),
                   ),
-                ),
-
-              if (_words.length > 1) const SizedBox(height: 8),
-
-              SizedBox(
-                height: 40,
-                child: SingleChildScrollView(
-                  controller: _chipScrollController,
-                  scrollDirection: Axis.horizontal,
-                  reverse: true, // 🔴 critical for RTL
-                  child: Row(
-                    children: _dictNames.reversed.map((entry) {
-                      final en = entry.d;
-                      final ar = entry.ar;
-
-                      return Padding(
-                        padding: const EdgeInsets.only(left: 8),
-                        child: ChoiceChip(
-                          label: Text(ar), // Arabic name
-                          selected: en == _selectedDict,
-                          onSelected: (_) {
-                            if (_selectedDict != en) {
-                              setState(() {
-                                _selectedDict = en;
-                              });
-                              _loadWord();
-                            }
-                          },
-                        ),
-                      );
-                    }).toList(),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: _controller,
+                    textDirection: TextDirection.rtl,
+                    textAlign: TextAlign.right,
+                    onChanged: _onTextChanged,
+                    decoration: InputDecoration(
+                      hintText: 'اكتب كلمات مفصولة بمسافة',
+                      prefixIcon: IconButton(
+                        onPressed: () => setState(() {
+                          _controller.clear();
+                          _selectedWord = null;
+                          _words = [];
+                        }),
+                        icon: Icon(Icons.clear),
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      filled: true,
+                    ),
                   ),
-                ),
+                ],
               ),
-              const SizedBox(height: 8),
-              TextField(
-                controller: _controller,
-                textDirection: TextDirection.rtl,
-                textAlign: TextAlign.right,
-                onChanged: _onTextChanged,
-                decoration: InputDecoration(
-                  hintText: 'اكتب كلمات مفصولة بمسافة',
-                  prefixIcon: IconButton(
-                    onPressed: () => setState(() {
-                      _controller.clear();
-                      _selectedWord = null;
-                      _words = [];
-                    }),
-                    icon: Icon(Icons.clear),
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  filled: true,
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

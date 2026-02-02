@@ -1,30 +1,17 @@
 import 'dart:io';
-
 import 'package:flutter/services.dart';
 import 'package:path/path.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 class DbService {
   static const _assetDbPath = 'assets/data/db.sqlite';
-  static const _dbFileName = 'mujamul_wasith.sqlite';
+  static const _dbFileName = 'db.sqlite';
 
   static Database? _db;
 
-  /// Must be called once (Linux requirement)
-  static Future<void> init() async {
-    sqfliteFfiInit();
-    databaseFactory = databaseFactoryFfi;
-  }
-
-  static Future<Database> get database async {
-    if (_db != null) return _db!;
-    _db = await _openDb();
-    return _db!;
-  }
-
   static Future<Database> _openDb() async {
     final dbPath = await _copyDbFromAssetsIfNeeded();
-    return openDatabase(dbPath);
+    return openDatabase(dbPath, readOnly: true);
   }
 
   static Future<String> _copyDbFromAssetsIfNeeded() async {
@@ -45,6 +32,22 @@ class DbService {
     await File(dbPath).writeAsBytes(bytes, flush: true);
 
     return dbPath;
+  }
+
+  /// Must be called once (Linux requirement)
+  static Future<void> init() async {
+    if (Platform.isLinux || Platform.isWindows) {
+      sqfliteFfiInit();
+      databaseFactory = databaseFactoryFfi;
+    }
+    _db = await _openDb();
+  }
+
+  static Database get database {
+    if (_db == null) {
+      throw "no db open";
+    }
+    return _db!;
   }
 
   /// Fetch by exact word
@@ -215,6 +218,5 @@ class DbService {
 
   static Future<void> close() async {
     await _db?.close();
-    _db = null;
   }
 }

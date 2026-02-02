@@ -72,7 +72,12 @@ class SearchWithSelection extends StatefulWidget {
 
 class _SearchWithSelectionState extends State<SearchWithSelection> {
   late final TextEditingController _controller;
-  final ScrollController _chipScrollController = ScrollController();
+  final FocusNode _focusNode = FocusNode();
+
+  final ScrollController _wordScrollController = ScrollController();
+
+  final ScrollController _dictScrollController = ScrollController();
+  double _dictScrollOffset = 0;
 
   late Dict _selectedDict;
 
@@ -90,6 +95,20 @@ class _SearchWithSelectionState extends State<SearchWithSelection> {
     _onTextChanged(widget.initialText);
 
     _selectedDict = dictNames.first.d;
+
+    _dictScrollController.addListener(() {
+      _dictScrollOffset = _dictScrollController.offset;
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    _focusNode.dispose();
+    _dictScrollController.dispose();
+    _wordScrollController.dispose();
+    DbService.close();
+    super.dispose();
   }
 
   void _onTextChanged(String value) async {
@@ -102,18 +121,21 @@ class _SearchWithSelectionState extends State<SearchWithSelection> {
       _dbRes = [];
     });
 
-    _loadWord();
-
     // Auto-scroll to show last (rightmost) chip
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_chipScrollController.hasClients) {
-        _chipScrollController.animateTo(
-          0, // RTL: start = right
+      if (_dictScrollController.offset != _dictScrollOffset) {
+        _dictScrollController.jumpTo(_dictScrollOffset);
+      }
+      if (_wordScrollController.hasClients) {
+        _wordScrollController.animateTo(
+          _wordScrollController.position.maxScrollExtent,
           duration: const Duration(milliseconds: 250),
           curve: Curves.easeOut,
         );
       }
     });
+
+    _loadWord();
   }
 
   void _selectWord(String word) {
@@ -124,16 +146,6 @@ class _SearchWithSelectionState extends State<SearchWithSelection> {
     });
 
     _loadWord();
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_chipScrollController.hasClients) {
-        _chipScrollController.animateTo(
-          0,
-          duration: const Duration(milliseconds: 200),
-          curve: Curves.easeOut,
-        );
-      }
-    });
   }
 
   Future<void> _loadWord() async {
@@ -171,14 +183,6 @@ class _SearchWithSelectionState extends State<SearchWithSelection> {
   }
 
   @override
-  void dispose() {
-    _controller.dispose();
-    _chipScrollController.dispose();
-    DbService.close();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
@@ -186,16 +190,9 @@ class _SearchWithSelectionState extends State<SearchWithSelection> {
           children: [
             Expanded(child: showRes(_selectedDict, _dbRes, _arEnRes)),
 
-            Material(
-              elevation: 10, // 👈 shadow strength
-              shadowColor: Colors.grey,
-              color: Theme.of(context).scaffoldBackgroundColor,
-              child: Container(
-                decoration: BoxDecoration(
-                  border: Border(
-                    top: BorderSide(color: Colors.grey.withAlpha(75), width: 1),
-                  ),
-                ),
+            Container(
+              decoration: BoxDecoration(
+                border: Border(top: BorderSide(color: Colors.grey, width: 1)),
               ),
             ),
             Padding(
@@ -208,7 +205,7 @@ class _SearchWithSelectionState extends State<SearchWithSelection> {
                     SizedBox(
                       height: 40,
                       child: SingleChildScrollView(
-                        controller: _chipScrollController,
+                        controller: _wordScrollController,
                         scrollDirection: Axis.horizontal,
                         reverse: true, // 🔴 critical for RTL
                         child: Row(
@@ -238,6 +235,7 @@ class _SearchWithSelectionState extends State<SearchWithSelection> {
                   SizedBox(
                     height: 40,
                     child: SingleChildScrollView(
+                      controller: _dictScrollController,
                       scrollDirection: Axis.horizontal,
                       reverse: true, // 🔴 critical for RTL
                       child: Row(
@@ -277,6 +275,7 @@ class _SearchWithSelectionState extends State<SearchWithSelection> {
                   const SizedBox(height: 8),
                   TextField(
                     controller: _controller,
+                    focusNode: _focusNode,
                     textDirection: TextDirection.rtl,
                     textAlign: TextAlign.right,
                     onChanged: _onTextChanged,
@@ -286,13 +285,23 @@ class _SearchWithSelectionState extends State<SearchWithSelection> {
                         color: Colors.grey, // 👈 this makes the hint gray
                       ),
                       prefixIcon: IconButton(
-                        onPressed: () => setState(() {
-                          _controller.clear();
-                          _selectedWord = null;
-                          _words = [];
-                          _dbRes = [];
-                          _arEnRes = null;
-                        }),
+                        onPressed: () {
+                          setState(() {
+                            _controller.clear();
+                            _selectedWord = null;
+                            _words = [];
+                            _dbRes = [];
+                            _arEnRes = null;
+                          });
+
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            if (_dictScrollController.offset !=
+                                _dictScrollOffset) {
+                              _dictScrollController.jumpTo(_dictScrollOffset);
+                            }
+                          });
+                          _focusNode.requestFocus();
+                        },
 
                         icon: Icon(Icons.clear),
                       ),

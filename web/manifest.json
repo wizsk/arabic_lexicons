@@ -1,6 +1,6 @@
 {
-    "name": "salah_time",
-    "short_name": "salah_time",
+    "name": "ara_dict",
+    "short_name": "ara_dict",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

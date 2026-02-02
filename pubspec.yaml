@@ -1,4 +1,4 @@
-name: salah_time
+name: ara_dict
 description: "A new Flutter project."
 publish_to: "none" # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
@@ -55,4 +55,3 @@ flutter:
         - asset: assets/fonts/kitab/Kitab-Regular.ttf
         - asset: assets/fonts/kitab/Kitab-Bold.ttf
           weight: 700
-

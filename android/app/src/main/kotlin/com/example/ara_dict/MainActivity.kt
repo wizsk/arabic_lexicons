@@ -1,4 +1,4 @@
-package com.example.salah_time
+package com.example.ara_dict
 
 import io.flutter.embedding.android.FlutterActivity
 

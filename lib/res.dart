@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
-import 'package:salah_time/arEn.dart';
-import 'package:salah_time/data.dart';
+import 'package:ara_dict/arEn.dart';
+import 'package:ara_dict/data.dart';
 
 Widget showRes(
   Dict curDict,

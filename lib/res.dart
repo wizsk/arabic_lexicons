@@ -3,6 +3,8 @@ import 'package:flutter_html/flutter_html.dart';
 import 'package:ara_dict/ar_en.dart';
 import 'package:ara_dict/data.dart';
 
+final _scrollPadding = const EdgeInsets.symmetric(vertical: 16, horizontal: 8);
+
 Widget showRes(
   Dict curDict,
   List<Map<String, dynamic>>? dbRes,
@@ -24,38 +26,29 @@ Widget showRes(
     fontFam = fontAmiri;
   }
 
-  // final hideWordTtl = curDict == Dict.hanswehr;
+  var showWordTitle = curDict == Dict.mujamulGhoni;
 
   if (dbRes != null && dbRes.isNotEmpty) {
     return ListView.separated(
       // padding: EdgeInsets.only(top: 16),
-      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+      padding: _scrollPadding,
       itemCount: dbRes.length,
       separatorBuilder: (context, index) =>
           const Divider(height: 24, thickness: 1, color: Colors.grey),
       itemBuilder: (context, index) {
         final row = dbRes[index];
+        String txt;
+        if (showWordTitle) {
+          final word = row['word'] ?? '';
+          final meaning = row['meanings'] ?? '';
+          txt = '$word: $meaning';
+        } else {
+          txt = row['meanings'] ?? '';
+        }
         // return RichText(text: TextSpan(text: row['meanings']));
         return Padding(
-          // padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
           padding: const EdgeInsets.only(top: 4, bottom: 4),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // if (!hideWordTtl)
-              Center(
-                child: Text(
-                  row['word'] ?? '',
-                  style: const TextStyle(
-                    // fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 6),
-              meaningView(row['meanings'] ?? '', fontFam, dir, al),
-            ],
-          ),
+          child: meaningView(txt, fontFam, dir, al),
         );
       },
     );
@@ -92,11 +85,14 @@ Widget showArEnRes(List<Entry>? entries) {
     child: Center(
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
+        padding: _scrollPadding,
         child: DataTable(
+          dividerThickness: 0.5,
           columnSpacing: 12.0,
+          headingTextStyle: const TextStyle(fontWeight: FontWeight.w600),
           columns: const [
             DataColumn(label: Text('Word')),
-            DataColumn(label: Text('Definition')),
+            DataColumn(label: Text('Def')),
             DataColumn(label: Text('Root')),
           ],
           rows: entries.map((e) {

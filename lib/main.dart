@@ -299,6 +299,10 @@ class _SearchWithSelectionState extends State<SearchWithSelection> {
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.black87),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
                       // filled: true,
                     ),
                   ),

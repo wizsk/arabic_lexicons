@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:ara_dict/data.dart';
-import 'package:ara_dict/arEn.dart';
+import 'package:ara_dict/ar_en.dart';
 import 'package:ara_dict/db.dart';
 import 'package:ara_dict/res.dart';
 
@@ -241,7 +241,6 @@ class _SearchWithSelectionState extends State<SearchWithSelection> {
                   SizedBox(
                     height: 40,
                     child: SingleChildScrollView(
-                      controller: _chipScrollController,
                       scrollDirection: Axis.horizontal,
                       reverse: true, // 🔴 critical for RTL
                       child: Row(
@@ -295,6 +294,7 @@ class _SearchWithSelectionState extends State<SearchWithSelection> {
                           _selectedWord = null;
                           _words = [];
                         }),
+
                         icon: Icon(Icons.clear),
                       ),
                       border: OutlineInputBorder(

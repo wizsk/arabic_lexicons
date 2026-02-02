@@ -20,6 +20,16 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
       theme: ThemeData(
+        // colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        useMaterial3: true,
+        textTheme: Theme.of(context).textTheme.apply(
+          fontFamily: fontKitab,
+          fontSizeFactor: 1.1,
+          fontSizeDelta: 2.0,
+          bodyColor: null,
+          displayColor: null,
+        ),
+
         // This is the theme of your application.
         //
         // TRY THIS: Try running your application with "flutter run". You'll see
@@ -83,6 +93,8 @@ class _SearchWithSelectionState extends State<SearchWithSelection> {
     setState(() {
       _words = parts;
       _selectedWord = parts.isNotEmpty ? parts.last : null;
+      _arEnRes = null;
+      _dbRes = [];
     });
 
     _loadWord();
@@ -102,6 +114,8 @@ class _SearchWithSelectionState extends State<SearchWithSelection> {
   void _selectWord(String word) {
     setState(() {
       _selectedWord = word;
+      _dbRes = [];
+      _arEnRes = null;
     });
 
     _loadWord();
@@ -162,7 +176,6 @@ class _SearchWithSelectionState extends State<SearchWithSelection> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // appBar: AppBar(title: const Text('بحث')),
       body: SafeArea(
         child: Column(
           children: [
@@ -232,6 +245,8 @@ class _SearchWithSelectionState extends State<SearchWithSelection> {
                                 if (_selectedDict != en) {
                                   setState(() {
                                     _selectedDict = en;
+                                    _dbRes = [];
+                                    _arEnRes = null;
                                   });
                                   _loadWord();
                                 }
@@ -259,9 +274,9 @@ class _SearchWithSelectionState extends State<SearchWithSelection> {
                         icon: Icon(Icons.clear),
                       ),
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(8),
                       ),
-                      filled: true,
+                      // filled: true,
                     ),
                   ),
                 ],

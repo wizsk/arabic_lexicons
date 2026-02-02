@@ -17,9 +17,11 @@ Widget showRes(
 
   var dir = TextDirection.rtl;
   var al = TextAlign.right;
+  var fontFam = fontKitab;
   if (curDict == Dict.hanswehr || curDict == Dict.laneLexicon) {
     al = TextAlign.left;
     dir = TextDirection.ltr;
+    fontFam = fontAmiri;
   }
 
   // final hideWordTtl = curDict == Dict.hanswehr;
@@ -44,13 +46,13 @@ Widget showRes(
                 child: Text(
                   row['word'] ?? '',
                   style: const TextStyle(
-                    fontSize: 18,
+                    // fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
               const SizedBox(height: 6),
-              meaningView(row['meanings'] ?? '', dir, al),
+              meaningView(row['meanings'] ?? '', fontFam, dir, al),
             ],
           ),
         );
@@ -60,20 +62,21 @@ Widget showRes(
   return Center(child: Text("No results"));
 }
 
-Widget meaningView(String html, TextDirection dir, TextAlign al) {
+Widget meaningView(String html, String font, TextDirection dir, TextAlign al) {
   return Directionality(
     textDirection: TextDirection.rtl, // Arabic
     child: Html(
       data: html,
       style: {
         'body': Style(
-          fontSize: FontSize(16),
+          // fontSize: FontSize(16),
+          fontFamily: font,
           lineHeight: LineHeight.number(1.6),
           direction: dir,
           textAlign: al,
         ),
-        'strong': Style(fontWeight: FontWeight.bold),
-        'i': Style(fontStyle: FontStyle.italic),
+        'strong': Style(fontWeight: FontWeight.bold, fontFamily: font),
+        'i': Style(fontStyle: FontStyle.italic, fontFamily: font),
       },
     ),
   );

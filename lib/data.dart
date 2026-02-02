@@ -1,3 +1,6 @@
+const fontAmiri = 'Amiri';
+const fontKitab = 'Kitab';
+
 class DictEntry {
   final Dict d;
   final String ar;

@@ -35,13 +35,13 @@ class Entry {
     );
   }
   Map<String, dynamic> toJson() => {
-        'root': root,
-        'word': word,
-        'morph': morph,
-        'def': def,
-        'family': fam,
-        'pos': pos,
-      };
+    'root': root,
+    'word': word,
+    'morph': morph,
+    'def': def,
+    'family': fam,
+    'pos': pos,
+  };
 
   @override
   String toString() {
@@ -67,8 +67,11 @@ class WordAndEntries {
   final bool isPunctuation;
   final List<Entry> entries;
 
-  WordAndEntries(
-      {required this.word, required this.isPunctuation, required this.entries});
+  WordAndEntries({
+    required this.word,
+    required this.isPunctuation,
+    required this.entries,
+  });
 
   @override
   String toString() {
@@ -77,22 +80,30 @@ class WordAndEntries {
 }
 
 // Dictionary class
-class Dictionary {
-  final Map<String, List<Entry>> _dictPref = {};
-  final Map<String, List<Entry>> _dictStems = {};
-  final Map<String, List<Entry>> _dictSuff = {};
-  final Map<String, List<String>> _tableAB = {};
-  final Map<String, List<String>> _tableAC = {};
-  final Map<String, List<String>> _tableBC = {};
-  var err = '';
-  var loaded = false;
+class ArEnDict {
+  static final Map<String, List<Entry>> _dictPref = {};
+  static final Map<String, List<Entry>> _dictStems = {};
+  static final Map<String, List<Entry>> _dictSuff = {};
+  static final Map<String, List<String>> _tableAB = {};
+  static final Map<String, List<String>> _tableAC = {};
+  static final Map<String, List<String>> _tableBC = {};
+  static var loaded = false;
 
-  Dictionary() {
-    loadData();
+  static Future<void> init() async {
+    if (loaded) return;
+    await Future.wait([
+      _loadDict('assets/data/dictprefixes', _dictPref),
+      _loadDict('assets/data/dictstems', _dictStems),
+      _loadDict('assets/data/dictsuffixes', _dictSuff),
+      _loadTable('assets/data/tableab', _tableAB),
+      _loadTable('assets/data/tableac', _tableAC),
+      _loadTable('assets/data/tablebc', _tableBC),
+    ]);
+    loaded = true;
   }
 
   // removes all the char other than arabic!
-  String cleanWord(String w) {
+  static String cleanWord(String w) {
     if (w.isEmpty) return '';
 
     var cw = '';
@@ -105,14 +116,17 @@ class Dictionary {
   }
 
   // words htat has thier non arabic char removed
-  List<Entry> findCleanedWord(String w) {
+  static List<Entry> _findCleanedWord(String w) {
     List<Entry> res = [];
     w = _transliterateRmHarakats(w);
     for (int i = 0; i < w.length; i++) {
       for (int j = i + 1; j <= w.length; j++) {
         // var c = dict(rSlice(w, 0, i), rSlice(w, i, j), rSlice(w, j, w.length));
-        var c = dict(
-            w.substring(0, i), w.substring(i, j), w.substring(j, w.length));
+        var c = _dict(
+          w.substring(0, i),
+          w.substring(i, j),
+          w.substring(j, w.length),
+        );
         res.addAll(c);
       }
     }
@@ -120,15 +134,15 @@ class Dictionary {
   }
 
   // Method to find word
-  List<Entry> findWord(String word) {
-    if (word.isEmpty) return [];
+  static List<Entry> findWord(String? word) {
+    if (word == null || word.isEmpty) return [];
     var w = cleanWord(word);
     if (w.isEmpty) return [];
-    return findCleanedWord(w);
+    return _findCleanedWord(w);
   }
 
   // Main dictionary search function
-  List<Entry> dict(String pref, String stem, String suff) {
+  static List<Entry> _dict(String pref, String stem, String suff) {
     // print('$pref, $stem, $suff');
     var prf = _dictPref[pref] ?? [];
     var stm = _dictStems[stem] ?? [];
@@ -138,14 +152,14 @@ class Dictionary {
     for (var p in prf) {
       for (var s in stm) {
         for (var su in suf) {
-          if (!obeysGrammer(p.morph, s.morph, su.morph)) {
+          if (!_obeysGrammer(p.morph, s.morph, su.morph)) {
             continue;
           }
 
           var entry = Entry(
             root: _deTransliterate(s.root),
             word: _deTransliterate(p.word + s.word + su.word),
-            def: formatDef(p, s, su),
+            def: _formatDef(p, s, su),
             fam: s.fam,
             pos: s.pos,
             morph: '',
@@ -159,7 +173,7 @@ class Dictionary {
   }
 
   // Grammar check
-  bool obeysGrammer(String pref, String stem, String suff) {
+  static bool _obeysGrammer(String pref, String stem, String suff) {
     // return tableAB[pref]?.contains(stem) ??
     //     false && tableBC[stem]!.contains(suff) ??
     //     false && tableAC[pref]?.contains(suff) ??
@@ -177,7 +191,7 @@ class Dictionary {
   }
 
   // Format the definition
-  String formatDef(Entry pre, Entry stem, Entry suf) {
+  static String _formatDef(Entry pre, Entry stem, Entry suf) {
     String res = '';
     if (pre.def.isNotEmpty) {
       var seg = pre.def.split('<pos>');
@@ -208,28 +222,13 @@ class Dictionary {
     return res;
   }
 
-  // Load the tables from files
-  Future<void> loadData() async {
-    await Future.wait([
-      _loadDict('assets/data/dictprefixes', _dictPref),
-      _loadDict('assets/data/dictstems', _dictStems),
-      _loadDict('assets/data/dictsuffixes', _dictSuff),
-      _loadTable('assets/data/tableab', _tableAB),
-      _loadTable('assets/data/tableac', _tableAC),
-      _loadTable('assets/data/tablebc', _tableBC),
-    ]);
-    loaded = true;
-  }
-
   // Load a dictionary file into a map
-  Future<void> _loadDict(String file, Map<String, List<Entry>> dict) async {
+  static Future<void> _loadDict(
+    String file,
+    Map<String, List<Entry>> dict,
+  ) async {
     String fileContent = "";
-    try {
-      fileContent = await loadString(file);
-    } catch (e) {
-      err = '$e';
-      return;
-    }
+    fileContent = await loadString(file);
     var lines = LineSplitter.split(fileContent);
 
     String root = '';
@@ -259,7 +258,10 @@ class Dictionary {
   }
 
   // Load a table file into a map
-  Future<void> _loadTable(String file, Map<String, List<String>> table) async {
+  static Future<void> _loadTable(
+    String file,
+    Map<String, List<String>> table,
+  ) async {
     var fileContent = await loadString(file);
     var lines = LineSplitter.split(fileContent);
 

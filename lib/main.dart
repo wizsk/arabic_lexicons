@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:salah_time/dict/parse.dart';
+import 'package:flutter_html/flutter_html.dart';
+import 'package:salah_time/dict/arEn.dart';
+import 'package:salah_time/db.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await DbService.init();
+  await ArEnDict.init();
   runApp(const MyApp());
 }
 
@@ -27,34 +32,82 @@ class SearchWithSelection extends StatefulWidget {
 }
 
 class DictEntry {
-  final String en;
+  final Dict d;
   final String ar;
 
-  const DictEntry({required this.en, required this.ar});
+  const DictEntry({required this.d, required this.ar});
 }
+
+enum Dict {
+  arEn,
+  hanswehr,
+  laneLexicon,
+  mujamulGhoni,
+  mujamulShihah,
+  lisanAlArab,
+  mujamulMuashiroh,
+  mujamulWasith,
+  mujamulMuhith,
+}
+
+String getDictTableName(Dict d) {
+  switch (d) {
+    case Dict.arEn:
+      return "arEn";
+    case Dict.hanswehr:
+      return "hanswehr";
+    case Dict.laneLexicon:
+      return "lanelexcon";
+    case Dict.mujamulGhoni:
+      return "mujamul_ghoni";
+    case Dict.mujamulShihah:
+      return "mujamul_shihah";
+    case Dict.lisanAlArab:
+      return "lisanularab";
+    case Dict.mujamulMuashiroh:
+      return "mujamul_muashiroh";
+    case Dict.mujamulWasith:
+      return "mujamul_wasith";
+    case Dict.mujamulMuhith:
+      return "mujamul_muhith";
+  }
+}
+
+final List<DictEntry> _dictNames = [
+  DictEntry(d: Dict.arEn, ar: "مباشر"),
+  DictEntry(d: Dict.hanswehr, ar: "هانز"),
+  DictEntry(d: Dict.laneLexicon, ar: "لين"),
+  DictEntry(d: Dict.mujamulGhoni, ar: "الغني"),
+  DictEntry(d: Dict.mujamulShihah, ar: "مختار"),
+  DictEntry(d: Dict.lisanAlArab, ar: "لسان"),
+  DictEntry(d: Dict.mujamulMuashiroh, ar: "المعاصرة"),
+  DictEntry(d: Dict.mujamulWasith, ar: "الوسيط"),
+  DictEntry(d: Dict.mujamulMuhith, ar: "المحيط"),
+];
+
+// final List<DictEntry> _dictNames = [
+//   DictEntry(d: Dict.ArEn, ar: "مباشر"),
+//   DictEntry(d: Dict.hanswehr, ar: "هانز"),
+//   DictEntry(d: Dict.lanelexcon, ar: "لين"),
+//   DictEntry(d: Dict.mujamul_ghoni, ar: "الغني"),
+//   DictEntry(d: Dict.mujamul_shihah, ar: "مختار"),
+//   DictEntry(d: Dict.lisanularab, ar: "لسان"),
+//   DictEntry(d: Dict.mujamul_muashiroh, ar: "المعاصرة"),
+//   DictEntry(d: Dict.mujamul_wasith, ar: "الوسيط"),
+//   DictEntry(d: Dict.mujamul_muhith, ar: "المحيط"),
+// ];
 
 class _SearchWithSelectionState extends State<SearchWithSelection> {
   late final TextEditingController _controller;
   final ScrollController _chipScrollController = ScrollController();
 
-  final List<DictEntry> _dictNames = [
-    DictEntry(en: "arEn", ar: "مباشر"),
-    DictEntry(en: "hanswehr", ar: "هانز"),
-    DictEntry(en: "lanelexcon", ar: "لين"),
-    DictEntry(en: "mujamul_ghoni", ar: "الغني"),
-    DictEntry(en: "mujamul_shihah", ar: "مختار"),
-    DictEntry(en: "lisanularab", ar: "لسان"),
-    DictEntry(en: "mujamul_muashiroh", ar: "المعاصرة"),
-    DictEntry(en: "mujamul_wasith", ar: "الوسيط"),
-    DictEntry(en: "mujamul_muhith", ar: "المحيط"),
-  ];
-
-  late String _selectedDict;
+  late Dict _selectedDict;
 
   List<String> _words = [];
   String? _selectedWord;
 
-  final arEnDict = Dictionary();
+  List<Map<String, dynamic>>? _dbRes;
+  List<Entry>? _arEnRes;
 
   @override
   void initState() {
@@ -63,10 +116,10 @@ class _SearchWithSelectionState extends State<SearchWithSelection> {
     _controller = TextEditingController(text: widget.initialText);
     _onTextChanged(widget.initialText);
 
-    _selectedDict = _dictNames.first.en;
+    _selectedDict = _dictNames.first.d;
   }
 
-  void _onTextChanged(String value) {
+  void _onTextChanged(String value) async {
     final parts = value
         .trim()
         .split(RegExp(r'\s+'))
@@ -77,6 +130,8 @@ class _SearchWithSelectionState extends State<SearchWithSelection> {
       _words = parts;
       _selectedWord = parts.isNotEmpty ? parts.last : null;
     });
+
+    _loadWord();
 
     // Auto-scroll to show last (rightmost) chip
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -95,6 +150,8 @@ class _SearchWithSelectionState extends State<SearchWithSelection> {
       _selectedWord = word;
     });
 
+    _loadWord();
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_chipScrollController.hasClients) {
         _chipScrollController.animateTo(
@@ -106,10 +163,45 @@ class _SearchWithSelectionState extends State<SearchWithSelection> {
     });
   }
 
+  Future<void> _loadWord() async {
+    if (_selectedWord == null || _selectedWord!.isEmpty) {
+      _dbRes = null;
+      _arEnRes = null;
+      return;
+    }
+
+    switch (_selectedDict) {
+      case Dict.arEn:
+        _arEnRes = ArEnDict.findWord(_selectedWord);
+
+      case Dict.hanswehr:
+        _dbRes = await DbService.getByWordHans(_selectedWord);
+
+      case Dict.laneLexicon:
+        _dbRes = await DbService.getByWordLane(_selectedWord);
+
+      case Dict.mujamulGhoni:
+        _dbRes = await DbService.getByWordGoni(_selectedWord);
+
+      case Dict.mujamulShihah:
+      case Dict.lisanAlArab:
+      case Dict.mujamulMuashiroh:
+      case Dict.mujamulWasith:
+      case Dict.mujamulMuhith:
+        _dbRes = await DbService.getByWordWith3Rows(
+          getDictTableName(_selectedDict),
+          _selectedWord,
+        );
+    }
+
+    setState(() {});
+  }
+
   @override
   void dispose() {
     _controller.dispose();
     _chipScrollController.dispose();
+    DbService.close();
     super.dispose();
   }
 
@@ -117,19 +209,7 @@ class _SearchWithSelectionState extends State<SearchWithSelection> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('بحث')),
-
-      // body: Center(
-      //   child: Text(
-      //     _selectedWord == null
-      //         ? 'لا توجد كلمة مختارة'
-      //         : 'الكلمة المختارة: $_selectedWord',
-      //     style: const TextStyle(fontSize: 20),
-      //   ),
-      // ),
-      //
-      body: showArEnRes(
-        _selectedWord == null ? null : arEnDict.findWord(_selectedWord!),
-      ),
+      body: showRes(_selectedDict, _dbRes, _arEnRes),
 
       bottomNavigationBar: SafeArea(
         child: Padding(
@@ -170,7 +250,7 @@ class _SearchWithSelectionState extends State<SearchWithSelection> {
                   reverse: true, // 🔴 critical for RTL
                   child: Row(
                     children: _dictNames.reversed.map((entry) {
-                      final en = entry.en;
+                      final en = entry.d;
                       final ar = entry.ar;
 
                       return Padding(
@@ -178,17 +258,21 @@ class _SearchWithSelectionState extends State<SearchWithSelection> {
                         child: ChoiceChip(
                           label: Text(ar), // Arabic name
                           selected: en == _selectedDict,
-                          onSelected: (_) => setState(() {
-                            _selectedDict = en;
-                          }),
+                          onSelected: (_) {
+                            if (_selectedDict != en) {
+                              setState(() {
+                                _selectedDict = en;
+                              });
+                              _loadWord();
+                            }
+                          },
                         ),
                       );
                     }).toList(),
-                    // children: _words.reversed.map((word) {
-                    // }).toList(),
                   ),
                 ),
               ),
+              const SizedBox(height: 8),
               TextField(
                 controller: _controller,
                 textDirection: TextDirection.rtl,
@@ -245,6 +329,61 @@ Widget showArEnRes(List<Entry>? entries) {
           }).toList(),
         ),
       ),
+    ),
+  );
+}
+
+Widget showRes(
+  Dict curDict,
+  List<Map<String, dynamic>>? dbRes,
+  List<Entry>? arEnRes,
+) {
+  switch (curDict) {
+    case Dict.arEn:
+      return showArEnRes(arEnRes);
+    // case "":
+    default:
+  }
+
+  var dir = TextDirection.rtl;
+  var al = TextAlign.right;
+  if (curDict == Dict.hanswehr || curDict == Dict.laneLexicon) {
+    al = TextAlign.left;
+    dir = TextDirection.ltr;
+  }
+  if (dbRes != null && dbRes.isNotEmpty) {
+    return ListView.separated(
+      itemCount: dbRes.length,
+      separatorBuilder: (context, index) =>
+          const Divider(height: 24, thickness: 1),
+      itemBuilder: (context, index) {
+        final row = dbRes[index];
+        // return RichText(text: TextSpan(text: row['meanings']));
+        return ListTile(
+          title: Text(row['word'] ?? '', textDirection: dir, textAlign: al),
+          subtitle: meaningView(row['meanings'] ?? '', dir, al),
+        );
+      },
+    );
+  }
+  return Center(child: Text("loading"));
+}
+
+Widget meaningView(String html, TextDirection dir, TextAlign al) {
+  return Directionality(
+    textDirection: TextDirection.rtl, // Arabic
+    child: Html(
+      data: html,
+      style: {
+        'body': Style(
+          fontSize: FontSize(16),
+          lineHeight: LineHeight.number(1.6),
+          direction: dir,
+          textAlign: al,
+        ),
+        'strong': Style(fontWeight: FontWeight.bold),
+        'i': Style(fontStyle: FontStyle.italic),
+      },
     ),
   );
 }

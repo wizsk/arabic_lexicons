@@ -28,16 +28,17 @@ Widget showRes(
 
   if (dbRes != null && dbRes.isNotEmpty) {
     return ListView.separated(
-      padding: EdgeInsets.only(top: 16),
+      // padding: EdgeInsets.only(top: 16),
+      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
       itemCount: dbRes.length,
       separatorBuilder: (context, index) =>
-          const Divider(height: 24, thickness: 1),
+          const Divider(height: 24, thickness: 1, color: Colors.grey),
       itemBuilder: (context, index) {
         final row = dbRes[index];
         // return RichText(text: TextSpan(text: row['meanings']));
         return Padding(
           // padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-          padding: EdgeInsets.only(top: 4, bottom: 4),
+          padding: const EdgeInsets.only(top: 4, bottom: 4),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -92,7 +93,7 @@ Widget showArEnRes(List<Entry>? entries) {
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: DataTable(
-          columnSpacing: 24.0,
+          columnSpacing: 12.0,
           columns: const [
             DataColumn(label: Text('Word')),
             DataColumn(label: Text('Definition')),

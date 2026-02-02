@@ -20,8 +20,6 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Arabic Lexicons',
       theme: ThemeData(
-        // colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
         textTheme: Theme.of(context).textTheme.apply(
           fontFamily: fontKitab,
           fontSizeFactor: 1.1,
@@ -30,22 +28,32 @@ class MyApp extends StatelessWidget {
           displayColor: null,
         ),
 
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: .fromSeed(seedColor: Colors.yellow),
+        useMaterial3: true,
+        scaffoldBackgroundColor: const Color(0xFFFFFAF3),
+
+        colorScheme: const ColorScheme.light(
+          primary: Color(0xFF285A8C), // dark accent
+          secondary: Color(0xFF3A6FA6), // lighter accent
+          tertiary: Color(0xFF285A8C), // use same as primary for selected items
+
+          surface: Color(0xFFFFFAF3), // paper background
+          onSurface: Color(0xFF222223), // main text color
+
+          surfaceContainerLowest: Color(0xFFFFFAF3),
+          surfaceContainerLow: Color(0xFFF7F1E6),
+          surfaceContainer: Color(0xFFF2ECDD),
+
+          outline: Color(0xFFE6E1D8),
+          error: Color(0xFFB84A4A),
+        ),
+
+        dividerColor: const Color(0xFFE6E1D8),
+
+        textSelectionTheme: const TextSelectionThemeData(
+          cursorColor: Color(0xFF285A8C),
+          selectionColor: Color(0xFF3A6FA6),
+          selectionHandleColor: Color(0xFF285A8C),
+        ),
       ),
       home: SearchWithSelection(initialText: ''),
     );
@@ -183,12 +191,12 @@ class _SearchWithSelectionState extends State<SearchWithSelection> {
 
             Material(
               elevation: 10, // 👈 shadow strength
-              shadowColor: Colors.black26,
+              shadowColor: Colors.grey,
               color: Theme.of(context).scaffoldBackgroundColor,
               child: Container(
                 decoration: BoxDecoration(
                   border: Border(
-                    top: BorderSide(color: Colors.grey.withAlpha(25), width: 1),
+                    top: BorderSide(color: Colors.grey.withAlpha(75), width: 1),
                   ),
                 ),
               ),
@@ -213,6 +221,12 @@ class _SearchWithSelectionState extends State<SearchWithSelection> {
                               child: ChoiceChip(
                                 showCheckmark: false,
                                 label: Text(word),
+                                labelStyle: word == _selectedWord
+                                    ? const TextStyle(
+                                        color:
+                                            Colors.white, // text color on white
+                                      )
+                                    : null,
                                 selected: word == _selectedWord,
                                 onSelected: (_) => _selectWord(word),
                               ),
@@ -239,6 +253,13 @@ class _SearchWithSelectionState extends State<SearchWithSelection> {
                             padding: const EdgeInsets.only(left: 8),
                             child: ChoiceChip(
                               label: Text(ar), // Arabic name
+                              // selectedColor: Colors.white,
+                              labelStyle: en == _selectedDict
+                                  ? const TextStyle(
+                                      color:
+                                          Colors.white, // text color on white
+                                    )
+                                  : null,
                               showCheckmark: false,
                               selected: en == _selectedDict,
                               onSelected: (_) {
@@ -264,7 +285,10 @@ class _SearchWithSelectionState extends State<SearchWithSelection> {
                     textAlign: TextAlign.right,
                     onChanged: _onTextChanged,
                     decoration: InputDecoration(
-                      hintText: 'اكتب كلمات مفصولة بمسافة',
+                      hintText: 'ابحث',
+                      hintStyle: const TextStyle(
+                        color: Colors.grey, // 👈 this makes the hint gray
+                      ),
                       prefixIcon: IconButton(
                         onPressed: () => setState(() {
                           _controller.clear();

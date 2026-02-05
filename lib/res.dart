@@ -57,22 +57,20 @@ Widget showRes(
 }
 
 Widget meaningView(String html, String font, TextDirection dir, TextAlign al) {
-  return Directionality(
-    textDirection: TextDirection.rtl, // Arabic
-    child: Html(
-      data: html,
-      style: {
-        'body': Style(
-          // fontSize: FontSize(16),
-          fontFamily: font,
-          lineHeight: LineHeight.number(1.6),
-          direction: dir,
-          textAlign: al,
-        ),
-        'strong': Style(fontWeight: FontWeight.bold, fontFamily: font),
-        'i': Style(fontStyle: FontStyle.italic, fontFamily: font),
-      },
-    ),
+  return Html(
+    data: html,
+    style: {
+      'body': Style(
+        // fontSize: FontSize(16),
+        fontFamily: font,
+        lineHeight: LineHeight.number(1.6),
+        direction: dir,
+        textAlign: al,
+      ),
+      'strong': Style(fontWeight: FontWeight.bold, fontFamily: font),
+      'i': Style(fontStyle: FontStyle.italic, fontFamily: font),
+      'center': Style(textAlign: TextAlign.center),
+    },
   );
 }
 

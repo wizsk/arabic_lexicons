@@ -219,7 +219,7 @@ class _SearchWithSelectionState extends State<SearchWithSelection> {
                                         _words,
                                         _selectedWord!,
                                       );
-                                  if (result != null) {
+                                  if (result != null && _selectedWord != result) {
                                     _selectWord(result);
                                   }
                                 },

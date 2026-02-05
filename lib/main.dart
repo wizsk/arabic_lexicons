@@ -1,4 +1,5 @@
 import 'package:ara_dict/alphabets.dart';
+import 'package:ara_dict/etc.dart';
 import 'package:flutter/material.dart';
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/ar_en.dart';
@@ -201,75 +202,65 @@ class _SearchWithSelectionState extends State<SearchWithSelection> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  if (_words.length > 1)
-                    SizedBox(
-                      height: 40,
-                      child: SingleChildScrollView(
-                        controller: _wordScrollController,
-                        scrollDirection: Axis.horizontal,
-                        reverse: true, // 🔴 critical for RTL
-                        child: Row(
-                          children: _words.reversed.map((word) {
-                            return Padding(
-                              padding: const EdgeInsets.only(left: 8),
-                              child: ChoiceChip(
-                                showCheckmark: false,
-                                label: Text(word),
-                                labelStyle: word == _selectedWord
-                                    ? const TextStyle(
-                                        color:
-                                            Colors.white, // text color on white
-                                      )
-                                    : null,
-                                selected: word == _selectedWord,
-                                onSelected: (_) => _selectWord(word),
-                              ),
-                            );
-                          }).toList(),
-                        ),
-                      ),
-                    ),
-
-                  if (_words.length > 1) const SizedBox(height: 8),
-
                   SizedBox(
                     height: 40,
-                    child: SingleChildScrollView(
-                      controller: _dictScrollController,
-                      scrollDirection: Axis.horizontal,
-                      reverse: true, // 🔴 critical for RTL
-                      child: Row(
-                        children: dictNames.reversed.map((entry) {
-                          final en = entry.d;
-                          final ar = entry.ar;
+                    child: Row(
+                      textDirection: TextDirection.rtl,
+                      children: [
+                        IconButton(
+                          icon: Icon(Icons.subject),
+                          onPressed: _selectedWord == null || _words.length < 2
+                              ? null
+                              : () async {
+                                  _focusNode.unfocus();
+                                  final result =
+                                      await showWordPickerBottomSheet(
+                                        context,
+                                        _words,
+                                        _selectedWord!,
+                                      );
+                                  if (result != null) {
+                                    _selectWord(result);
+                                  }
+                                },
+                        ),
+                        Expanded(
+                          child: SingleChildScrollView(
+                            controller: _dictScrollController,
+                            scrollDirection: Axis.horizontal,
+                            reverse: true, // critical for RTL
+                            child: Row(
+                              children: dictNames.reversed.map((entry) {
+                                final en = entry.d;
+                                final ar = entry.ar;
 
-                          return Padding(
-                            padding: const EdgeInsets.only(left: 8),
-                            child: ChoiceChip(
-                              label: Text(ar), // Arabic name
-                              // selectedColor: Colors.white,
-                              labelStyle: en == _selectedDict
-                                  ? const TextStyle(
-                                      color:
-                                          Colors.white, // text color on white
-                                    )
-                                  : null,
-                              showCheckmark: false,
-                              selected: en == _selectedDict,
-                              onSelected: (_) {
-                                if (_selectedDict != en) {
-                                  setState(() {
-                                    _selectedDict = en;
-                                    _dbRes = [];
-                                    _arEnRes = null;
-                                  });
-                                  _loadWord();
-                                }
-                              },
+                                return Padding(
+                                  padding: const EdgeInsets.only(left: 8),
+                                  child: ChoiceChip(
+                                    label: Text(ar), // Arabic name
+                                    // selectedColor: Colors.white,
+                                    labelStyle: en == _selectedDict
+                                        ? const TextStyle(color: Colors.white)
+                                        : null,
+                                    showCheckmark: false,
+                                    selected: en == _selectedDict,
+                                    onSelected: (_) {
+                                      if (_selectedDict != en) {
+                                        setState(() {
+                                          _selectedDict = en;
+                                          _dbRes = [];
+                                          _arEnRes = null;
+                                        });
+                                        _loadWord();
+                                      }
+                                    },
+                                  ),
+                                );
+                              }).toList(),
                             ),
-                          );
-                        }).toList(),
-                      ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -281,9 +272,7 @@ class _SearchWithSelectionState extends State<SearchWithSelection> {
                     onChanged: _onTextChanged,
                     decoration: InputDecoration(
                       hintText: 'ابحث',
-                      hintStyle: const TextStyle(
-                        color: Colors.grey, // 👈 this makes the hint gray
-                      ),
+                      hintStyle: const TextStyle(color: Colors.grey),
                       prefixIcon: IconButton(
                         onPressed: () {
                           setState(() {

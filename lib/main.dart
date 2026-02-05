@@ -75,10 +75,10 @@ class _SearchWithSelectionState extends State<SearchWithSelection> {
   late final TextEditingController _controller;
   final FocusNode _focusNode = FocusNode();
 
-  final ScrollController _wordScrollController = ScrollController();
+  // final ScrollController _wordScrollController = ScrollController();
 
-  final ScrollController _dictScrollController = ScrollController();
-  double _dictScrollOffset = 0;
+  // final ScrollController _dictScrollController = ScrollController();
+  // double _dictScrollOffset = 0;
 
   late Dict _selectedDict;
 
@@ -97,17 +97,17 @@ class _SearchWithSelectionState extends State<SearchWithSelection> {
 
     _selectedDict = dictNames.first.d;
 
-    _dictScrollController.addListener(() {
-      _dictScrollOffset = _dictScrollController.offset;
-    });
+    // _dictScrollController.addListener(() {
+    //   _dictScrollOffset = _dictScrollController.offset;
+    // });
   }
 
   @override
   void dispose() {
     _controller.dispose();
     _focusNode.dispose();
-    _dictScrollController.dispose();
-    _wordScrollController.dispose();
+    // _dictScrollController.dispose();
+    // _wordScrollController.dispose();
     DbService.close();
     super.dispose();
   }
@@ -122,19 +122,19 @@ class _SearchWithSelectionState extends State<SearchWithSelection> {
       _dbRes = [];
     });
 
-    // Auto-scroll to show last (rightmost) chip
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_dictScrollController.offset != _dictScrollOffset) {
-        _dictScrollController.jumpTo(_dictScrollOffset);
-      }
-      if (_wordScrollController.hasClients) {
-        _wordScrollController.animateTo(
-          _wordScrollController.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 250),
-          curve: Curves.easeOut,
-        );
-      }
-    });
+    // // Auto-scroll to show last (rightmost) chip
+    // WidgetsBinding.instance.addPostFrameCallback((_) {
+    //   if (_dictScrollController.offset != _dictScrollOffset) {
+    //     _dictScrollController.jumpTo(_dictScrollOffset);
+    //   }
+    //   if (_wordScrollController.hasClients) {
+    //     _wordScrollController.animateTo(
+    //       _wordScrollController.position.maxScrollExtent,
+    //       duration: const Duration(milliseconds: 250),
+    //       curve: Curves.easeOut,
+    //     );
+    //   }
+    // });
 
     _loadWord();
   }
@@ -226,7 +226,7 @@ class _SearchWithSelectionState extends State<SearchWithSelection> {
                         ),
                         Expanded(
                           child: SingleChildScrollView(
-                            controller: _dictScrollController,
+                            // controller: _dictScrollController,
                             scrollDirection: Axis.horizontal,
                             reverse: true, // critical for RTL
                             child: Row(
@@ -283,12 +283,12 @@ class _SearchWithSelectionState extends State<SearchWithSelection> {
                             _arEnRes = null;
                           });
 
-                          WidgetsBinding.instance.addPostFrameCallback((_) {
-                            if (_dictScrollController.offset !=
-                                _dictScrollOffset) {
-                              _dictScrollController.jumpTo(_dictScrollOffset);
-                            }
-                          });
+                          // WidgetsBinding.instance.addPostFrameCallback((_) {
+                          //   if (_dictScrollController.offset !=
+                          //       _dictScrollOffset) {
+                          //     _dictScrollController.jumpTo(_dictScrollOffset);
+                          //   }
+                          // });
                           _focusNode.requestFocus();
                         },
 

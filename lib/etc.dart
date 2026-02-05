@@ -43,6 +43,7 @@ Future<String?> showWordPickerBottomSheet(
                       ),
                     ),
 
+                    // Text('${words.length}'),
                     const SizedBox(height: 12),
 
                     // Scroll

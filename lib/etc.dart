@@ -23,7 +23,6 @@ Future<({DictEntry de, String? word})?> showWordPickerBottomSheet(
 
       final chipTextStyle = Theme.of(context).textTheme.bodyMedium!;
 
-
       return SafeArea(
         child: ConstrainedBox(
           constraints: BoxConstraints(
@@ -86,8 +85,8 @@ Future<({DictEntry de, String? word})?> showWordPickerBottomSheet(
                 if (words.length > 1)
                   Padding(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 1,
-                      vertical: 2,
+                      horizontal: 2,
+                      vertical: 8,
                     ),
                     child: Divider(thickness: 0.5),
                   ),

@@ -40,6 +40,7 @@ ThemeData buildDarkTheme(BuildContext context) {
     textTheme: _buildArabicTextTheme(cs),
     drawerTheme: _buildDrawerTheme(cs),
     appBarTheme: _buildAppBarTheme(cs),
+    // dividerColor: Color.fromARGB(255, 111,111,111),
   );
 }
 

@@ -167,19 +167,32 @@ class _SearchWithSelectionState extends State<SearchWithSelection> {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: AppBar(title: appBarTxt(), titleSpacing: 0.0),
       drawer: Drawer(
         child: ListView(
+          padding: EdgeInsets.zero,
           children: [
-            DrawerHeader(
-              child: Text(
-                'Settings',
-                style: TextStyle(
-                  color: cs.onSurface, // ensures visibility
-                  fontSize: mediumFontSize * 1.75,
-                  fontWeight: FontWeight.bold,
+            Theme(
+              data: Theme.of(context).copyWith(
+                dividerTheme: const DividerThemeData(
+                  color: Colors.transparent,
+                  thickness: 0,
+                  space: 0,
+                ),
+              ),
+              child: DrawerHeader(
+                margin: EdgeInsets.zero,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                child: Text(
+                  'Settings',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: mediumFontSize * 1.75,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ),
@@ -209,7 +222,13 @@ class _SearchWithSelectionState extends State<SearchWithSelection> {
 
             Divider(thickness: 0.5, height: 0),
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+              // padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+              padding: const EdgeInsets.only(
+                top: 8,
+                bottom: 8,
+                right: 2,
+                left: 8,
+              ),
               child: Row(
                 children: [
                   Expanded(

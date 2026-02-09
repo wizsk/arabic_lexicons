@@ -1,6 +1,8 @@
 import 'package:ara_dict/help.dart';
+import 'package:ara_dict/reader.dart';
 import 'package:ara_dict/theme.dart';
 import 'package:ara_dict/txt.dart';
+import 'package:ara_dict/wigds.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -35,7 +37,12 @@ class MyApp extends StatelessWidget {
           theme: buildLightTheme(context),
           darkTheme: buildDarkTheme(context),
           themeMode: mode,
-          home: SearchWithSelection(initialText: ''),
+          initialRoute: Routes.dictionary,
+          routes: {
+            Routes.dictionary: (_) => const SearchWithSelection(),
+            Routes.reader: (_) => const ReaderPage(),
+            Routes.help: (_) => const HelpPage(),
+          },
         );
       },
     );
@@ -43,9 +50,14 @@ class MyApp extends StatelessWidget {
 }
 
 class SearchWithSelection extends StatefulWidget {
+  final bool showDrawer;
   final String initialText;
 
-  const SearchWithSelection({super.key, this.initialText = ''});
+  const SearchWithSelection({
+    super.key,
+    this.showDrawer = true,
+    this.initialText = '',
+  });
 
   @override
   State<SearchWithSelection> createState() => _SearchWithSelectionState();
@@ -56,6 +68,7 @@ class _SearchWithSelectionState extends State<SearchWithSelection> {
   final FocusNode _focusNode = FocusNode();
 
   late DictEntry _selectedDict;
+  late bool _showDrawer;
 
   List<String> _words = [];
   String? _selectedWord;
@@ -68,9 +81,10 @@ class _SearchWithSelectionState extends State<SearchWithSelection> {
     super.initState();
 
     _controller = TextEditingController(text: widget.initialText);
-    _onTextChanged(widget.initialText);
-
+    _showDrawer = widget.showDrawer;
     _selectedDict = dictNames.first;
+
+    if (widget.initialText.isNotEmpty) _onTextChanged(widget.initialText);
   }
 
   @override
@@ -79,7 +93,7 @@ class _SearchWithSelectionState extends State<SearchWithSelection> {
     _focusNode.dispose();
     // _dictScrollController.dispose();
     // _wordScrollController.dispose();
-    DbService.close();
+    // DbService.close();
     super.dispose();
   }
 
@@ -177,70 +191,9 @@ class _SearchWithSelectionState extends State<SearchWithSelection> {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: AppBar(title: appBarTxt(), titleSpacing: 0.0),
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            Theme(
-              data: Theme.of(context).copyWith(
-                dividerTheme: const DividerThemeData(
-                  color: Colors.transparent,
-                  thickness: 0,
-                  space: 0,
-                ),
-              ),
-              child: DrawerHeader(
-                margin: EdgeInsets.zero,
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-                child: Text(
-                  'Menu',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: mediumFontSize * 1.75,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ),
-            ValueListenableBuilder<ThemeMode>(
-              valueListenable: themeModeNotifier,
-              builder: (context, mode, _) {
-                final isDark = mode == ThemeMode.dark;
-                return SwitchListTile(
-                  title: const Text('Dark mode'),
-                  secondary: Icon(
-                    isDark ? Icons.dark_mode : Icons.light_mode,
-                    color: cs.onSurface,
-                  ),
-                  value: isDark,
-                  onChanged: (value) {
-                    Navigator.pop(context);
-                    themeModeNotifier.save(
-                      value ? ThemeMode.dark : ThemeMode.light,
-                    );
-                  },
-                );
-              },
-            ),
-            ListTile(
-              title: Text("Help"),
-              leading: Icon(Icons.help, color: cs.onSurface),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => HelpPage()),
-                );
-              },
-            ),
-          ],
-        ),
-      ),
+      drawer: _showDrawer ? buildDrawer(context) : null,
       body: SafeArea(
         child: Column(
           children: [
@@ -267,7 +220,7 @@ class _SearchWithSelectionState extends State<SearchWithSelection> {
                       style: Theme.of(context).textTheme.bodyMedium,
                       decoration: InputDecoration(
                         hintText: 'ابحث',
-                        hintStyle: themeModeNotifier.value == ThemeMode.light
+                        hintStyle: themeModeNotifier.value == ThemeMode.dark
                             ? const TextStyle(color: Colors.grey)
                             : null,
                         prefixIcon: IconButton(
@@ -318,6 +271,34 @@ class _SearchWithSelectionState extends State<SearchWithSelection> {
           ],
         ),
       ),
+    );
+  }
+}
+
+class Routes {
+  static const dictionary = '/dictionary';
+  static const reader = '/reader';
+  static const help = '/help';
+}
+
+class AppScaffold extends StatelessWidget {
+  final Widget body;
+  final Widget title;
+  final List<Widget>? actions;
+
+  const AppScaffold({
+    super.key,
+    required this.body,
+    required this.title,
+    this.actions,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: title, titleSpacing: 0.0),
+      drawer: buildDrawer(context),
+      body: body,
     );
   }
 }

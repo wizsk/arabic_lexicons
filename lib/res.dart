@@ -3,19 +3,11 @@ import 'package:flutter_html/flutter_html.dart';
 import 'package:ara_dict/ar_en.dart';
 import 'package:ara_dict/data.dart';
 
-final _scrollPadding = const EdgeInsets.only(
-  left: 8,
-  right: 8,
-  top: 0,
-  bottom: 16,
-);
-
 Widget showRes(
   Dict curDict,
   List<Map<String, dynamic>>? dbRes,
   List<Entry>? arEnRes,
 ) {
-
   if (curDict == Dict.arEn) {
     return showArEnRes(arEnRes);
   }
@@ -34,7 +26,7 @@ Widget showRes(
   if (dbRes != null && dbRes.isNotEmpty) {
     return ListView.separated(
       // padding: EdgeInsets.only(top: 16),
-      padding: _scrollPadding,
+      padding: scrollPadding,
       itemCount: dbRes.length,
       separatorBuilder: (context, index) =>
           const Divider(height: 0, thickness: 0.5),
@@ -85,7 +77,7 @@ Widget showArEnRes(List<Entry>? entries) {
     child: Center(
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
-        padding: _scrollPadding,
+        padding: scrollPadding,
         child: DataTable(
           dividerThickness: 0.5,
           columnSpacing: 12.0,

@@ -41,6 +41,9 @@ ThemeData buildDarkTheme(BuildContext context) {
     drawerTheme: _buildDrawerTheme(cs),
     appBarTheme: _buildAppBarTheme(cs),
     // dividerColor: Color.fromARGB(255, 111,111,111),
+    iconTheme: IconThemeData(
+      color: cs.onSurface, // force readable icons
+    ),
   );
 }
 

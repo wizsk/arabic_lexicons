@@ -177,6 +177,7 @@ class _SearchWithSelectionState extends State<SearchWithSelection> {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: AppBar(title: appBarTxt(), titleSpacing: 0.0),
       drawer: Drawer(
@@ -212,7 +213,10 @@ class _SearchWithSelectionState extends State<SearchWithSelection> {
                 final isDark = mode == ThemeMode.dark;
                 return SwitchListTile(
                   title: const Text('Dark mode'),
-                  secondary: Icon(isDark ? Icons.dark_mode : Icons.light_mode),
+                  secondary: Icon(
+                    isDark ? Icons.dark_mode : Icons.light_mode,
+                    color: cs.onSurface,
+                  ),
                   value: isDark,
                   onChanged: (value) {
                     Navigator.pop(context);
@@ -224,8 +228,8 @@ class _SearchWithSelectionState extends State<SearchWithSelection> {
               },
             ),
             ListTile(
-              leading: Icon(Icons.help),
               title: Text("Help"),
+              leading: Icon(Icons.help, color: cs.onSurface),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.push(

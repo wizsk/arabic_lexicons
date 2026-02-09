@@ -1,3 +1,4 @@
+import 'package:ara_dict/theme.dart';
 import 'package:flutter/material.dart';
 
 import 'package:ara_dict/alphabets.dart';
@@ -6,6 +7,8 @@ import 'package:ara_dict/data.dart';
 import 'package:ara_dict/ar_en.dart';
 import 'package:ara_dict/db.dart';
 import 'package:ara_dict/res.dart';
+
+final themeModeNotifier = ValueNotifier<ThemeMode>(ThemeMode.light);
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -19,31 +22,19 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Arabic Lexicons',
-      theme: ThemeData(
-        useMaterial3: true,
-        textTheme: Theme.of(context).textTheme.apply(
-          fontFamily: fontKitab,
-          fontSizeFactor: 1.2,
-          fontSizeDelta: 2.0,
-          bodyColor: null,
-          displayColor: null,
-        ),
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: themeModeNotifier,
+      builder: (context, mode, _) {
+        return MaterialApp(
+          debugShowCheckedModeBanner: false,
+          title: 'Arabic Lexicons',
 
-        scaffoldBackgroundColor: const Color(0xFFFFFAF3),
-        brightness: Brightness.light,
-        colorScheme: ColorScheme.fromSeed(
-              seedColor: Colors.deepPurple,
-              brightness: Brightness.light,
-            ).copyWith(
-            surface: const Color(0xFFFFFAF3),   // paper background
-            onSurface: const Color(0xFF222223), // main text color
-          ),
-        // dividerColor: const Color(0xFFE6E1D8),
-      ),
-      home: SearchWithSelection(initialText: ''),
+          theme: buildLightTheme(context),
+          darkTheme: buildDarkTheme(context),
+          themeMode: mode,
+          home: SearchWithSelection(initialText: ''),
+        );
+      },
     );
   }
 }
@@ -169,15 +160,47 @@ class _SearchWithSelectionState extends State<SearchWithSelection> {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: AppBar(title: appBarTxt(), titleSpacing: 0.0),
-      drawer: Drawer(child: Text("y")),
+      drawer: Drawer(
+        child: ListView(
+          children: [
+            DrawerHeader(
+              child: Text(
+                'Settings',
+                style: TextStyle(
+                  color: cs.onSurface, // ensures visibility
+                  fontSize: mediumFontSize * 1.75,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            ValueListenableBuilder<ThemeMode>(
+              valueListenable: themeModeNotifier,
+              builder: (context, mode, _) {
+                final isDark = mode == ThemeMode.dark;
+                return SwitchListTile(
+                  title: const Text('Dark mode'),
+                  secondary: Icon(isDark ? Icons.dark_mode : Icons.light_mode),
+                  value: isDark,
+                  onChanged: (value) {
+                    themeModeNotifier.value = value
+                        ? ThemeMode.dark
+                        : ThemeMode.light;
+                  },
+                );
+              },
+            ),
+          ],
+        ),
+      ),
       body: SafeArea(
         child: Column(
           children: [
             Expanded(child: showRes(_selectedDict.d, _dbRes, _arEnRes)),
 
-            Divider(color: Colors.grey, thickness: 0.5),
+            Divider(thickness: 0.5, height: 0),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
               child: Row(
@@ -189,9 +212,12 @@ class _SearchWithSelectionState extends State<SearchWithSelection> {
                       textDirection: TextDirection.rtl,
                       textAlign: TextAlign.right,
                       onChanged: _onTextChanged,
+                      style: Theme.of(context).textTheme.bodyMedium,
                       decoration: InputDecoration(
                         hintText: 'ابحث',
-                        hintStyle: const TextStyle(color: Colors.grey),
+                        hintStyle: themeModeNotifier.value == ThemeMode.light
+                            ? const TextStyle(color: Colors.grey)
+                            : null,
                         prefixIcon: IconButton(
                           onPressed: () {
                             setState(() {
@@ -209,10 +235,10 @@ class _SearchWithSelectionState extends State<SearchWithSelection> {
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.black87),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
+                        // enabledBorder: OutlineInputBorder(
+                        //   borderSide: BorderSide(color: Colors.black87),
+                        //   borderRadius: BorderRadius.circular(8),
+                        // ),
                         // filled: true,
                       ),
                     ),

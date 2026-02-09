@@ -15,11 +15,9 @@ Widget showRes(
   List<Map<String, dynamic>>? dbRes,
   List<Entry>? arEnRes,
 ) {
-  switch (curDict) {
-    case Dict.arEn:
-      return showArEnRes(arEnRes);
-    // case "":
-    default:
+
+  if (curDict == Dict.arEn) {
+    return showArEnRes(arEnRes);
   }
 
   var dir = TextDirection.rtl;
@@ -39,7 +37,7 @@ Widget showRes(
       padding: _scrollPadding,
       itemCount: dbRes.length,
       separatorBuilder: (context, index) =>
-          const Divider(height: 24, thickness: 1, color: Colors.grey),
+          const Divider(height: 0, thickness: 0.5),
       itemBuilder: (context, index) {
         final row = dbRes[index];
         String txt;
@@ -52,7 +50,7 @@ Widget showRes(
         }
         // return RichText(text: TextSpan(text: row['meanings']));
         return Padding(
-          padding: const EdgeInsets.only(top: 4, bottom: 4),
+          padding: const EdgeInsets.symmetric(vertical: 8),
           child: meaningView(txt, fontFam, dir, al),
         );
       },
@@ -66,9 +64,8 @@ Widget meaningView(String html, String font, TextDirection dir, TextAlign al) {
     data: html,
     style: {
       'body': Style(
-        // fontSize: FontSize(16),
         fontFamily: font,
-        lineHeight: LineHeight.number(1.6),
+        lineHeight: LineHeight.number(1.5),
         direction: dir,
         textAlign: al,
       ),

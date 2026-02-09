@@ -1,11 +1,14 @@
+import 'package:ara_dict/data.dart';
 import 'package:flutter/material.dart';
 
-Future<String?> showWordPickerBottomSheet(
+Future<({Dict dict, String? word})?> showWordPickerBottomSheet(
   BuildContext context,
+  List<DictEntry> dicts,
+  Dict selectedDict,
   List<String> words,
-  String selected,
+  String? selectedWord,
 ) {
-  return showModalBottomSheet<String>(
+  return showModalBottomSheet<({Dict dict, String? word})?>(
     context: context,
     isScrollControlled: true,
     shape: const RoundedRectangleBorder(
@@ -13,8 +16,8 @@ Future<String?> showWordPickerBottomSheet(
     ),
     builder: (context) {
       final sh = MediaQuery.of(context).size.height;
-      final maxHeight = sh * 0.7;
-      final minHeight = sh * 0.3;
+      final maxHeight = sh * 0.8;
+      final minHeight = sh * 0.4;
 
       return StatefulBuilder(
         builder: (context, setState) {
@@ -47,30 +50,67 @@ Future<String?> showWordPickerBottomSheet(
                     const SizedBox(height: 12),
 
                     // Scroll
-                    Flexible(
-                      child: SingleChildScrollView(
-                        child: Wrap(
-                          textDirection: TextDirection.rtl,
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: words.map((word) {
-                            final s = selected == word;
-                            return ChoiceChip(
-                              showCheckmark: false,
-                              label: Text(word),
-                              selected: s,
-                              labelStyle: s
-                                  ? const TextStyle(color: Colors.white)
-                                  : null,
-                              onSelected: (value) {
-                                setState(() {
-                                  Navigator.pop(context, word);
-                                });
-                              },
-                            );
-                          }).toList(),
+                    if (words.length > 1)
+                      Flexible(
+                        child: SingleChildScrollView(
+                          child: Wrap(
+                            textDirection: TextDirection.rtl,
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: words.map((word) {
+                              final s = selectedWord == word;
+                              return ChoiceChip(
+                                showCheckmark: false,
+                                label: Text(word),
+                                selected: s,
+                                labelStyle: s
+                                    ? const TextStyle(color: Colors.white)
+                                    : null,
+                                onSelected: (value) {
+                                  setState(() {
+                                    Navigator.pop(context, (
+                                      dict: selectedDict,
+                                      word: word,
+                                    ));
+                                  });
+                                },
+                              );
+                            }).toList(),
+                          ),
                         ),
                       ),
+
+                    if (words.length > 1)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 1,
+                          vertical: 2,
+                        ),
+                        child: Divider(color: Colors.grey, thickness: 0.5),
+                      ),
+                    Wrap(
+                      textDirection: TextDirection.rtl,
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: dicts.map((dict) {
+                        final s = selectedDict == dict.d;
+                        return ChoiceChip(
+                          showCheckmark: false,
+                          label: Text(dict.ar),
+                          selected: s,
+                          labelStyle: s
+                              ? const TextStyle(color: Colors.white)
+                              : null,
+                          onSelected: (value) {
+                            setState(() {
+                              Navigator.pop(context, (
+                                dict: dict.d,
+                                word: selectedWord,
+                              ));
+                            });
+                          },
+                        );
+                      }).toList(),
                     ),
                   ],
                 ),

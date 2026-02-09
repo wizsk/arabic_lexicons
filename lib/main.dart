@@ -1,6 +1,7 @@
+import 'package:flutter/material.dart';
+
 import 'package:ara_dict/alphabets.dart';
 import 'package:ara_dict/etc.dart';
-import 'package:flutter/material.dart';
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/ar_en.dart';
 import 'package:ara_dict/db.dart';
@@ -191,118 +192,72 @@ class _SearchWithSelectionState extends State<SearchWithSelection> {
           children: [
             Expanded(child: showRes(_selectedDict, _dbRes, _arEnRes)),
 
-            Container(
-              decoration: BoxDecoration(
-                border: Border(top: BorderSide(color: Colors.grey, width: 1)),
-              ),
-            ),
+            Divider(color: Colors.grey, thickness: 0.5),
             Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.end,
+              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+              child: Row(
                 children: [
-                  SizedBox(
-                    height: 40,
-                    child: Row(
+                  Expanded(
+                    child: TextField(
+                      controller: _controller,
+                      focusNode: _focusNode,
                       textDirection: TextDirection.rtl,
-                      children: [
-                        IconButton(
-                          icon: Icon(Icons.subject),
-                          onPressed: _selectedWord == null || _words.length < 2
-                              ? null
-                              : () async {
-                                  _focusNode.unfocus();
-                                  final result =
-                                      await showWordPickerBottomSheet(
-                                        context,
-                                        _words,
-                                        _selectedWord!,
-                                      );
-                                  if (result != null && _selectedWord != result) {
-                                    _selectWord(result);
-                                  }
-                                },
-                        ),
-                        Expanded(
-                          child: SingleChildScrollView(
-                            // controller: _dictScrollController,
-                            scrollDirection: Axis.horizontal,
-                            reverse: true, // critical for RTL
-                            child: Row(
-                              children: dictNames.reversed.map((entry) {
-                                final en = entry.d;
-                                final ar = entry.ar;
+                      textAlign: TextAlign.right,
+                      onChanged: _onTextChanged,
+                      decoration: InputDecoration(
+                        hintText: 'ابحث',
+                        hintStyle: const TextStyle(color: Colors.grey),
+                        prefixIcon: IconButton(
+                          onPressed: () {
+                            setState(() {
+                              _controller.clear();
+                              _selectedWord = null;
+                              _words = [];
+                              _dbRes = [];
+                              _arEnRes = null;
+                            });
+                            _focusNode.requestFocus();
+                          },
 
-                                return Padding(
-                                  padding: const EdgeInsets.only(left: 8),
-                                  child: ChoiceChip(
-                                    label: Text(ar), // Arabic name
-                                    // selectedColor: Colors.white,
-                                    labelStyle: en == _selectedDict
-                                        ? const TextStyle(color: Colors.white)
-                                        : null,
-                                    showCheckmark: false,
-                                    selected: en == _selectedDict,
-                                    onSelected: (_) {
-                                      if (_selectedDict != en) {
-                                        setState(() {
-                                          _selectedDict = en;
-                                          _dbRes = [];
-                                          _arEnRes = null;
-                                        });
-                                        _loadWord();
-                                      }
-                                    },
-                                  ),
-                                );
-                              }).toList(),
-                            ),
-                          ),
+                          icon: Icon(Icons.clear),
                         ),
-                      ],
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.black87),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        // filled: true,
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  TextField(
-                    controller: _controller,
-                    focusNode: _focusNode,
-                    textDirection: TextDirection.rtl,
-                    textAlign: TextAlign.right,
-                    onChanged: _onTextChanged,
-                    decoration: InputDecoration(
-                      hintText: 'ابحث',
-                      hintStyle: const TextStyle(color: Colors.grey),
-                      prefixIcon: IconButton(
-                        onPressed: () {
+                  IconButton(
+                    icon: Icon(Icons.info),
+                    onPressed: () async {
+                      _focusNode.unfocus();
+                      final res = await showWordPickerBottomSheet(
+                        context,
+                        dictNames,
+                        _selectedDict,
+                        _words,
+                        _selectedWord,
+                      );
+                      if (res != null) {
+                        final en = res.dict;
+                        if (_selectedDict != en) {
                           setState(() {
-                            _controller.clear();
-                            _selectedWord = null;
-                            _words = [];
+                            _selectedDict = en;
                             _dbRes = [];
                             _arEnRes = null;
                           });
-
-                          // WidgetsBinding.instance.addPostFrameCallback((_) {
-                          //   if (_dictScrollController.offset !=
-                          //       _dictScrollOffset) {
-                          //     _dictScrollController.jumpTo(_dictScrollOffset);
-                          //   }
-                          // });
-                          _focusNode.requestFocus();
-                        },
-
-                        icon: Icon(Icons.clear),
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.black87),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      // filled: true,
-                    ),
+                          _loadWord();
+                        }
+                        if (res.word != null && res.word != _selectedWord) {
+                          _selectWord(res.word!);
+                        }
+                      }
+                    },
                   ),
                 ],
               ),

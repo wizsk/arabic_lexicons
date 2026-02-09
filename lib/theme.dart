@@ -1,5 +1,7 @@
-import 'package:ara_dict/data.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import 'package:ara_dict/data.dart';
 
 const double mediumFontSize = 18;
 
@@ -126,4 +128,50 @@ AppBarTheme _buildAppBarTheme(ColorScheme cs) {
       color: cs.onPrimary, // force AppBar title color
     ),
   );
+}
+
+
+class ThemeController extends ValueNotifier<ThemeMode> {
+  ThemeController() : super(ThemeMode.system);
+
+  static const _key = 'theme_mode';
+
+  /// Load saved theme from memory
+  Future<void> load() async {
+    final prefs = await SharedPreferences.getInstance();
+    final mode = prefs.getString(_key);
+
+    // if (mode == 'light') {
+    // } else
+     if (mode == 'dark') {
+      value = ThemeMode.dark;
+    } else {
+      // value = ThemeMode.system;
+      value = ThemeMode.light;
+    }
+  }
+
+  /// Save theme to memory
+  Future<void> save(ThemeMode mode) async {
+    final prefs = await SharedPreferences.getInstance();
+    value = mode;
+
+    await prefs.setString(
+      _key,
+      mode == ThemeMode.light
+          ? 'light'
+          : mode == ThemeMode.dark
+              ? 'dark'
+              : 'system',
+    );
+  }
+
+  /// Toggle light/dark
+  Future<void> toggle() async {
+    if (value == ThemeMode.light) {
+      await save(ThemeMode.dark);
+    } else {
+      await save(ThemeMode.light);
+    }
+  }
 }

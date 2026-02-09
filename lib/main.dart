@@ -8,12 +8,13 @@ import 'package:ara_dict/ar_en.dart';
 import 'package:ara_dict/db.dart';
 import 'package:ara_dict/res.dart';
 
-final themeModeNotifier = ValueNotifier<ThemeMode>(ThemeMode.light);
+final themeModeNotifier = ThemeController();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await DbService.init();
   await ArEnDict.init();
+  await themeModeNotifier.load();
   runApp(const MyApp());
 }
 
@@ -185,9 +186,9 @@ class _SearchWithSelectionState extends State<SearchWithSelection> {
                   secondary: Icon(isDark ? Icons.dark_mode : Icons.light_mode),
                   value: isDark,
                   onChanged: (value) {
-                    themeModeNotifier.value = value
-                        ? ThemeMode.dark
-                        : ThemeMode.light;
+                    themeModeNotifier.save(
+                      value ? ThemeMode.dark : ThemeMode.light,
+                    );
                   },
                 );
               },

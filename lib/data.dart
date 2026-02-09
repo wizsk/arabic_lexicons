@@ -1,5 +1,8 @@
+import 'package:flutter/material.dart';
+
 const fontAmiri = 'Amiri';
 const fontKitab = 'Kitab';
+const dictWordSelectModalOpenIcon = Icon(Icons.info);
 
 class DictEntry {
   final Dict d;

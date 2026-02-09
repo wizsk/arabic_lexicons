@@ -197,7 +197,7 @@ class _SearchWithSelectionState extends State<SearchWithSelection> {
                   color: Theme.of(context).colorScheme.primary,
                 ),
                 child: Text(
-                  'Settings',
+                  'Menu',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: mediumFontSize * 1.75,
@@ -215,6 +215,7 @@ class _SearchWithSelectionState extends State<SearchWithSelection> {
                   secondary: Icon(isDark ? Icons.dark_mode : Icons.light_mode),
                   value: isDark,
                   onChanged: (value) {
+                    Navigator.pop(context);
                     themeModeNotifier.save(
                       value ? ThemeMode.dark : ThemeMode.light,
                     );
@@ -226,6 +227,7 @@ class _SearchWithSelectionState extends State<SearchWithSelection> {
               leading: Icon(Icons.help),
               title: Text("Help"),
               onTap: () {
+                Navigator.pop(context);
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (_) => HelpPage()),
@@ -290,7 +292,7 @@ class _SearchWithSelectionState extends State<SearchWithSelection> {
                     ),
                   ),
                   IconButton(
-                    icon: Icon(Icons.info),
+                    icon: dictWordSelectModalOpenIcon,
                     onPressed: () async {
                       _focusNode.unfocus();
                       final res = await showWordPickerBottomSheet(

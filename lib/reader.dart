@@ -1,9 +1,20 @@
+import 'dart:convert';
+import 'dart:io';
+import 'package:crypto/crypto.dart'; // for hashing
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/main.dart';
 import 'package:ara_dict/theme.dart';
 import 'package:ara_dict/wigds.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:path/path.dart';
+import 'package:path_provider/path_provider.dart';
+
+class BookEntry {
+  final String hash;
+  final String name;
+  BookEntry(this.hash, this.name);
+}
 
 class ReaderPage extends StatefulWidget {
   const ReaderPage({super.key});
@@ -19,12 +30,104 @@ class _ReaderPageState extends State<ReaderPage> {
   void _showText() {
     final text = _controller.text.trim();
     if (text.isEmpty) return;
-    _paragraphs = text
+    _paragraphs = _splitLines(text);
+    setState(() {});
+    _saveFile();
+  }
+
+  List<String> _splitLines(String text) {
+    text = text.trim();
+    if (text.isEmpty) return [];
+    return text
         .replaceAll('\r\n', '\n')
         .replaceAll('\r', '\n')
         .split(RegExp(r'\n+'));
+  }
+
+  Directory? _booksDir;
+  File? _indexFile;
+  List<BookEntry> _books = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _initStorage();
+  }
+
+  Future<void> _initStorage() async {
+    final dir = await getApplicationDocumentsDirectory();
+    _booksDir = Directory(join(dir.path, 'books'));
+    if (!await _booksDir!.exists()) await _booksDir!.create();
+
+    _indexFile = File(join(_booksDir!.path, 'books.txt'));
+    if (!await _indexFile!.exists()) await _indexFile!.writeAsString('');
+
+    await _loadBooks();
+  }
+
+  Future<void> _loadBooks() async {
+    if (_indexFile == null) return;
+
+    final lines = await _indexFile!.readAsLines();
+    _books = lines
+        .map((line) {
+          final parts = line.split(':');
+          if (parts.length >= 2) {
+            final hash = parts[0];
+            final name = parts.sublist(1).join(':'); // in case name has colon
+            return BookEntry(hash, name);
+          }
+          return null;
+        })
+        .whereType<BookEntry>()
+        .toList();
 
     setState(() {});
+  }
+
+  String _hashText(String text) {
+    final bytes = utf8.encode(text);
+    return sha1.convert(bytes).toString(); // short but unique
+  }
+
+  Future<void> _saveFile() async {
+    final content = _controller.text.trim();
+    if (content.isEmpty) return;
+
+    final lines = _splitLines(content);
+    String displayName = lines.isNotEmpty ? lines.first : 'Untitled';
+    if (displayName.length > 100) displayName = displayName.substring(0, 100);
+
+    final hash = _hashText(content); // filename
+    final file = File(join(_booksDir!.path, '$hash.txt'));
+    try {
+      await file.writeAsString(content);
+    } catch (_) {
+      return;
+    }
+
+    // update index file
+    final exists = _books.any((b) => b.hash == hash);
+    if (!exists) {
+      await _indexFile?.writeAsString(
+        '$hash:$displayName\n',
+        mode: FileMode.append,
+      );
+    }
+
+    setState(() {
+      _books.add(BookEntry(hash, displayName));
+    });
+  }
+
+  Future<void> _openBook(BookEntry entry) async {
+    final file = File(join(_booksDir!.path, '${entry.hash}.txt'));
+    if (!await file.exists()) return;
+
+    final content = await file.readAsString();
+    setState(() {
+      _paragraphs = _splitLines(content);
+    });
   }
 
   @override
@@ -76,6 +179,25 @@ class _ReaderPageState extends State<ReaderPage> {
                         onPressed: _showText,
                       ),
                     ],
+                  ),
+                ),
+
+              if (_paragraphs.isEmpty && _books.isNotEmpty)
+                Expanded(
+                  child: ListView.builder(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: _books.length,
+                    itemBuilder: (context, index) {
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 20),
+                        child: TextButton(
+                          child: Text(_books[index].name),
+                          onPressed: () {
+                            _openBook(_books[index]);
+                          },
+                        ),
+                      );
+                    },
                   ),
                 ),
 

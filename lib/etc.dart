@@ -1,14 +1,14 @@
 import 'package:ara_dict/data.dart';
 import 'package:flutter/material.dart';
 
-Future<({Dict dict, String? word})?> showWordPickerBottomSheet(
+Future<({DictEntry de, String? word})?> showWordPickerBottomSheet(
   BuildContext context,
   List<DictEntry> dicts,
-  Dict selectedDict,
+  DictEntry selectedDict,
   List<String> words,
   String? selectedWord,
 ) {
-  return showModalBottomSheet<({Dict dict, String? word})?>(
+  return showModalBottomSheet<({DictEntry de, String? word})?>(
     context: context,
     isScrollControlled: true,
     shape: const RoundedRectangleBorder(
@@ -17,7 +17,7 @@ Future<({Dict dict, String? word})?> showWordPickerBottomSheet(
     builder: (context) {
       final sh = MediaQuery.of(context).size.height;
       final maxHeight = sh * 0.8;
-      final minHeight = sh * 0.4;
+      final minHeight = sh * 0.35;
 
       return StatefulBuilder(
         builder: (context, setState) {
@@ -63,13 +63,10 @@ Future<({Dict dict, String? word})?> showWordPickerBottomSheet(
                                 showCheckmark: false,
                                 label: Text(word),
                                 selected: s,
-                                labelStyle: s
-                                    ? const TextStyle(color: Colors.white)
-                                    : null,
                                 onSelected: (value) {
                                   setState(() {
                                     Navigator.pop(context, (
-                                      dict: selectedDict,
+                                      de: selectedDict,
                                       word: word,
                                     ));
                                   });
@@ -93,18 +90,15 @@ Future<({Dict dict, String? word})?> showWordPickerBottomSheet(
                       spacing: 8,
                       runSpacing: 8,
                       children: dicts.map((dict) {
-                        final s = selectedDict == dict.d;
+                        final s = selectedDict.d == dict.d;
                         return ChoiceChip(
                           showCheckmark: false,
                           label: Text(dict.ar),
                           selected: s,
-                          labelStyle: s
-                              ? const TextStyle(color: Colors.white)
-                              : null,
                           onSelected: (value) {
                             setState(() {
                               Navigator.pop(context, (
-                                dict: dict.d,
+                                de: dict,
                                 word: selectedWord,
                               ));
                             });

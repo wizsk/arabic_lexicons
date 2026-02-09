@@ -3,7 +3,12 @@ import 'package:flutter_html/flutter_html.dart';
 import 'package:ara_dict/ar_en.dart';
 import 'package:ara_dict/data.dart';
 
-final _scrollPadding = const EdgeInsets.symmetric(vertical: 16, horizontal: 8);
+final _scrollPadding = const EdgeInsets.only(
+  left: 8,
+  right: 8,
+  top: 0,
+  bottom: 16,
+);
 
 Widget showRes(
   Dict curDict,

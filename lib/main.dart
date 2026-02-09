@@ -23,6 +23,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Arabic Lexicons',
       theme: ThemeData(
+        useMaterial3: true,
         textTheme: Theme.of(context).textTheme.apply(
           fontFamily: fontKitab,
           fontSizeFactor: 1.2,
@@ -31,32 +32,16 @@ class MyApp extends StatelessWidget {
           displayColor: null,
         ),
 
-        useMaterial3: true,
         scaffoldBackgroundColor: const Color(0xFFFFFAF3),
-
-        colorScheme: const ColorScheme.light(
-          primary: Color(0xFF285A8C), // dark accent
-          secondary: Color(0xFF3A6FA6), // lighter accent
-          tertiary: Color(0xFF285A8C), // use same as primary for selected items
-
-          surface: Color(0xFFFFFAF3), // paper background
-          onSurface: Color(0xFF222223), // main text color
-
-          surfaceContainerLowest: Color(0xFFFFFAF3),
-          surfaceContainerLow: Color(0xFFF7F1E6),
-          surfaceContainer: Color(0xFFF2ECDD),
-
-          outline: Color(0xFFE6E1D8),
-          error: Color(0xFFB84A4A),
-        ),
-
-        dividerColor: const Color(0xFFE6E1D8),
-
-        textSelectionTheme: const TextSelectionThemeData(
-          cursorColor: Color(0xFF285A8C),
-          selectionColor: Color(0xFF3A6FA6),
-          selectionHandleColor: Color(0xFF285A8C),
-        ),
+        brightness: Brightness.light,
+        colorScheme: ColorScheme.fromSeed(
+              seedColor: Colors.deepPurple,
+              brightness: Brightness.light,
+            ).copyWith(
+            surface: const Color(0xFFFFFAF3),   // paper background
+            onSurface: const Color(0xFF222223), // main text color
+          ),
+        // dividerColor: const Color(0xFFE6E1D8),
       ),
       home: SearchWithSelection(initialText: ''),
     );
@@ -76,12 +61,7 @@ class _SearchWithSelectionState extends State<SearchWithSelection> {
   late final TextEditingController _controller;
   final FocusNode _focusNode = FocusNode();
 
-  // final ScrollController _wordScrollController = ScrollController();
-
-  // final ScrollController _dictScrollController = ScrollController();
-  // double _dictScrollOffset = 0;
-
-  late Dict _selectedDict;
+  late DictEntry _selectedDict;
 
   List<String> _words = [];
   String? _selectedWord;
@@ -96,11 +76,7 @@ class _SearchWithSelectionState extends State<SearchWithSelection> {
     _controller = TextEditingController(text: widget.initialText);
     _onTextChanged(widget.initialText);
 
-    _selectedDict = dictNames.first.d;
-
-    // _dictScrollController.addListener(() {
-    //   _dictScrollOffset = _dictScrollController.offset;
-    // });
+    _selectedDict = dictNames.first;
   }
 
   @override
@@ -123,26 +99,26 @@ class _SearchWithSelectionState extends State<SearchWithSelection> {
       _dbRes = [];
     });
 
-    // // Auto-scroll to show last (rightmost) chip
-    // WidgetsBinding.instance.addPostFrameCallback((_) {
-    //   if (_dictScrollController.offset != _dictScrollOffset) {
-    //     _dictScrollController.jumpTo(_dictScrollOffset);
-    //   }
-    //   if (_wordScrollController.hasClients) {
-    //     _wordScrollController.animateTo(
-    //       _wordScrollController.position.maxScrollExtent,
-    //       duration: const Duration(milliseconds: 250),
-    //       curve: Curves.easeOut,
-    //     );
-    //   }
-    // });
-
     _loadWord();
   }
 
   void _selectWord(String word) {
+    if (word == _selectedWord) return;
     setState(() {
       _selectedWord = word;
+      _dbRes = [];
+      _arEnRes = null;
+    });
+
+    _loadWord();
+  }
+
+  void _selectDict(DictEntry de) {
+    if (_selectedDict.d == de.d) {
+      return;
+    }
+    setState(() {
+      _selectedDict = de;
       _dbRes = [];
       _arEnRes = null;
     });
@@ -157,7 +133,7 @@ class _SearchWithSelectionState extends State<SearchWithSelection> {
       return;
     }
 
-    switch (_selectedDict) {
+    switch (_selectedDict.d) {
       case Dict.arEn:
         _arEnRes = ArEnDict.findWord(_selectedWord);
 
@@ -176,7 +152,7 @@ class _SearchWithSelectionState extends State<SearchWithSelection> {
       case Dict.mujamulWasith:
       case Dict.mujamulMuhith:
         _dbRes = await DbService.getByWordWith3Rows(
-          getDictTableName(_selectedDict),
+          getDictTableName(_selectedDict.d),
           _selectedWord,
         );
     }
@@ -184,13 +160,22 @@ class _SearchWithSelectionState extends State<SearchWithSelection> {
     setState(() {});
   }
 
+  Widget appBarTxt() {
+    if (_selectedWord != null) {
+      return Text("${_selectedDict.ar}: $_selectedWord");
+    }
+    return Text(_selectedDict.ar);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(title: appBarTxt(), titleSpacing: 0.0),
+      drawer: Drawer(child: Text("y")),
       body: SafeArea(
         child: Column(
           children: [
-            Expanded(child: showRes(_selectedDict, _dbRes, _arEnRes)),
+            Expanded(child: showRes(_selectedDict.d, _dbRes, _arEnRes)),
 
             Divider(color: Colors.grey, thickness: 0.5),
             Padding(
@@ -244,18 +229,8 @@ class _SearchWithSelectionState extends State<SearchWithSelection> {
                         _selectedWord,
                       );
                       if (res != null) {
-                        final en = res.dict;
-                        if (_selectedDict != en) {
-                          setState(() {
-                            _selectedDict = en;
-                            _dbRes = [];
-                            _arEnRes = null;
-                          });
-                          _loadWord();
-                        }
-                        if (res.word != null && res.word != _selectedWord) {
-                          _selectWord(res.word!);
-                        }
+                        _selectDict(res.de);
+                        _selectWord(res.word!);
                       }
                     },
                   ),

@@ -1,3 +1,4 @@
+import 'package:ara_dict/help.dart';
 import 'package:ara_dict/theme.dart';
 import 'package:ara_dict/txt.dart';
 import 'package:flutter/foundation.dart';
@@ -218,6 +219,16 @@ class _SearchWithSelectionState extends State<SearchWithSelection> {
                       value ? ThemeMode.dark : ThemeMode.light,
                     );
                   },
+                );
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.help),
+              title: Text("Help"),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => HelpPage()),
                 );
               },
             ),

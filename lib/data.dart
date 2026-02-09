@@ -4,8 +4,9 @@ const fontKitab = 'Kitab';
 class DictEntry {
   final Dict d;
   final String ar;
+  final String en;
 
-  const DictEntry({required this.d, required this.ar});
+  const DictEntry({required this.d, required this.ar, required this.en});
 }
 
 enum Dict {
@@ -43,14 +44,26 @@ String getDictTableName(Dict d) {
   }
 }
 
+// final List<DictEntry> dictNames = [
+//   DictEntry(d: Dict.arEn, ar: "مباشر", en: "Dicrect dictionary"),
+//   DictEntry(d: Dict.hanswehr, ar: "هانز", en: "Hans"),
+//   DictEntry(d: Dict.laneLexicon, ar: "لين", en: "Lane"),
+//   DictEntry(d: Dict.mujamulGhoni, ar: "الغني", en: "Ghani"),
+//   DictEntry(d: Dict.mujamulShihah, ar: "مختار", en: "Mukhtar"),
+//   DictEntry(d: Dict.lisanAlArab, ar: "لسان", en: "Lisan"),
+//   DictEntry(d: Dict.mujamulMuashiroh, ar: "المعاصرة", en: "Muasiroh"),
+//   DictEntry(d: Dict.mujamulWasith, ar: "الوسيط", en: "Wasat"),
+//   DictEntry(d: Dict.mujamulMuhith, ar: "المحيط", en: "Muthktar"),
+// ];
+
 final List<DictEntry> dictNames = [
-  DictEntry(d: Dict.arEn, ar: "مباشر"),
-  DictEntry(d: Dict.hanswehr, ar: "هانز"),
-  DictEntry(d: Dict.laneLexicon, ar: "لين"),
-  DictEntry(d: Dict.mujamulGhoni, ar: "الغني"),
-  DictEntry(d: Dict.mujamulShihah, ar: "مختار"),
-  DictEntry(d: Dict.lisanAlArab, ar: "لسان"),
-  DictEntry(d: Dict.mujamulMuashiroh, ar: "المعاصرة"),
-  DictEntry(d: Dict.mujamulWasith, ar: "الوسيط"),
-  DictEntry(d: Dict.mujamulMuhith, ar: "المحيط"),
+  DictEntry(d: Dict.arEn, ar: "مباشر", en: "Direct Dictionary"),
+  DictEntry(d: Dict.hanswehr, ar: "هانز", en: "Hans Wehr"),
+  DictEntry(d: Dict.laneLexicon, ar: "لين", en: "Lane Lexicon"),
+  DictEntry(d: Dict.mujamulGhoni, ar: "الغني", en: "Al-Ghani"),
+  DictEntry(d: Dict.mujamulShihah, ar: "مختار", en: "Mukhtar"),
+  DictEntry(d: Dict.lisanAlArab, ar: "لسان", en: "Lisan Al-Arab"),
+  DictEntry(d: Dict.mujamulMuashiroh, ar: "المعاصرة", en: "Al-Muashirah"),
+  DictEntry(d: Dict.mujamulWasith, ar: "الوسيط", en: "Al-Waseet"),
+  DictEntry(d: Dict.mujamulMuhith, ar: "المحيط", en: "Al-Muhit"),
 ];

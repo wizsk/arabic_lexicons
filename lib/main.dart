@@ -159,10 +159,19 @@ class _SearchWithSelectionState extends State<SearchWithSelection> {
   }
 
   Widget appBarTxt() {
+    final fontStyle = TextStyle(fontWeight: FontWeight.bold);
+
     if (_selectedWord != null) {
-      return Text("${_selectedDict.ar}: $_selectedWord");
+      return Text.rich(
+        TextSpan(
+          children: [
+            TextSpan(text: _selectedDict.ar, style: fontStyle),
+            TextSpan(text: ': $_selectedWord'),
+          ],
+        ),
+      );
     }
-    return Text(_selectedDict.ar);
+    return Text.rich(TextSpan(text: _selectedDict.ar, style: fontStyle));
   }
 
   @override

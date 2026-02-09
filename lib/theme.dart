@@ -124,8 +124,8 @@ AppBarTheme _buildAppBarTheme(ColorScheme cs) {
     centerTitle: true, // if you want centered
     titleTextStyle: TextStyle(
       fontFamily: fontKitab,
-      fontSize: mediumFontSize,
-      fontWeight: FontWeight.w600,
+      fontSize: mediumFontSize * 1.15,
+      // fontWeight: FontWeight.bold,
       color: cs.onPrimary, // force AppBar title color
     ),
   );

@@ -68,14 +68,14 @@ class HelpPage extends StatelessWidget {
 
                 const TextSpan(text: 'Mail: '),
                 TextSpan(
-                  text: 'saibul706@gmail.com',
+                  text: 'sakibul706@gmail.com',
                   style: const TextStyle(
                     color: Colors.blueAccent,
                     decoration: TextDecoration.underline,
                   ),
                   recognizer: TapGestureRecognizer()
                     ..onTap = () {
-                      launchUrl(Uri.parse('mailto:saibul706@gmail.com'));
+                      launchUrl(Uri.parse('mailto:sakibul706@gmail.com'));
                     },
                 ),
 

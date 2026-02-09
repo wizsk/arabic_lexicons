@@ -130,9 +130,8 @@ AppBarTheme _buildAppBarTheme(ColorScheme cs) {
   );
 }
 
-
 class ThemeController extends ValueNotifier<ThemeMode> {
-  ThemeController() : super(ThemeMode.system);
+  ThemeController() : super(ThemeMode.light);
 
   static const _key = 'theme_mode';
 
@@ -143,7 +142,7 @@ class ThemeController extends ValueNotifier<ThemeMode> {
 
     // if (mode == 'light') {
     // } else
-     if (mode == 'dark') {
+    if (mode == 'dark') {
       value = ThemeMode.dark;
     } else {
       // value = ThemeMode.system;
@@ -156,14 +155,7 @@ class ThemeController extends ValueNotifier<ThemeMode> {
     final prefs = await SharedPreferences.getInstance();
     value = mode;
 
-    await prefs.setString(
-      _key,
-      mode == ThemeMode.light
-          ? 'light'
-          : mode == ThemeMode.dark
-              ? 'dark'
-              : 'system',
-    );
+    await prefs.setString(_key, mode == ThemeMode.dark ? 'dark' : 'light');
   }
 
   /// Toggle light/dark

@@ -1,7 +1,8 @@
 import 'package:ara_dict/theme.dart';
+import 'package:ara_dict/txt.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import 'package:ara_dict/alphabets.dart';
 import 'package:ara_dict/etc.dart';
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/ar_en.dart';
@@ -82,14 +83,19 @@ class _SearchWithSelectionState extends State<SearchWithSelection> {
   }
 
   void _onTextChanged(String value) async {
-    final parts = cleanQeury(value);
+    final (parts, currWord) = getNextWord(
+      value,
+      _controller.selection.base.offset,
+    );
 
-    setState(() {
-      _words = parts;
-      _selectedWord = parts.isNotEmpty ? parts.last : null;
-      _arEnRes = null;
-      _dbRes = [];
-    });
+    if (!listEquals(_words, parts) || currWord != _selectedWord) {
+      setState(() {
+        _words = parts;
+        _selectedWord = currWord;
+        _arEnRes = null;
+        _dbRes = [];
+      });
+    }
 
     _loadWord();
   }

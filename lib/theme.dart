@@ -79,31 +79,31 @@ TextTheme _buildArabicTextTheme(ColorScheme cs) {
   );
 }
 
-TextTheme __buildArabicTextTheme(ColorScheme cs) {
-  return Typography.material2021()
-      .englishLike // base English, then we override for Arabic
-      .apply(
-        fontFamily: fontKitab,
-        fontSizeFactor: 1.2,
-        fontSizeDelta: 2.0,
-        bodyColor: cs.onSurface,
-        displayColor: cs.onSurface,
-      )
-      .copyWith(
-        bodyMedium: Typography.material2021().englishLike.bodyMedium?.copyWith(
-          fontFamily: fontKitab,
-          height: 1.5,
-        ), // better line height for Arabic
-        bodyLarge: Typography.material2021().englishLike.bodyLarge?.copyWith(
-          fontFamily: fontKitab,
-          height: 1.5,
-        ),
-        bodySmall: Typography.material2021().englishLike.bodySmall?.copyWith(
-          fontFamily: fontKitab,
-          height: 1.3,
-        ),
-      );
-}
+// TextTheme __buildArabicTextTheme(ColorScheme cs) {
+//   return Typography.material2021()
+//       .englishLike // base English, then we override for Arabic
+//       .apply(
+//         fontFamily: fontKitab,
+//         fontSizeFactor: 1.2,
+//         fontSizeDelta: 2.0,
+//         bodyColor: cs.onSurface,
+//         displayColor: cs.onSurface,
+//       )
+//       .copyWith(
+//         bodyMedium: Typography.material2021().englishLike.bodyMedium?.copyWith(
+//           fontFamily: fontKitab,
+//           height: 1.5,
+//         ), // better line height for Arabic
+//         bodyLarge: Typography.material2021().englishLike.bodyLarge?.copyWith(
+//           fontFamily: fontKitab,
+//           height: 1.5,
+//         ),
+//         bodySmall: Typography.material2021().englishLike.bodySmall?.copyWith(
+//           fontFamily: fontKitab,
+//           height: 1.3,
+//         ),
+//       );
+// }
 
 DrawerThemeData _buildDrawerTheme(ColorScheme cs) {
   return DrawerThemeData(

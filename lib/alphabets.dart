@@ -1,3 +1,9 @@
+import 'package:flutter/cupertino.dart';
+
+String cleanWord(String w) {
+  return w.characters.where((c) => arabicLetters.contains(c)).join("");
+}
+
 List<String> cleanQeury(String query) {
   final res = query
       .trim()

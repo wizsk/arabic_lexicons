@@ -91,9 +91,6 @@ class _SearchWithSelectionState extends State<SearchWithSelection> {
   void dispose() {
     _controller.dispose();
     _focusNode.dispose();
-    // _dictScrollController.dispose();
-    // _wordScrollController.dispose();
-    // DbService.close();
     super.dispose();
   }
 
@@ -220,9 +217,6 @@ class _SearchWithSelectionState extends State<SearchWithSelection> {
                       style: Theme.of(context).textTheme.bodyMedium,
                       decoration: InputDecoration(
                         hintText: 'ابحث',
-                        hintStyle: themeModeNotifier.value == ThemeMode.dark
-                            ? const TextStyle(color: Colors.grey)
-                            : null,
                         prefixIcon: IconButton(
                           onPressed: () {
                             setState(() {
@@ -240,11 +234,6 @@ class _SearchWithSelectionState extends State<SearchWithSelection> {
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        // enabledBorder: OutlineInputBorder(
-                        //   borderSide: BorderSide(color: Colors.black87),
-                        //   borderRadius: BorderRadius.circular(8),
-                        // ),
-                        // filled: true,
                       ),
                     ),
                   ),

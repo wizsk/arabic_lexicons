@@ -4,15 +4,15 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ara_dict/data.dart';
 
 const double mediumFontSize = 18;
-
-final _baseScheme = ColorScheme.fromSeed(seedColor: Colors.deepPurple);
+const _seedColor = Colors.deepPurple;
 
 ThemeData buildLightTheme(BuildContext context) {
-  final cs = _baseScheme.copyWith(
+  final cs = ColorScheme.fromSeed(seedColor: _seedColor).copyWith(
     brightness: Brightness.light,
     surface: const Color(0xFFFFFAF3),
     onSurface: const Color(0xFF222223),
   );
+
   return ThemeData(
     useMaterial3: true,
     brightness: Brightness.light,
@@ -21,16 +21,22 @@ ThemeData buildLightTheme(BuildContext context) {
     textTheme: _buildArabicTextTheme(cs),
     drawerTheme: _buildDrawerTheme(cs),
     appBarTheme: _buildAppBarTheme(cs),
-    // dividerColor:
+    inputDecorationTheme: InputDecorationTheme(
+      hintStyle: TextStyle(color: Color(0xFFAAAAAA)),
+    ),
   );
 }
 
 ThemeData buildDarkTheme(BuildContext context) {
-  final cs = _baseScheme.copyWith(
-    brightness: Brightness.dark,
-    surface: const Color(0xFF121212),
-    onSurface: const Color(0xFFEAEAEA),
-  );
+  final cs =
+      ColorScheme.fromSeed(
+        seedColor: Colors.deepPurple,
+        brightness: Brightness.dark,
+      ).copyWith(
+        brightness: Brightness.dark,
+        surface: const Color(0xFF121212),
+        onSurface: const Color(0xFFEAEAEA),
+      );
 
   return ThemeData(
     useMaterial3: true,
@@ -41,8 +47,11 @@ ThemeData buildDarkTheme(BuildContext context) {
     drawerTheme: _buildDrawerTheme(cs),
     appBarTheme: _buildAppBarTheme(cs),
     // dividerColor: Color.fromARGB(255, 111,111,111),
-    iconTheme: IconThemeData(
-      color: cs.onSurface, // force readable icons
+    // iconTheme: IconThemeData(
+    //   color: cs.onSurface, // force readable icons
+    // ),
+    inputDecorationTheme: InputDecorationTheme(
+      hintStyle: TextStyle(color: Color(0xFF777777)),
     ),
   );
 }

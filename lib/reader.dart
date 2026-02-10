@@ -1,12 +1,12 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:crypto/crypto.dart'; // for hashing
-import 'package:ara_dict/data.dart';
 import 'package:ara_dict/main.dart';
 import 'package:ara_dict/theme.dart';
 import 'package:ara_dict/wigds.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -25,7 +25,48 @@ class ReaderPage extends StatefulWidget {
 
 class _ReaderPageState extends State<ReaderPage> {
   final TextEditingController _controller = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
+
   List<String> _paragraphs = [];
+  Directory? _booksDir;
+  File? _indexFile;
+  List<BookEntry> _books = [];
+
+  bool _isFabVisible = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _initStorage();
+    _scrollController.addListener(_scrollListener);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _scrollListener() {
+    if (_scrollController.position.userScrollDirection ==
+        ScrollDirection.reverse) {
+      // Scrolling down - hide FAB
+      if (_isFabVisible) {
+        setState(() {
+          _isFabVisible = false;
+        });
+      }
+    } else if (_scrollController.position.userScrollDirection ==
+        ScrollDirection.forward) {
+      // Scrolling up - show FAB
+      if (!_isFabVisible) {
+        setState(() {
+          _isFabVisible = true;
+        });
+      }
+    }
+  }
 
   void _showText() {
     final text = _controller.text.trim();
@@ -42,16 +83,6 @@ class _ReaderPageState extends State<ReaderPage> {
         .replaceAll('\r\n', '\n')
         .replaceAll('\r', '\n')
         .split(RegExp(r'\n+'));
-  }
-
-  Directory? _booksDir;
-  File? _indexFile;
-  List<BookEntry> _books = [];
-
-  @override
-  void initState() {
-    super.initState();
-    _initStorage();
   }
 
   Future<void> _initStorage() async {
@@ -95,7 +126,9 @@ class _ReaderPageState extends State<ReaderPage> {
     if (content.isEmpty) return;
 
     final lines = _splitLines(content);
-    String displayName = lines.isNotEmpty ? lines.first : 'Untitled';
+    if (lines.isEmpty) return;
+
+    String displayName = lines.first;
     if (displayName.length > 100) displayName = displayName.substring(0, 100);
 
     final hash = _hashText(content); // filename
@@ -115,9 +148,30 @@ class _ReaderPageState extends State<ReaderPage> {
       );
     }
 
-    setState(() {
-      _books.add(BookEntry(hash, displayName));
-    });
+    _books.add(BookEntry(hash, displayName));
+  }
+
+  Future<void> _deleteFile(int index) async {
+    if (index < 0 || index >= _books.length) {
+      return;
+    }
+    final be = _books.removeAt(index);
+    final file = File(join(_booksDir!.path, '${be.hash}.txt'));
+    try {
+      await file.delete();
+    } catch (e) {
+      // AlertDialog()
+      return;
+    }
+
+    await _saveBookEntriesFile();
+    setState(() {});
+  }
+
+  Future<void> _saveBookEntriesFile() async {
+    if (_indexFile == null) return;
+    final txt = _books.map((be) => '${be.hash}:${be.name}').join("\n");
+    await _indexFile!.writeAsString(txt, flush: true, mode: FileMode.write);
   }
 
   Future<void> _openBook(BookEntry entry) async {
@@ -130,97 +184,169 @@ class _ReaderPageState extends State<ReaderPage> {
     });
   }
 
+  int _textFiledSize = 2;
+  final int _maxTextFiledSize = 8;
+
   @override
   Widget build(BuildContext context) {
-    final textStyle = Theme.of(context).textTheme.bodyMedium;
+    final textStyleBodyMedium = Theme.of(context).textTheme.bodyMedium;
 
     return Scaffold(
       appBar: AppBar(title: const Text('القارئ')),
       drawer: buildDrawer(context),
       body: SafeArea(
-        child: Padding(
-          padding: scrollPadding.copyWith(top: 16, bottom: 0),
-          child: Column(
-            textDirection: TextDirection.rtl,
-            children: [
-              if (_paragraphs.isEmpty)
-                TextField(
-                  controller: _controller,
-                  maxLines: 8,
-                  textDirection: TextDirection.rtl,
-                  style: Theme.of(context).textTheme.bodyMedium,
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(),
-                    hintText: 'اكتب هنا…',
-                    hintTextDirection: TextDirection.rtl,
-                    hintStyle: themeModeNotifier.value == ThemeMode.dark
-                        ? const TextStyle(color: Colors.grey)
-                        : null,
-                  ),
-                ),
-
-              if (_paragraphs.isEmpty)
-                Padding(
-                  padding: const EdgeInsets.only(top: 16),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    spacing: 4,
-                    children: [
-                      IconButton(
-                        icon: Icon(Icons.clear),
-                        iconSize: mediumFontSize * 2,
-                        onPressed: () => setState(() {
-                          _controller.clear();
-                        }),
+        child: Column(
+          textDirection: TextDirection.rtl,
+          children: [
+            if (_paragraphs.isEmpty)
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  children: [
+                    TextField(
+                      controller: _controller,
+                      maxLines: _textFiledSize,
+                      textDirection: TextDirection.rtl,
+                      style: textStyleBodyMedium,
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(),
+                        hintText: 'اكتب هنا…',
+                        hintTextDirection: TextDirection.rtl,
                       ),
-                      IconButton(
-                        icon: Icon(Icons.arrow_circle_right),
-                        iconSize: mediumFontSize * 2,
-                        onPressed: _showText,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 16),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        spacing: 4,
+                        children: [
+                          IconButton(
+                            icon: Icon(Icons.expand),
+                            iconSize: mediumFontSize * 2,
+                            onPressed: () => setState(() {
+                              if (_textFiledSize == _maxTextFiledSize) {
+                                _textFiledSize = 2;
+                              } else {
+                                _textFiledSize = _maxTextFiledSize;
+                              }
+                            }),
+                          ),
+                          IconButton(
+                            icon: Icon(Icons.clear),
+                            iconSize: mediumFontSize * 2,
+                            onPressed: () => setState(() {
+                              _controller.clear();
+                            }),
+                          ),
+                          IconButton(
+                            icon: Icon(Icons.arrow_circle_right),
+                            iconSize: mediumFontSize * 2,
+                            onPressed: _showText,
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
+              ),
 
-              if (_paragraphs.isEmpty && _books.isNotEmpty)
-                Expanded(
-                  child: ListView.builder(
-                    padding: const EdgeInsets.all(16),
-                    itemCount: _books.length,
-                    itemBuilder: (context, index) {
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 20),
-                        child: TextButton(
-                          child: Text(_books[index].name),
-                          onPressed: () {
-                            _openBook(_books[index]);
-                          },
+            if (_paragraphs.isEmpty && _books.isNotEmpty)
+              Expanded(
+                child: ListView.builder(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  itemCount: _books.length,
+                  itemBuilder: (context, index) {
+                    // return Padding(
+                    //   padding: const EdgeInsets.symmetric(vertical: 20),
+                    //   child: ListTile(
+                    //     title: Text(_books[index].name),
+                    //     onPressed: () {
+                    //       _openBook(_books[index]);
+                    //     },
+                    //   ),
+                    // );
+                    return InkWell(
+                      onTap: () {
+                        _openBook(_books[index]);
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
                         ),
-                      );
-                    },
-                  ),
-                ),
+                        child: Row(
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.delete),
+                              onPressed: () async {
+                                final res = await showConfirmDialog(
+                                  context,
+                                  message:
+                                      'Do you really want to delete: ${_books[index].name}',
+                                );
+                                if (res != null && res == true) {
+                                  _deleteFile(index);
+                                }
+                              },
+                            ),
 
-              if (_paragraphs.isNotEmpty)
-                Expanded(
-                  child: ListView.builder(
-                    // padding: const EdgeInsets.all(16),
-                    itemCount: _paragraphs.length,
-                    itemBuilder: (context, index) {
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 20),
-                        child: ClickableParagraph(
-                          text: _paragraphs[index],
-                          textStyle: textStyle,
-                          onWordTap: (word) {
-                            openDict(context, word);
-                          },
+                            const SizedBox(width: 8),
+
+                            Expanded(
+                              child: Text(
+                                _books[index].name,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                textDirection: TextDirection.rtl,
+                                textAlign: TextAlign.right,
+                              ),
+                            ),
+                          ],
                         ),
-                      );
-                    },
-                  ),
+                      ),
+                    );
+                  },
                 ),
-            ],
+              ),
+
+            if (_paragraphs.isNotEmpty)
+              Expanded(
+                child: ListView.builder(
+                  controller: _scrollController,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ).copyWith(bottom: 128),
+                  itemCount: _paragraphs.length,
+                  itemBuilder: (context, index) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: ClickableParagraph(
+                        text: _paragraphs[index],
+                        textStyleBodyMedium: textStyleBodyMedium,
+                        onWordTap: (word) {
+                          openDict(context, word);
+                        },
+                      ),
+                    );
+                  },
+                ),
+              ),
+          ],
+        ),
+      ),
+
+      floatingActionButton: AnimatedSlide(
+        duration: Duration(milliseconds: 300),
+        offset: _isFabVisible ? Offset.zero : Offset(0, 2),
+        child: AnimatedOpacity(
+          duration: Duration(milliseconds: 300),
+          opacity: _isFabVisible ? 1.0 : 0.0,
+          child: FloatingActionButton(
+            onPressed: () {
+              // Your action
+            },
+            child: Icon(Icons.add),
           ),
         ),
       ),
@@ -231,11 +357,11 @@ class _ReaderPageState extends State<ReaderPage> {
 class ClickableParagraph extends StatelessWidget {
   final String text;
   final void Function(String word) onWordTap;
-  final TextStyle? textStyle;
+  final TextStyle? textStyleBodyMedium;
 
   const ClickableParagraph({
     super.key,
-    required this.textStyle,
+    required this.textStyleBodyMedium,
     required this.text,
     required this.onWordTap,
   });
@@ -244,7 +370,7 @@ class ClickableParagraph extends StatelessWidget {
   Widget build(BuildContext context) {
     return RichText(
       textDirection: TextDirection.rtl,
-      text: TextSpan(style: textStyle, children: _buildSpans()),
+      text: TextSpan(style: textStyleBodyMedium, children: _buildSpans()),
     );
   }
 

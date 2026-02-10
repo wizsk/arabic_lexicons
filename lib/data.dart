@@ -5,7 +5,7 @@ const fontKitab = 'Kitab';
 
 const scrollPadding = EdgeInsets.only(left: 8, right: 8, top: 0, bottom: 16);
 
-const dictWordSelectModalOpenIcon = Icon(Icons.info);
+const dictWordSelectModalOpenIcon = Icon(Icons.book);
 
 class DictEntry {
   final Dict d;

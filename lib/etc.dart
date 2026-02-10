@@ -137,112 +137,104 @@ Future<({bool isQasidah, TextAlign textAlign})?> showReaderModeSettings(
     builder: (sheetContext) {
       bool isQasidah = initialIsQasidah;
       TextAlign textAlign = initialTextAlign;
-      bool isClosing = false; // 🔒 prevents double pop
 
       void close() {
-        if (isClosing) return;
-        isClosing = true;
-
         Navigator.of(
           sheetContext,
         ).pop((isQasidah: isQasidah, textAlign: textAlign));
       }
 
-      return PopScope(
-        canPop: false, // 👈 critical
-        onPopInvokedWithResult: (_, _) => close(),
-        child: StatefulBuilder(
-          builder: (context, setState) {
-            final sh = MediaQuery.of(context).size.height;
+      return StatefulBuilder(
+        builder: (context, setState) {
+          final sh = MediaQuery.of(context).size.height;
 
-            return SafeArea(
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  maxHeight: sh * 0.8,
-                  // minHeight: sh * 0.2,
-                ),
-                // child: ListView(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min, // 🔥 THIS is the magic
-                    children: [
-                      // drag handle
-                      Center(
-                        child: Container(
-                          width: 40,
-                          height: 4,
-                          margin: const EdgeInsets.only(bottom: 16),
-                          decoration: BoxDecoration(
-                            color: Colors.grey.shade500,
-                            borderRadius: BorderRadius.circular(2),
-                          ),
+          return SafeArea(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxHeight: sh * 0.8,
+                // minHeight: sh * 0.2,
+              ),
+              // child: ListView(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min, // 🔥 THIS is the magic
+                  children: [
+                    // drag handle
+                    Center(
+                      child: Container(
+                        width: 40,
+                        height: 4,
+                        margin: const EdgeInsets.only(bottom: 16),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade500,
+                          borderRadius: BorderRadius.circular(2),
                         ),
                       ),
+                    ),
 
-                      SwitchListTile(
-                        title: const Text('Qasidah mode'),
-                        secondary: Icon(Icons.notes),
-                        value: isQasidah,
-                        onChanged: (v) {
-                          setState(() {
-                            isQasidah = v;
-                          });
-                        },
-                      ),
+                    SwitchListTile(
+                      title: const Text('Qasidah mode'),
+                      secondary: Icon(Icons.notes),
+                      value: isQasidah,
+                      onChanged: (v) {
+                        setState(() {
+                          isQasidah = v;
+                        });
+                      },
+                    ),
 
-                      const Divider(),
+                    const Divider(),
 
-                      SwitchListTile(
-                        title: const Text('Right-aligned text'),
-                        secondary: Icon(Icons.format_align_right),
-                        value: textAlign == TextAlign.right,
-                        onChanged: isQasidah
-                            ? null
-                            : (v) {
-                                setState(() {
-                                  textAlign = v
-                                      ? TextAlign.right
-                                      : TextAlign.justify;
-                                });
-                              },
-                      ),
-
-                      const SizedBox(height: 30),
-                      Row(
-                        children: [
-                          FilledButton(
-                            onPressed: () {
-                              close();
-                              closeReader();
+                    SwitchListTile(
+                      title: const Text('Right-aligned text'),
+                      secondary: Icon(Icons.format_align_right),
+                      value: textAlign == TextAlign.right,
+                      onChanged: isQasidah
+                          ? null
+                          : (v) {
+                              setState(() {
+                                textAlign = v
+                                    ? TextAlign.right
+                                    : TextAlign.justify;
+                              });
                             },
-                            style: FilledButton.styleFrom(
-                              backgroundColor: Theme.of(
-                                context,
-                              ).colorScheme.error, // alert color
-                              foregroundColor: Theme.of(
-                                context,
-                              ).colorScheme.onError, // text/icon color
-                            ),
-                            child: const Text('Exit Reader'),
+                    ),
+
+                    const SizedBox(height: 30),
+                    Row(
+                      children: [
+                        FilledButton(
+                          onPressed: () {
+                            close();
+                            closeReader();
+                          },
+                          style: FilledButton.styleFrom(
+                            backgroundColor: Theme.of(
+                              context,
+                            ).colorScheme.error, // alert color
+                            foregroundColor: Theme.of(
+                              context,
+                            ).colorScheme.onError, // text/icon color
                           ),
-                          SizedBox(width: 12),
-                          Expanded(
-                            child: FilledButton(
-                              onPressed: close,
-                              child: const Text('Done'),
-                            ),
+                          child: const Text('Exit Reader'),
+                        ),
+                        SizedBox(width: 12),
+                        Expanded(
+                          child: FilledButton(
+                            onPressed: close,
+                            child: const Text('Done'),
                           ),
-                        ],
-                      ),
-                      const SizedBox(height: 30),
-                    ],
-                  ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 30),
+                  ],
                 ),
               ),
-            );
-          },
-        ),
+            ),
+          );
+        },
       );
     },
   );

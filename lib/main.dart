@@ -1,5 +1,6 @@
 import 'package:ara_dict/help.dart';
 import 'package:ara_dict/reader.dart';
+import 'package:ara_dict/sv.dart';
 import 'package:ara_dict/theme.dart';
 import 'package:ara_dict/txt.dart';
 import 'package:ara_dict/wigds.dart';
@@ -80,11 +81,13 @@ class _SearchWithSelectionState extends State<SearchWithSelection> {
   void initState() {
     super.initState();
 
-    _controller = TextEditingController(text: widget.initialText);
     _showDrawer = widget.showDrawer;
     _selectedDict = dictNames.first;
 
-    if (widget.initialText.isNotEmpty) _onTextChanged(widget.initialText);
+    _controller = TextEditingController(text: widget.initialText);
+    if (widget.initialText.isNotEmpty) {
+      _onTextChanged(widget.initialText);
+    }
   }
 
   @override
@@ -107,13 +110,14 @@ class _SearchWithSelectionState extends State<SearchWithSelection> {
         _arEnRes = null;
         _dbRes = [];
       });
-    }
 
-    _loadWord();
+      _loadWord();
+    }
   }
 
   void _selectWord(String word) {
     if (word == _selectedWord) return;
+
     setState(() {
       _selectedWord = word;
       _dbRes = [];
@@ -217,20 +221,33 @@ class _SearchWithSelectionState extends State<SearchWithSelection> {
                       style: Theme.of(context).textTheme.bodyMedium,
                       decoration: InputDecoration(
                         hintText: 'ابحث',
-                        prefixIcon: IconButton(
-                          onPressed: () {
-                            setState(() {
-                              _controller.clear();
-                              _selectedWord = null;
-                              _words = [];
-                              _dbRes = [];
-                              _arEnRes = null;
-                            });
-                            _focusNode.requestFocus();
-                          },
+                        prefixIcon: _controller.text.isEmpty
+                            ? IconButton(
+                                onPressed: () async {
+                                  final txt = await getClipboardText();
+                                  if (txt != null) {
+                                    _controller.clear();
+                                    _controller.text = txt;
+                                    _focusNode.unfocus();
+                                    setState(() {});
+                                  }
+                                },
+                                icon: Icon(Icons.paste),
+                              )
+                            : IconButton(
+                                onPressed: () {
+                                  setState(() {
+                                    _controller.clear();
+                                    _selectedWord = null;
+                                    _words = [];
+                                    _dbRes = [];
+                                    _arEnRes = null;
+                                  });
+                                  _focusNode.requestFocus();
+                                },
 
-                          icon: Icon(Icons.clear),
-                        ),
+                                icon: Icon(Icons.clear),
+                              ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
@@ -239,6 +256,7 @@ class _SearchWithSelectionState extends State<SearchWithSelection> {
                   ),
                   IconButton(
                     icon: dictWordSelectModalOpenIcon,
+                    iconSize: mediumFontSize * 1.5,
                     onPressed: () async {
                       _focusNode.unfocus();
                       final res = await showWordPickerBottomSheet(

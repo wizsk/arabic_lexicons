@@ -1,3 +1,4 @@
+import 'package:ara_dict/data.dart';
 import 'package:ara_dict/main.dart';
 import 'package:ara_dict/theme.dart';
 import 'package:flutter/material.dart';
@@ -14,10 +15,10 @@ Widget buildDrawer(BuildContext context) {
               children: [
                 DrawerHeader(
                   child: Text(
-                    'Menu',
+                    appName,
                     style: TextStyle(
                       // color: Colors.white,
-                      fontSize: mediumFontSize * 1.75,
+                      fontSize: mediumFontSize * 1.5,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -32,7 +33,7 @@ Widget buildDrawer(BuildContext context) {
                 ),
                 ListTile(
                   title: Text("Reader"),
-                  leading: Icon(Icons.read_more),
+                  leading: Icon(Icons.notes),
                   onTap: () {
                     Navigator.pop(context);
                     Navigator.pushReplacementNamed(context, Routes.reader);

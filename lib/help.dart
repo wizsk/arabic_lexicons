@@ -13,9 +13,9 @@ class HelpPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: Text('Help')),
       drawer: buildDrawer(context),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 8),
+      body: SafeArea(
         child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 8),
           child: Text.rich(
             TextSpan(
               children: [

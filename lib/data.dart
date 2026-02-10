@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+const appName = 'Arabic Lexcions';
+
 const fontAmiri = 'Amiri';
 const fontKitab = 'Kitab';
 

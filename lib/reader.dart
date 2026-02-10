@@ -83,7 +83,6 @@ class _ReaderPageState extends State<ReaderPage> {
     _paragraphs = _splitLines(text);
     final t = _paragraphs.first;
     _title = t.length > 50 ? t.substring(0, 50) : t;
-    _controller.clear();
     setState(() {});
     _saveFile();
   }
@@ -137,6 +136,7 @@ class _ReaderPageState extends State<ReaderPage> {
 
   Future<void> _saveFile() async {
     final content = _controller.text.trim();
+    _controller.clear();
     if (content.isEmpty) return;
 
     final lines = _splitLines(content);

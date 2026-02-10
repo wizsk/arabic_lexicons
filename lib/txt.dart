@@ -1,10 +1,13 @@
+
 import 'package:ara_dict/alphabets.dart';
 
 (List<String> res, String? word) getNextWord(String query, int curPos) {
   List<String> res = [];
+  query = query.trim();
+
   if (query.isEmpty) {
     return (res, null);
-  } else if (query.length == curPos) {
+  } else if (query.length == curPos || !query.contains(" ")) {
     res = cleanQeury(query);
     if (res.isNotEmpty) return (res, res.last);
     return (res, null);

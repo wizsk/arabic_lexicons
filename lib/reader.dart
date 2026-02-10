@@ -186,7 +186,7 @@ class _ReaderPageState extends State<ReaderPage> {
   }
 
   int _textFiledSize = 2;
-  final int _maxTextFiledSize = 14;
+  final int _maxTextFiledSize = 18;
 
   @override
   Widget build(BuildContext context) {
@@ -196,163 +196,154 @@ class _ReaderPageState extends State<ReaderPage> {
       appBar: AppBar(title: const Text('القارئ')),
       drawer: buildDrawer(context),
       body: SafeArea(
-        child: Column(
-          textDirection: TextDirection.rtl,
-          children: [
-            if (_paragraphs.isEmpty)
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  children: [
-                    TextField(
-                      controller: _controller,
-                      maxLines: _textFiledSize,
-                      textDirection: TextDirection.rtl,
-                      style: textStyleBodyMedium,
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(),
-                        hintText: 'اكتب هنا…',
-                        hintTextDirection: TextDirection.rtl,
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 16),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        spacing: 4,
-                        children: [
-                          IconButton(
-                            icon: Icon(Icons.expand),
-                            iconSize: mediumFontSize * 2,
-                            onPressed: () => setState(() {
-                              if (_textFiledSize == _maxTextFiledSize) {
-                                _textFiledSize = 2;
-                              } else {
-                                _textFiledSize = _maxTextFiledSize;
-                              }
-                            }),
+        child: _paragraphs.isEmpty
+            ? ListView(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      children: [
+                        TextField(
+                          controller: _controller,
+                          maxLines: _textFiledSize,
+                          textDirection: TextDirection.rtl,
+                          style: textStyleBodyMedium,
+                          decoration: InputDecoration(
+                            border: OutlineInputBorder(),
+                            hintText: 'اكتب هنا…',
+                            hintTextDirection: TextDirection.rtl,
                           ),
-                          IconButton(
-                            iconSize: mediumFontSize * 2,
-                            onPressed: () async {
-                              final txt = await getClipboardText();
-                              if (txt != null) {
-                                _controller.clear();
-                                _controller.text = txt;
-                              }
-                            },
-                            icon: Icon(Icons.paste),
-                          ),
-                          IconButton(
-                            icon: Icon(Icons.clear),
-                            iconSize: mediumFontSize * 2,
-                            onPressed: () async {
-                              if (_controller.text.isEmpty) return;
-
-                              final res = await showConfirmDialog(
-                                context,
-                                message: 'Do you want to clear the texts?',
-                              );
-                              if (res != null && res) _controller.clear();
-                            },
-                          ),
-                          IconButton(
-                            icon: Icon(Icons.arrow_circle_right),
-                            iconSize: mediumFontSize * 2,
-                            onPressed: _showText,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-            if (_paragraphs.isEmpty && _books.isNotEmpty)
-              Expanded(
-                child: ListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  itemCount: _books.length,
-                  itemBuilder: (context, index) {
-                    return Ink(
-                      decoration: index.isOdd
-                          ? BoxDecoration(
-                              color: Theme.of(
-                                context,
-                              ).colorScheme.primary.withAlpha(30),
-                              // borderRadius: BorderRadius.circular(12), // Optional
-                            )
-                          : null,
-                      child: InkWell(
-                        onTap: () {
-                          _openBook(_books[index]);
-                        },
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 8,
-                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 16),
                           child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            spacing: 4,
                             children: [
                               IconButton(
-                                icon: const Icon(Icons.delete),
+                                icon: Icon(Icons.expand),
+                                iconSize: mediumFontSize * 2,
+                                onPressed: () => setState(() {
+                                  if (_textFiledSize == _maxTextFiledSize) {
+                                    _textFiledSize = 2;
+                                  } else {
+                                    _textFiledSize = _maxTextFiledSize;
+                                  }
+                                }),
+                              ),
+                              IconButton(
+                                iconSize: mediumFontSize * 2,
                                 onPressed: () async {
-                                  final res = await showConfirmDialog(
-                                    context,
-                                    message:
-                                        'Do you really want to delete: ${_books[index].name}',
-                                  );
-                                  if (res != null && res == true) {
-                                    _deleteFile(index);
+                                  final txt = await getClipboardText();
+                                  if (txt != null) {
+                                    _controller.clear();
+                                    _controller.text = txt;
                                   }
                                 },
+                                icon: Icon(Icons.paste),
                               ),
+                              IconButton(
+                                icon: Icon(Icons.clear),
+                                iconSize: mediumFontSize * 2,
+                                onPressed: () async {
+                                  if (_controller.text.isEmpty) return;
 
-                              const SizedBox(width: 8),
-
-                              Expanded(
-                                child: Text(
-                                  _books[index].name,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  textDirection: TextDirection.rtl,
-                                  textAlign: TextAlign.right,
-                                ),
+                                  final res = await showConfirmDialog(
+                                    context,
+                                    message: 'Do you want to clear the texts?',
+                                  );
+                                  if (res != null && res) _controller.clear();
+                                },
+                              ),
+                              IconButton(
+                                icon: Icon(Icons.arrow_circle_right),
+                                iconSize: mediumFontSize * 2,
+                                onPressed: _showText,
                               ),
                             ],
                           ),
                         ),
-                      ),
-                    );
-                  },
-                ),
-              ),
+                      ],
+                    ),
+                  ),
 
-            if (_paragraphs.isNotEmpty)
-              Expanded(
-                child: ListView.builder(
-                  controller: _scrollController,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ).copyWith(bottom: 128),
-                  itemCount: _paragraphs.length,
-                  itemBuilder: (context, index) {
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8),
-                      child: ClickableParagraph(
-                        text: _paragraphs[index],
-                        textStyleBodyMedium: textStyleBodyMedium,
-                        onWordTap: (word) {
-                          openDict(context, word);
-                        },
-                      ),
-                    );
-                  },
-                ),
+                  if (_books.isNotEmpty)
+                    ...List.generate(_books.length, (index) {
+                      // padding: const EdgeInsets.symmetric(horizontal: 16),
+                      // itemCount: _books.length,
+                      return Ink(
+                        decoration: index.isOdd
+                            ? BoxDecoration(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.primary.withAlpha(30),
+                                // borderRadius: BorderRadius.circular(12), // Optional
+                              )
+                            : null,
+                        child: InkWell(
+                          onTap: () {
+                            _openBook(_books[index]);
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 8,
+                            ),
+                            child: Row(
+                              children: [
+                                IconButton(
+                                  icon: const Icon(Icons.delete),
+                                  onPressed: () async {
+                                    final res = await showConfirmDialog(
+                                      context,
+                                      message:
+                                          'Do you really want to delete: ${_books[index].name}',
+                                    );
+                                    if (res != null && res == true) {
+                                      _deleteFile(index);
+                                    }
+                                  },
+                                ),
+
+                                const SizedBox(width: 8),
+
+                                Expanded(
+                                  child: Text(
+                                    _books[index].name,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    textDirection: TextDirection.rtl,
+                                    textAlign: TextAlign.right,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    }),
+                ],
+              )
+            : ListView.builder(
+                controller: _scrollController,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ).copyWith(bottom: 128),
+                itemCount: _paragraphs.length,
+                itemBuilder: (context, index) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    child: ClickableParagraph(
+                      text: _paragraphs[index],
+                      textStyleBodyMedium: textStyleBodyMedium,
+                      onWordTap: (word) {
+                        openDict(context, word);
+                      },
+                    ),
+                  );
+                },
               ),
-          ],
-        ),
       ),
 
       floatingActionButton: _paragraphs.isNotEmpty

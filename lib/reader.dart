@@ -38,8 +38,8 @@ class _ReaderPageState extends State<ReaderPage> {
   @override
   void initState() {
     super.initState();
-    _initStorage();
     _scrollController.addListener(_scrollListener);
+    _initStorage();
   }
 
   @override
@@ -83,7 +83,10 @@ class _ReaderPageState extends State<ReaderPage> {
     return text
         .replaceAll('\r\n', '\n')
         .replaceAll('\r', '\n')
-        .split(RegExp(r'\n+'));
+        .split(RegExp(r'\n+'))
+        .map((l) => l.trim())
+        .where((l) => l.isNotEmpty)
+        .toList();
   }
 
   Future<void> _initStorage() async {
@@ -129,10 +132,14 @@ class _ReaderPageState extends State<ReaderPage> {
     final lines = _splitLines(content);
     if (lines.isEmpty) return;
 
-    String displayName = lines.first;
+    String displayName = lines.first.split(RegExp(r' +')).join(" ");
     if (displayName.length > 100) displayName = displayName.substring(0, 100);
 
     final hash = _hashText(content); // filename
+    final exists = _books.any((b) => b.hash == hash);
+    if (exists) {
+      return;
+    }
     final file = File(join(_booksDir!.path, '$hash.txt'));
     try {
       await file.writeAsString(content);
@@ -140,15 +147,7 @@ class _ReaderPageState extends State<ReaderPage> {
       return;
     }
 
-    // update index file
-    final exists = _books.any((b) => b.hash == hash);
-    if (!exists) {
-      await _indexFile?.writeAsString(
-        '$hash:$displayName\n',
-        mode: FileMode.append,
-      );
-    }
-
+    await _saveBookEntriesFile();
     _books.add(BookEntry(hash, displayName));
   }
 
@@ -198,86 +197,81 @@ class _ReaderPageState extends State<ReaderPage> {
       body: SafeArea(
         child: _paragraphs.isEmpty
             ? ListView(
+                padding: const EdgeInsets.all(16),
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      children: [
-                        TextField(
-                          controller: _controller,
-                          maxLines: _textFiledSize,
-                          textDirection: TextDirection.rtl,
-                          style: textStyleBodyMedium,
-                          decoration: InputDecoration(
-                            border: OutlineInputBorder(),
-                            hintText: 'اكتب هنا…',
-                            hintTextDirection: TextDirection.rtl,
-                          ),
+                  Column(
+                    children: [
+                      TextField(
+                        controller: _controller,
+                        maxLines: _textFiledSize,
+                        textDirection: TextDirection.rtl,
+                        style: textStyleBodyMedium,
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(),
+                          hintText: 'اكتب هنا…',
+                          hintTextDirection: TextDirection.rtl,
                         ),
-                        Padding(
-                          padding: const EdgeInsets.only(top: 16),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            spacing: 4,
-                            children: [
-                              IconButton(
-                                icon: Icon(Icons.expand),
-                                iconSize: mediumFontSize * 2,
-                                onPressed: () => setState(() {
-                                  if (_textFiledSize == _maxTextFiledSize) {
-                                    _textFiledSize = 2;
-                                  } else {
-                                    _textFiledSize = _maxTextFiledSize;
-                                  }
-                                }),
-                              ),
-                              IconButton(
-                                iconSize: mediumFontSize * 2,
-                                onPressed: () async {
-                                  final txt = await getClipboardText();
-                                  if (txt != null) {
-                                    _controller.clear();
-                                    _controller.text = txt;
-                                  }
-                                },
-                                icon: Icon(Icons.paste),
-                              ),
-                              IconButton(
-                                icon: Icon(Icons.clear),
-                                iconSize: mediumFontSize * 2,
-                                onPressed: () async {
-                                  if (_controller.text.isEmpty) return;
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 16),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          spacing: 4,
+                          children: [
+                            IconButton(
+                              icon: Icon(Icons.expand),
+                              iconSize: mediumFontSize * 2,
+                              onPressed: () => setState(() {
+                                if (_textFiledSize == _maxTextFiledSize) {
+                                  _textFiledSize = 2;
+                                } else {
+                                  _textFiledSize = _maxTextFiledSize;
+                                }
+                              }),
+                            ),
+                            IconButton(
+                              iconSize: mediumFontSize * 2,
+                              onPressed: () async {
+                                final txt = await getClipboardText();
+                                if (txt != null) {
+                                  _controller.clear();
+                                  _controller.text = txt;
+                                }
+                              },
+                              icon: Icon(Icons.paste),
+                            ),
+                            IconButton(
+                              icon: Icon(Icons.clear),
+                              iconSize: mediumFontSize * 2,
+                              onPressed: () async {
+                                if (_controller.text.isEmpty) return;
 
-                                  final res = await showConfirmDialog(
-                                    context,
-                                    message: 'Do you want to clear the texts?',
-                                  );
-                                  if (res != null && res) _controller.clear();
-                                },
-                              ),
-                              IconButton(
-                                icon: Icon(Icons.arrow_circle_right),
-                                iconSize: mediumFontSize * 2,
-                                onPressed: _showText,
-                              ),
-                            ],
-                          ),
+                                final res = await showConfirmDialog(
+                                  context,
+                                  message: 'Do you want to clear the texts?',
+                                );
+                                if (res != null && res) _controller.clear();
+                              },
+                            ),
+                            IconButton(
+                              icon: Icon(Icons.check_circle),
+                              iconSize: mediumFontSize * 2,
+                              onPressed: _showText,
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-
+                  SizedBox(height: 20),
                   if (_books.isNotEmpty)
                     ...List.generate(_books.length, (index) {
-                      // padding: const EdgeInsets.symmetric(horizontal: 16),
-                      // itemCount: _books.length,
                       return Ink(
                         decoration: index.isOdd
                             ? BoxDecoration(
                                 color: Theme.of(
                                   context,
                                 ).colorScheme.primary.withAlpha(30),
-                                // borderRadius: BorderRadius.circular(12), // Optional
                               )
                             : null,
                         child: InkWell(
@@ -394,7 +388,11 @@ class ClickableParagraph extends StatelessWidget {
   List<TextSpan> _buildSpans() {
     final spans = <TextSpan>[];
 
-    for (final word in text.split(RegExp(r'\s+'))) {
+    final words = text.split(RegExp(r'\s+'));
+    if (words.isEmpty) return spans;
+
+    spans.add(TextSpan(children: [WidgetSpan(child: SizedBox(width: 20))]));
+    for (final word in words) {
       spans.add(
         TextSpan(
           text: '$word ',

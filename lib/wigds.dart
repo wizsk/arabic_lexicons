@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 Widget buildDrawer(BuildContext context) {
   // final cs = Theme.of(context).colorScheme;
+  final currRoute = ModalRoute.of(context)?.settings.name;
   return Drawer(
     child: SafeArea(
       child: Column(
@@ -24,27 +25,39 @@ Widget buildDrawer(BuildContext context) {
                   ),
                 ),
                 ListTile(
+                  selected: currRoute == Routes.dictionary,
                   title: Text("Lexicons"),
                   leading: Icon(Icons.book),
                   onTap: () {
                     Navigator.pop(context);
-                    Navigator.pushReplacementNamed(context, Routes.dictionary);
+                    if (currRoute != Routes.dictionary) {
+                      Navigator.pushReplacementNamed(
+                        context,
+                        Routes.dictionary,
+                      );
+                    }
                   },
                 ),
                 ListTile(
+                  selected: currRoute == Routes.reader,
                   title: Text("Reader"),
                   leading: Icon(Icons.notes),
                   onTap: () {
                     Navigator.pop(context);
-                    Navigator.pushReplacementNamed(context, Routes.reader);
+                    if (currRoute != Routes.reader) {
+                      Navigator.pushReplacementNamed(context, Routes.reader);
+                    }
                   },
                 ),
                 ListTile(
+                  selected: currRoute == Routes.help,
                   title: Text("Help"),
                   leading: Icon(Icons.help),
                   onTap: () {
                     Navigator.pop(context);
-                    Navigator.pushReplacementNamed(context, Routes.help);
+                    if (currRoute != Routes.help) {
+                      Navigator.pushReplacementNamed(context, Routes.help);
+                    }
                   },
                 ),
 

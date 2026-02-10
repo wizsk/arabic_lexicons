@@ -282,12 +282,6 @@ class _SearchWithSelectionState extends State<SearchWithSelection> {
   }
 }
 
-class Routes {
-  static const dictionary = '/dictionary';
-  static const reader = '/reader';
-  static const help = '/help';
-}
-
 class AppScaffold extends StatelessWidget {
   final Widget body;
   final Widget title;

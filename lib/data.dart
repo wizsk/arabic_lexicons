@@ -9,6 +9,12 @@ const scrollPadding = EdgeInsets.only(left: 8, right: 8, top: 0, bottom: 16);
 
 const dictWordSelectModalOpenIcon = Icon(Icons.book);
 
+class Routes {
+  static const dictionary = '/dictionary';
+  static const reader = '/reader';
+  static const help = '/help';
+}
+
 class DictEntry {
   final Dict d;
   final String ar;

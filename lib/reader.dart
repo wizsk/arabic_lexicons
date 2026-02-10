@@ -83,6 +83,7 @@ class _ReaderPageState extends State<ReaderPage> {
     _paragraphs = _splitLines(text);
     final t = _paragraphs.first;
     _title = t.length > 50 ? t.substring(0, 50) : t;
+    _controller.clear();
     setState(() {});
     _saveFile();
   }
@@ -189,16 +190,16 @@ class _ReaderPageState extends State<ReaderPage> {
     if (!await file.exists()) return;
 
     final content = await file.readAsString();
-    setState(() {
-      _paragraphs = _splitLines(content);
-      final t = _paragraphs.first;
-      _title = t.length > 50 ? t.substring(0, 50) : t;
-    });
+    _paragraphs = _splitLines(content);
+    final t = _paragraphs.first;
+    _title = t.length > 50 ? t.substring(0, 50) : t;
+    _controller.clear();
+    setState(() {});
   }
 
   int _textFiledSize = 2;
   final int _maxTextFiledSize = 18;
-  bool _isQasidah = true;
+  bool _isQasidah = false;
   TextAlign _textAlign = TextAlign.justify;
 
   @override
@@ -206,7 +207,6 @@ class _ReaderPageState extends State<ReaderPage> {
     final textStyleBodyMedium = Theme.of(context).textTheme.bodyMedium;
 
     return Scaffold(
-      // appBar: AppBar(title: ),
       appBar: AppBar(
         title: _paragraphs.isEmpty ? const Text('القارئ') : Text(_title!),
       ),

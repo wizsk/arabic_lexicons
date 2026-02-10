@@ -268,7 +268,7 @@ class _SearchWithSelectionState extends State<SearchWithSelection> {
                       );
                       if (res != null) {
                         _selectDict(res.de);
-                        _selectWord(res.word!);
+                        if (res.word != null) _selectWord(res.word!);
                       }
                     },
                   ),

@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:ara_dict/etc.dart';
 import 'package:ara_dict/sv.dart';
 import 'package:crypto/crypto.dart'; // for hashing
 import 'package:ara_dict/main.dart';
@@ -29,8 +30,15 @@ class _ReaderPageState extends State<ReaderPage> {
   final ScrollController _scrollController = ScrollController();
 
   List<String> _paragraphs = [];
-  Directory? _booksDir;
-  File? _indexFile;
+  String? _title;
+  late final Directory _booksDir;
+
+  late final File _indexFile;
+  late final File _tmpIndexFile;
+
+  // late final String _indexFilePath;
+  // late final String _tmpIndexFilePath;
+
   List<BookEntry> _books = [];
 
   bool _isFabVisible = true;
@@ -73,6 +81,8 @@ class _ReaderPageState extends State<ReaderPage> {
     final text = _controller.text.trim();
     if (text.isEmpty) return;
     _paragraphs = _splitLines(text);
+    final t = _paragraphs.first;
+    _title = t.length > 50 ? t.substring(0, 50) : t;
     setState(() {});
     _saveFile();
   }
@@ -92,18 +102,17 @@ class _ReaderPageState extends State<ReaderPage> {
   Future<void> _initStorage() async {
     final dir = await getApplicationDocumentsDirectory();
     _booksDir = Directory(join(dir.path, 'books'));
-    if (!await _booksDir!.exists()) await _booksDir!.create();
+    if (!await _booksDir.exists()) await _booksDir.create();
 
-    _indexFile = File(join(_booksDir!.path, 'books.txt'));
-    if (!await _indexFile!.exists()) await _indexFile!.writeAsString('');
-
+    _indexFile = File(join(_booksDir.path, 'books.txt'));
+    _tmpIndexFile = File(join(_booksDir.path, 'books_tmp.txt'));
     await _loadBooks();
   }
 
   Future<void> _loadBooks() async {
-    if (_indexFile == null) return;
+    if (!await _indexFile.exists()) return;
 
-    final lines = await _indexFile!.readAsLines();
+    final lines = await _indexFile.readAsLines();
     _books = lines
         .map((line) {
           final parts = line.split(':');
@@ -140,15 +149,16 @@ class _ReaderPageState extends State<ReaderPage> {
     if (exists) {
       return;
     }
-    final file = File(join(_booksDir!.path, '$hash.txt'));
+
+    final file = File(join(_booksDir.path, '$hash.txt'));
     try {
       await file.writeAsString(content);
     } catch (_) {
       return;
     }
 
-    await _saveBookEntriesFile();
     _books.add(BookEntry(hash, displayName));
+    await _saveBookEntriesFile();
   }
 
   Future<void> _deleteFile(int index) async {
@@ -156,7 +166,7 @@ class _ReaderPageState extends State<ReaderPage> {
       return;
     }
     final be = _books.removeAt(index);
-    final file = File(join(_booksDir!.path, '${be.hash}.txt'));
+    final file = File(join(_booksDir.path, '${be.hash}.txt'));
     try {
       await file.delete();
     } catch (e) {
@@ -169,30 +179,37 @@ class _ReaderPageState extends State<ReaderPage> {
   }
 
   Future<void> _saveBookEntriesFile() async {
-    if (_indexFile == null) return;
     final txt = _books.map((be) => '${be.hash}:${be.name}').join("\n");
-    await _indexFile!.writeAsString(txt, flush: true, mode: FileMode.write);
+    await _tmpIndexFile.writeAsString(txt, flush: true, mode: FileMode.write);
+    await _tmpIndexFile.rename(_indexFile.path);
   }
 
   Future<void> _openBook(BookEntry entry) async {
-    final file = File(join(_booksDir!.path, '${entry.hash}.txt'));
+    final file = File(join(_booksDir.path, '${entry.hash}.txt'));
     if (!await file.exists()) return;
 
     final content = await file.readAsString();
     setState(() {
       _paragraphs = _splitLines(content);
+      final t = _paragraphs.first;
+      _title = t.length > 50 ? t.substring(0, 50) : t;
     });
   }
 
   int _textFiledSize = 2;
   final int _maxTextFiledSize = 18;
+  bool _isQasidah = true;
+  TextAlign _textAlign = TextAlign.justify;
 
   @override
   Widget build(BuildContext context) {
     final textStyleBodyMedium = Theme.of(context).textTheme.bodyMedium;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('القارئ')),
+      // appBar: AppBar(title: ),
+      appBar: AppBar(
+        title: _paragraphs.isEmpty ? const Text('القارئ') : Text(_title!),
+      ),
       drawer: buildDrawer(context),
       body: SafeArea(
         child: _paragraphs.isEmpty
@@ -268,12 +285,12 @@ class _ReaderPageState extends State<ReaderPage> {
                     ...List.generate(_books.length, (index) {
                       return Ink(
                         decoration: index.isOdd
-                            ? BoxDecoration(
+                            ? null
+                            : BoxDecoration(
                                 color: Theme.of(
                                   context,
                                 ).colorScheme.primary.withAlpha(30),
-                              )
-                            : null,
+                              ),
                         child: InkWell(
                           onTap: () {
                             _openBook(_books[index]);
@@ -326,11 +343,16 @@ class _ReaderPageState extends State<ReaderPage> {
                 ).copyWith(bottom: 128),
                 itemCount: _paragraphs.length,
                 itemBuilder: (context, index) {
+                  final textAlign = _isQasidah ? TextAlign.right : _textAlign;
+
                   return Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     child: ClickableParagraph(
+                      peraIndex: index,
+                      isQasidah: _isQasidah,
                       text: _paragraphs[index],
                       textStyleBodyMedium: textStyleBodyMedium,
+                      textAlign: textAlign,
                       onWordTap: (word) {
                         openDict(context, word);
                       },
@@ -348,12 +370,33 @@ class _ReaderPageState extends State<ReaderPage> {
                 duration: Duration(milliseconds: 300),
                 opacity: _isFabVisible ? 1.0 : 0.0,
                 child: FloatingActionButton(
-                  onPressed: () {
-                    setState(() {
-                      _paragraphs = [];
-                    });
+                  onPressed: () async {
+                    final res = await showReaderModeSettings(
+                      context,
+                      _isQasidah,
+                      _textAlign,
+                      () async {
+                        final res = await showConfirmDialog(
+                          context,
+                          message: "Do you realy want to exit?",
+                        );
+                        if (res != null && res) {
+                          setState(() {
+                            _paragraphs = [];
+                          });
+                        }
+                      },
+                    );
+
+                    if (res == null) return;
+                    if (res.isQasidah != _isQasidah ||
+                        res.textAlign != _textAlign) {
+                      _isQasidah = res.isQasidah;
+                      _textAlign = res.textAlign;
+                      setState(() {});
+                    }
                   },
-                  child: Icon(Icons.arrow_back),
+                  child: Icon(Icons.settings),
                 ),
               ),
             )
@@ -364,15 +407,19 @@ class _ReaderPageState extends State<ReaderPage> {
 
 class ClickableParagraph extends StatelessWidget {
   final String text;
+  final int peraIndex;
+  final bool isQasidah;
   final void Function(String word) onWordTap;
   final TextStyle? textStyleBodyMedium;
   final TextAlign textAlign;
 
   const ClickableParagraph({
     super.key,
-    required this.textStyleBodyMedium,
     required this.text,
+    required this.peraIndex,
+    required this.isQasidah,
     required this.onWordTap,
+    required this.textStyleBodyMedium,
     this.textAlign = TextAlign.justify,
   });
 
@@ -391,7 +438,21 @@ class ClickableParagraph extends StatelessWidget {
     final words = text.split(RegExp(r'\s+'));
     if (words.isEmpty) return spans;
 
-    spans.add(TextSpan(children: [WidgetSpan(child: SizedBox(width: 20))]));
+    if (isQasidah) {
+      if (peraIndex % 2 == 0) {
+        spans.add(
+          TextSpan(
+            text: '${enToArNum((peraIndex ~/ 2) + 1)}- ',
+            style: textStyleBodyMedium!.copyWith(fontWeight: FontWeight.bold),
+          ),
+        );
+      } else {
+        spans.add(TextSpan(children: [WidgetSpan(child: SizedBox(width: 30))]));
+      }
+    } else {
+      spans.add(TextSpan(children: [WidgetSpan(child: SizedBox(width: 20))]));
+    }
+
     for (final word in words) {
       spans.add(
         TextSpan(
@@ -410,5 +471,12 @@ void openDict(BuildContext context, String word) {
     MaterialPageRoute(
       builder: (_) => SearchWithSelection(showDrawer: false, initialText: word),
     ),
+  );
+}
+
+String enToArNum(dynamic n) {
+  return n.toString().replaceAllMapped(
+    RegExp(r'[0-9]'),
+    (m) => String.fromCharCode(0x0660 + int.parse(m.group(0)!)),
   );
 }

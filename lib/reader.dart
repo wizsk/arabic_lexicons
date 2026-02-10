@@ -181,7 +181,7 @@ class _ReaderPageState extends State<ReaderPage> {
 
   Future<void> _saveBookEntriesFile() async {
     final txt = _books.map((be) => '${be.hash}:${be.name}').join("\n");
-    await _tmpIndexFile.writeAsString(txt, flush: true, mode: FileMode.write);
+    await _tmpIndexFile.writeAsString(txt);
     await _tmpIndexFile.rename(_indexFile.path);
   }
 

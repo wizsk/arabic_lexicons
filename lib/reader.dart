@@ -36,9 +36,6 @@ class _ReaderPageState extends State<ReaderPage> {
   late final File _indexFile;
   late final File _tmpIndexFile;
 
-  // late final String _indexFilePath;
-  // late final String _tmpIndexFilePath;
-
   List<BookEntry> _books = [];
 
   bool _isFabVisible = true;
@@ -59,21 +56,17 @@ class _ReaderPageState extends State<ReaderPage> {
 
   void _scrollListener() {
     if (_scrollController.position.userScrollDirection ==
-        ScrollDirection.reverse) {
-      // Scrolling down - hide FAB
-      if (_isFabVisible) {
-        setState(() {
-          _isFabVisible = false;
-        });
-      }
+            ScrollDirection.reverse &&
+        _isFabVisible) {
+      setState(() {
+        _isFabVisible = false;
+      });
     } else if (_scrollController.position.userScrollDirection ==
-        ScrollDirection.forward) {
-      // Scrolling up - show FAB
-      if (!_isFabVisible) {
-        setState(() {
-          _isFabVisible = true;
-        });
-      }
+            ScrollDirection.forward &&
+        !_isFabVisible) {
+      setState(() {
+        _isFabVisible = true;
+      });
     }
   }
 
@@ -166,12 +159,12 @@ class _ReaderPageState extends State<ReaderPage> {
     if (index < 0 || index >= _books.length) {
       return;
     }
+
     final be = _books.removeAt(index);
     final file = File(join(_booksDir.path, '${be.hash}.txt'));
     try {
       await file.delete();
     } catch (e) {
-      // AlertDialog()
       return;
     }
 
@@ -193,6 +186,7 @@ class _ReaderPageState extends State<ReaderPage> {
     _paragraphs = _splitLines(content);
     final t = _paragraphs.first;
     _title = t.length > 50 ? t.substring(0, 50) : t;
+
     _controller.clear();
     setState(() {});
   }
@@ -280,7 +274,9 @@ class _ReaderPageState extends State<ReaderPage> {
                       ),
                     ],
                   ),
+
                   SizedBox(height: 20),
+                  if (_books.isNotEmpty) Divider(thickness: 0.5),
                   if (_books.isNotEmpty)
                     ...List.generate(_books.length, (index) {
                       return Ink(
@@ -307,8 +303,8 @@ class _ReaderPageState extends State<ReaderPage> {
                                   onPressed: () async {
                                     final res = await showConfirmDialog(
                                       context,
-                                      message:
-                                          'Do you really want to delete: ${_books[index].name}',
+                                      message: 'احذف: ${_books[index].name}',
+                                      dir: TextDirection.rtl,
                                     );
                                     if (res != null && res == true) {
                                       _deleteFile(index);
@@ -381,9 +377,11 @@ class _ReaderPageState extends State<ReaderPage> {
                           message: "Do you realy want to exit?",
                         );
                         if (res != null && res) {
-                          setState(() {
-                            _paragraphs = [];
-                          });
+                          // after if no longer in reader mode
+                          _paragraphs = [];
+                          _isQasidah = false;
+                          _textAlign = TextAlign.justify;
+                          setState(() {});
                         }
                       },
                     );

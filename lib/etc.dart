@@ -189,7 +189,7 @@ Future<({bool isQasidah, TextAlign textAlign})?> showReaderModeSettings(
                     SwitchListTile(
                       title: const Text('Right-aligned text'),
                       secondary: Icon(Icons.format_align_right),
-                      value: textAlign == TextAlign.right,
+                      value: textAlign == TextAlign.right || isQasidah,
                       onChanged: isQasidah
                           ? null
                           : (v) {
@@ -223,7 +223,7 @@ Future<({bool isQasidah, TextAlign textAlign})?> showReaderModeSettings(
                         Expanded(
                           child: FilledButton(
                             onPressed: close,
-                            child: const Text('Done'),
+                            child: const Text('Save'),
                           ),
                         ),
                       ],

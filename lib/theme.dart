@@ -57,7 +57,6 @@ ThemeData buildDarkTheme(BuildContext context) {
 }
 
 TextTheme _buildArabicTextTheme(ColorScheme cs) {
-  // start from Material 2021
   final base = Typography.material2021().englishLike;
 
   return base.copyWith(

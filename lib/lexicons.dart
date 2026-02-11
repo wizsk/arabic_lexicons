@@ -1,4 +1,5 @@
 import 'package:ara_dict/ar_en.dart';
+
 import 'package:ara_dict/theme.dart';
 import 'package:flutter/material.dart';
 
@@ -10,7 +11,6 @@ import 'package:ara_dict/etc.dart';
 import 'package:ara_dict/res.dart';
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/db.dart';
-
 
 class SearchLexicons extends StatefulWidget {
   final bool showDrawer;
@@ -137,14 +137,23 @@ class _SearchLexiconsState extends State<SearchLexicons> {
   }
 
   Widget appBarTxt() {
-    final fontStyle = TextStyle(fontWeight: FontWeight.bold);
+    final arabicFontStyle = appSettingsNotifier.getArabicTextStyle(context);
+    final fontStyle = TextStyle(
+      fontWeight: FontWeight.bold,
+      // fontSize: 20,
+      fontFamily: arabicFontStyle.fontFamily,
+    );
 
     if (_selectedWord != null) {
       return Text.rich(
         TextSpan(
+          // style: ,
           children: [
             TextSpan(text: _selectedDict.ar, style: fontStyle),
-            TextSpan(text: ': $_selectedWord'),
+            TextSpan(
+              text: ': $_selectedWord',
+              style: TextStyle(fontFamily: arabicFontStyle.fontFamily),
+            ),
           ],
         ),
       );
@@ -154,13 +163,16 @@ class _SearchLexiconsState extends State<SearchLexicons> {
 
   @override
   Widget build(BuildContext context) {
+    final arTxtTheme = appSettingsNotifier.getArabicTextStyle(context);
     return Scaffold(
       appBar: AppBar(title: appBarTxt(), titleSpacing: 0.0),
       drawer: _showDrawer ? buildDrawer(context) : null,
       body: SafeArea(
         child: Column(
           children: [
-            Expanded(child: showRes(_selectedDict.d, _dbRes, _arEnRes)),
+            Expanded(
+              child: showRes(arTxtTheme, _selectedDict.d, _dbRes, _arEnRes),
+            ),
 
             Divider(thickness: 0.5, height: 0),
             Padding(
@@ -180,7 +192,7 @@ class _SearchLexiconsState extends State<SearchLexicons> {
                       textDirection: TextDirection.rtl,
                       textAlign: TextAlign.right,
                       onChanged: _onTextChanged,
-                      style: Theme.of(context).textTheme.bodyMedium,
+                      style: arTxtTheme,
                       decoration: InputDecoration(
                         hintText: 'ابحث',
                         prefixIcon: _controller.text.isEmpty
@@ -227,6 +239,7 @@ class _SearchLexiconsState extends State<SearchLexicons> {
                         _selectedDict,
                         _words,
                         _selectedWord,
+                        arTxtTheme,
                       );
                       if (res != null) {
                         _selectDict(res.de);

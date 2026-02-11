@@ -10,6 +10,7 @@ Future<({DictEntry de, String? word})?> showWordPickerBottomSheet(
   DictEntry selectedDict,
   List<String> words,
   String? selectedWord,
+  TextStyle ts,
 ) {
   final cs = Theme.of(context).colorScheme;
   return showModalBottomSheet<({DictEntry de, String? word})?>(
@@ -23,8 +24,6 @@ Future<({DictEntry de, String? word})?> showWordPickerBottomSheet(
       final sh = MediaQuery.of(context).size.height;
       final maxHeight = sh * 0.8;
       final minHeight = sh * 0.35;
-
-      final chipTextStyle = Theme.of(context).textTheme.bodyMedium!;
 
       return SafeArea(
         child: ConstrainedBox(
@@ -69,7 +68,7 @@ Future<({DictEntry de, String? word})?> showWordPickerBottomSheet(
                             label: Text(word),
                             selected: s,
 
-                            labelStyle: chipTextStyle.copyWith(
+                            labelStyle: ts.copyWith(
                               color: s ? cs.onPrimary : cs.onSurface,
                             ),
                             selectedColor: cs.primary,
@@ -103,7 +102,7 @@ Future<({DictEntry de, String? word})?> showWordPickerBottomSheet(
                       showCheckmark: false,
                       label: Text(dict.ar),
                       selected: s,
-                      labelStyle: chipTextStyle.copyWith(
+                      labelStyle: ts.copyWith(
                         color: s ? cs.onPrimary : cs.onSurface,
                       ),
                       selectedColor: cs.primary,
@@ -213,20 +212,20 @@ Future<({bool isQasidah, TextAlign textAlign})?> showReaderModeSettings(
                           : const Text('Copy Text'),
                       leading: const Icon(Icons.copy),
                       onTap: () async {
-                              if (isCoping) return;
-                              isCoping = true;
-                              await Clipboard.setData(
-                                ClipboardData(text: peras.join("\n")),
-                              );
+                        if (isCoping) return;
+                        isCoping = true;
+                        await Clipboard.setData(
+                          ClipboardData(text: peras.join("\n")),
+                        );
 
-                              isCopiedMsgShowing = true;
-                              setState(() {});
-                              Timer(Duration(seconds: 1), () {
-                                isCopiedMsgShowing = false;
-                                isCoping = false;
-                                setState(() {});
-                              });
-                            },
+                        isCopiedMsgShowing = true;
+                        setState(() {});
+                        Timer(Duration(seconds: 1), () {
+                          isCopiedMsgShowing = false;
+                          isCoping = false;
+                          setState(() {});
+                        });
+                      },
                     ),
 
                     const SizedBox(height: 30),

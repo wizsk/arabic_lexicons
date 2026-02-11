@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import 'package:ara_dict/data.dart';
 
-const double mediumFontSize = 18;
+double mediumFontSize = 18;
+double defaultArabicFontSize = 18;
 const _seedColor = Colors.deepPurple;
 
-ThemeData buildLightTheme(BuildContext context) {
+ThemeData buildLightTheme(BuildContext context, double mediumFontSizeArg) {
   final cs = ColorScheme.fromSeed(seedColor: _seedColor).copyWith(
     brightness: Brightness.light,
     surface: const Color(0xFFFFFAF3),
@@ -18,16 +18,15 @@ ThemeData buildLightTheme(BuildContext context) {
     brightness: Brightness.light,
     colorScheme: cs,
     scaffoldBackgroundColor: const Color(0xFFFFFAF3),
-    textTheme: _buildArabicTextTheme(cs),
     drawerTheme: _buildDrawerTheme(cs),
-    appBarTheme: _buildAppBarTheme(cs),
+    appBarTheme: _buildAppBarTheme(cs, mediumFontSizeArg),
     inputDecorationTheme: InputDecorationTheme(
       hintStyle: TextStyle(color: Color(0xFFAAAAAA)),
     ),
   );
 }
 
-ThemeData buildDarkTheme(BuildContext context) {
+ThemeData buildDarkTheme(BuildContext context, double mediumFontSizeArg) {
   final cs =
       ColorScheme.fromSeed(
         seedColor: Colors.deepPurple,
@@ -43,79 +42,13 @@ ThemeData buildDarkTheme(BuildContext context) {
     brightness: Brightness.dark,
     colorScheme: cs,
     scaffoldBackgroundColor: const Color(0xFF121212),
-    textTheme: _buildArabicTextTheme(cs),
     drawerTheme: _buildDrawerTheme(cs),
-    appBarTheme: _buildAppBarTheme(cs),
-    // dividerColor: Color.fromARGB(255, 111,111,111),
-    // iconTheme: IconThemeData(
-    //   color: cs.onSurface, // force readable icons
-    // ),
+    appBarTheme: _buildAppBarTheme(cs, mediumFontSizeArg),
     inputDecorationTheme: InputDecorationTheme(
       hintStyle: TextStyle(color: Color(0xFF777777)),
     ),
   );
 }
-
-TextTheme _buildArabicTextTheme(ColorScheme cs) {
-  final base = Typography.material2021().englishLike;
-
-  return base.copyWith(
-    bodySmall: base.bodySmall?.copyWith(
-      fontFamily: fontKitab,
-      height: 1.3,
-      color: cs.onSurface,
-    ),
-    bodyMedium: base.bodyMedium?.copyWith(
-      fontSize: mediumFontSize,
-      fontFamily: fontKitab,
-      height: 1.5,
-      color: cs.onSurface,
-    ),
-    bodyLarge: base.bodyLarge?.copyWith(
-      fontFamily: fontKitab,
-      height: 1.5,
-      color: cs.onSurface,
-    ),
-    titleLarge: base.titleLarge?.copyWith(
-      fontFamily: fontKitab,
-      color: cs.onSurface,
-    ),
-    titleMedium: base.titleMedium?.copyWith(
-      fontFamily: fontKitab,
-      color: cs.onSurface,
-    ),
-    titleSmall: base.titleSmall?.copyWith(
-      fontFamily: fontKitab,
-      color: cs.onSurface,
-    ),
-  );
-}
-
-// TextTheme __buildArabicTextTheme(ColorScheme cs) {
-//   return Typography.material2021()
-//       .englishLike // base English, then we override for Arabic
-//       .apply(
-//         fontFamily: fontKitab,
-//         fontSizeFactor: 1.2,
-//         fontSizeDelta: 2.0,
-//         bodyColor: cs.onSurface,
-//         displayColor: cs.onSurface,
-//       )
-//       .copyWith(
-//         bodyMedium: Typography.material2021().englishLike.bodyMedium?.copyWith(
-//           fontFamily: fontKitab,
-//           height: 1.5,
-//         ), // better line height for Arabic
-//         bodyLarge: Typography.material2021().englishLike.bodyLarge?.copyWith(
-//           fontFamily: fontKitab,
-//           height: 1.5,
-//         ),
-//         bodySmall: Typography.material2021().englishLike.bodySmall?.copyWith(
-//           fontFamily: fontKitab,
-//           height: 1.3,
-//         ),
-//       );
-// }
 
 DrawerThemeData _buildDrawerTheme(ColorScheme cs) {
   return DrawerThemeData(
@@ -128,54 +61,51 @@ DrawerThemeData _buildDrawerTheme(ColorScheme cs) {
   );
 }
 
-AppBarTheme _buildAppBarTheme(ColorScheme cs) {
+AppBarTheme _buildAppBarTheme(ColorScheme cs, double mediumFontSizeArg) {
   return AppBarTheme(
-    backgroundColor: cs.primary, // deepPurple derived
-    foregroundColor: cs.onPrimary, // text & icons automatically adapt
-    centerTitle: true, // if you want centered
-    titleTextStyle: TextStyle(
-      fontFamily: fontKitab,
-      fontSize: mediumFontSize * 1.15,
-      // fontWeight: FontWeight.bold,
-      color: cs.onPrimary, // force AppBar title color
-    ),
+    backgroundColor: cs.primary,
+    foregroundColor: cs.onPrimary,
+    centerTitle: true,
+    titleTextStyle: TextStyle(fontSize: 20, color: cs.onPrimary),
   );
 }
 
-class ThemeController extends ValueNotifier<ThemeMode> {
-  ThemeController() : super(ThemeMode.light);
+class AppSettingsController extends ChangeNotifier {
+  static const _themeKey = 'theme_mode';
+  static const _fontKey = 'ar_font_size';
 
-  static const _key = 'theme_mode';
+  late double fontSize;
+  late ThemeMode theme;
 
-  /// Load saved theme from memory
+  /// Load saved theme & font size from memory
   Future<void> load() async {
     final prefs = await SharedPreferences.getInstance();
-    final mode = prefs.getString(_key);
 
-    // if (mode == 'light') {
-    // } else
-    if (mode == 'dark') {
-      value = ThemeMode.dark;
-    } else {
-      // value = ThemeMode.system;
-      value = ThemeMode.light;
-    }
+    final mode = prefs.getString(_themeKey);
+    theme = mode == 'dark' ? ThemeMode.dark : ThemeMode.light;
+
+    fontSize = prefs.getDouble(_fontKey) ?? defaultArabicFontSize;
   }
 
-  /// Save theme to memory
-  Future<void> save(ThemeMode mode) async {
+  Future<void> saveTheme(ThemeMode mode) async {
     final prefs = await SharedPreferences.getInstance();
-    value = mode;
-
-    await prefs.setString(_key, mode == ThemeMode.dark ? 'dark' : 'light');
+    theme = mode;
+    notifyListeners();
+    prefs.setString(_themeKey, mode == ThemeMode.dark ? 'dark' : 'light');
   }
 
-  /// Toggle light/dark
-  Future<void> toggle() async {
-    if (value == ThemeMode.light) {
-      await save(ThemeMode.dark);
-    } else {
-      await save(ThemeMode.light);
-    }
+  Future<void> setFontSize(double size) async {
+    fontSize = size;
+    final prefs = await SharedPreferences.getInstance();
+    notifyListeners();
+    prefs.setDouble(_fontKey, size);
+  }
+
+  TextStyle getArabicTextStyle(BuildContext context) {
+    return Theme.of(context).textTheme.bodyMedium!.copyWith(
+      fontFamily: fontKitab,
+      fontSize: fontSize,
+      height: 1.5,
+    );
   }
 }

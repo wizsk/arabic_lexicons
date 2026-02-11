@@ -1,3 +1,4 @@
+
 import 'package:ara_dict/wigds.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
@@ -17,6 +18,9 @@ class HelpPage extends StatelessWidget {
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 8),
           child: Text.rich(
+            style: TextStyle(
+              fontSize: appSettingsNotifier.getArabicTextStyle(context).fontSize,
+            ),
             TextSpan(
               children: [
                 // info

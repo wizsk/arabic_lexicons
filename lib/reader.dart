@@ -1,9 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:ara_dict/data.dart';
 import 'package:ara_dict/etc.dart';
+
 import 'package:ara_dict/sv.dart';
 import 'package:crypto/crypto.dart'; // for hashing
-import 'package:ara_dict/theme.dart';
 import 'package:ara_dict/wigds.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -209,11 +210,26 @@ class _ReaderPageState extends State<ReaderPage> {
 
   @override
   Widget build(BuildContext context) {
-    final textStyleBodyMedium = Theme.of(context).textTheme.bodyMedium;
+    final arabicFontStyle = appSettingsNotifier.getArabicTextStyle(context);
+    final cs = Theme.of(context).colorScheme;
+    final btnTheme = FilledButton.styleFrom(
+      backgroundColor: cs.primary.withAlpha(30),
+      foregroundColor: cs.primary,
+    );
 
     return Scaffold(
       appBar: AppBar(
-        title: _paragraphs.isEmpty ? const Text('القارئ') : Text(_title!),
+        title: _paragraphs.isEmpty
+            ? Text(
+                /*txt*/ 'القارئ',
+                textDirection: TextDirection.rtl,
+                style: TextStyle(fontFamily: arabicFontStyle.fontFamily),
+              )
+            : Text(
+                _title!,
+                textDirection: TextDirection.rtl,
+                style: TextStyle(fontFamily: arabicFontStyle.fontFamily),
+              ),
       ),
       drawer: buildDrawer(context),
       body: SafeArea(
@@ -222,12 +238,13 @@ class _ReaderPageState extends State<ReaderPage> {
                 padding: const EdgeInsets.all(16),
                 children: [
                   Column(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       TextField(
                         controller: _controller,
                         maxLines: _textFiledSize,
                         textDirection: TextDirection.rtl,
-                        style: textStyleBodyMedium,
+                        style: arabicFontStyle,
                         decoration: InputDecoration(
                           border: OutlineInputBorder(),
                           hintText: 'اكتب هنا…',
@@ -249,14 +266,17 @@ class _ReaderPageState extends State<ReaderPage> {
                       ),
 
                       Padding(
-                        padding: const EdgeInsets.only(top: 8),
+                        padding: const EdgeInsets.symmetric(vertical: 8),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
-                          spacing: 4,
+                          spacing: 6,
                           children: [
-                            IconButton(
-                              icon: Icon(Icons.expand),
-                              iconSize: mediumFontSize * 2,
+                            FilledButton(
+                              style: btnTheme,
+                              child: _textFiledSize == _minTextFiledSize ? Text('Expand'):
+                               Text('Collapse'),
+                              // icon: Icon(Icons.expand),
+                              // iconSize: mediumFontSize * 2,
                               onPressed: () => setState(() {
                                 if (_textFiledSize == _maxTextFiledSize) {
                                   _textFiledSize = _minTextFiledSize;
@@ -265,8 +285,9 @@ class _ReaderPageState extends State<ReaderPage> {
                                 }
                               }),
                             ),
-                            IconButton(
-                              iconSize: mediumFontSize * 2,
+                            FilledButton(
+                              style: btnTheme,
+                              child: Text('Paste'),
                               onPressed: () async {
                                 final txt = await getClipboardText();
                                 if (txt != null) {
@@ -274,11 +295,11 @@ class _ReaderPageState extends State<ReaderPage> {
                                   _controller.text = txt;
                                 }
                               },
-                              icon: Icon(Icons.paste),
+                              // icon: Icon(Icons.paste),
                             ),
-                            IconButton(
-                              icon: Icon(Icons.clear),
-                              iconSize: mediumFontSize * 2,
+                            FilledButton(
+                              style: btnTheme,
+                              child: Text('Clear'),
                               onPressed: () async {
                                 if (_controller.text.isEmpty) return;
 
@@ -289,12 +310,18 @@ class _ReaderPageState extends State<ReaderPage> {
                                 if (res != null && res) _controller.clear();
                               },
                             ),
-                            IconButton(
-                              icon: Icon(Icons.check_circle),
-                              iconSize: mediumFontSize * 2,
-                              onPressed: _showText,
-                            ),
                           ],
+                        ),
+                      ),
+
+                      SizedBox(height: 10),
+                      SizedBox(
+                        width: 150,
+                        child: FilledButton.icon(
+                          label: Text('Go'),
+                          icon: Icon(Icons.arrow_circle_right),
+                          iconAlignment: IconAlignment.end,
+                          onPressed: _showText,
                         ),
                       ),
                     ],
@@ -318,7 +345,9 @@ class _ReaderPageState extends State<ReaderPage> {
                           /* Txt */ 'قائمة النص ${_isShowEntrieNewToOld ? "(جديد إلى قديم)" : "(قديم إلى جديد)"} [${enToArNum(_books.length)}]',
                           textDirection: TextDirection.rtl,
                           textAlign: TextAlign.right,
-                          style: TextStyle(fontWeight: FontWeight.bold),
+                          style: arabicFontStyle.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ),
@@ -370,6 +399,7 @@ class _ReaderPageState extends State<ReaderPage> {
                                     overflow: TextOverflow.ellipsis,
                                     textDirection: TextDirection.rtl,
                                     textAlign: TextAlign.right,
+                                    style: arabicFontStyle,
                                   ),
                                 ),
                               ],
@@ -396,7 +426,7 @@ class _ReaderPageState extends State<ReaderPage> {
                       peraIndex: index,
                       isQasidah: _isQasidah,
                       text: _paragraphs[index],
-                      textStyleBodyMedium: textStyleBodyMedium,
+                      textStyleBodyMedium: arabicFontStyle,
                       textAlign: textAlign,
                       onWordTap: (word) {
                         openDict(context, word);
@@ -458,7 +488,7 @@ class ClickableParagraph extends StatelessWidget {
   final int peraIndex;
   final bool isQasidah;
   final void Function(String word) onWordTap;
-  final TextStyle? textStyleBodyMedium;
+  final TextStyle textStyleBodyMedium;
   final TextAlign textAlign;
 
   const ClickableParagraph({
@@ -491,7 +521,7 @@ class ClickableParagraph extends StatelessWidget {
         spans.add(
           TextSpan(
             text: '${enToArNum((peraIndex ~/ 2) + 1)}- ',
-            style: textStyleBodyMedium!.copyWith(fontWeight: FontWeight.bold),
+            style: textStyleBodyMedium.copyWith(fontWeight: FontWeight.bold),
           ),
         );
       } else {

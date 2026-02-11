@@ -1,108 +1,92 @@
 import 'package:ara_dict/data.dart';
-import 'package:ara_dict/main.dart';
-import 'package:ara_dict/theme.dart';
+import 'package:ara_dict/font_size.dart';
+
 import 'package:flutter/material.dart';
 
 Widget buildDrawer(BuildContext context) {
   final cs = Theme.of(context).colorScheme;
   final currRoute = ModalRoute.of(context)?.settings.name;
   return Drawer(
-    child: SafeArea(
-      child: Column(
-        children: [
-          Expanded(
-            child: ListView(
-              padding: EdgeInsets.zero,
-              children: [
-                DrawerHeader(
-                  decoration: BoxDecoration(
-                    color: cs.primary,
-                  ),
-                  child: Text(
-                    appName,
-                    style: TextStyle(
-                      color: cs.onInverseSurface,
-                      fontSize: mediumFontSize * 1.5,
-                      fontWeight: FontWeight.bold,
-                    ),
+    child: Column(
+      children: [
+        Expanded(
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: [
+              DrawerHeader(
+                decoration: BoxDecoration(color: cs.primary),
+                child: Text(
+                  appName,
+                  style: TextStyle(
+                    color: cs.onInverseSurface,
+                    fontSize: 26,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
-                ListTile(
-                  selected: currRoute == Routes.dictionary,
-                  title: Text("Lexicons"),
-                  leading: Icon(Icons.book),
-                  onTap: () {
-                    Navigator.pop(context);
-                    if (currRoute != Routes.dictionary) {
-                      Navigator.pushReplacementNamed(
-                        context,
-                        Routes.dictionary,
-                      );
-                    }
-                  },
-                ),
-                ListTile(
-                  selected: currRoute == Routes.reader,
-                  title: Text("Reader"),
-                  leading: Icon(Icons.notes),
-                  onTap: () {
-                    Navigator.pop(context);
-                    if (currRoute != Routes.reader) {
-                      Navigator.pushReplacementNamed(context, Routes.reader);
-                    }
-                  },
-                ),
-                ListTile(
-                  selected: currRoute == Routes.help,
-                  title: Text("Help"),
-                  leading: Icon(Icons.help),
-                  onTap: () {
-                    Navigator.pop(context);
-                    if (currRoute != Routes.help) {
-                      Navigator.pushReplacementNamed(context, Routes.help);
-                    }
-                  },
-                ),
-
-                // ListTile(
-                //   title: Text("Dict pop"),
-                //   leading: Icon(Icons.book),
-                //   onTap: () {
-                //     Navigator.pop(context);
-                //     Navigator.push(
-                //       context,
-                //       MaterialPageRoute(
-                //         builder: (_) => SearchWithSelection(showDrawer: false),
-                //       ),
-                //     );
-                //   },
-                // ),
-              ],
-            ),
-          ),
-
-          ValueListenableBuilder<ThemeMode>(
-            valueListenable: themeModeNotifier,
-            builder: (context, mode, _) {
-              final isDark = mode == ThemeMode.dark;
-              return SwitchListTile(
-                title: const Text('Dark mode'),
-                secondary: Icon(
-                  isDark ? Icons.dark_mode : Icons.light_mode,
-                  //,
-                ),
-                value: isDark,
-                onChanged: (value) {
+              ),
+              ListTile(
+                selected: currRoute == Routes.dictionary,
+                title: Text("Lexicons"),
+                leading: Icon(Icons.book),
+                onTap: () {
                   Navigator.pop(context);
-                  themeModeNotifier.save(
-                    value ? ThemeMode.dark : ThemeMode.light,
-                  );
+                  if (currRoute != Routes.dictionary) {
+                    Navigator.pushReplacementNamed(context, Routes.dictionary);
+                  }
                 },
-              );
-            },
+              ),
+              ListTile(
+                selected: currRoute == Routes.reader,
+                title: Text("Reader"),
+                leading: Icon(Icons.notes),
+                onTap: () {
+                  Navigator.pop(context);
+                  if (currRoute != Routes.reader) {
+                    Navigator.pushReplacementNamed(context, Routes.reader);
+                  }
+                },
+              ),
+              ListTile(
+                selected: currRoute == Routes.help,
+                title: Text("Help"),
+                leading: Icon(Icons.help),
+                onTap: () {
+                  Navigator.pop(context);
+                  if (currRoute != Routes.help) {
+                    Navigator.pushReplacementNamed(context, Routes.help);
+                  }
+                },
+              ),
+            ],
           ),
-        ],
-      ),
+        ),
+
+        Divider(),
+        ListTile(
+          title: const Text('Change Font Size'),
+          leading: const Icon(Icons.text_fields),
+          onTap: () {
+            Navigator.pop(context);
+            showFontSizeDialog(context, appSettingsNotifier);
+          },
+        ),
+        SwitchListTile(
+          title: const Text('Dark mode'),
+          secondary: Icon(
+            appSettingsNotifier.theme == ThemeMode.dark
+                ? Icons.dark_mode
+                : Icons.light_mode,
+          ),
+          value: appSettingsNotifier.theme == ThemeMode.dark,
+          onChanged: (value) {
+            Navigator.pop(context);
+            appSettingsNotifier.saveTheme(
+              value ? ThemeMode.dark : ThemeMode.light,
+            );
+          },
+        ),
+        SizedBox(height: 30),
+      ],
     ),
   );
 }

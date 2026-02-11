@@ -4,12 +4,13 @@ import 'package:ara_dict/ar_en.dart';
 import 'package:ara_dict/data.dart';
 
 Widget showRes(
+  TextStyle ts,
   Dict curDict,
   List<Map<String, dynamic>>? dbRes,
   List<Entry>? arEnRes,
 ) {
   if (curDict == Dict.arEn) {
-    return showArEnRes(arEnRes);
+    return showArEnRes(ts, arEnRes);
   }
 
   var dir = TextDirection.rtl;
@@ -43,34 +44,47 @@ Widget showRes(
         // return RichText(text: TextSpan(text: row['meanings']));
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: 8),
-          child: meaningView(txt, fontFam, dir, al),
+          child: meaningView(txt, fontFam, dir, al, ts.fontSize!, ts.height!),
         );
       },
     );
   }
-  return Center(child: Text("No results"));
+  return _noRes(ts);
 }
 
-Widget meaningView(String html, String font, TextDirection dir, TextAlign al) {
+Widget meaningView(
+  String html,
+  String font,
+  TextDirection dir,
+  TextAlign al,
+  double fsz,
+  double lh,
+) {
   return Html(
     data: html,
     style: {
       'body': Style(
         fontFamily: font,
-        lineHeight: LineHeight.number(1.5),
+        lineHeight: LineHeight.number(lh),
         direction: dir,
         textAlign: al,
+        fontSize: FontSize(fsz),
       ),
-      'strong': Style(fontWeight: FontWeight.bold, fontFamily: font),
-      'i': Style(fontStyle: FontStyle.italic, fontFamily: font),
+      'strong': Style(fontWeight: FontWeight.bold),
+      'i': Style(fontStyle: FontStyle.italic),
       'center': Style(textAlign: TextAlign.center),
     },
   );
 }
 
-Widget showArEnRes(List<Entry>? entries) {
+Widget _noRes(TextStyle ts) {
+  const txt = "لا توجد نتائج";
+  return Center(child: Text(txt, style: ts));
+}
+
+Widget showArEnRes(TextStyle ts, List<Entry>? entries) {
   if (entries == null || entries.isEmpty) {
-    return const Center(child: Text('No results'));
+    return _noRes(ts);
   }
 
   return SingleChildScrollView(
@@ -79,6 +93,7 @@ Widget showArEnRes(List<Entry>? entries) {
         scrollDirection: Axis.horizontal,
         padding: scrollPadding,
         child: DataTable(
+          dataTextStyle: ts,
           dividerThickness: 0.5,
           columnSpacing: 12.0,
           headingTextStyle: const TextStyle(fontWeight: FontWeight.w600),

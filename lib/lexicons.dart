@@ -202,7 +202,7 @@ class _SearchLexiconsState extends State<SearchLexicons> {
                                 onPressed: () async {
                                   final txt = await getClipboardText();
                                   if (txt != null && txt.isNotEmpty) {
-                                    _controller.text = _controller.text + txt;
+                                    _controller.text = txt;
                                     _focusNode.unfocus();
                                     _onTextChanged(txt);
                                   }

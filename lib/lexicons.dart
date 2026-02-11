@@ -74,7 +74,7 @@ class _SearchLexiconsState extends State<SearchLexicons> {
       });
 
       _loadWord();
-    } else if (value.isNotEmpty) {
+    } else if (currWord == null && value.isNotEmpty) {
       setState(() {});
     }
   }

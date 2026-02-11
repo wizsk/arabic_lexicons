@@ -14,6 +14,8 @@ A comprehensive Arabic dictionary app providing access to 8 classical Arabic lex
 - **Fully offline**: The app doesn't even require internet permission - all dictionaries work completely offline
 - **Lightweight design**: Despite containing extensive lexical data, the app is optimized to be as small as possible (~60MB, mostly the compressed database)
 
+**Go to [Screenshots](#screenshots) to see the features in action**
+
 ## Download
 
 Get the latest version from the [releases page](https://github.com/wizsk/arabic_lexicons/releases/latest).
@@ -50,14 +52,29 @@ The app includes 9 comprehensive dictionaries - 2 English-Arabic dictionaries an
 
 ## Screenshots
 
-[<img src="assets/showcase/00.png"  width=200>](assets/showcase/00.png)
-[<img src="assets/showcase/01.png"  width=200>](assets/showcase/01.png)
-[<img src="assets/showcase/02.png"  width=200>](assets/showcase/02.png)
-[<img src="assets/showcase/03.png"  width=200>](assets/showcase/03.png)
-[<img src="assets/showcase/04.png"  width=200>](assets/showcase/04.png)
-[<img src="assets/showcase/05.png"  width=200>](assets/showcase/05.png)
-[<img src="assets/showcase/06.png"  width=200>](assets/showcase/06.png)
-[<img src="assets/showcase/07.png"  width=200>](assets/showcase/07.png)
+**Main Page**:
+
+[<img src="assets/showcase/00.png"  width=220>](assets/showcase/00.png)
+
+**Lexicon and Word Switcher**:
+
+[<img src="assets/showcase/01.png"  width=220>](assets/showcase/01.png)
+
+
+**Reader Page (Click to see meanings)**:
+
+[<img src="assets/showcase/02.png"  width=220>](assets/showcase/02.png)
+[<img src="assets/showcase/03.png"  width=220>](assets/showcase/03.png)
+[<img src="assets/showcase/04.png"  width=220>](assets/showcase/04.png)
+
+**Qasidah(Poem) Mode**:
+
+[<img src="assets/showcase/05.png"  width=220>](assets/showcase/05.png)
+
+**Lastly**:
+
+[<img src="assets/showcase/06.png"  width=220>](assets/showcase/06.png)
+[<img src="assets/showcase/07.png"  width=220>](assets/showcase/07.png)
 
 ## License
 

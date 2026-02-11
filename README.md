@@ -52,7 +52,7 @@ The app includes 9 comprehensive dictionaries - 2 English-Arabic dictionaries an
 
 ## Screenshots
 
-**Main page. Lexicon and Word Switcher:**:
+**Main page. Lexicon and Word Switcher:**
 
 [<img src="assets/showcase/00.png"  width=220>](assets/showcase/00.png)
 

@@ -77,7 +77,7 @@ class _ReaderPageState extends State<ReaderPage> {
     final t = _paragraphs.first;
     _title = t.length > 50 ? t.substring(0, 50) : t;
     setState(() {});
-    _saveFile();
+    if (!_isTempMode) _saveFile();
   }
 
   List<String> _splitLines(String text) {
@@ -194,6 +194,8 @@ class _ReaderPageState extends State<ReaderPage> {
   int _textFiledSize = 2;
   final int _maxTextFiledSize = 18;
   bool _isQasidah = false;
+  bool _isTempMode = false;
+  bool _isShowEntrieNewToOld = true;
   TextAlign _textAlign = TextAlign.justify;
 
   @override
@@ -223,8 +225,22 @@ class _ReaderPageState extends State<ReaderPage> {
                           hintTextDirection: TextDirection.rtl,
                         ),
                       ),
+
                       Padding(
-                        padding: const EdgeInsets.only(top: 16),
+                        padding: const EdgeInsets.all(8.0),
+                        child: CompactCheckboxTile(
+                          value: _isTempMode,
+                          onChanged: (v) {
+                            setState(() {
+                              _isTempMode = v ?? false;
+                            });
+                          },
+                          title: Text('Do not save'),
+                        ),
+                      ),
+
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           spacing: 4,
@@ -275,10 +291,32 @@ class _ReaderPageState extends State<ReaderPage> {
                     ],
                   ),
 
-                  SizedBox(height: 20),
+                  SizedBox(height: 26),
+                  if (_books.isNotEmpty)
+                    InkWell(
+                      // borderRadius: BorderRadius.circular(6),
+                      onTap: () {
+                        setState(() {
+                          _isShowEntrieNewToOld = !_isShowEntrieNewToOld;
+                        });
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                        child: Text(
+                          /* Txt */ 'قائمة النص ${_isShowEntrieNewToOld ? "(جديد إلى قديم)" : "(قديم إلى جديد)"} [${enToArNum(_books.length)}]',
+                          textDirection: TextDirection.rtl,
+                          textAlign: TextAlign.right,
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ),
                   if (_books.isNotEmpty) Divider(thickness: 0.5),
                   if (_books.isNotEmpty)
                     ...List.generate(_books.length, (index) {
+                      if (_isShowEntrieNewToOld) index = _books.length - 1 - index;
                       return Ink(
                         decoration: index.isOdd
                             ? null

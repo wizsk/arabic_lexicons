@@ -158,3 +158,44 @@ Future<bool?> showConfirmDialog(
     },
   );
 }
+
+class CompactCheckboxTile extends StatelessWidget {
+  final bool? value;
+  final ValueChanged<bool?> onChanged;
+  final Widget title;
+  final EdgeInsets padding;
+  final double gap;
+
+  const CompactCheckboxTile({
+    super.key,
+    required this.value,
+    required this.onChanged,
+    required this.title,
+    this.padding = const EdgeInsets.all(8),
+    this.gap = 6,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      // borderRadius: BorderRadius.circular(6),
+      onTap: () => onChanged(value == null ? null : !value!),
+      child: Padding(
+        padding: padding,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Flexible(child: title),
+            SizedBox(width: gap),
+            Checkbox(
+              value: value,
+              onChanged: (v) => onChanged(v),
+              visualDensity: VisualDensity.compact,
+              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

@@ -77,7 +77,13 @@ class _ReaderPageState extends State<ReaderPage> {
     final t = _paragraphs.first;
     _title = t.length > 50 ? t.substring(0, 50) : t;
     setState(() {});
-    if (!_isTempMode) _saveFile();
+    if (!_isTempMode) {
+      _saveFile();
+    } else {
+      _controller.clear();
+    }
+    _textFiledSize = _minTextFiledSize;
+    _isTempMode = false;
   }
 
   List<String> _splitLines(String text) {
@@ -187,12 +193,15 @@ class _ReaderPageState extends State<ReaderPage> {
     final t = _paragraphs.first;
     _title = t.length > 50 ? t.substring(0, 50) : t;
 
+    _isTempMode = false;
+    _textFiledSize = _minTextFiledSize;
     _controller.clear();
     setState(() {});
   }
 
-  int _textFiledSize = 2;
+  final int _minTextFiledSize = 4;
   final int _maxTextFiledSize = 18;
+  int _textFiledSize = 4;
   bool _isQasidah = false;
   bool _isTempMode = false;
   bool _isShowEntrieNewToOld = true;
@@ -235,7 +244,7 @@ class _ReaderPageState extends State<ReaderPage> {
                               _isTempMode = v ?? false;
                             });
                           },
-                          title: Text('Do not save'),
+                          title: Text("Don't save"),
                         ),
                       ),
 
@@ -250,7 +259,7 @@ class _ReaderPageState extends State<ReaderPage> {
                               iconSize: mediumFontSize * 2,
                               onPressed: () => setState(() {
                                 if (_textFiledSize == _maxTextFiledSize) {
-                                  _textFiledSize = 2;
+                                  _textFiledSize = _minTextFiledSize;
                                 } else {
                                   _textFiledSize = _maxTextFiledSize;
                                 }
@@ -316,7 +325,9 @@ class _ReaderPageState extends State<ReaderPage> {
                   if (_books.isNotEmpty) Divider(thickness: 0.5),
                   if (_books.isNotEmpty)
                     ...List.generate(_books.length, (index) {
-                      if (_isShowEntrieNewToOld) index = _books.length - 1 - index;
+                      if (_isShowEntrieNewToOld) {
+                        index = _books.length - 1 - index;
+                      }
                       return Ink(
                         decoration: index.isOdd
                             ? null
@@ -409,18 +420,19 @@ class _ReaderPageState extends State<ReaderPage> {
                       context,
                       _isQasidah,
                       _textAlign,
-                      () async {
-                        final res = await showConfirmDialog(
-                          context,
-                          message: "Do you realy want to exit?",
-                        );
-                        if (res != null && res) {
-                          // after if no longer in reader mode
-                          _paragraphs = [];
-                          _isQasidah = false;
-                          _textAlign = TextAlign.justify;
-                          setState(() {});
-                        }
+                      _paragraphs,
+                      () {
+                        // final res = await showConfirmDialog(
+                        //   context,
+                        //   message: "Do you realy want to exit?",
+                        // );
+                        // if (res != null && res) {
+                        // after if no longer in reader mode
+                        _paragraphs = [];
+                        _isQasidah = false;
+                        _textAlign = TextAlign.justify;
+                        setState(() {});
+                        // }
                       },
                     );
 

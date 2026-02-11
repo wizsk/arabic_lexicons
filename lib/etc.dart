@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:ara_dict/data.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 Future<({DictEntry de, String? word})?> showWordPickerBottomSheet(
   BuildContext context,
@@ -123,6 +126,7 @@ Future<({bool isQasidah, TextAlign textAlign})?> showReaderModeSettings(
   BuildContext context,
   bool initialIsQasidah,
   TextAlign initialTextAlign,
+  List<String> peras,
   void Function() closeReader,
 ) {
   final cs = Theme.of(context).colorScheme;
@@ -137,6 +141,8 @@ Future<({bool isQasidah, TextAlign textAlign})?> showReaderModeSettings(
     builder: (sheetContext) {
       bool isQasidah = initialIsQasidah;
       TextAlign textAlign = initialTextAlign;
+      bool isCopiedMsgShowing = false;
+      bool isCoping = false;
 
       void close() {
         Navigator.of(
@@ -197,6 +203,28 @@ Future<({bool isQasidah, TextAlign textAlign})?> showReaderModeSettings(
                                 textAlign = v
                                     ? TextAlign.right
                                     : TextAlign.justify;
+                              });
+                            },
+                    ),
+                    const Divider(),
+                    ListTile(
+                      title: isCopiedMsgShowing
+                          ? const Text('Text Copied')
+                          : const Text('Copy Text'),
+                      leading: const Icon(Icons.copy),
+                      onTap: () async {
+                              if (isCoping) return;
+                              isCoping = true;
+                              await Clipboard.setData(
+                                ClipboardData(text: peras.join("\n")),
+                              );
+
+                              isCopiedMsgShowing = true;
+                              setState(() {});
+                              Timer(Duration(seconds: 1), () {
+                                isCopiedMsgShowing = false;
+                                isCoping = false;
+                                setState(() {});
                               });
                             },
                     ),

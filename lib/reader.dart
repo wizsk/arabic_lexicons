@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:ara_dict/etc.dart';
 import 'package:ara_dict/sv.dart';
 import 'package:crypto/crypto.dart'; // for hashing
-import 'package:ara_dict/main.dart';
 import 'package:ara_dict/theme.dart';
 import 'package:ara_dict/wigds.dart';
 import 'package:flutter/gestures.dart';
@@ -11,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:ara_dict/lexicons.dart';
 
 class BookEntry {
   final String hash;
@@ -517,7 +517,7 @@ void openDict(BuildContext context, String word) {
   Navigator.push(
     context,
     MaterialPageRoute(
-      builder: (_) => SearchWithSelection(showDrawer: false, initialText: word),
+      builder: (_) => SearchLexicons(showDrawer: false, initialText: word),
     ),
   );
 }

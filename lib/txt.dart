@@ -1,4 +1,3 @@
-
 import 'package:ara_dict/alphabets.dart';
 
 (List<String> res, String? word) getNextWord(String query, int curPos) {

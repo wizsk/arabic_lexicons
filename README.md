@@ -73,6 +73,16 @@ The app includes 9 comprehensive dictionaries - 2 English-Arabic dictionaries an
 [<img src="assets/showcase/06.png"  width=220>](assets/showcase/06.png)
 [<img src="assets/showcase/07.png"  width=220>](assets/showcase/07.png)
 
+## Build or run
+
+```sh
+git clone https://github.com/wizsk/arabic_lexicons.git
+cd arabic_lexicons
+unzip assets/data/db.sqlite.zip -d assets/data/
+flutter pub get
+flutter run
+```
+
 ## License
 
 This project is fully open source and released under the **GPL-3.0 License**.

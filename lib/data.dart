@@ -8,7 +8,7 @@ const appName = 'Arabic Lexcions';
 const fontAmiri = 'Amiri';
 const fontKitab = 'Kitab';
 
-const scrollPadding = EdgeInsets.only(left: 8, right: 8, top: 0, bottom: 16);
+const scrollPadding = EdgeInsets.only(left: 8, right: 8, top: 0, bottom: 40);
 
 const dictWordSelectModalOpenIcon = Icon(Icons.book);
 

@@ -253,7 +253,7 @@ class _ReaderPageState extends State<ReaderPage> {
                       ),
 
                       Padding(
-                        padding: const EdgeInsets.all(8.0),
+                        padding: const EdgeInsets.all(10),
                         child: CompactCheckboxTile(
                           value: _isTempMode,
                           onChanged: (v) {
@@ -265,16 +265,28 @@ class _ReaderPageState extends State<ReaderPage> {
                         ),
                       ),
 
+                      // SizedBox(height: 10),
+                      SizedBox(
+                        width: 150,
+                        child: FilledButton.icon(
+                          label: Text('Go'),
+                          icon: Icon(Icons.start),
+                          iconAlignment: IconAlignment.end,
+                          onPressed: _showText,
+                        ),
+                      ),
+
                       Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        padding: const EdgeInsets.only(top: 16),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           spacing: 6,
                           children: [
                             FilledButton(
                               style: btnTheme,
-                              child: _textFiledSize == _minTextFiledSize ? Text('Expand'):
-                               Text('Collapse'),
+                              child: _textFiledSize == _minTextFiledSize
+                                  ? Text('Expand')
+                                  : Text('Collapse'),
                               // icon: Icon(Icons.expand),
                               // iconSize: mediumFontSize * 2,
                               onPressed: () => setState(() {
@@ -291,8 +303,8 @@ class _ReaderPageState extends State<ReaderPage> {
                               onPressed: () async {
                                 final txt = await getClipboardText();
                                 if (txt != null) {
-                                  _controller.clear();
-                                  _controller.text = txt;
+                                  // _controller.clear();
+                                  _controller.text = _controller.text + txt;
                                 }
                               },
                               // icon: Icon(Icons.paste),
@@ -311,17 +323,6 @@ class _ReaderPageState extends State<ReaderPage> {
                               },
                             ),
                           ],
-                        ),
-                      ),
-
-                      SizedBox(height: 10),
-                      SizedBox(
-                        width: 150,
-                        child: FilledButton.icon(
-                          label: Text('Go'),
-                          icon: Icon(Icons.arrow_circle_right),
-                          iconAlignment: IconAlignment.end,
-                          onPressed: _showText,
                         ),
                       ),
                     ],

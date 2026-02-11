@@ -96,7 +96,7 @@ Widget showArEnRes(TextStyle ts, List<Entry>? entries) {
           dataTextStyle: ts,
           dividerThickness: 0.5,
           columnSpacing: 12.0,
-          headingTextStyle: const TextStyle(fontWeight: FontWeight.w600),
+          headingTextStyle:  ts.copyWith(fontWeight: FontWeight.bold),
           columns: const [
             DataColumn(label: Text('Word')),
             DataColumn(label: Text('Def')),

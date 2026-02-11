@@ -4,7 +4,7 @@ import 'package:ara_dict/theme.dart';
 import 'package:flutter/material.dart';
 
 Widget buildDrawer(BuildContext context) {
-  // final cs = Theme.of(context).colorScheme;
+  final cs = Theme.of(context).colorScheme;
   final currRoute = ModalRoute.of(context)?.settings.name;
   return Drawer(
     child: SafeArea(
@@ -15,10 +15,13 @@ Widget buildDrawer(BuildContext context) {
               padding: EdgeInsets.zero,
               children: [
                 DrawerHeader(
+                  decoration: BoxDecoration(
+                    color: cs.primary,
+                  ),
                   child: Text(
                     appName,
                     style: TextStyle(
-                      // color: Colors.white,
+                      color: cs.onInverseSurface,
                       fontSize: mediumFontSize * 1.5,
                       fontWeight: FontWeight.bold,
                     ),

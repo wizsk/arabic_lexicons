@@ -1,0 +1,13 @@
+Arabic Lexicons provides access to 6 classical Arabic lexicons, 2 Arabic-English lexicons, and 1 Arabic-English dictionary - all working completely offline.
+
+Features:
+• 9 comprehensive resources including Hans Wehr, Lane Lexicon,
+Lisan Al-Arab, and more
+• Multi-word search capability
+• Reader mode - paste Arabic text and tap any word for instant meanings
+• No internet permission required - fully offline
+• Lightweight and fast
+
+Perfect for Arabic learners, students, and anyone working with classical or modern Arabic texts.
+
+For more details, visit: https://github.com/wizsk/arabic_lexicons/

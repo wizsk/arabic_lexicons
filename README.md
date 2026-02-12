@@ -2,11 +2,15 @@
 
 # Arabic Lexicons
 
-A comprehensive Arabic dictionary app providing access to 8 classical Arabic lexicons and 1 Arabic-English dictionary, all in one lightweight package.
+Arabic Lexicons provides access to 6 classical Arabic lexicons,
+2 Arabic-English lexicons, and 1 Arabic-English dictionary -
+all working completely offline.
+
+**See [Available Dictionaries](#available-dictionaries) for details.**
 
 ## Features
 
-**Arabic Lexicons** gives you instant access to multiple authoritative Arabic dictionaries:
+<!-- **Arabic Lexicons** gives you instant access to multiple authoritative Arabic dictionaries: -->
 
 - **Multi-word search**: Search for several words simultaneously
 - **Quick switching**: Easily switch between different words and lexicons
@@ -78,9 +82,9 @@ The app includes 9 comprehensive dictionaries - 2 English-Arabic dictionaries an
 ```sh
 git clone https://github.com/wizsk/arabic_lexicons.git
 cd arabic_lexicons
-unzip assets/data/db.sqlite.zip -d assets/data/
+unzip -o assets/data/db.sqlite.zip -d assets/data/
 flutter pub get
-flutter run
+flutter run # flutter build apk
 ```
 
 ## License

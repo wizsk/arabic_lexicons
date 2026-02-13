@@ -1,8 +1,7 @@
 import 'package:ara_dict/ar_en.dart';
-
+import 'package:ara_dict/font_size.dart';
 import 'package:ara_dict/theme.dart';
 import 'package:flutter/material.dart';
-
 import 'package:ara_dict/sv.dart';
 import 'package:ara_dict/txt.dart';
 import 'package:ara_dict/wigds.dart';
@@ -173,7 +172,7 @@ class _SearchLexiconsState extends State<SearchLexicons> {
         child: Column(
           children: [
             Expanded(
-              child: showRes(arTxtTheme, _selectedDict.d, _dbRes, _arEnRes),
+              child: showRes(arTxtTheme, _selectedDict.d, _selectedWord, _dbRes, _arEnRes),
             ),
 
             Divider(thickness: 0.5, height: 0),
@@ -229,9 +228,9 @@ class _SearchLexiconsState extends State<SearchLexicons> {
                       ),
                     ),
                   ),
-                  IconButton(
-                    icon: dictWordSelectModalOpenIcon,
-                    iconSize: mediumFontSize * 1.5,
+                  SizedBox(width: 5,),
+                  IconButton.filledTonal(
+                    icon: Icon(dictWordSelectModalOpenIcon),
                     onPressed: () async {
                       _focusNode.unfocus();
                       final res = await showWordPickerBottomSheet(

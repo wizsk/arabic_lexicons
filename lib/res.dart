@@ -6,11 +6,14 @@ import 'package:ara_dict/data.dart';
 Widget showRes(
   TextStyle ts,
   Dict curDict,
+  String? currWord,
   List<Map<String, dynamic>>? dbRes,
   List<Entry>? arEnRes,
 ) {
+  if (currWord == null || currWord.isEmpty) return _noRes(ts, currWord);
+
   if (curDict == Dict.arEn) {
-    return showArEnRes(ts, arEnRes);
+    return showArEnRes(ts, currWord, arEnRes);
   }
 
   var dir = TextDirection.rtl;
@@ -49,7 +52,7 @@ Widget showRes(
       },
     );
   }
-  return _noRes(ts);
+  return _noRes(ts, currWord);
 }
 
 Widget meaningView(
@@ -77,14 +80,22 @@ Widget meaningView(
   );
 }
 
-Widget _noRes(TextStyle ts) {
-  const txt = "لا توجد نتائج";
-  return Center(child: Text(txt, style: ts));
+Widget _noRes(TextStyle ts, String? currWord) {
+  String txt;
+  if (currWord == null || currWord.isEmpty) {
+    txt = "ابجث عن كلمة";
+  } else {
+    txt = "لا توجد نتائج لـ: $currWord";
+  }
+
+  return Center(
+    child: Text(txt, textDirection: TextDirection.rtl, style: ts),
+  );
 }
 
-Widget showArEnRes(TextStyle ts, List<Entry>? entries) {
+Widget showArEnRes(TextStyle ts, String? currWord, List<Entry>? entries) {
   if (entries == null || entries.isEmpty) {
-    return _noRes(ts);
+    return _noRes(ts, currWord);
   }
 
   return SingleChildScrollView(
@@ -96,7 +107,7 @@ Widget showArEnRes(TextStyle ts, List<Entry>? entries) {
           dataTextStyle: ts,
           dividerThickness: 0.5,
           columnSpacing: 12.0,
-          headingTextStyle:  ts.copyWith(fontWeight: FontWeight.bold),
+          headingTextStyle: ts.copyWith(fontWeight: FontWeight.bold),
           columns: const [
             DataColumn(label: Text('Word')),
             DataColumn(label: Text('Def')),

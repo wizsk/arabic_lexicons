@@ -1,3 +1,4 @@
+import 'package:ara_dict/conf.dart';
 import 'package:ara_dict/theme.dart';
 import 'package:flutter/material.dart';
 
@@ -28,11 +29,12 @@ Future<void> showFontSizeDialog(
                   const SizedBox(height: 24),
 
                   SizedBox(
-                    height: MediaQuery.of(context).size.height * 0.18,
+                    height: MediaQuery.of(context).size.height * 0.20,
                     child: Center(
                       child: Text(
                         /* txt */ "هذا مثال لتجربة حجم الخط\nهذا هو السطر التالي",
                         textAlign: TextAlign.right,
+                        textDirection: TextDirection.rtl,
                         style: arabicFontStyle.copyWith(fontSize: tempSize),
                       ),
                     ),
@@ -43,10 +45,9 @@ Future<void> showFontSizeDialog(
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      _sizeButton(
-                        context,
-                        icon: Icons.restore,
-                        onTap: tempSize == defaultArabicFontSize
+                      IconButton.filledTonal(
+                        icon: Icon(Icons.restore),
+                        onPressed: tempSize == defaultArabicFontSize
                             ? null
                             : () {
                                 setState(() {
@@ -55,20 +56,18 @@ Future<void> showFontSizeDialog(
                               },
                       ),
                       const SizedBox(width: 20),
-                      _sizeButton(
-                        context,
-                        icon: Icons.remove,
-                        onTap: tempSize <= 10
+                      IconButton.filledTonal(
+                        icon: Icon(Icons.remove),
+                        onPressed: tempSize <= 10
                             ? null
                             : () {
                                 setState(() => tempSize -= 1);
                               },
                       ),
                       const SizedBox(width: 20),
-                      _sizeButton(
-                        context,
-                        icon: Icons.add,
-                        onTap: tempSize >= 30
+                      IconButton.filledTonal(
+                        icon: Icon(Icons.add),
+                        onPressed: tempSize >= 30
                             ? null
                             : () {
                                 setState(() => tempSize += 1);
@@ -104,52 +103,5 @@ Future<void> showFontSizeDialog(
         ),
       );
     },
-  );
-}
-
-// Widget _sizeButton(
-//   BuildContext context, {
-//   required IconData icon,
-//   required VoidCallback? onTap,
-// }) {
-
-//   return InkWell(
-//     borderRadius: BorderRadius.circular(50),
-//     onTap: onTap,
-//     child: Container(
-//       padding: const EdgeInsets.all(10),
-//       decoration: BoxDecoration(
-//         shape: BoxShape.circle,
-//         color: Theme.of(context).colorScheme.primary.withAlpha(10),
-//       ),
-//       child: Icon(icon, color: Theme.of(context).colorScheme.primary),
-//     ),
-//   );
-// }
-
-Widget _sizeButton(
-  BuildContext context, {
-  required IconData icon,
-  VoidCallback? onTap,
-}) {
-  final cs = Theme.of(context).colorScheme;
-  final isEnabled = onTap != null;
-
-  return InkWell(
-    borderRadius: BorderRadius.circular(50),
-    onTap: onTap, // null disables tap automatically
-    child: Container(
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: isEnabled
-            ? cs.primary.withAlpha(25)
-            : cs.onSurface.withAlpha(10),
-      ),
-      child: Icon(
-        icon,
-        color: isEnabled ? cs.primary : cs.onSurface.withAlpha(40),
-      ),
-    ),
   );
 }

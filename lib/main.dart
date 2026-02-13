@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:ara_dict/help.dart';
 import 'package:ara_dict/reader.dart';
 import 'package:ara_dict/theme.dart';
@@ -24,28 +26,23 @@ class MyApp extends StatelessWidget {
     return AnimatedBuilder(
       animation: appSettingsNotifier,
       builder: (context, _) {
-        final cs = Theme.of(context).colorScheme;
-        SystemChrome.setSystemUIOverlayStyle(
-          SystemUiOverlayStyle(
-            statusBarColor: cs.primary,
-            statusBarIconBrightness: appSettingsNotifier.theme == ThemeMode.dark
-                ? Brightness.light
-                : Brightness.dark,
-          ),
-        );
-        return MaterialApp(
-          debugShowCheckedModeBanner: false,
-          title: 'Arabic Lexicons',
+        return Listener(
+          behavior: HitTestBehavior.translucent,
+          onPointerDown:  appSettingsNotifier.wake.onUserActivity,
+          child: MaterialApp(
+            debugShowCheckedModeBanner: false,
+            title: 'Arabic Lexicons',
 
-          theme: buildLightTheme(context, appSettingsNotifier.fontSize),
-          darkTheme: buildDarkTheme(context, appSettingsNotifier.fontSize),
-          themeMode: appSettingsNotifier.theme,
-          initialRoute: Routes.dictionary,
-          routes: {
-            Routes.dictionary: (_) => const SearchLexicons(),
-            Routes.reader: (_) => const ReaderPage(),
-            Routes.help: (_) => const HelpPage(),
-          },
+            theme: buildLightTheme(context, appSettingsNotifier.fontSize),
+            darkTheme: buildDarkTheme(context, appSettingsNotifier.fontSize),
+            themeMode: appSettingsNotifier.theme,
+            initialRoute: Routes.dictionary,
+            routes: {
+              Routes.dictionary: (_) => const SearchLexicons(),
+              Routes.reader: (_) => const ReaderPage(),
+              Routes.help: (_) => const HelpPage(),
+            },
+          ),
         );
       },
     );

@@ -71,6 +71,15 @@ Widget buildDrawer(BuildContext context) {
           },
         ),
         SwitchListTile(
+          title: const Text('Keep Screen on'),
+          secondary: Icon(Icons.screen_lock_portrait),
+          value: appSettingsNotifier.wake.isEnabled(),
+          onChanged: (value) {
+            Navigator.pop(context);
+            appSettingsNotifier.wake.tougle(enable: value);
+          },
+        ),
+        SwitchListTile(
           title: const Text('Dark mode'),
           secondary: Icon(
             appSettingsNotifier.theme == ThemeMode.dark

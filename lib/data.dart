@@ -1,4 +1,4 @@
-import 'package:ara_dict/theme.dart';
+import 'package:ara_dict/conf.dart';
 import 'package:flutter/material.dart';
 
 final appSettingsNotifier = AppSettingsController();
@@ -10,7 +10,7 @@ const fontKitab = 'Kitab';
 
 const scrollPadding = EdgeInsets.only(left: 8, right: 8, top: 0, bottom: 40);
 
-const dictWordSelectModalOpenIcon = Icon(Icons.book);
+const dictWordSelectModalOpenIcon = Icons.swap_horiz_rounded;
 
 class Routes {
   static const dictionary = '/dictionary';

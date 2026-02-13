@@ -55,7 +55,7 @@ class HelpPage extends StatelessWidget {
                 TextSpan(text: 'Click on the '),
                 WidgetSpan(
                   alignment: PlaceholderAlignment.middle,
-                  child: dictWordSelectModalOpenIcon,
+                  child: Icon(dictWordSelectModalOpenIcon),
                 ),
                 TextSpan(
                   text:

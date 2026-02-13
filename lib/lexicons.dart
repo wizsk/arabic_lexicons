@@ -1,6 +1,4 @@
 import 'package:ara_dict/ar_en.dart';
-import 'package:ara_dict/font_size.dart';
-import 'package:ara_dict/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:ara_dict/sv.dart';
 import 'package:ara_dict/txt.dart';

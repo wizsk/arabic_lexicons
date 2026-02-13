@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:ara_dict/help.dart';
 import 'package:ara_dict/reader.dart';
 import 'package:ara_dict/theme.dart';
@@ -8,7 +6,6 @@ import 'package:ara_dict/data.dart';
 import 'package:ara_dict/ar_en.dart';
 import 'package:ara_dict/db.dart';
 import 'package:ara_dict/lexicons.dart';
-import 'package:flutter/services.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

@@ -252,9 +252,9 @@ class _SearchLexiconsState extends State<SearchLexicons> {
                       // the way it works only one can change if it changes the set state is called surely
                       // or we call manually to update bookmark info
                       if (res != null) {
-                        if (res.de.d == _selectedDict.d) {
+                        if (res.de.d != _selectedDict.d) {
                           _selectDict(res.de);
-                        } else if (res.word == _selectedWord) {
+                        } else if (res.word != _selectedWord) {
                           _selectWord(res.word!);
                         } else {
                           setState(() {});

@@ -7,6 +7,7 @@ import 'package:ara_dict/data.dart';
 import 'package:ara_dict/reader.dart';
 import 'package:ara_dict/wigds.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:file_picker/file_picker.dart';
@@ -14,6 +15,7 @@ import 'package:file_picker/file_picker.dart';
 const _bookMarkFileName = 'arabic_lexicons_bookMarks.txt';
 
 class BookMarks {
+  static const int _maxBookMarkWrodSize = 10;
   static late final File _bookMarkFile;
   static late final File _bookMarkFileTmp;
   static final Set<String> _bookMarkedWords = {};
@@ -52,16 +54,18 @@ class BookMarks {
     return _bookMarkedWords;
   }
 
+  /// word must be cleaned
   static bool add(String w) {
-    if (w.isEmpty) return false;
+    if (w.isEmpty || w.length > _maxBookMarkWrodSize) return false;
     if (!_bookMarkedWords.add(w)) return true;
     return _saveToFile();
   }
 
+  /// word list must be cleaned
   static int addAll(List<String> wl) {
     int added = 0;
     for (final w in wl) {
-      if (w.isEmpty) continue;
+      if (w.isEmpty || w.length > _maxBookMarkWrodSize) continue;
       if (_bookMarkedWords.add(w)) {
         added++;
       }
@@ -118,6 +122,36 @@ class BookMarkPage extends StatefulWidget {
 
 class _BookMarkPageState extends State<BookMarkPage> {
   bool _isShowNewToOld = true;
+  bool _isFabVisable = true;
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_scrollListener);
+  }
+
+  void _scrollListener() {
+    if (_scrollController.position.userScrollDirection ==
+            ScrollDirection.reverse &&
+        _isFabVisable) {
+      setState(() {
+        _isFabVisable = false;
+      });
+    } else if (_scrollController.position.userScrollDirection ==
+            ScrollDirection.forward &&
+        !_isFabVisable) {
+      setState(() {
+        _isFabVisable = true;
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -126,7 +160,9 @@ class _BookMarkPageState extends State<BookMarkPage> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: false,
-        title: Text('BookMarks'),
+        title: Text(
+          'BM${BookMarks.isEmpty ? "" : "s (${BookMarks.length.toString()})"}',
+        ),
 
         actions: [
           IconButton(
@@ -148,6 +184,7 @@ class _BookMarkPageState extends State<BookMarkPage> {
                     );
                     if (res ?? false) {
                       BookMarks.rmAll();
+                      setState(() {});
                     }
                   },
           ),
@@ -207,6 +244,7 @@ class _BookMarkPageState extends State<BookMarkPage> {
                     res.add(w);
                   }
                   final addedCound = BookMarks.addAll(res);
+                  setState(() {});
                   if (!context.mounted) return;
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
@@ -233,7 +271,8 @@ class _BookMarkPageState extends State<BookMarkPage> {
         child: BookMarks.isEmpty
             ? Center(child: Text('Bookmark some words'))
             : ListView.builder(
-                padding: const EdgeInsets.all(16),
+                controller: _scrollController,
+                padding: const EdgeInsets.all(16).copyWith(bottom: 120),
                 itemCount: BookMarks.length,
                 itemBuilder: (context, index) {
                   if (_isShowNewToOld) {
@@ -292,15 +331,21 @@ class _BookMarkPageState extends State<BookMarkPage> {
                 },
               ),
       ),
-      floatingActionButton: FloatingActionButton.small(
-        child: Transform.rotate(
-          angle: _isShowNewToOld ? 3.16 : 0,
-          child: const Icon(Icons.sort),
+
+      floatingActionButton: AnimatedSlide(
+        duration: Duration(milliseconds: 300),
+        offset: _isFabVisable ? Offset.zero : Offset(0, 2),
+        child: AnimatedOpacity(
+          duration: Duration(milliseconds: 300),
+          opacity: _isFabVisable ? 1.0 : 0.0,
+          child: FloatingActionButton.small(
+            child: const Icon(Icons.swap_vert),
+            onPressed: () {
+              _isShowNewToOld = !_isShowNewToOld;
+              setState(() {});
+            },
+          ),
         ),
-        onPressed: () {
-          _isShowNewToOld = !_isShowNewToOld;
-          setState(() {});
-        },
       ),
     );
   }

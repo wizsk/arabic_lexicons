@@ -111,7 +111,7 @@ Future<({DictEntry de, String? word})?> showWordPickerBottomSheet(
                           horizontal: 2,
                           vertical: 8,
                         ),
-                        child: Divider(thickness: 0.5),
+                        child: Divider(),
                       ),
 
                     Wrap(

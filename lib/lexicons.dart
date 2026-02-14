@@ -154,10 +154,7 @@ class _SearchLexiconsState extends State<SearchLexicons> {
               text: ': $_selectedWord ',
               style: TextStyle(fontFamily: arabicFontStyle.fontFamily),
             ),
-            if (bm)
-              WidgetSpan(
-                child: Icon(Icons.bookmark),
-              ),
+            if (bm) WidgetSpan(child: Icon(Icons.bookmark)),
           ],
         ),
         textDirection: TextDirection.rtl,
@@ -251,9 +248,19 @@ class _SearchLexiconsState extends State<SearchLexicons> {
                         _selectedWord,
                         arTxtTheme,
                       );
+
+                      // the way it works only one can change if it changes the set state is called surely
+                      // or we call manually to update bookmark info
                       if (res != null) {
-                        _selectDict(res.de);
-                        if (res.word != null) _selectWord(res.word!);
+                        if (res.de.d == _selectedDict.d) {
+                          _selectDict(res.de);
+                        } else if (res.word == _selectedWord) {
+                          _selectWord(res.word!);
+                        } else {
+                          setState(() {});
+                        }
+                      } else {
+                        setState(() {});
                       }
                     },
                   ),

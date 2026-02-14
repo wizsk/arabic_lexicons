@@ -39,6 +39,7 @@ class MyApp extends StatelessWidget {
             routes: {
               Routes.dictionary: (_) => const SearchLexicons(),
               Routes.reader: (_) => const ReaderPage(),
+              Routes.bookMarks: (_) => const BookMarkPage(),
               Routes.help: (_) => const HelpPage(),
             },
           ),

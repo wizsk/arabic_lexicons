@@ -47,6 +47,17 @@ Widget buildDrawer(BuildContext context) {
                 },
               ),
               ListTile(
+                selected: currRoute == Routes.bookMarks,
+                title: Text("Book Marks"),
+                leading: Icon(Icons.bookmark),
+                onTap: () {
+                  Navigator.pop(context);
+                  if (currRoute != Routes.bookMarks) {
+                    Navigator.pushReplacementNamed(context, Routes.bookMarks);
+                  }
+                },
+              ),
+              ListTile(
                 selected: currRoute == Routes.help,
                 title: Text("Help"),
                 leading: Icon(Icons.help),

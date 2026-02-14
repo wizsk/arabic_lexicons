@@ -242,9 +242,7 @@ class _ReaderPageState extends State<ReaderPage> {
     );
 
     // final cs = Theme.of(context).colorScheme;
-    final highWordStyle = arabicFontStyle.copyWith(
-      color: cs.error,
-    );
+    final highWordStyle = arabicFontStyle.copyWith(color: cs.error);
 
     return Scaffold(
       appBar: AppBar(
@@ -458,9 +456,7 @@ class _ReaderPageState extends State<ReaderPage> {
                       textStyleBodyMedium: arabicFontStyle,
                       highTextStyleBodyMedium: highWordStyle,
                       textAlign: textAlign,
-                      onWordTap: (word) {
-                        openDict(context, word);
-                      },
+                      onChange: () => setState(() {}),
                     ),
                   );
                 },
@@ -474,7 +470,7 @@ class _ReaderPageState extends State<ReaderPage> {
               child: AnimatedOpacity(
                 duration: Duration(milliseconds: 300),
                 opacity: _isFabVisible ? 1.0 : 0.0,
-                child: FloatingActionButton(
+                child: FloatingActionButton.small(
                   onPressed: () async {
                     final res = await showReaderModeSettings(
                       context,
@@ -510,7 +506,7 @@ class ClickableParagraph extends StatelessWidget {
   final List<WordEntry> pera;
   final int peraIndex;
   final bool isQasidah;
-  final void Function(String word) onWordTap;
+  final void Function() onChange;
   final TextStyle textStyleBodyMedium;
   final TextStyle highTextStyleBodyMedium;
   final TextAlign textAlign;
@@ -520,7 +516,7 @@ class ClickableParagraph extends StatelessWidget {
     required this.pera,
     required this.peraIndex,
     required this.isQasidah,
-    required this.onWordTap,
+    required this.onChange,
     required this.textStyleBodyMedium,
     required this.highTextStyleBodyMedium,
     this.textAlign = TextAlign.justify,
@@ -531,11 +527,14 @@ class ClickableParagraph extends StatelessWidget {
     return RichText(
       textDirection: TextDirection.rtl,
       textAlign: textAlign,
-      text: TextSpan(style: textStyleBodyMedium, children: _buildSpans()),
+      text: TextSpan(
+        style: textStyleBodyMedium,
+        children: _buildSpans(context),
+      ),
     );
   }
 
-  List<TextSpan> _buildSpans() {
+  List<TextSpan> _buildSpans(BuildContext context) {
     final spans = <TextSpan>[];
 
     if (isQasidah) {
@@ -554,13 +553,28 @@ class ClickableParagraph extends StatelessWidget {
     }
 
     for (final word in pera) {
+      final isBmk = BookMarks.isSet(word.cl);
       spans.add(
         TextSpan(
           text: '${word.ar} ',
-          recognizer: TapGestureRecognizer()..onTap = () => onWordTap(word.cl),
-          style: BookMarks.isSet(word.cl)
-              ? highTextStyleBodyMedium
-              : null,
+          recognizer: word.cl.isEmpty
+              ? null
+              : (TapGestureRecognizer()
+                  ..onTap = () => showWordReadeActionsDialog(
+                    context,
+                    word.cl,
+                    isBmk,
+                    () {
+                      if (isBmk) {
+                        BookMarks.rm(word.cl);
+                      } else {
+                        BookMarks.add(word.cl);
+                      }
+                    },
+                    () => openDict(context, word.cl),
+                    textStyleBodyMedium,
+                  )),
+          style: isBmk ? highTextStyleBodyMedium : null,
         ),
       );
     }
@@ -581,5 +595,97 @@ String enToArNum(dynamic n) {
   return n.toString().replaceAllMapped(
     RegExp(r'[0-9]'),
     (m) => String.fromCharCode(0x0660 + int.parse(m.group(0)!)),
+  );
+}
+
+Future<void> showWordReadeActionsDialog(
+  BuildContext context,
+  String word,
+  bool isBookmarked,
+  VoidCallback onBookmark,
+  VoidCallback onShowDefinition,
+  TextStyle ts,
+) {
+  // final cs = Theme.of(context).colorScheme;
+
+  return showDialog(
+    context: context,
+    builder: (context) {
+      return Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Align(
+              //   alignment: Alignment.topRight,
+              //   child: IconButton(
+              //     icon: Icon(
+              //       Icons.close,
+              //       size: 20,
+              //       color: Theme.of(context).colorScheme.onSurfaceVariant,
+              //     ),
+              //     style: IconButton.styleFrom(
+              //       backgroundColor: Theme.of(context)
+              //           .colorScheme
+              //           .surfaceContainerHighest
+              //           .withAlpha(40),
+              //       padding: const EdgeInsets.all(6),
+              //     ),
+              //     onPressed: () => Navigator.pop(context),
+              //   ),
+              // ),
+              /// Title
+              Text(
+                word,
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  fontFamily: ts.fontFamily,
+                ),
+              ),
+
+              const SizedBox(height: 24),
+
+              /// Buttons
+              Column(
+                children: [
+                  SizedBox(
+                    width: double.infinity,
+                    child: FilledButton.icon(
+                      icon: Icon(
+                        isBookmarked ? Icons.bookmark : Icons.bookmark_border,
+                      ),
+                      label: Text(
+                        isBookmarked ? "Remove Bookmark" : "Add to Bookmark",
+                      ),
+                      onPressed: () {
+                        Navigator.pop(context);
+                        onBookmark();
+                      },
+                    ),
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      icon: const Icon(Icons.menu_book),
+                      label: const Text("Show Definition"),
+                      onPressed: () {
+                        Navigator.pop(context);
+                        onShowDefinition();
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
+    },
   );
 }

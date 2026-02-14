@@ -16,6 +16,7 @@ const dictWordSelectModalOpenIcon = Icons.swap_horiz_rounded;
 class Routes {
   static const dictionary = '/dictionary';
   static const reader = '/reader';
+  static const bookMarks = '/bookMarks';
   static const help = '/help';
 }
 

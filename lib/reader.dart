@@ -344,7 +344,8 @@ class _ReaderPageState extends State<ReaderPage> {
 
                                 final res = await showConfirmDialog(
                                   context,
-                                  message: 'Do you want to clear the texts?',
+                                  'Clear all text?',
+                                  // message: 'Do you want to clear the texts?',
                                 );
                                 if (res != null && res) _controller.clear();
                               },
@@ -409,7 +410,9 @@ class _ReaderPageState extends State<ReaderPage> {
                                   onPressed: () async {
                                     final res = await showConfirmDialog(
                                       context,
-                                      message: 'احذف: ${_books[index].name}',
+                                      /*txt*/ 'حذف الكتاب',
+                                      message:
+                                          /* txt */ 'هل تريد حذف ${_books[index].name}؟',
                                       dir: TextDirection.rtl,
                                     );
                                     if (res != null && res == true) {

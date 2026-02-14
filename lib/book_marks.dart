@@ -180,7 +180,9 @@ class _BookMarkPageState extends State<BookMarkPage> {
                 : () async {
                     final res = await showConfirmDialog(
                       context,
-                      message: 'Delete all bookmarked words?',
+                      'Delete All Bookmarks',
+                      message:
+                          'Are you sure you want to delete all bookmarked words?\nThis action cannot be undone.',
                     );
                     if (res ?? false) {
                       BookMarks.rmAll();
@@ -303,7 +305,9 @@ class _BookMarkPageState extends State<BookMarkPage> {
                               onPressed: () async {
                                 final res = await showConfirmDialog(
                                   context,
-                                  message: 'Do you want to delte: $word',
+                                  'Delete Word',
+                                  message:
+                                      'Are you sure you want to delete $word?',
                                 );
                                 if (res ?? false) {
                                   BookMarks.rm(word);

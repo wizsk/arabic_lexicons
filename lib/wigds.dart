@@ -112,14 +112,15 @@ Widget buildDrawer(BuildContext context) {
 }
 
 Future<bool?> showInfoDialog(
-  BuildContext context, {
-  required String message,
-  String? title,
+  BuildContext context,
+  String title, {
+  String? message,
   String confirmText = 'Ok',
   TextDirection dir = TextDirection.ltr,
 }) async {
   return showConfirmDialog(
     context,
+    title,
     message: message,
     dir: dir,
     cancelText: null,
@@ -127,9 +128,9 @@ Future<bool?> showInfoDialog(
 }
 
 Future<bool?> showConfirmDialog(
-  BuildContext context, {
-  String message = 'Are you sure?',
-  String? title,
+  BuildContext context,
+  String title, {
+  String? message,
   String confirmText = 'Confirm',
   String? cancelText = 'Cancel',
   TextDirection dir = TextDirection.ltr,
@@ -142,14 +143,18 @@ Future<bool?> showConfirmDialog(
 
       return AlertDialog(
         backgroundColor: cs.surface,
-        title: title != null
-            ? Text(title, style: theme.textTheme.titleLarge, textDirection: dir)
-            : null,
-        content: Text(
-          message,
-          style: theme.textTheme.bodyMedium,
+        title: Text(
+          title,
+          style: theme.textTheme.titleLarge,
           textDirection: dir,
         ),
+        content: message == null
+            ? null
+            : Text(
+                message,
+                style: theme.textTheme.bodyMedium,
+                textDirection: dir,
+              ),
         actions: [
           if (cancelText != null)
             TextButton(

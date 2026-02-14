@@ -25,6 +25,7 @@ class SearchLexicons extends StatefulWidget {
 }
 
 class _SearchLexiconsState extends State<SearchLexicons> {
+  final int _maxTextSize = 500;
   late final TextEditingController _controller;
   final FocusNode _focusNode = FocusNode();
 
@@ -58,6 +59,15 @@ class _SearchLexiconsState extends State<SearchLexicons> {
   }
 
   void _onTextChanged(String value) async {
+    if (value.length > _maxTextSize) {
+      await showInfoDialog(
+        context,
+        'Text Too Long',
+        message:
+            'Maximum allowed length is $_maxTextSize characters.\nPlease shorten the text.',
+      );
+      return;
+    }
     final (parts, currWord) = getNextWord(
       value,
       _controller.selection.base.offset,
@@ -144,7 +154,6 @@ class _SearchLexiconsState extends State<SearchLexicons> {
     );
 
     if (_selectedWord != null) {
-      final bm = BookMarks.isSet(_selectedWord);
       return Text.rich(
         TextSpan(
           // style: ,
@@ -154,7 +163,7 @@ class _SearchLexiconsState extends State<SearchLexicons> {
               text: ': $_selectedWord ',
               style: TextStyle(fontFamily: arabicFontStyle.fontFamily),
             ),
-            if (bm) WidgetSpan(child: Icon(Icons.bookmark)),
+            // if (bm) WidgetSpan(child: Icon(Icons.bookmark)),
           ],
         ),
         textDirection: TextDirection.rtl,
@@ -166,8 +175,27 @@ class _SearchLexiconsState extends State<SearchLexicons> {
   @override
   Widget build(BuildContext context) {
     final arTxtTheme = appSettingsNotifier.getArabicTextStyle(context);
+    final bm = BookMarks.isSet(_selectedWord);
     return Scaffold(
-      appBar: AppBar(title: appBarTxt(), titleSpacing: 0.0),
+      appBar: AppBar(
+        title: appBarTxt(),
+        titleSpacing: 0.0,
+        actions: [
+          IconButton(
+            icon: Icon(bm ? Icons.bookmark : Icons.bookmark_border),
+            onPressed: _selectedWord == null
+                ? null
+                : () {
+                    if (bm) {
+                      BookMarks.rm(_selectedWord!);
+                    } else {
+                      BookMarks.add(_selectedWord!);
+                    }
+                    setState(() {});
+                  },
+          ),
+        ],
+      ),
       drawer: _showDrawer ? buildDrawer(context) : null,
       body: SafeArea(
         child: Column(
@@ -185,12 +213,6 @@ class _SearchLexiconsState extends State<SearchLexicons> {
             Divider(thickness: 0.5, height: 0),
             Padding(
               padding: const EdgeInsets.all(8),
-              // padding: const EdgeInsets.s(
-              //   top: 8,
-              //   bottom: 8,
-              //   right: 2,
-              //   left: 8,
-              // ),
               child: Row(
                 children: [
                   Expanded(
@@ -206,8 +228,19 @@ class _SearchLexiconsState extends State<SearchLexicons> {
                         prefixIcon: _controller.text.isEmpty
                             ? IconButton(
                                 onPressed: () async {
-                                  final txt = await getClipboardText();
+                                  var txt = await getClipboardText();
                                   if (txt != null && txt.isNotEmpty) {
+                                    if (txt.length > _maxTextSize) {
+                                      if (context.mounted) {
+                                        await showInfoDialog(
+                                          context,
+                                          'Text Too Large',
+                                          message:
+                                              'This text contains ${txt.length} characters.\nIt will be reduced to $_maxTextSize characters.',
+                                        );
+                                      }
+                                      txt = txt.substring(0, 500);
+                                    }
                                     _controller.text = txt;
                                     _focusNode.unfocus();
                                     _onTextChanged(txt);
@@ -224,6 +257,7 @@ class _SearchLexiconsState extends State<SearchLexicons> {
                                     _dbRes = [];
                                     _arEnRes = null;
                                   });
+                                  // this is when it's focued but keyboard is not oppended
                                   _focusNode.requestFocus();
                                 },
 

@@ -1,22 +1,26 @@
+import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
+import 'package:ara_dict/alphabets.dart';
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/reader.dart';
 import 'package:ara_dict/wigds.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_html/flutter_html.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:file_picker/file_picker.dart';
+
+const _bookMarkFileName = 'arabic_lexicons_bookMarks.txt';
 
 class BookMarks {
   static late final File _bookMarkFile;
   static late final File _bookMarkFileTmp;
-  static final Set<String> _bookMarkedWords = {'عمل'};
+  static final Set<String> _bookMarkedWords = {};
 
   static Future<void> load() async {
     final dir = await getApplicationDocumentsDirectory();
-    _bookMarkFile = File(join(dir.path, 'arabic_lexicons_bookMarks.txt'));
+    _bookMarkFile = File(join(dir.path, _bookMarkFileName));
     _bookMarkFileTmp = File(
       join(dir.path, 'arabic_lexicons_bookMarks_tmp.txt'),
     );
@@ -52,6 +56,18 @@ class BookMarks {
     if (w.isEmpty) return false;
     if (!_bookMarkedWords.add(w)) return true;
     return _saveToFile();
+  }
+
+  static int addAll(List<String> wl) {
+    int added = 0;
+    for (final w in wl) {
+      if (w.isEmpty) continue;
+      if (_bookMarkedWords.add(w)) {
+        added++;
+      }
+    }
+    if (added > 0) _saveToFile();
+    return added;
   }
 
   static bool rm(String w) {
@@ -103,11 +119,84 @@ class _BookMarkPageState extends State<BookMarkPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          /*txt*/ 'القارئ',
-          textDirection: TextDirection.rtl,
-          style: TextStyle(fontFamily: arabicFontStyle.fontFamily),
-        ),
+        title: Text('Bookmarks'),
+
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.upload_file), // export
+            tooltip: 'Export List',
+            onPressed: () async {
+              if (BookMarks.isEmpty) return;
+              try {
+                Uint8List fileBytes = Uint8List.fromList(
+                  utf8.encode(BookMarks.list.join("\n")),
+                );
+
+                String? outputFile = await FilePicker.platform.saveFile(
+                  dialogTitle: 'Export Bookmarks',
+                  fileName: _bookMarkFileName,
+                  bytes: fileBytes,
+                  allowedExtensions: ['txt'],
+                );
+
+                if (outputFile != null) {
+                  if (!context.mounted) return;
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text('Saved')));
+                } else {
+                  throw "Filepicker canceled";
+                }
+              } catch (e) {
+                if (!context.mounted) return;
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(SnackBar(content: Text('Export failed: $e')));
+              }
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.download), // import
+            tooltip: 'Import List',
+
+            onPressed: () async {
+              try {
+                FilePickerResult? result = await FilePicker.platform.pickFiles(
+                  type: FileType.custom,
+                  allowedExtensions: ['txt'],
+                  withData: true,
+                );
+
+                if (result != null && result.files.single.bytes != null) {
+                  final Uint8List fileBytes = result.files.single.bytes!;
+                  final String content = utf8.decode(fileBytes);
+                  final res = <String>[];
+                  for (var w in content.split(RegExp(r'\r\n?|\n'))) {
+                    w = cleanWord(w);
+                    if (w.isEmpty) continue;
+                    res.add(w);
+                  }
+                  final addedCound = BookMarks.addAll(res);
+                  if (!context.mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        'Added $addedCound word${addedCound > 1 ? "s" : ""} to bookmark',
+                      ),
+                    ),
+                  );
+                } else {
+                  throw "Import canceled";
+                }
+              } catch (e) {
+                if (!context.mounted) return;
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(SnackBar(content: Text('Import failed: $e')));
+              }
+            },
+          ),
+        ],
       ),
       drawer: buildDrawer(context),
       body: SafeArea(

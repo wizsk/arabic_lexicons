@@ -1,5 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:ara_dict/alphabets.dart';
+import 'package:ara_dict/book_marks.dart';
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/etc.dart';
 
@@ -30,7 +32,7 @@ class _ReaderPageState extends State<ReaderPage> {
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
 
-  List<String> _paragraphs = [];
+  List<List<WordEntry>> _paragraphs = [];
   String? _title;
   late final Directory _booksDir;
 
@@ -74,29 +76,38 @@ class _ReaderPageState extends State<ReaderPage> {
   void _showText() {
     final text = _controller.text.trim();
     if (text.isEmpty) return;
-    _paragraphs = _splitLines(text);
-    final t = _paragraphs.first;
+    _paragraphs = _cleanInputAndPrepare(text);
+    final t = _paragraphs.first.map((w) => w.ar).join(" ");
     _title = t.length > 50 ? t.substring(0, 50) : t;
     setState(() {});
-    if (!_isTempMode) {
-      _saveFile();
-    } else {
-      _controller.clear();
-    }
+
+    _saveBookTxt(_paragraphs);
+    _controller.clear();
     _textFiledSize = _minTextFiledSize;
     _isTempMode = false;
   }
 
-  List<String> _splitLines(String text) {
+  List<List<WordEntry>> _cleanInputAndPrepare(String text) {
     text = text.trim();
     if (text.isEmpty) return [];
-    return text
+    final lines = text
         .replaceAll('\r\n', '\n')
         .replaceAll('\r', '\n')
         .split(RegExp(r'\n+'))
-        .map((l) => l.trim())
-        .where((l) => l.isNotEmpty)
-        .toList();
+        .map((l) => l.trim());
+
+    List<List<WordEntry>> res = [];
+    for (final l in lines) {
+      if (l.isEmpty) continue;
+      List<WordEntry> curr = [];
+      for (var w in l.split(RegExp(r' +'))) {
+        w = w.trim();
+        if (w.isEmpty) continue;
+        curr.add(WordEntry(ar: w, cl: cleanWord(w)));
+      }
+      if (curr.isNotEmpty) res.add(curr);
+    }
+    return res;
   }
 
   Future<void> _initStorage() async {
@@ -134,16 +145,15 @@ class _ReaderPageState extends State<ReaderPage> {
     return sha1.convert(bytes).toString(); // short but unique
   }
 
-  Future<void> _saveFile() async {
-    final content = _controller.text.trim();
-    _controller.clear();
-    if (content.isEmpty) return;
+  Future<void> _saveBookTxt(List<List<WordEntry>> peras) async {
+    if (peras.isEmpty) return;
 
-    final lines = _splitLines(content);
-    if (lines.isEmpty) return;
-
-    String displayName = lines.first.split(RegExp(r' +')).join(" ");
+    String displayName = peras.first.map((w) => w.ar).join(" ");
     if (displayName.length > 100) displayName = displayName.substring(0, 100);
+
+    String content = peras
+        .map((p) => p.map((w) => '${w.cl}:${w.ar}').join("\n"))
+        .join("\n\n");
 
     final hash = _hashText(content); // filename
     final exists = _books.any((b) => b.hash == hash);
@@ -190,8 +200,22 @@ class _ReaderPageState extends State<ReaderPage> {
     if (!await file.exists()) return;
 
     final content = await file.readAsString();
-    _paragraphs = _splitLines(content);
-    final t = _paragraphs.first;
+    _paragraphs = [];
+    for (var p in content.split("\n\n")) {
+      p = p.trim();
+      if (p.isEmpty) continue;
+      List<WordEntry> curr = [];
+      for (var w in p.split('\n')) {
+        w = w.trim();
+        if (w.isEmpty) continue;
+        final parts = w.split(':');
+        if (parts.length != 2) continue;
+        curr.add(WordEntry(ar: parts[1], cl: parts[0]));
+      }
+      if (curr.isNotEmpty) _paragraphs.add(curr);
+    }
+
+    final t = _paragraphs.first.map((w) => w.ar).join(" ");
     _title = t.length > 50 ? t.substring(0, 50) : t;
 
     _isTempMode = false;
@@ -215,6 +239,11 @@ class _ReaderPageState extends State<ReaderPage> {
     final btnTheme = FilledButton.styleFrom(
       backgroundColor: cs.primary.withAlpha(30),
       foregroundColor: cs.primary,
+    );
+
+    // final cs = Theme.of(context).colorScheme;
+    final highWordStyle = arabicFontStyle.copyWith(
+      color: cs.error,
     );
 
     return Scaffold(
@@ -420,14 +449,14 @@ class _ReaderPageState extends State<ReaderPage> {
                 itemCount: _paragraphs.length,
                 itemBuilder: (context, index) {
                   final textAlign = _isQasidah ? TextAlign.right : _textAlign;
-
                   return Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     child: ClickableParagraph(
                       peraIndex: index,
                       isQasidah: _isQasidah,
-                      text: _paragraphs[index],
+                      pera: _paragraphs[index],
                       textStyleBodyMedium: arabicFontStyle,
+                      highTextStyleBodyMedium: highWordStyle,
                       textAlign: textAlign,
                       onWordTap: (word) {
                         openDict(context, word);
@@ -453,17 +482,10 @@ class _ReaderPageState extends State<ReaderPage> {
                       _textAlign,
                       _paragraphs,
                       () {
-                        // final res = await showConfirmDialog(
-                        //   context,
-                        //   message: "Do you realy want to exit?",
-                        // );
-                        // if (res != null && res) {
-                        // after if no longer in reader mode
                         _paragraphs = [];
                         _isQasidah = false;
                         _textAlign = TextAlign.justify;
                         setState(() {});
-                        // }
                       },
                     );
 
@@ -485,20 +507,22 @@ class _ReaderPageState extends State<ReaderPage> {
 }
 
 class ClickableParagraph extends StatelessWidget {
-  final String text;
+  final List<WordEntry> pera;
   final int peraIndex;
   final bool isQasidah;
   final void Function(String word) onWordTap;
   final TextStyle textStyleBodyMedium;
+  final TextStyle highTextStyleBodyMedium;
   final TextAlign textAlign;
 
   const ClickableParagraph({
     super.key,
-    required this.text,
+    required this.pera,
     required this.peraIndex,
     required this.isQasidah,
     required this.onWordTap,
     required this.textStyleBodyMedium,
+    required this.highTextStyleBodyMedium,
     this.textAlign = TextAlign.justify,
   });
 
@@ -513,9 +537,6 @@ class ClickableParagraph extends StatelessWidget {
 
   List<TextSpan> _buildSpans() {
     final spans = <TextSpan>[];
-
-    final words = text.split(RegExp(r'\s+'));
-    if (words.isEmpty) return spans;
 
     if (isQasidah) {
       if (peraIndex % 2 == 0) {
@@ -532,11 +553,14 @@ class ClickableParagraph extends StatelessWidget {
       spans.add(TextSpan(children: [WidgetSpan(child: SizedBox(width: 20))]));
     }
 
-    for (final word in words) {
+    for (final word in pera) {
       spans.add(
         TextSpan(
-          text: '$word ',
-          recognizer: TapGestureRecognizer()..onTap = () => onWordTap(word),
+          text: '${word.ar} ',
+          recognizer: TapGestureRecognizer()..onTap = () => onWordTap(word.cl),
+          style: BookMarks.isSet(word.cl)
+              ? highTextStyleBodyMedium
+              : null,
         ),
       );
     }

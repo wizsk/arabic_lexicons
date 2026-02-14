@@ -1,6 +1,7 @@
 import 'package:ara_dict/conf.dart';
 import 'package:flutter/material.dart';
 
+
 final appSettingsNotifier = AppSettingsController();
 
 const appName = 'Arabic Lexcions';
@@ -84,3 +85,10 @@ final List<DictEntry> dictNames = [
   DictEntry(d: Dict.mujamulWasith, ar: "الوسيط", en: "Al-Waseet"),
   DictEntry(d: Dict.mujamulMuhith, ar: "المحيط", en: "Al-Muhit"),
 ];
+
+class WordEntry {
+  final String ar;
+  final String cl;
+
+  const WordEntry({required this.ar, required this.cl});
+}

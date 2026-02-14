@@ -1,4 +1,5 @@
 import 'package:ara_dict/ar_en.dart';
+import 'package:ara_dict/book_marks.dart';
 import 'package:flutter/material.dart';
 import 'package:ara_dict/sv.dart';
 import 'package:ara_dict/txt.dart';
@@ -139,22 +140,27 @@ class _SearchLexiconsState extends State<SearchLexicons> {
     final arabicFontStyle = appSettingsNotifier.getArabicTextStyle(context);
     final fontStyle = TextStyle(
       fontWeight: FontWeight.bold,
-      // fontSize: 20,
       fontFamily: arabicFontStyle.fontFamily,
     );
 
     if (_selectedWord != null) {
+      final bm = BookMarks.isSet(_selectedWord);
       return Text.rich(
         TextSpan(
           // style: ,
           children: [
             TextSpan(text: _selectedDict.ar, style: fontStyle),
             TextSpan(
-              text: ': $_selectedWord',
+              text: ': $_selectedWord ',
               style: TextStyle(fontFamily: arabicFontStyle.fontFamily),
             ),
+            if (bm)
+              WidgetSpan(
+                child: Icon(Icons.bookmark),
+              ),
           ],
         ),
+        textDirection: TextDirection.rtl,
       );
     }
     return Text.rich(TextSpan(text: _selectedDict.ar, style: fontStyle));
@@ -170,18 +176,24 @@ class _SearchLexiconsState extends State<SearchLexicons> {
         child: Column(
           children: [
             Expanded(
-              child: showRes(arTxtTheme, _selectedDict.d, _selectedWord, _dbRes, _arEnRes),
+              child: showRes(
+                arTxtTheme,
+                _selectedDict.d,
+                _selectedWord,
+                _dbRes,
+                _arEnRes,
+              ),
             ),
 
             Divider(thickness: 0.5, height: 0),
             Padding(
-              // padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
-              padding: const EdgeInsets.only(
-                top: 8,
-                bottom: 8,
-                right: 2,
-                left: 8,
-              ),
+              padding: const EdgeInsets.all(8),
+              // padding: const EdgeInsets.s(
+              //   top: 8,
+              //   bottom: 8,
+              //   right: 2,
+              //   left: 8,
+              // ),
               child: Row(
                 children: [
                   Expanded(
@@ -226,7 +238,7 @@ class _SearchLexiconsState extends State<SearchLexicons> {
                       ),
                     ),
                   ),
-                  SizedBox(width: 5,),
+                  SizedBox(width: 5),
                   IconButton.filledTonal(
                     icon: Icon(dictWordSelectModalOpenIcon),
                     onPressed: () async {

@@ -1,3 +1,4 @@
+import 'package:ara_dict/book_marks.dart';
 import 'package:ara_dict/help.dart';
 import 'package:ara_dict/reader.dart';
 import 'package:ara_dict/theme.dart';
@@ -11,6 +12,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await DbService.init();
   await ArEnDict.init();
+  await BookMarks.load();
   await appSettingsNotifier.load();
   runApp(const MyApp());
 }
@@ -25,7 +27,7 @@ class MyApp extends StatelessWidget {
       builder: (context, _) {
         return Listener(
           behavior: HitTestBehavior.translucent,
-          onPointerDown:  appSettingsNotifier.wake.onUserActivity,
+          onPointerDown: appSettingsNotifier.wake.onUserActivity,
           child: MaterialApp(
             debugShowCheckedModeBanner: false,
             title: 'Arabic Lexicons',

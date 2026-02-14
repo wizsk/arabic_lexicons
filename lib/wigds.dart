@@ -48,7 +48,7 @@ Widget buildDrawer(BuildContext context) {
               ),
               ListTile(
                 selected: currRoute == Routes.bookMarks,
-                title: Text("Book Marks"),
+                title: Text("BookMarks"),
                 leading: Icon(Icons.bookmark),
                 onTap: () {
                   Navigator.pop(context);

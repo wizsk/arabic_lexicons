@@ -76,6 +76,12 @@ class BookMarks {
     return _saveToFile();
   }
 
+  static bool rmAll() {
+    if (_bookMarkedWords.isEmpty) return true;
+    _bookMarkedWords.clear();
+    return _saveToFile();
+  }
+
   static bool _saveToFile() {
     if (_bookMarkedWords.isEmpty) {
       try {
@@ -119,41 +125,65 @@ class _BookMarkPageState extends State<BookMarkPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Bookmarks'),
+        centerTitle: false,
+        title: Text('BookMarks'),
 
         actions: [
           IconButton(
+            icon: const Icon(Icons.delete_sweep), // export
+            tooltip: 'Delete all',
+            onPressed: BookMarks.isEmpty
+                ? null
+                : () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Long press to delete')),
+                    );
+                  },
+            onLongPress: BookMarks.isEmpty
+                ? null
+                : () async {
+                    final res = await showConfirmDialog(
+                      context,
+                      message: 'Delete all bookmarked words?',
+                    );
+                    if (res ?? false) {
+                      BookMarks.rmAll();
+                    }
+                  },
+          ),
+          IconButton(
             icon: const Icon(Icons.upload_file), // export
             tooltip: 'Export List',
-            onPressed: () async {
-              if (BookMarks.isEmpty) return;
-              try {
-                Uint8List fileBytes = Uint8List.fromList(
-                  utf8.encode(BookMarks.list.join("\n")),
-                );
+            onPressed: BookMarks.isEmpty
+                ? null
+                : () async {
+                    try {
+                      Uint8List fileBytes = Uint8List.fromList(
+                        utf8.encode(BookMarks.list.join("\n")),
+                      );
 
-                String? outputFile = await FilePicker.platform.saveFile(
-                  dialogTitle: 'Export Bookmarks',
-                  fileName: _bookMarkFileName,
-                  bytes: fileBytes,
-                  allowedExtensions: ['txt'],
-                );
+                      String? outputFile = await FilePicker.platform.saveFile(
+                        dialogTitle: 'Export Bookmarks',
+                        fileName: _bookMarkFileName,
+                        bytes: fileBytes,
+                        allowedExtensions: ['txt'],
+                      );
 
-                if (outputFile != null) {
-                  if (!context.mounted) return;
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(SnackBar(content: Text('Saved')));
-                } else {
-                  throw "Filepicker canceled";
-                }
-              } catch (e) {
-                if (!context.mounted) return;
-                ScaffoldMessenger.of(
-                  context,
-                ).showSnackBar(SnackBar(content: Text('Export failed: $e')));
-              }
-            },
+                      if (outputFile != null) {
+                        if (!context.mounted) return;
+                        ScaffoldMessenger.of(
+                          context,
+                        ).showSnackBar(SnackBar(content: Text('Saved')));
+                      } else {
+                        throw "Filepicker canceled";
+                      }
+                    } catch (e) {
+                      if (!context.mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Export failed: $e')),
+                      );
+                    }
+                  },
           ),
           IconButton(
             icon: const Icon(Icons.download), // import

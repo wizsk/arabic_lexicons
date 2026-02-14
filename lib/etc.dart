@@ -105,13 +105,14 @@ Future<({DictEntry de, String? word})?> showWordPickerBottomSheet(
                       ),
                     ),
 
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 2,
-                        vertical: 8,
+                    if (words.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 2,
+                          vertical: 8,
+                        ),
+                        child: Divider(thickness: 0.5),
                       ),
-                      child: Divider(thickness: 0.5),
-                    ),
 
                     Wrap(
                       textDirection: TextDirection.rtl,

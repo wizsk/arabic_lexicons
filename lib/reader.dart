@@ -73,6 +73,12 @@ class _ReaderPageState extends State<ReaderPage> {
     }
   }
 
+  void _resetReaderInputPage() {
+    _controller.clear();
+    _textFiledSize = _minTextFiledSize;
+    _isTempMode = false;
+  }
+
   void _showText() {
     final text = _controller.text.trim();
     if (text.isEmpty) return;
@@ -81,10 +87,8 @@ class _ReaderPageState extends State<ReaderPage> {
     _title = t.length > 50 ? t.substring(0, 50) : t;
     setState(() {});
 
-    _saveBookTxt(_paragraphs);
-    _controller.clear();
-    _textFiledSize = _minTextFiledSize;
-    _isTempMode = false;
+    if (!_isTempMode) _saveBookTxt(_paragraphs);
+    _resetReaderInputPage();
   }
 
   List<List<WordEntry>> _cleanInputAndPrepare(String text) {
@@ -218,10 +222,8 @@ class _ReaderPageState extends State<ReaderPage> {
     final t = _paragraphs.first.map((w) => w.ar).join(" ");
     _title = t.length > 50 ? t.substring(0, 50) : t;
 
-    _isTempMode = false;
-    _textFiledSize = _minTextFiledSize;
-    _controller.clear();
     setState(() {});
+    _resetReaderInputPage();
   }
 
   final int _minTextFiledSize = 4;

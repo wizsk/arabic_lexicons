@@ -9,6 +9,7 @@ Widget showRes(
   String? currWord,
   List<Map<String, dynamic>>? dbRes,
   List<Entry>? arEnRes,
+  ColorScheme cs,
 ) {
   if (currWord == null || currWord.isEmpty) return _noRes(ts, currWord);
 
@@ -44,10 +45,21 @@ Widget showRes(
         } else {
           txt = row['meanings'] ?? '';
         }
+
+        final isHi = row['isHi'] ?? false;
         // return RichText(text: TextSpan(text: row['meanings']));
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: 8),
-          child: meaningView(txt, fontFam, dir, al, ts.fontSize!, ts.height!),
+          child: meaningView(
+            txt,
+            fontFam,
+            dir,
+            al,
+            ts.fontSize!,
+            ts.height!,
+            cs,
+            isHi,
+          ),
         );
       },
     );
@@ -62,6 +74,8 @@ Widget meaningView(
   TextAlign al,
   double fsz,
   double lh,
+  ColorScheme cs,
+  bool isHighResult,
 ) {
   return Html(
     data: html,
@@ -72,10 +86,12 @@ Widget meaningView(
         direction: dir,
         textAlign: al,
         fontSize: FontSize(fsz),
+        color: isHighResult ? cs.primary : null,
       ),
       'strong': Style(fontWeight: FontWeight.bold),
       'i': Style(fontStyle: FontStyle.italic),
       'center': Style(textAlign: TextAlign.center),
+      '.high': Style(color: cs.onPrimary, backgroundColor: cs.primary),
     },
   );
 }

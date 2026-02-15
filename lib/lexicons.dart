@@ -176,6 +176,7 @@ class _SearchLexiconsState extends State<SearchLexicons> {
   Widget build(BuildContext context) {
     final arTxtTheme = appSettingsNotifier.getArabicTextStyle(context);
     final bm = BookMarks.isSet(_selectedWord);
+    final cs = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: AppBar(
         title: appBarTxt(),
@@ -207,6 +208,7 @@ class _SearchLexiconsState extends State<SearchLexicons> {
                 _selectedWord,
                 _dbRes,
                 _arEnRes,
+                cs,
               ),
             ),
 

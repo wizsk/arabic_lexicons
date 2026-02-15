@@ -58,7 +58,7 @@ class DbService {
     if (word == null || word.isEmpty) {
       return const [];
     }
-    final db = await database;
+    final db = database;
     final res = await db.query(tableName, where: 'word = ?', whereArgs: [word]);
 
     final entries = <Map<String, dynamic>>[];
@@ -79,7 +79,7 @@ class DbService {
     if (word == null || word.isEmpty) {
       return const [];
     }
-    final db = await database;
+    final db = database;
     const q =
         'SELECT word, root, meanings FROM mujamul_ghoni WHERE root = ? OR no_harakat = ?';
     final res = await db.rawQuery(q, [word, word]);
@@ -92,7 +92,6 @@ class DbService {
       entries.add({
         'word': row['word'],
         'root': row['root'],
-        // same as strings.ReplaceAll(meanings, "|", "<br>")
         'meanings': meaningsRaw.replaceAll('|', '<br>'),
       });
     }
@@ -105,11 +104,9 @@ class DbService {
       return const [];
     }
 
-    final db = await database;
+    final db = database;
     final query = word.trim();
-    final results = <Map<String, dynamic>>[];
 
-    // 1️⃣ First query: parent_id of root matching word
     var res = await db.rawQuery(
       '''
       SELECT word, meanings, is_root
@@ -123,20 +120,9 @@ class DbService {
     );
 
     if (res.isNotEmpty) {
-      results.addAll(
-        res.map(
-          (row) => {
-            'word': row['word'],
-            'meanings': row['meanings'],
-            'isRoot': row['is_root'],
-            'isHi': false,
-          },
-        ),
-      );
-      return results;
+      return res;
     }
 
-    // 2️⃣ Second query: parent_id matching any word
     res = await db.rawQuery(
       '''
       SELECT word, meanings, is_root
@@ -149,6 +135,7 @@ class DbService {
       [query],
     );
 
+    final results = <Map<String, dynamic>>[];
     if (res.isNotEmpty) {
       results.addAll(
         res.map((row) {
@@ -156,15 +143,14 @@ class DbService {
           return {
             'word': w,
             'meanings': row['meanings'],
-            'isRoot': row['is_root'],
-            // 'isHi': w == query, // match highlighted word
+            // 'isRoot': row['is_root'],
+            'isHi': w == query, // match highlighted word result
           };
         }),
       );
       return results;
     }
 
-    // 3️⃣ Third query: LIKE search if query length >= 3
     if (query.length >= 3) {
       res = await db.rawQuery(
         '''
@@ -184,7 +170,7 @@ class DbService {
           // Highlight query inside meanings
           final highlighted = m.replaceAll(
             query,
-            '<span style="background-color: yellow;">$query</span>',
+            '<span class="high">$query</span>',
           );
 
           return {'word': w, 'meanings': highlighted, 'isRoot': row['is_root']};
@@ -203,17 +189,32 @@ class DbService {
 	WHERE parent_id IN (SELECT parent_id FROM lanelexcon WHERE is_root AND WORD = ?)
 	ORDER BY id''';
 
-    final db = await database;
+    final db = database;
     var res = await db.rawQuery(q, [word]);
 
-    if (res.isEmpty) {
-      q = '''SELECT word, meanings, is_root FROM lanelexcon
+    if (res.isNotEmpty) {
+      return res;
+    }
+    q = '''SELECT word, meanings, is_root FROM lanelexcon
        WHERE parent_id IN (SELECT parent_id FROM lanelexcon WHERE WORD = ?)
        ORDER BY id''';
-      res = await db.rawQuery(q, [word]);
-    }
+    res = await db.rawQuery(q, [word]);
 
-    return res;
+    final results = <Map<String, dynamic>>[];
+    if (res.isNotEmpty) {
+      results.addAll(
+        res.map((row) {
+          final w = row['word'] as String? ?? '';
+          return {
+            'word': w,
+            'meanings': row['meanings'],
+            'isRoot': row['is_root'],
+            'isHi': w == word,
+          };
+        }),
+      );
+    }
+    return results;
   }
 
   static Future<void> close() async {

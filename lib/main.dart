@@ -9,10 +9,14 @@ import 'package:ara_dict/lexicons.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await DbService.init();
-  await ArEnDict.init();
-  await BookMarks.load();
-  await appSettingsNotifier.load();
+
+  await Future.wait([
+    DbService.init(),
+    ArEnDict.init(),
+    BookMarks.load(),
+    appSettingsNotifier.load(),
+  ]);
+
   runApp(const MyApp());
 }
 

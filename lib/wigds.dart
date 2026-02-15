@@ -58,6 +58,17 @@ Widget buildDrawer(BuildContext context) {
                 },
               ),
               ListTile(
+                selected: currRoute == Routes.fams,
+                title: Text("Verb Famalies"),
+                leading: Icon(Icons.info),
+                onTap: () {
+                  Navigator.pop(context);
+                  if (currRoute != Routes.fams) {
+                    Navigator.pushReplacementNamed(context, Routes.fams);
+                  }
+                },
+              ),
+              ListTile(
                 selected: currRoute == Routes.help,
                 title: Text("Help"),
                 leading: Icon(Icons.help),

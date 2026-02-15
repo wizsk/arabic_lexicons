@@ -1,7 +1,6 @@
 import 'package:ara_dict/conf.dart';
 import 'package:flutter/material.dart';
 
-
 final appSettingsNotifier = AppSettingsController();
 
 const appName = 'Arabic Lexcions';
@@ -17,6 +16,7 @@ class Routes {
   static const dictionary = '/dictionary';
   static const reader = '/reader';
   static const bookMarks = '/bookMarks';
+  static const fams = '/fams';
   static const help = '/help';
 }
 

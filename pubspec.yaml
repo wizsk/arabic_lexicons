@@ -15,7 +15,6 @@ dependencies:
   path: ^1.9.1
   flutter_html: ^3.0.0
   path_provider: ^2.1.5
-  flutter_launcher_icons: ^0.14.4
   shared_preferences: ^2.5.4
   url_launcher: ^6.3.2
   crypto: ^3.0.7
@@ -27,6 +26,7 @@ dev_dependencies:
     sdk: flutter
 
   flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.14.4
 
 flutter:
   # The following line ensures that the Material Icons font is
@@ -61,18 +61,3 @@ flutter:
         - asset: assets/fonts/kitab/Kitab-Regular.ttf
         - asset: assets/fonts/kitab/Kitab-Bold.ttf
           weight: 700
-
-# flutter pub get
-# dart run flutter_launcher_icons
-flutter_launcher_icons:
-  android: "launcher_icon"
-  # ios: true
-  image_path: "assets/icons/icon.png"
-  min_sdk_android: 24 # android min sdk min:16, default 21
-  adaptive_icon_background: "#020311ff"
-  adaptive_icon_foreground: "assets/icons/icon.png"
-  # windows:
-  #   generate: true
-  #   image_path: "assets/icons/icon.png"
-  #   icon_size: 48 # min:48, max:256, default: 48
-

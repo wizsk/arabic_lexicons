@@ -16,6 +16,7 @@ all working completely offline.
 - **Quick switching**: Easily switch between different words and lexicons
 - **Reader mode**: Read Arabic text or poetry - tap any word for its meaning
 - **Fully offline**: The app doesn't even require internet permission - all dictionaries work completely offline
+- **BookMark**: BookMark words to review later. And highligh words while reading.
 - **Lightweight design**: Despite containing extensive lexical data, the app is optimized to be as small as possible (~60MB, mostly the compressed database)
 
 **Go to [Screenshots](#screenshots) to see the features in action**

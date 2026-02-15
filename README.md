@@ -59,24 +59,25 @@ The app includes 9 comprehensive dictionaries - 2 English-Arabic dictionaries an
 
 **Main page. Lexicon and Word Switcher:**
 
-[<img src="assets/showcase/00.png"  width=220>](assets/showcase/00.png)
-[<img src="assets/showcase/01.png"  width=220>](assets/showcase/01.png)
-
+[<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/0.png"  width=220>](fastlane/metadata/android/en-US/images/phoneScreenshots/0.png)
+[<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/1.png"  width=220>](fastlane/metadata/android/en-US/images/phoneScreenshots/1.png)
 
 **Reader Page**:
 
-[<img src="assets/showcase/02.png"  width=220>](assets/showcase/02.png)
-[<img src="assets/showcase/03.png"  width=220>](assets/showcase/03.png)
-[<img src="assets/showcase/04.png"  width=220>](assets/showcase/04.png)
+[<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/2.png"  width=220>](fastlane/metadata/android/en-US/images/phoneScreenshots/2.png)
+[<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/3.png"  width=220>](fastlane/metadata/android/en-US/images/phoneScreenshots/3.png)
+[<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/4.png"  width=220>](fastlane/metadata/android/en-US/images/phoneScreenshots/4.png)
 
 **Qasidah(Poem) Mode**:
 
-[<img src="assets/showcase/05.png"  width=220>](assets/showcase/05.png)
+[<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/5.png"  width=220>](fastlane/metadata/android/en-US/images/phoneScreenshots/5.png)
 
 **Lastly**:
 
-[<img src="assets/showcase/06.png"  width=220>](assets/showcase/06.png)
-[<img src="assets/showcase/07.png"  width=220>](assets/showcase/07.png)
+[<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/6.png"  width=220>](fastlane/metadata/android/en-US/images/phoneScreenshots/6.png)
+[<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/7.png"  width=220>](fastlane/metadata/android/en-US/images/phoneScreenshots/7.png)
+[<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/8.png"  width=220>](fastlane/metadata/android/en-US/images/phoneScreenshots/8.png)
+[<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/9.png"  width=220>](fastlane/metadata/android/en-US/images/phoneScreenshots/9.png)
 
 ## Build or run
 

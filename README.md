@@ -59,11 +59,16 @@ The app includes 9 comprehensive dictionaries - 2 English-Arabic dictionaries an
 
 **Main page. Lexicon and Word Switcher:**
 
+> Click on the bookmark icon on top or **press and hold** on the word in the word switcher to bookmark the word.
+
 [<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/0.png"  width=220>](fastlane/metadata/android/en-US/images/phoneScreenshots/0.png)
 [<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/1.png"  width=220>](fastlane/metadata/android/en-US/images/phoneScreenshots/1.png)
 
 **Reader Page**:
 
+> Click on any word to see the meanings or bookmark/highlight it.
+
+[<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/10.png"  width=220>](fastlane/metadata/android/en-US/images/phoneScreenshots/10.png)
 [<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/2.png"  width=220>](fastlane/metadata/android/en-US/images/phoneScreenshots/2.png)
 [<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/3.png"  width=220>](fastlane/metadata/android/en-US/images/phoneScreenshots/3.png)
 [<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/4.png"  width=220>](fastlane/metadata/android/en-US/images/phoneScreenshots/4.png)
@@ -73,6 +78,8 @@ The app includes 9 comprehensive dictionaries - 2 English-Arabic dictionaries an
 [<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/5.png"  width=220>](fastlane/metadata/android/en-US/images/phoneScreenshots/5.png)
 
 **Lastly**:
+
+> BMs aka Bookmarks page, click on the word to open dictionary.
 
 [<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/6.png"  width=220>](fastlane/metadata/android/en-US/images/phoneScreenshots/6.png)
 [<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/7.png"  width=220>](fastlane/metadata/android/en-US/images/phoneScreenshots/7.png)

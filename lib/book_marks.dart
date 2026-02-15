@@ -21,17 +21,19 @@ class BookMarks {
   static final Set<String> _bookMarkedWords = {};
 
   static Future<void> load() async {
-    final dir = await getApplicationDocumentsDirectory();
-    _bookMarkFile = File(join(dir.path, _bookMarkFileName));
-    _bookMarkFileTmp = File(
-      join(dir.path, 'arabic_lexicons_bookMarks_tmp.txt'),
-    );
+    try {
+      final dir = await getApplicationDocumentsDirectory();
+      _bookMarkFile = File(join(dir.path, _bookMarkFileName));
+      _bookMarkFileTmp = File(
+        join(dir.path, 'arabic_lexicons_bookMarks_tmp.txt'),
+      );
 
-    if (!await _bookMarkFile.exists()) return;
-    for (var w in await _bookMarkFile.readAsLines()) {
-      w = w.trim();
-      if (w.isNotEmpty) _bookMarkedWords.add(w);
-    }
+      if (!await _bookMarkFile.exists()) return;
+      for (var w in await _bookMarkFile.readAsLines()) {
+        w = w.trim();
+        if (w.isNotEmpty) _bookMarkedWords.add(w);
+      }
+    } catch (e) {}
   }
 
   static bool isSet(String? w) {

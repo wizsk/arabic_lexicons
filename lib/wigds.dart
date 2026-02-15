@@ -138,6 +138,7 @@ Future<bool?> showInfoDialog(
     title,
     message: message,
     dir: dir,
+    confirmText: confirmText,
     cancelText: null,
   );
 }

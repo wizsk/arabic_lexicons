@@ -16,7 +16,7 @@ class Routes {
   static const dictionary = '/dictionary';
   static const reader = '/reader';
   static const bookMarks = '/bookMarks';
-  // static const fams = '/fams';
+  static const startupscreen = '/startupscreen';
   // static const help = '/help';
 }
 

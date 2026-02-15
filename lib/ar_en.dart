@@ -91,17 +91,15 @@ class ArEnDict {
 
   static Future<void> init() async {
     if (loaded) return;
-    try {
-      await Future.wait([
-        _loadDict('assets/data/dictprefixes', _dictPref),
-        _loadDict('assets/data/dictstems', _dictStems),
-        _loadDict('assets/data/dictsuffixes', _dictSuff),
-        _loadTable('assets/data/tableab', _tableAB),
-        _loadTable('assets/data/tableac', _tableAC),
-        _loadTable('assets/data/tablebc', _tableBC),
-      ]);
-      loaded = true;
-    } catch (e) {}
+    await Future.wait([
+      _loadDict('assets/data/dictprefixes', _dictPref),
+      _loadDict('assets/data/dictstems', _dictStems),
+      _loadDict('assets/data/dictsuffixes', _dictSuff),
+      _loadTable('assets/data/tableab', _tableAB),
+      _loadTable('assets/data/tableac', _tableAC),
+      _loadTable('assets/data/tablebc', _tableBC),
+    ]);
+    loaded = true;
   }
 
   // removes all the char other than arabic!

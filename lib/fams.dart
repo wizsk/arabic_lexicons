@@ -114,7 +114,7 @@ class ArabicFamilyList extends StatelessWidget {
               ),
               const SizedBox(height: 20),
               Text(
-                'Grammar Terms',
+                "Grammar Glossary",
                 style: titleTextStyle.copyWith(color: colorScheme.onSurface),
               ),
               const Divider(),
@@ -179,7 +179,7 @@ class ArabicFamilyList extends StatelessWidget {
         title: const Text("Verb Families"),
         actions: [
           IconButton(
-            icon: Icon(Icons.info),
+            icon: Icon(Icons.info_outline),
             onPressed: () =>
                 _showGrammerTerms(context, arTextStyle, titleTextStyle),
           ),

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+
 
 class VerbFamilyInfo {
   final String formName;
@@ -44,25 +44,60 @@ class GrammarExplanation {
 const grammarTerms = [
   GrammarExplanation(
     "Transitive Verb",
-    "A verb that requires a direct object. The action passes to something.",
+    "A verb that requires a direct object. The action passes from the doer to a receiver (e.g., 'He wrote the letter').",
   ),
   GrammarExplanation(
     "Intransitive Verb",
-    "A verb that does not take a direct object. The action remains with the subject.",
+    "A verb that does not take a direct object. The action remains with the subject (e.g., 'He sat').",
   ),
-  GrammarExplanation("Reflexive", "The subject performs the action on itself."),
+  GrammarExplanation(
+    "Reflexive",
+    "The subject performs the action on itself (e.g., 'He taught himself' or 'He washed himself').",
+  ),
   GrammarExplanation(
     "Causative",
-    "The subject causes someone else to perform the action.",
+    "The subject causes someone or something else to perform the action or enter a state (e.g., 'To teach' is the causative of 'to know').",
   ),
   GrammarExplanation(
     "Reciprocal",
-    "Two or more subjects perform the action on each other.",
+    "Two or more subjects perform the action on each other simultaneously (e.g., 'They cooperated').",
   ),
-  GrammarExplanation("Intensive", "The action is strengthened or repeated."),
+  GrammarExplanation(
+    "Intensive",
+    "The action is done with greater force, frequency, or violence (e.g., 'To smash' vs. 'To break').",
+  ),
   GrammarExplanation(
     "Seeking Form",
-    "Indicates seeking, requesting, or attempting to obtain something.",
+    "Indicates asking for, seeking, or attempting to obtain the root meaning (Common in Form X).",
+  ),
+  // --- New Additions ---
+  GrammarExplanation(
+    "Root (Jizr)",
+    "The base sequence of consonants (usually three) that carries the core lexical meaning of the word, before any vowels or affixes are added.",
+  ),
+  GrammarExplanation(
+    "Triliteral",
+    "A root consisting of exactly three consonants. This is the standard foundation for most Arabic verbs.",
+  ),
+  GrammarExplanation(
+    "Gemination",
+    "The doubling of a consonant, resulting in a stronger sound. In Arabic script, this is marked with a Shadda (ّ). Critical for Forms II and IX.",
+  ),
+  GrammarExplanation(
+    "Affix (Prefix/Infix)",
+    "Letters added to the root to change its meaning. A 'Prefix' is added to the front (like 'ista-' in Form X), and an 'Infix' is inserted inside the root (like the 't' in Form VIII).",
+  ),
+  GrammarExplanation(
+    "Estimative",
+    "A mental action where the subject deems or considers the object to have a certain quality (e.g., 'He considered it good'). Common in Form X.",
+  ),
+  GrammarExplanation(
+    "Feigning",
+    "Pretending to have a certain quality or state that one does not actually possess (e.g., 'Pretending to be sick'). A unique feature of Form VI.",
+  ),
+  GrammarExplanation(
+    "Stative",
+    "A verb that describes a state of being or a condition (like a color or physical trait) rather than a dynamic action. Common in Form IX.",
   ),
 ];
 
@@ -74,36 +109,46 @@ const verbFamilies = [
     commonMeaning: "Basic root meaning.",
     transitivity: "Both",
     explanation:
-        "I carries the core lexical meaning of the root. It can be transitive or intransitive depending on the root.",
+        "The base form. It carries the core lexical meaning. It can be transitive (needs an object) or intransitive depending strictly on the root.",
     morphologyNote: "Pure triliteral root without additional letters.",
     examples: [
       VerbExample(
-        arabic: "كَتَبَ الرَّجُلُ الرِّسَالَةَ",
+        arabic: "كَتَبَ الرَّجُلُ الرِّسَالَةَ",
         literal: "The man wrote the letter",
         highlightedPart: "كَتَبَ",
       ),
       VerbExample(
-        arabic: "جَلَسَ الطِّفْلُ",
-        literal: "The child sat",
+        arabic: "جَلَسَ الطِّفْلُ عَلَى الكُرْسِيِّ",
+        literal: "The child sat on the chair",
         highlightedPart: "جَلَسَ",
+      ),
+      VerbExample(
+        arabic: "ذَهَبَ الطَّالِبُ إِلَى الْمَدْرَسَةِ",
+        literal: "The student went to school",
+        highlightedPart: "ذَهَبَ",
       ),
     ],
   ),
 
   VerbFamilyInfo(
     formName: "II",
-    pattern: "فَعَّلَ",
+    pattern: "فَعَّلَ",
     rootExample: "ع ل م",
-    commonMeaning: "Intensive or causative.",
-    transitivity: "Usually Transitive",
+    commonMeaning: "Causative or Intensive.",
+    transitivity: "Transitive",
     explanation:
-        "II strengthens or intensifies the root meaning. Often causative.",
-    morphologyNote: "Gemination (shadda) on middle root letter.",
+        "Often makes an intransitive root transitive (Causative). It can also indicate doing the action repeatedly or violently (Intensive).",
+    morphologyNote: "Gemination (shadda) on the middle root letter (Ayin).",
     examples: [
       VerbExample(
-        arabic: "عَلَّمَ المُدَرِّسُ الطُّلَّابَ",
-        literal: "The teacher taught the students",
-        highlightedPart: "عَلَّمَ",
+        arabic: "عَلَّمَ المُدَرِّسُ الطُّلَّابَ",
+        literal: "The teacher taught the students (caused them to know)",
+        highlightedPart: "عَلَّمَ",
+      ),
+      VerbExample(
+        arabic: "كَسَّرَ الزُّجَاجَ",
+        literal: "He smashed the glass to pieces (Intensive of 'broke')",
+        highlightedPart: "كَسَّرَ",
       ),
     ],
   ),
@@ -112,15 +157,26 @@ const verbFamilies = [
     formName: "III",
     pattern: "فَاعَلَ",
     rootExample: "ق ت ل",
-    commonMeaning: "Reciprocal interaction.",
+    commonMeaning: "Interaction / Reciprocity.",
     transitivity: "Transitive",
-    explanation: "Implies participation between two parties.",
-    morphologyNote: "Long vowel after first root letter.",
+    explanation:
+        "Implies an action done towards another entity, often suggesting an attempt or interaction.",
+    morphologyNote: "Alif added after the first root letter.",
     examples: [
       VerbExample(
-        arabic: "قَاتَلَ الجُنْدِيُّ العَدُوَّ",
+        arabic: "قَاتَلَ الجُنْدِيُّ العَدُوَّ",
         literal: "The soldier fought the enemy",
         highlightedPart: "قَاتَلَ",
+      ),
+      VerbExample(
+        arabic: "شَارَكَ المُوَظَّفُ فِي الاِجْتِمَاعِ",
+        literal: "The employee participated in the meeting",
+        highlightedPart: "شَارَكَ",
+      ),
+      VerbExample(
+        arabic: "سَافَرَ الرَّجُلُ",
+        literal: "The man traveled (journeyed through space)",
+        highlightedPart: "سَافَرَ",
       ),
     ],
   ),
@@ -132,30 +188,51 @@ const verbFamilies = [
     commonMeaning: "Causative.",
     transitivity: "Transitive",
     explanation:
-        "Indicates causing someone or something to do the root action.",
-    morphologyNote: "Prefix أَ added to triliteral root.",
+        "The standard causative form. It makes an intransitive verb transitive, or a transitive verb doubly transitive.",
+    morphologyNote: "Prefixed Hamza (أَ) before the root.",
     examples: [
       VerbExample(
-        arabic: "أَخْرَجَ المُعَلِّمُ الطُّلَّابَ",
-        literal: "The teacher made the students go out",
+        arabic: "أَخْرَجَ المُعَلِّمُ الكِتَابَ",
+        literal: "The teacher brought out the book",
         highlightedPart: "أَخْرَجَ",
+      ),
+      VerbExample(
+        arabic: "أَرْسَلَ اللهُ الرُّسُلَ",
+        literal: "Allah sent the messengers",
+        highlightedPart: "أَرْسَلَ",
+      ),
+      VerbExample(
+        arabic: "أَكْرَمَ الْمُضِيفُ الضَّيْفَ",
+        literal: "The host honored the guest",
+        highlightedPart: "أَكْرَمَ",
       ),
     ],
   ),
 
   VerbFamilyInfo(
     formName: "V",
-    pattern: "تَفَعَّلَ",
+    pattern: "تَفَعَّلَ",
     rootExample: "ع ل م",
-    commonMeaning: "Reflexive of II.",
-    transitivity: "Usually Intransitive",
-    explanation: "Subject performs action upon itself.",
-    morphologyNote: "Prefix تَ plus II structure.",
+    commonMeaning: "Reflexive of II / Gradualness.",
+    transitivity: "Intransitive",
+    explanation:
+        "Often the result of Form II. Can also imply gradualness or doing something with effort.",
+    morphologyNote: "Prefix (تَ) plus the gemination of Form II.",
     examples: [
       VerbExample(
-        arabic: "تَعَلَّمَ الطَّالِبُ",
-        literal: "The student learned",
-        highlightedPart: "تَعَلَّمَ",
+        arabic: "تَعَلَّمَ الطَّالِبُ الدَّرْسَ",
+        literal: "The student learned the lesson",
+        highlightedPart: "تَعَلَّمَ",
+      ),
+      VerbExample(
+        arabic: "تَكَلَّمَ الرَّجُلُ بِوُضُوحٍ",
+        literal: "The man spoke clearly",
+        highlightedPart: "تَكَلَّمَ",
+      ),
+      VerbExample(
+        arabic: "تَذَكَّرَ الْمَوْعِدَ",
+        literal: "He remembered the appointment",
+        highlightedPart: "تَذَكَّرَ",
       ),
     ],
   ),
@@ -164,15 +241,26 @@ const verbFamilies = [
     formName: "VI",
     pattern: "تَفَاعَلَ",
     rootExample: "ع و ن",
-    commonMeaning: "Mutual action.",
-    transitivity: "Reciprocal",
-    explanation: "Indicates mutual participation.",
-    morphologyNote: "Prefix تَ plus III structure.",
+    commonMeaning: "Reciprocity / Feigning.",
+    transitivity: "Reciprocal / Intransitive",
+    explanation:
+        "Indicates mutual action between two or more parties. Crucially, it can also mean pretending or feigning a state (e.g., pretending to be sick).",
+    morphologyNote: "Prefix (تَ) plus the Alif of Form III.",
     examples: [
       VerbExample(
-        arabic: "تَعَاوَنَ الطُّلَّابُ",
-        literal: "The students cooperated",
+        arabic: "تَعَاوَنَ الفَرِيقُ",
+        literal: "The team cooperated (with each other)",
         highlightedPart: "تَعَاوَنَ",
+      ),
+      VerbExample(
+        arabic: "تَجَاهَلَ المُدِيرُ الْمُشْكِلَةَ",
+        literal: "The manager feigned ignorance of the problem",
+        highlightedPart: "تَجَاهَلَ",
+      ),
+      VerbExample(
+        arabic: "تَنَافَسَ اللَّاعِبُونَ",
+        literal: "The players competed (against each other)",
+        highlightedPart: "تَنَافَسَ",
       ),
     ],
   ),
@@ -181,16 +269,26 @@ const verbFamilies = [
     formName: "VII",
     pattern: "اِنْفَعَلَ",
     rootExample: "ك س ر",
-    commonMeaning: "Passive or reflexive.",
+    commonMeaning: "Passive / Reflexive.",
     transitivity: "Intransitive",
     explanation:
-        "Often indicates passive meaning without explicit passive form.",
-    morphologyNote: "Prefix اِنْ added before root.",
+        "Strictly intransitive. It describes the state of having undergone the action. It is the reflexive/passive of Form I.",
+    morphologyNote: "Prefix (اِنْ) added before the root.",
     examples: [
       VerbExample(
-        arabic: "اِنْكَسَرَ الزُّجَاجُ",
-        literal: "The glass broke",
+        arabic: "اِنْكَسَرَ الكُوبُ",
+        literal: "The cup broke (shattered)",
         highlightedPart: "اِنْكَسَرَ",
+      ),
+      VerbExample(
+        arabic: "اِنْقَطَعَ الاِتِّصَالُ",
+        literal: "The connection was cut off",
+        highlightedPart: "اِنْقَطَعَ",
+      ),
+      VerbExample(
+        arabic: "اِنْفَجَرَ اللَّغَمُ",
+        literal: "The mine exploded",
+        highlightedPart: "اِنْفَجَرَ",
       ),
     ],
   ),
@@ -199,32 +297,49 @@ const verbFamilies = [
     formName: "VIII",
     pattern: "اِفْتَعَلَ",
     rootExample: "ج م ع",
-    commonMeaning: "Internalized or effortful action.",
-    transitivity: "Usually Transitive",
-    explanation: "Often indicates exertion or deliberate action.",
-    morphologyNote: "Infix ت after first root letter.",
+    commonMeaning: "Participating / Taking for oneself.",
+    transitivity: "Varies",
+    explanation:
+        "Indicates doing the action for oneself, striving, or mutual participation. Often reflexive of Form I.",
+    morphologyNote: "Infix (ت) inserted after the first root letter.",
     examples: [
       VerbExample(
-        arabic: "اِجْتَمَعَ القَوْمُ",
-        literal: "The people gathered",
+        arabic: "اِجْتَمَعَ الْمُوَظَّفُونَ",
+        literal: "The employees gathered/met",
         highlightedPart: "اِجْتَمَعَ",
+      ),
+      VerbExample(
+        arabic: "اِشْتَرَى الرَّجُلُ سَيَّارَةً",
+        literal: "The man bought a car (for himself)",
+        highlightedPart: "اِشْتَرَى",
+      ),
+      VerbExample(
+        arabic: "اِسْتَمَعَ الطَّالِبُ",
+        literal: "The student listened (intent to hear)",
+        highlightedPart: "اِسْتَمَعَ",
       ),
     ],
   ),
 
   VerbFamilyInfo(
     formName: "IX",
-    pattern: "اِفْعَلَّ",
+    pattern: "اِفْعَلَّ",
     rootExample: "ح م ر",
-    commonMeaning: "Colors or defects.",
+    commonMeaning: "Colors / Physical Defects.",
     transitivity: "Intransitive",
-    explanation: "Used primarily for colors and physical states.",
-    morphologyNote: "Gemination on final root letter.",
+    explanation:
+        "Used almost exclusively for colors (turning a color) or physical defects (becoming twisted/crooked).",
+    morphologyNote: "Gemination (shadda) on the final root letter.",
     examples: [
       VerbExample(
-        arabic: "اِحْمَرَّ الوَجْهُ",
-        literal: "The face became red",
-        highlightedPart: "اِحْمَرَّ",
+        arabic: "اِحْمَرَّ وَجْهُهُ خَجَلًا",
+        literal: "His face turned red from shyness",
+        highlightedPart: "اِحْمَرَّ",
+      ),
+      VerbExample(
+        arabic: "اِصْفَرَّتْ أَوْرَاقُ الشَّجَرِ",
+        literal: "The tree leaves turned yellow",
+        highlightedPart: "اِصْفَرَّتْ",
       ),
     ],
   ),
@@ -233,104 +348,27 @@ const verbFamilies = [
     formName: "X",
     pattern: "اِسْتَفْعَلَ",
     rootExample: "غ ف ر",
-    commonMeaning: "Seeking or requesting.",
-    transitivity: "Usually Transitive",
-    explanation: "Indicates seeking or attempting to obtain the root meaning.",
-    morphologyNote: "Prefix اِسْتَ added before triliteral root.",
+    commonMeaning: "Requesting / Estimative.",
+    transitivity: "Transitive",
+    explanation:
+        "Indicates asking for the action (Requesting) or considering something to have a certain quality (Estimative).",
+    morphologyNote: "Prefix (اِسْتَ) added before the root.",
     examples: [
       VerbExample(
-        arabic: "اِسْتَغْفَرَ الرَّجُلُ رَبَّهُ",
-        literal: "The man sought forgiveness from his Lord",
+        arabic: "اِسْتَغْفَرَ الْمُؤْمِنُ رَبَّهُ",
+        literal: "The believer sought forgiveness from his Lord",
         highlightedPart: "اِسْتَغْفَرَ",
+      ),
+      VerbExample(
+        arabic: "اِسْتَخْدَمَ النَّاسُ التِّكْنُولُوجِيَا",
+        literal: "People utilized/used technology (sought service from it)",
+        highlightedPart: "اِسْتَخْدَمَ",
+      ),
+      VerbExample(
+        arabic: "اِسْتَحْسَنَ المُدِيرُ الاِقْتِرَاحَ",
+        literal: "The manager considered the proposal good (Estimative)",
+        highlightedPart: "اِسْتَحْسَنَ",
       ),
     ],
   ),
 ];
-
-List<TextSpan> highlightArabic(
-  BuildContext context,
-  String text,
-  String highlight,
-) {
-  final cs = Theme.of(context).colorScheme;
-  final parts = text.split(highlight);
-
-  if (parts.length < 2) {
-    return [TextSpan(text: text)];
-  }
-
-  return [
-    TextSpan(text: parts[0]),
-    TextSpan(
-      text: highlight,
-      style: TextStyle(color: cs.primary, fontWeight: FontWeight.bold),
-    ),
-    TextSpan(text: parts[1]),
-  ];
-}
-
-class GrammarTermsSection extends StatelessWidget {
-  const GrammarTermsSection({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        spacing: 8,
-        // runSpacing: 8,
-        children: [
-          // Padding(
-          //   padding: const EdgeInsets.all(20),
-          //   child: Text('Grammar terms:'),
-          // ),
-          ActionChip(label: Text('Grammar terms:')),
-          ...grammarTerms.map((term) {
-            return ActionChip(
-              label: Text(term.term),
-              onPressed: () {
-                showModalBottomSheet(
-                  context: context,
-                  builder: (_) => Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // drag handle
-                        Center(
-                          child: Container(
-                            width: 40,
-                            height: 4,
-                            margin: const EdgeInsets.only(bottom: 12),
-                            decoration: BoxDecoration(
-                              color: Colors.grey.shade500,
-                              borderRadius: BorderRadius.circular(2),
-                            ),
-                          ),
-                        ),
-
-                        // Text('${words.length}'),
-                        const SizedBox(height: 12),
-                        Text(
-                          term.term,
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        Text(term.definition),
-                        const SizedBox(height: 12),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            );
-          }),
-        ],
-      ),
-    );
-  }
-}

@@ -1,6 +1,6 @@
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/fams_data.dart';
-import 'package:ara_dict/wigds.dart';
+
 import 'package:flutter/material.dart';
 
 class ArabicFamilyList extends StatelessWidget {
@@ -185,7 +185,7 @@ class ArabicFamilyList extends StatelessWidget {
           ),
         ],
       ),
-      drawer: buildDrawer(context),
+      // drawer: buildDrawer(context),
       body: ListView.separated(
         padding: const EdgeInsets.all(16),
         itemCount: verbFamilies.length,

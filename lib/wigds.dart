@@ -1,5 +1,7 @@
 import 'package:ara_dict/data.dart';
+import 'package:ara_dict/fams.dart';
 import 'package:ara_dict/font_size.dart';
+import 'package:ara_dict/help.dart';
 
 import 'package:flutter/material.dart';
 
@@ -58,25 +60,27 @@ Widget buildDrawer(BuildContext context) {
                 },
               ),
               ListTile(
-                selected: currRoute == Routes.fams,
+                // selected: currRoute == Routes.fams,
                 title: Text("Verb Famalies"),
                 leading: Icon(Icons.info),
                 onTap: () {
                   Navigator.pop(context);
-                  if (currRoute != Routes.fams) {
-                    Navigator.pushReplacementNamed(context, Routes.fams);
-                  }
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => ArabicFamilyList()),
+                  );
                 },
               ),
               ListTile(
-                selected: currRoute == Routes.help,
+                // selected: currRoute == Routes.help,
                 title: Text("Help"),
                 leading: Icon(Icons.help),
                 onTap: () {
                   Navigator.pop(context);
-                  if (currRoute != Routes.help) {
-                    Navigator.pushReplacementNamed(context, Routes.help);
-                  }
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => HelpPage()),
+                  );
                 },
               ),
             ],

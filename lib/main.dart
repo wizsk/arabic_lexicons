@@ -1,6 +1,4 @@
 import 'package:ara_dict/book_marks.dart';
-import 'package:ara_dict/fams.dart';
-import 'package:ara_dict/help.dart';
 import 'package:ara_dict/reader.dart';
 import 'package:ara_dict/theme.dart';
 import 'package:flutter/material.dart';
@@ -41,8 +39,8 @@ class MyApp extends StatelessWidget {
               Routes.dictionary: (_) => const SearchLexicons(),
               Routes.reader: (_) => const ReaderPage(),
               Routes.bookMarks: (_) => const BookMarkPage(),
-              Routes.fams: (_) => const ArabicFamilyList(),
-              Routes.help: (_) => const HelpPage(),
+              // Routes.fams: (_) => const ArabicFamilyList(),
+              // Routes.help: (_) => const HelpPage(),
             },
           ),
         );

@@ -32,8 +32,9 @@ class _ReaderPageState extends State<ReaderPage> {
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
 
+  final _maxTitleLen = 40;
+
   List<List<WordEntry>> _paragraphs = [];
-  bool _isTashkilparagraphsInited = false;
   String? _title;
   late final Directory _booksDir;
 
@@ -85,7 +86,7 @@ class _ReaderPageState extends State<ReaderPage> {
     if (text.isEmpty) return;
     _paragraphs = _cleanInputAndPrepare(text);
     final t = _paragraphs.first.map((w) => w.ar).join(" ");
-    _title = t.length > 50 ? t.substring(0, 50) : t;
+    _title = t.length > _maxTitleLen ? t.substring(0, _maxTitleLen) : t;
     setState(() {});
 
     if (!_isTempMode) _saveBookTxt(_paragraphs);
@@ -102,7 +103,13 @@ class _ReaderPageState extends State<ReaderPage> {
       if (l.isEmpty) continue;
       List<WordEntry> curr = [];
       for (var w in l.split(RegExp(r'\s'))) {
-        curr.add(WordEntry(ar: w, cl: ArabicNormalizer.keepOnlyAr(w)));
+        curr.add(
+          WordEntry(
+            ar: w,
+            cl: ArabicNormalizer.keepOnlyAr(w),
+            nTk: ArabicNormalizer.rmTashkil(w),
+          ),
+        );
       }
       if (curr.isNotEmpty) res.add(curr);
     }
@@ -150,9 +157,7 @@ class _ReaderPageState extends State<ReaderPage> {
     String displayName = peras.first.map((w) => w.ar).join(" ");
     if (displayName.length > 100) displayName = displayName.substring(0, 100);
 
-    String content = peras
-        .map((p) => p.map((w) => '${w.cl}:${w.ar}').join("\n"))
-        .join("\n\n");
+    String content = peras.map((p) => p.map((w) => w.ar).join(" ")).join("\n");
 
     final hash = _hashText(content); // filename
     final exists = _books.any((b) => b.hash == hash);
@@ -199,20 +204,9 @@ class _ReaderPageState extends State<ReaderPage> {
     if (!await file.exists()) return;
 
     final content = await file.readAsString();
-    _paragraphs = [];
-    for (var p in content.split("\n\n")) {
-      p = p.trim();
-      if (p.isEmpty) continue;
-      List<WordEntry> curr = [];
-      for (var w in p.split('\n')) {
-        w = w.trim();
-        if (w.isEmpty) continue;
-        final parts = w.split(':');
-        if (parts.length != 2) continue;
-        curr.add(WordEntry(ar: parts[1], cl: parts[0]));
-      }
-      if (curr.isNotEmpty) _paragraphs.add(curr);
-    }
+    _paragraphs = _cleanInputAndPrepare(content);
+
+    if (_paragraphs.isEmpty) return;
 
     final t = _paragraphs.first.map((w) => w.ar).join(" ");
     _title = t.length > 50 ? t.substring(0, 50) : t;
@@ -485,7 +479,6 @@ class _ReaderPageState extends State<ReaderPage> {
                       _paragraphs,
                       () {
                         _paragraphs = [];
-                        _isTashkilparagraphsInited = false;
                         _rs.isQasidah = false;
                         _rs.isRmTashkil = false;
                         _rs.textAlign = TextAlign.justify;
@@ -503,17 +496,14 @@ class _ReaderPageState extends State<ReaderPage> {
                       );
                     }
 
-                    if (res.isRmTashkil) {
-                      if (!_isTashkilparagraphsInited) {
-                        for (int i = 0; i < _paragraphs.length; i++) {
-                          for (int j = 0; j < _paragraphs[i].length; j++) {
-                            _paragraphs[i][j].nTk = ArabicNormalizer.rmTashkil(
-                              _paragraphs[i][j].ar,
-                            );
-                          }
-                        }
-                        _isTashkilparagraphsInited = true;
-                      }
+                    if (_rs.isRmTashkil != res.isRmTashkil &&
+                        _paragraphs.isNotEmpty) {
+                      final nt = res.isRmTashkil
+                          ? _paragraphs.first.map((w) => w.nTk).join(" ")
+                          : _paragraphs.first.map((w) => w.ar).join(" ");
+                      _title = nt.length > _maxTitleLen
+                          ? nt.substring(0, _maxTitleLen)
+                          : nt;
                     }
 
                     _rs = res;

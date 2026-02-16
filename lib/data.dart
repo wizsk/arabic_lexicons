@@ -124,8 +124,8 @@ final List<DictEntry> dictNames = [
 
 class WordEntry {
   final String ar;
-  String nTk;
+  final String nTk;
   final String cl;
 
-  WordEntry({required this.ar, required this.cl, this.nTk = ''});
+  WordEntry({required this.ar, required this.cl, required this.nTk});
 }

@@ -8,12 +8,15 @@ import 'package:wakelock_plus/wakelock_plus.dart';
 class AppSettingsController extends ChangeNotifier {
   static const _themeKey = 'theme_mode';
   static const _fontKey = 'ar_font_size';
+  static const _lastRouteKey = 'route';
   static const _readerIsOpenLexiconDireclyKey = 'reader_db_pop';
+
   // isOpenLexiconDirecly
 
   late double fontSize;
   late ThemeMode theme;
   late bool _readerIsOpenLexiconDirecly;
+  late String _lastRoute;
 
   final wake = _WakelockController();
 
@@ -25,7 +28,10 @@ class AppSettingsController extends ChangeNotifier {
     theme = mode == 'dark' ? ThemeMode.dark : ThemeMode.light;
 
     fontSize = prefs.getDouble(_fontKey) ?? defaultArabicFontSize;
-    _readerIsOpenLexiconDirecly = prefs.getBool(_readerIsOpenLexiconDireclyKey) ?? false;
+    _readerIsOpenLexiconDirecly =
+        prefs.getBool(_readerIsOpenLexiconDireclyKey) ?? false;
+
+    _lastRoute = prefs.getString(_lastRouteKey) ?? routesToBeSavedInPref.first;
 
     await wake.load();
   }
@@ -34,25 +40,37 @@ class AppSettingsController extends ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     theme = mode;
     notifyListeners();
-    prefs.setString(_themeKey, mode == ThemeMode.dark ? 'dark' : 'light');
+    await prefs.setString(_themeKey, mode == ThemeMode.dark ? 'dark' : 'light');
   }
 
   /// DB -> dictionary, bookmark
   Future<void> saveReaderIsOpenLexiconDirecly(bool v) async {
     final prefs = await SharedPreferences.getInstance();
     _readerIsOpenLexiconDirecly = v;
-    prefs.setBool(_readerIsOpenLexiconDireclyKey, v);
+    await prefs.setBool(_readerIsOpenLexiconDireclyKey, v);
   }
 
   bool get readerIsOpenLexiconDirecly {
     return _readerIsOpenLexiconDirecly;
   }
 
+  Future<void> saveRoute(String r) async {
+    final prefs = await SharedPreferences.getInstance();
+    if (routesToBeSavedInPref.contains(r)) {
+      await prefs.setString(_lastRouteKey, r);
+    }
+  }
+
+  String get lastRoute {
+    if (routesToBeSavedInPref.contains(_lastRoute)) return _lastRoute;
+    return routesToBeSavedInPref.first;
+  }
+
   Future<void> setFontSize(double size) async {
     fontSize = size;
     final prefs = await SharedPreferences.getInstance();
     notifyListeners();
-    prefs.setDouble(_fontKey, size);
+    await prefs.setDouble(_fontKey, size);
   }
 
   TextStyle getArabicTextStyle(BuildContext context) {

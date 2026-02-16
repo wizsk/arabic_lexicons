@@ -20,6 +20,8 @@ class Routes {
   // static const help = '/help';
 }
 
+const routesToBeSavedInPref = [Routes.dictionary, Routes.reader];
+
 class DictEntry {
   final Dict d;
   final String ar;

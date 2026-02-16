@@ -34,6 +34,7 @@ Widget buildDrawer(BuildContext context) {
                   Navigator.pop(context);
                   if (currRoute != Routes.dictionary) {
                     Navigator.pushReplacementNamed(context, Routes.dictionary);
+                    appSettingsNotifier.saveRoute(Routes.dictionary);
                   }
                 },
               ),
@@ -45,6 +46,7 @@ Widget buildDrawer(BuildContext context) {
                   Navigator.pop(context);
                   if (currRoute != Routes.reader) {
                     Navigator.pushReplacementNamed(context, Routes.reader);
+                    appSettingsNotifier.saveRoute(Routes.reader);
                   }
                 },
               ),

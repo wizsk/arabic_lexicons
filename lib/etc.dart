@@ -216,7 +216,8 @@ Future<ReaderPageSettings?> showReaderModeSettings(
                               title: const Text('Right-aligned text'),
                               secondary: Icon(Icons.format_align_right),
                               value:
-                                  rs.textAlign == TextAlign.right || rs.isQasidah,
+                                  rs.textAlign == TextAlign.right ||
+                                  rs.isQasidah,
                               onChanged: rs.isQasidah
                                   ? null
                                   : (v) {
@@ -259,7 +260,9 @@ Future<ReaderPageSettings?> showReaderModeSettings(
                                 await Clipboard.setData(
                                   ClipboardData(
                                     text: peras
-                                        .map((p) => p.map((w) => w.ar).join(" "))
+                                        .map(
+                                          (p) => p.map((w) => w.ar).join(" "),
+                                        )
                                         .join("\n"),
                                   ),
                                 );
@@ -278,33 +281,41 @@ Future<ReaderPageSettings?> showReaderModeSettings(
                       ),
                     ),
                     const SizedBox(height: 30),
-                    Row(
-                      children: [
-                        FilledButton(
-                          onPressed: () {
-                            closeReader();
-                            Navigator.of(sheetContext).pop();
-                          },
-                          style: FilledButton.styleFrom(
-                            backgroundColor: Theme.of(
-                              context,
-                            ).colorScheme.error, // alert color
-                            foregroundColor: Theme.of(
-                              context,
-                            ).colorScheme.onError, // text/icon color
-                          ),
-                          child: const Text('Exit Reader'),
-                        ),
-                        SizedBox(width: 12),
-                        Expanded(
-                          child: FilledButton(
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: Row(
+                        children: [
+                          FilledButton.icon(
                             onPressed: () {
-                              Navigator.of(sheetContext).pop((rs));
+                              closeReader();
+                              Navigator.of(sheetContext).pop();
                             },
-                            child: const Text('Save'),
+                            style: FilledButton.styleFrom(
+                              backgroundColor: Theme.of(
+                                context,
+                              ).colorScheme.error, // alert color
+                              foregroundColor: Theme.of(
+                                context,
+                              ).colorScheme.onError, // text/icon color
+                            ),
+                            label: const Text('Exit Reader'),
+                            icon: Icon(Icons.exit_to_app_outlined),
+                            iconAlignment: IconAlignment.end,
+                            // child: const Text('Exit Reader'),
                           ),
-                        ),
-                      ],
+                          SizedBox(width: 12),
+                          Expanded(
+                            child: FilledButton.icon(
+                              onPressed: () {
+                                Navigator.of(sheetContext).pop((rs));
+                              },
+                              label: const Text('Save'),
+                              icon: Icon(Icons.save_outlined),
+                              iconAlignment: IconAlignment.end,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                     const SizedBox(height: 30),
                   ],

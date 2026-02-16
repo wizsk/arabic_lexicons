@@ -196,83 +196,85 @@ Future<ReaderPageSettings?> showReaderModeSettings(
                       ),
                     ),
 
-                    Expanded(
-                      child: ListView(
-                        children: [
-                          SwitchListTile(
-                            title: const Text('Qasidah mode'),
-                            secondary: Icon(Icons.notes),
-                            value: rs.isQasidah,
-                            onChanged: (v) {
-                              setState(() {
-                                rs.isQasidah = v;
-                              });
-                            },
-                          ),
+                    Flexible(
+                      child: SingleChildScrollView(
+                        child: Column(
+                          children: [
+                            SwitchListTile(
+                              title: const Text('Qasidah mode'),
+                              secondary: Icon(Icons.notes),
+                              value: rs.isQasidah,
+                              onChanged: (v) {
+                                setState(() {
+                                  rs.isQasidah = v;
+                                });
+                              },
+                            ),
 
-                          // const Divider(),
-                          SwitchListTile(
-                            title: const Text('Right-aligned text'),
-                            secondary: Icon(Icons.format_align_right),
-                            value:
-                                rs.textAlign == TextAlign.right || rs.isQasidah,
-                            onChanged: rs.isQasidah
-                                ? null
-                                : (v) {
-                                    setState(() {
-                                      rs.textAlign = v
-                                          ? TextAlign.right
-                                          : TextAlign.justify;
-                                    });
-                                  },
-                          ),
-                          SwitchListTile(
-                            title: const Text('Remove Tashkil'),
-                            secondary: Icon(Icons.do_not_disturb),
-                            value: rs.isRmTashkil,
-                            onChanged: (v) {
-                              setState(() {
-                                rs.isRmTashkil = v;
-                              });
-                            },
-                          ),
-                          SwitchListTile(
-                            title: const Text('Open Lexicon Direcly'),
-                            secondary: Icon(Icons.directions),
-                            value: rs.isOpenLexiconDirecly,
-                            onChanged: (v) {
-                              setState(() {
-                                rs.isOpenLexiconDirecly = v;
-                              });
-                            },
-                          ),
-                          const Divider(),
-                          ListTile(
-                            title: isCopiedMsgShowing
-                                ? const Text('Text Copied')
-                                : const Text('Copy Text'),
-                            leading: const Icon(Icons.copy),
-                            onTap: () async {
-                              if (isCoping) return;
-                              isCoping = true;
-                              await Clipboard.setData(
-                                ClipboardData(
-                                  text: peras
-                                      .map((p) => p.map((w) => w.ar).join(" "))
-                                      .join("\n"),
-                                ),
-                              );
+                            // const Divider(),
+                            SwitchListTile(
+                              title: const Text('Right-aligned text'),
+                              secondary: Icon(Icons.format_align_right),
+                              value:
+                                  rs.textAlign == TextAlign.right || rs.isQasidah,
+                              onChanged: rs.isQasidah
+                                  ? null
+                                  : (v) {
+                                      setState(() {
+                                        rs.textAlign = v
+                                            ? TextAlign.right
+                                            : TextAlign.justify;
+                                      });
+                                    },
+                            ),
+                            SwitchListTile(
+                              title: const Text('Remove Tashkil'),
+                              secondary: Icon(Icons.do_not_disturb),
+                              value: rs.isRmTashkil,
+                              onChanged: (v) {
+                                setState(() {
+                                  rs.isRmTashkil = v;
+                                });
+                              },
+                            ),
+                            SwitchListTile(
+                              title: const Text('Open Lexicon Direcly'),
+                              secondary: Icon(Icons.directions),
+                              value: rs.isOpenLexiconDirecly,
+                              onChanged: (v) {
+                                setState(() {
+                                  rs.isOpenLexiconDirecly = v;
+                                });
+                              },
+                            ),
+                            const Divider(),
+                            ListTile(
+                              title: isCopiedMsgShowing
+                                  ? const Text('Text Copied')
+                                  : const Text('Copy Text'),
+                              leading: const Icon(Icons.copy),
+                              onTap: () async {
+                                if (isCoping) return;
+                                isCoping = true;
+                                await Clipboard.setData(
+                                  ClipboardData(
+                                    text: peras
+                                        .map((p) => p.map((w) => w.ar).join(" "))
+                                        .join("\n"),
+                                  ),
+                                );
 
-                              isCopiedMsgShowing = true;
-                              setState(() {});
-                              Timer(Duration(seconds: 1), () {
-                                isCopiedMsgShowing = false;
-                                isCoping = false;
+                                isCopiedMsgShowing = true;
                                 setState(() {});
-                              });
-                            },
-                          ),
-                        ],
+                                Timer(Duration(seconds: 1), () {
+                                  isCopiedMsgShowing = false;
+                                  isCoping = false;
+                                  setState(() {});
+                                });
+                              },
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                     const SizedBox(height: 30),

@@ -247,6 +247,7 @@ class _BookMarkPageState extends State<BookMarkPage> {
                       String? outputFile = await FilePicker.platform.saveFile(
                         dialogTitle: 'Export Bookmarks',
                         fileName: _bookMarkFileName,
+                        type: FileType.custom,
                         bytes: fileBytes,
                         allowedExtensions: ['txt'],
                       );
@@ -256,6 +257,14 @@ class _BookMarkPageState extends State<BookMarkPage> {
                         ScaffoldMessenger.of(
                           context,
                         ).showSnackBar(SnackBar(content: Text('Saved')));
+                        showInfoDialog(
+                          context,
+                          "Warning!",
+                          message:
+                              "Make sure the file was written properly. After saving, check the file size to confirm it is not empty. "
+                              "If a file is created in the Downloads folder but ends up empty, create a new subfolder inside Downloads and save the file there instead.",
+                          confirmText: 'Okay',
+                        );
                       } else {
                         throw "Filepicker canceled";
                       }
@@ -275,13 +284,16 @@ class _BookMarkPageState extends State<BookMarkPage> {
               try {
                 FilePickerResult? result = await FilePicker.platform.pickFiles(
                   type: FileType.custom,
-                  allowedExtensions: ['txt'],
+                  // allowedExtensions: ['txt'],
                   withData: true,
                 );
 
                 if (result != null && result.files.single.bytes != null) {
                   final Uint8List fileBytes = result.files.single.bytes!;
-                  final String content = utf8.decode(fileBytes);
+                  final String content = utf8.decode(
+                    fileBytes,
+                    allowMalformed: false,
+                  );
                   final res = <String>[];
 
                   for (var w in LineSplitter.split(content)) {

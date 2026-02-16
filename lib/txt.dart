@@ -7,7 +7,7 @@ import 'package:ara_dict/alphabets.dart';
   if (query.isEmpty) {
     return (res, null);
   } else if (query.length == curPos || !query.contains(" ")) {
-    res = cleanQeury(query);
+    res = ArabicNormalizer.keepOnlyArList(query);
     if (res.isNotEmpty) return (res, res.last);
     return (res, null);
   }
@@ -36,7 +36,7 @@ import 'package:ara_dict/alphabets.dart';
       i++;
     }
 
-    final cw = cleanWord(curWord);
+    final cw = ArabicNormalizer.keepOnlyAr(curWord);
 
     if (cw != "") {
       res.add(cw);

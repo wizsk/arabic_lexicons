@@ -75,6 +75,41 @@ String getDictTableName(Dict d) {
 //   DictEntry(d: Dict.mujamulMuhith, ar: "المحيط", en: "Muthktar"),
 // ];
 
+class ReaderPageSettings {
+  bool isQasidah;
+  bool isRmTashkil;
+  bool isOpenLexiconDirecly;
+  TextAlign textAlign;
+
+  ReaderPageSettings({
+    required this.isQasidah,
+    required this.isRmTashkil,
+    required this.isOpenLexiconDirecly,
+    required this.textAlign,
+  });
+
+  bool isEqual(ReaderPageSettings rs) {
+    return isQasidah == rs.isQasidah &&
+        isRmTashkil == rs.isRmTashkil &&
+        isOpenLexiconDirecly == rs.isOpenLexiconDirecly &&
+        textAlign == rs.textAlign;
+  }
+
+  ReaderPageSettings copyWith({
+    bool? isQasidah,
+    bool? isRmTashkil,
+    bool? isOpenLexiconDirecly,
+    TextAlign? textAlign,
+  }) {
+    return ReaderPageSettings(
+      isQasidah: isQasidah ?? this.isQasidah,
+      isRmTashkil: isRmTashkil ?? this.isRmTashkil,
+      isOpenLexiconDirecly: isOpenLexiconDirecly ?? this.isOpenLexiconDirecly,
+      textAlign: textAlign ?? this.textAlign,
+    );
+  }
+}
+
 final List<DictEntry> dictNames = [
   DictEntry(d: Dict.arEn, ar: "مباشر", en: "Direct Dictionary"),
   DictEntry(d: Dict.hanswehr, ar: "هانز", en: "Hans Wehr"),
@@ -89,7 +124,8 @@ final List<DictEntry> dictNames = [
 
 class WordEntry {
   final String ar;
+  String nTk;
   final String cl;
 
-  const WordEntry({required this.ar, required this.cl});
+  WordEntry({required this.ar, required this.cl, this.nTk = ''});
 }

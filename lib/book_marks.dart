@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
+
 import 'package:ara_dict/alphabets.dart';
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/reader.dart';
@@ -284,7 +285,7 @@ class _BookMarkPageState extends State<BookMarkPage> {
                   final res = <String>[];
 
                   for (var w in LineSplitter.split(content)) {
-                    w = cleanWord(w);
+                    w = ArabicNormalizer.keepOnlyAr(w);
                     if (w.isEmpty) continue;
                     res.add(w);
                   }

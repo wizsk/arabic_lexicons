@@ -33,6 +33,7 @@ class _ReaderPageState extends State<ReaderPage> {
   final ScrollController _scrollController = ScrollController();
 
   List<List<WordEntry>> _paragraphs = [];
+  bool _isTashkilparagraphsInited = false;
   String? _title;
   late final Directory _booksDir;
 
@@ -101,7 +102,7 @@ class _ReaderPageState extends State<ReaderPage> {
       if (l.isEmpty) continue;
       List<WordEntry> curr = [];
       for (var w in l.split(RegExp(r'\s'))) {
-        curr.add(WordEntry(ar: w, cl: cleanWord(w)));
+        curr.add(WordEntry(ar: w, cl: ArabicNormalizer.keepOnlyAr(w)));
       }
       if (curr.isNotEmpty) res.add(curr);
     }
@@ -223,10 +224,15 @@ class _ReaderPageState extends State<ReaderPage> {
   final int _minTextFiledSize = 4;
   final int _maxTextFiledSize = 18;
   int _textFiledSize = 4;
-  bool _isQasidah = false;
   bool _isTempMode = false;
   bool _isShowEntrieNewToOld = true;
-  TextAlign _textAlign = TextAlign.justify;
+
+  ReaderPageSettings _rs = ReaderPageSettings(
+    isQasidah: false,
+    isRmTashkil: false,
+    isOpenLexiconDirecly: appSettingsNotifier.readerIsOpenLexiconDirecly,
+    textAlign: TextAlign.justify,
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -445,12 +451,14 @@ class _ReaderPageState extends State<ReaderPage> {
                 ).copyWith(bottom: 128),
                 itemCount: _paragraphs.length,
                 itemBuilder: (context, index) {
-                  final textAlign = _isQasidah ? TextAlign.right : _textAlign;
+                  final textAlign = _rs.isQasidah
+                      ? TextAlign.right
+                      : _rs.textAlign;
                   return Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     child: ClickableParagraph(
                       peraIndex: index,
-                      isQasidah: _isQasidah,
+                      rs: _rs,
                       pera: _paragraphs[index],
                       textStyleBodyMedium: arabicFontStyle,
                       highTextStyleBodyMedium: highWordStyle,
@@ -473,24 +481,43 @@ class _ReaderPageState extends State<ReaderPage> {
                   onPressed: () async {
                     final res = await showReaderModeSettings(
                       context,
-                      _isQasidah,
-                      _textAlign,
+                      _rs.copyWith(),
                       _paragraphs,
                       () {
                         _paragraphs = [];
-                        _isQasidah = false;
-                        _textAlign = TextAlign.justify;
+                        _isTashkilparagraphsInited = false;
+                        _rs.isQasidah = false;
+                        _rs.isRmTashkil = false;
+                        _rs.textAlign = TextAlign.justify;
                         setState(() {});
                       },
                     );
 
-                    if (res == null) return;
-                    if (res.isQasidah != _isQasidah ||
-                        res.textAlign != _textAlign) {
-                      _isQasidah = res.isQasidah;
-                      _textAlign = res.textAlign;
-                      setState(() {});
+                    if (res == null || _rs.isEqual(res)) {
+                      return;
                     }
+
+                    if (_rs.isOpenLexiconDirecly != res.isOpenLexiconDirecly) {
+                      await appSettingsNotifier.saveReaderIsOpenLexiconDirecly(
+                        res.isOpenLexiconDirecly,
+                      );
+                    }
+
+                    if (res.isRmTashkil) {
+                      if (!_isTashkilparagraphsInited) {
+                        for (int i = 0; i < _paragraphs.length; i++) {
+                          for (int j = 0; j < _paragraphs[i].length; j++) {
+                            _paragraphs[i][j].nTk = ArabicNormalizer.rmTashkil(
+                              _paragraphs[i][j].ar,
+                            );
+                          }
+                        }
+                        _isTashkilparagraphsInited = true;
+                      }
+                    }
+
+                    _rs = res;
+                    setState(() {});
                   },
                   child: Icon(Icons.settings),
                 ),
@@ -504,7 +531,7 @@ class _ReaderPageState extends State<ReaderPage> {
 class ClickableParagraph extends StatelessWidget {
   final List<WordEntry> pera;
   final int peraIndex;
-  final bool isQasidah;
+  final ReaderPageSettings rs;
   final void Function() onChange;
   final TextStyle textStyleBodyMedium;
   final TextStyle highTextStyleBodyMedium;
@@ -514,7 +541,7 @@ class ClickableParagraph extends StatelessWidget {
     super.key,
     required this.pera,
     required this.peraIndex,
-    required this.isQasidah,
+    required this.rs,
     required this.onChange,
     required this.textStyleBodyMedium,
     required this.highTextStyleBodyMedium,
@@ -536,7 +563,7 @@ class ClickableParagraph extends StatelessWidget {
   List<TextSpan> _buildSpans(BuildContext context) {
     final spans = <TextSpan>[];
 
-    if (isQasidah) {
+    if (rs.isQasidah) {
       if (peraIndex % 2 == 0) {
         spans.add(
           TextSpan(
@@ -555,37 +582,33 @@ class ClickableParagraph extends StatelessWidget {
       final isBmk = BookMarks.isSet(word.cl);
       spans.add(
         TextSpan(
-          text: '${word.ar} ',
+          text: rs.isRmTashkil ? '${word.nTk} ' : '${word.ar} ',
           recognizer: word.cl.isEmpty
               ? null
               : (TapGestureRecognizer()
-                  ..onTap = () => showWordReadeActionsDialog(
-                    context,
-                    word.cl,
-                    isBmk,
-                    () async {
-                      if (isBmk) {
-                        await BookMarks.rm(word.cl);
-                      } else {
-                        await BookMarks.add(word.cl);
-                      }
-                      if (context.mounted) onChange();
-                    },
-                    () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => SearchLexicons(
-                            showDrawer: false,
-                            initialText: word.cl,
-                          ),
-                        ),
-                      ).then((_) {
-                        if (context.mounted) onChange();
-                      });
-                    },
-                    textStyleBodyMedium,
-                  )),
+                  ..onTap = rs.isOpenLexiconDirecly
+                      ? () => openDict(context, word.cl).then((_) {
+                          if (context.mounted) onChange();
+                        })
+                      : () => showWordReadeActionsDialog(
+                          context,
+                          word.cl,
+                          isBmk,
+                          () async {
+                            if (isBmk) {
+                              await BookMarks.rm(word.cl);
+                            } else {
+                              await BookMarks.add(word.cl);
+                            }
+                            if (context.mounted) onChange();
+                          },
+                          () {
+                            openDict(context, word.cl).then((_) {
+                              if (context.mounted) onChange();
+                            });
+                          },
+                          textStyleBodyMedium,
+                        )),
           style: isBmk ? highTextStyleBodyMedium : null,
         ),
       );
@@ -594,8 +617,8 @@ class ClickableParagraph extends StatelessWidget {
   }
 }
 
-void openDict(BuildContext context, String word) {
-  Navigator.push(
+Future<void> openDict(BuildContext context, String word) async {
+  await Navigator.push(
     context,
     MaterialPageRoute(
       builder: (_) => SearchLexicons(showDrawer: false, initialText: word),

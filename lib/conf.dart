@@ -8,9 +8,13 @@ import 'package:wakelock_plus/wakelock_plus.dart';
 class AppSettingsController extends ChangeNotifier {
   static const _themeKey = 'theme_mode';
   static const _fontKey = 'ar_font_size';
+  static const _readerIsOpenLexiconDireclyKey = 'reader_db_pop';
+  // isOpenLexiconDirecly
 
   late double fontSize;
   late ThemeMode theme;
+  late bool _readerIsOpenLexiconDirecly;
+
   final wake = _WakelockController();
 
   /// Load saved theme & font size from memory
@@ -21,6 +25,7 @@ class AppSettingsController extends ChangeNotifier {
     theme = mode == 'dark' ? ThemeMode.dark : ThemeMode.light;
 
     fontSize = prefs.getDouble(_fontKey) ?? defaultArabicFontSize;
+    _readerIsOpenLexiconDirecly = prefs.getBool(_readerIsOpenLexiconDireclyKey) ?? false;
 
     await wake.load();
   }
@@ -30,6 +35,17 @@ class AppSettingsController extends ChangeNotifier {
     theme = mode;
     notifyListeners();
     prefs.setString(_themeKey, mode == ThemeMode.dark ? 'dark' : 'light');
+  }
+
+  /// DB -> dictionary, bookmark
+  Future<void> saveReaderIsOpenLexiconDirecly(bool v) async {
+    final prefs = await SharedPreferences.getInstance();
+    _readerIsOpenLexiconDirecly = v;
+    prefs.setBool(_readerIsOpenLexiconDireclyKey, v);
+  }
+
+  bool get readerIsOpenLexiconDirecly {
+    return _readerIsOpenLexiconDirecly;
   }
 
   Future<void> setFontSize(double size) async {

@@ -167,10 +167,6 @@ Future<ReaderPageSettings?> showReaderModeSettings(
       bool isCopiedMsgShowing = false;
       bool isCoping = false;
 
-      void close() {
-        Navigator.of(sheetContext).pop((rs));
-      }
-
       return StatefulBuilder(
         builder: (context, setState) {
           final sh = MediaQuery.of(context).size.height;
@@ -284,8 +280,8 @@ Future<ReaderPageSettings?> showReaderModeSettings(
                       children: [
                         FilledButton(
                           onPressed: () {
-                            close();
                             closeReader();
+                            Navigator.of(sheetContext).pop();
                           },
                           style: FilledButton.styleFrom(
                             backgroundColor: Theme.of(
@@ -300,7 +296,9 @@ Future<ReaderPageSettings?> showReaderModeSettings(
                         SizedBox(width: 12),
                         Expanded(
                           child: FilledButton(
-                            onPressed: close,
+                            onPressed: () {
+                              Navigator.of(sheetContext).pop((rs));
+                            },
                             child: const Text('Save'),
                           ),
                         ),

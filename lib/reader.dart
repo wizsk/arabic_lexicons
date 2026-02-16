@@ -481,7 +481,6 @@ class _ReaderPageState extends State<ReaderPage> {
                         _paragraphs = [];
                         _rs.isQasidah = false;
                         _rs.isRmTashkil = false;
-                        _rs.isRmTashkil = false;
                         _rs.textAlign = TextAlign.justify;
                         setState(() {});
                       },

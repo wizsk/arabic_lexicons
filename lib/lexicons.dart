@@ -1,7 +1,6 @@
 import 'package:ara_dict/ar_en.dart';
 import 'package:ara_dict/book_marks.dart';
 import 'package:flutter/material.dart';
-import 'package:ara_dict/sv.dart';
 import 'package:ara_dict/txt.dart';
 import 'package:ara_dict/wigds.dart';
 import 'package:flutter/foundation.dart';
@@ -58,16 +57,25 @@ class _SearchLexiconsState extends State<SearchLexicons> {
     super.dispose();
   }
 
-  void _onTextChanged(String value) async {
+  void _onTextChanged(String value) {
     if (value.length > _maxTextSize) {
-      await showInfoDialog(
-        context,
-        'Text Too Long',
-        message:
-            'Maximum allowed length is $_maxTextSize characters.\nPlease shorten the text.',
+      value = value.length > _maxTextSize
+          ? value.substring(0, _maxTextSize)
+          : value;
+
+      _controller.value = TextEditingValue(
+        text: value,
+        selection: TextSelection.collapsed(offset: value.length),
       );
-      return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Text too long, reduced to $_maxTextSize chars'),
+          duration: Duration(seconds: 3),
+        ),
+      );
     }
+
     final (parts, currWord) = getNextWord(
       value,
       _controller.selection.base.offset,
@@ -82,8 +90,6 @@ class _SearchLexiconsState extends State<SearchLexicons> {
       });
 
       _loadWord();
-    } else if (currWord == null && value.isNotEmpty) {
-      setState(() {});
     }
   }
 
@@ -227,44 +233,21 @@ class _SearchLexiconsState extends State<SearchLexicons> {
                       style: arTxtTheme,
                       decoration: InputDecoration(
                         hintText: 'ابحث',
-                        prefixIcon: _controller.text.isEmpty
-                            ? IconButton(
-                                onPressed: () async {
-                                  var txt = await getClipboardText();
-                                  if (txt != null && txt.isNotEmpty) {
-                                    if (txt.length > _maxTextSize) {
-                                      if (context.mounted) {
-                                        await showInfoDialog(
-                                          context,
-                                          'Text Too Large',
-                                          message:
-                                              'This text contains ${txt.length} characters.\nIt will be reduced to $_maxTextSize characters.',
-                                        );
-                                      }
-                                      txt = txt.substring(0, 500);
-                                    }
-                                    _controller.text = txt;
-                                    _focusNode.unfocus();
-                                    _onTextChanged(txt);
-                                  }
-                                },
-                                icon: Icon(Icons.paste),
-                              )
-                            : IconButton(
-                                onPressed: () {
-                                  setState(() {
-                                    _controller.clear();
-                                    _selectedWord = null;
-                                    _words = [];
-                                    _dbRes = [];
-                                    _arEnRes = null;
-                                  });
-                                  // this is when it's focued but keyboard is not oppended
-                                  _focusNode.requestFocus();
-                                },
+                        prefixIcon: IconButton(
+                          onPressed: () {
+                            setState(() {
+                              _controller.clear();
+                              _selectedWord = null;
+                              _words = [];
+                              _dbRes = [];
+                              _arEnRes = null;
+                            });
+                            // this is when it's focued but keyboard is not oppended
+                            _focusNode.requestFocus();
+                          },
 
-                                icon: Icon(Icons.clear),
-                              ),
+                          icon: Icon(Icons.clear),
+                        ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),

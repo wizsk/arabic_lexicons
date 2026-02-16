@@ -6,9 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/lexicons.dart';
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await appSettingsNotifier.load();
+void main() {
+  // WidgetsFlutterBinding.ensureInitialized();
+  // await appSettingsNotifier.load();
   runApp(const MyApp());
 }
 

@@ -11,12 +11,10 @@ class AppSettingsController extends ChangeNotifier {
   static const _lastRouteKey = 'route';
   static const _readerIsOpenLexiconDireclyKey = 'reader_db_pop';
 
-  // isOpenLexiconDirecly
-
-  late double fontSize;
-  late ThemeMode theme;
-  late bool _readerIsOpenLexiconDirecly;
-  late String _lastRoute;
+  double _fontSize = defaultArabicFontSize;
+  ThemeMode _theme = ThemeMode.light;
+  bool _readerIsOpenLexiconDirecly = false;
+  String _lastRoute = routesToBeSavedInPref.first;
 
   final wake = _WakelockController();
 
@@ -25,20 +23,25 @@ class AppSettingsController extends ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
 
     final mode = prefs.getString(_themeKey);
-    theme = mode == 'dark' ? ThemeMode.dark : ThemeMode.light;
+    _theme = mode == 'dark' ? ThemeMode.dark : _theme;
 
-    fontSize = prefs.getDouble(_fontKey) ?? defaultArabicFontSize;
+    _fontSize = prefs.getDouble(_fontKey) ?? _fontSize;
     _readerIsOpenLexiconDirecly =
-        prefs.getBool(_readerIsOpenLexiconDireclyKey) ?? false;
+        prefs.getBool(_readerIsOpenLexiconDireclyKey) ??
+        _readerIsOpenLexiconDirecly;
 
-    _lastRoute = prefs.getString(_lastRouteKey) ?? routesToBeSavedInPref.first;
+    _lastRoute = prefs.getString(_lastRouteKey) ?? _lastRoute;
 
     await wake.load();
   }
 
+  void notify() {
+    notifyListeners();
+  }
+
   Future<void> saveTheme(ThemeMode mode) async {
     final prefs = await SharedPreferences.getInstance();
-    theme = mode;
+    _theme = mode;
     notifyListeners();
     await prefs.setString(_themeKey, mode == ThemeMode.dark ? 'dark' : 'light');
   }
@@ -67,16 +70,24 @@ class AppSettingsController extends ChangeNotifier {
   }
 
   Future<void> setFontSize(double size) async {
-    fontSize = size;
+    _fontSize = size;
     final prefs = await SharedPreferences.getInstance();
     notifyListeners();
     await prefs.setDouble(_fontKey, size);
   }
 
+  double get fontSize {
+    return _fontSize;
+  }
+
+  ThemeMode get theme {
+    return _theme;
+  }
+
   TextStyle getArabicTextStyle(BuildContext context) {
     return Theme.of(context).textTheme.bodyMedium!.copyWith(
       fontFamily: fontKitab,
-      fontSize: fontSize,
+      fontSize: _fontSize,
       height: 1.5,
     );
   }

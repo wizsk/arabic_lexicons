@@ -25,13 +25,18 @@ class _StartupScreenState extends State<StartupScreen> {
       await Future.wait([
         DbService.init(),
         ArEnDict.init(),
+        appSettingsNotifier.load(),
         BookMarks.load(),
-        // appSettingsNotifier.load(), // this has to be loaded before runApp(), as theme depends on it
         // Future.delayed( Duration(seconds: 3),), // for testing, looking at the loader lol
       ]);
 
+      appSettingsNotifier.notify();
       if (!mounted) return;
-      await Navigator.pushReplacementNamed(context, appSettingsNotifier.lastRoute);
+      await Navigator.pushReplacementNamed(
+        context,
+        appSettingsNotifier.lastRoute,
+      );
+
     } catch (e) {
       if (mounted) {
         await showInfoDialog(
@@ -48,7 +53,7 @@ class _StartupScreenState extends State<StartupScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Loading...")),
+      // appBar: AppBar(title: Text("Loading...")),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

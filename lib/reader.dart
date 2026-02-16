@@ -94,19 +94,13 @@ class _ReaderPageState extends State<ReaderPage> {
   List<List<WordEntry>> _cleanInputAndPrepare(String text) {
     text = text.trim();
     if (text.isEmpty) return [];
-    final lines = text
-        .replaceAll('\r\n', '\n')
-        .replaceAll('\r', '\n')
-        .split(RegExp(r'\n+'))
-        .map((l) => l.trim());
 
     List<List<WordEntry>> res = [];
-    for (final l in lines) {
+    for (var l in LineSplitter.split(text)) {
+      l = l.trim();
       if (l.isEmpty) continue;
       List<WordEntry> curr = [];
-      for (var w in l.split(RegExp(r' +'))) {
-        w = w.trim();
-        if (w.isEmpty) continue;
+      for (var w in l.split(RegExp(r'\s'))) {
         curr.add(WordEntry(ar: w, cl: cleanWord(w)));
       }
       if (curr.isNotEmpty) res.add(curr);
@@ -569,14 +563,27 @@ class ClickableParagraph extends StatelessWidget {
                     context,
                     word.cl,
                     isBmk,
-                    () {
+                    () async {
                       if (isBmk) {
-                        BookMarks.rm(word.cl);
+                        await BookMarks.rm(word.cl);
                       } else {
-                        BookMarks.add(word.cl);
+                        await BookMarks.add(word.cl);
                       }
+                      if (context.mounted) onChange();
                     },
-                    () => openDict(context, word.cl),
+                    () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => SearchLexicons(
+                            showDrawer: false,
+                            initialText: word.cl,
+                          ),
+                        ),
+                      ).then((_) {
+                        if (context.mounted) onChange();
+                      });
+                    },
                     textStyleBodyMedium,
                   )),
           style: isBmk ? highTextStyleBodyMedium : null,
@@ -616,78 +623,70 @@ Future<void> showWordReadeActionsDialog(
   return showDialog(
     context: context,
     builder: (context) {
+      final cs = Theme.of(context).colorScheme;
       return Dialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         child: Padding(
           padding: const EdgeInsets.all(20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Align(
-              //   alignment: Alignment.topRight,
-              //   child: IconButton(
-              //     icon: Icon(
-              //       Icons.close,
-              //       size: 20,
-              //       color: Theme.of(context).colorScheme.onSurfaceVariant,
-              //     ),
-              //     style: IconButton.styleFrom(
-              //       backgroundColor: Theme.of(context)
-              //           .colorScheme
-              //           .surfaceContainerHighest
-              //           .withAlpha(40),
-              //       padding: const EdgeInsets.all(6),
-              //     ),
-              //     onPressed: () => Navigator.pop(context),
-              //   ),
-              // ),
-              /// Title
-              Text(
-                word,
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  fontFamily: ts.fontFamily,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: 300),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                /// Title
+                Text(
+                  word,
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    fontFamily: ts.fontFamily,
+                  ),
                 ),
-              ),
 
-              const SizedBox(height: 24),
+                const SizedBox(height: 24),
 
-              /// Buttons
-              Column(
-                children: [
-                  SizedBox(
-                    width: double.infinity,
-                    child: FilledButton.icon(
-                      icon: Icon(
-                        isBookmarked ? Icons.bookmark : Icons.bookmark_border,
+                /// Buttons
+                Column(
+                  children: [
+                    SizedBox(
+                      width: double.infinity,
+                      child: FilledButton.icon(
+                        icon: Icon(
+                          isBookmarked ? Icons.bookmark : Icons.bookmark_border,
+                        ),
+                        label: Text(
+                          isBookmarked ? "Remove Bookmark" : "Add to Bookmark",
+                        ),
+                        style: isBookmarked
+                            ? FilledButton.styleFrom(
+                                backgroundColor: cs.error,
+                                foregroundColor: cs.onError,
+                              )
+                            : null,
+                        onPressed: () {
+                          Navigator.pop(context);
+                          onBookmark();
+                        },
                       ),
-                      label: Text(
-                        isBookmarked ? "Remove Bookmark" : "Add to Bookmark",
+                    ),
+
+                    const SizedBox(height: 12),
+
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton.icon(
+                        icon: const Icon(Icons.menu_book),
+                        label: const Text("Show Definition"),
+                        onPressed: () {
+                          Navigator.pop(context);
+                          onShowDefinition();
+                        },
                       ),
-                      onPressed: () {
-                        Navigator.pop(context);
-                        onBookmark();
-                      },
                     ),
-                  ),
-
-                  const SizedBox(height: 12),
-
-                  SizedBox(
-                    width: double.infinity,
-                    child: OutlinedButton.icon(
-                      icon: const Icon(Icons.menu_book),
-                      label: const Text("Show Definition"),
-                      onPressed: () {
-                        Navigator.pop(context);
-                        onShowDefinition();
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ],
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       );

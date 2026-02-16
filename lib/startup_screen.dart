@@ -31,7 +31,7 @@ class _StartupScreenState extends State<StartupScreen> {
       ]);
 
       if (!mounted) return;
-      Navigator.pushReplacementNamed(context, Routes.dictionary);
+      await Navigator.pushReplacementNamed(context, Routes.dictionary);
     } catch (e) {
       if (mounted) {
         await showInfoDialog(

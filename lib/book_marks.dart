@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
-
 import 'package:ara_dict/alphabets.dart';
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/reader.dart';
@@ -33,7 +32,9 @@ class BookMarks {
         w = w.trim();
         if (w.isNotEmpty) _bookMarkedWords.add(w);
       }
-    } catch (e) {}
+    } catch (e) {
+      debugPrint('Bookmark load failed: $e');
+    }
   }
 
   static bool isSet(String? w) {
@@ -57,41 +58,71 @@ class BookMarks {
   }
 
   /// word must be cleaned
-  static bool add(String w) {
+  static Future<bool> add(String w) async {
     if (w.isEmpty || w.length > _maxBookMarkWrodSize) return false;
     if (!_bookMarkedWords.add(w)) return true;
-    return _saveToFile();
+
+    if (!await _saveToFile()) {
+      _bookMarkedWords.remove(w);
+      return false;
+    }
+    return true;
   }
 
   /// word list must be cleaned
-  static int addAll(List<String> wl) {
-    int added = 0;
+  static Future<int> addAll(List<String> wl) async {
+    List<String> addedWords = [];
     for (final w in wl) {
       if (w.isEmpty || w.length > _maxBookMarkWrodSize) continue;
       if (_bookMarkedWords.add(w)) {
-        added++;
+        addedWords.add(w);
       }
     }
-    if (added > 0) _saveToFile();
-    return added;
+
+    if (addedWords.isEmpty) return 0;
+
+    if (!await _saveToFile()) {
+      for (final w in addedWords) {
+        _bookMarkedWords.remove(w);
+      }
+      return 0;
+    }
+
+    return addedWords.length;
   }
 
-  static bool rm(String w) {
+  static Future<bool> rm(String w) async {
     if (w.isEmpty) return false;
     if (!_bookMarkedWords.remove(w)) return true;
-    return _saveToFile();
+    if (!await _saveToFile()) {
+      _bookMarkedWords.add(w);
+      return false;
+    }
+
+    return true;
   }
 
-  static bool rmAll() {
-    if (_bookMarkedWords.isEmpty) return true;
+  static Future<int> rmAll() async {
+    if (_bookMarkedWords.isEmpty) return 0;
+
+    final removedWords = _bookMarkedWords.toList();
     _bookMarkedWords.clear();
-    return _saveToFile();
+
+    if (!await _saveToFile()) {
+      for (final w in removedWords) {
+        _bookMarkedWords.add(w);
+      }
+      return 0;
+    }
+
+    return removedWords.length;
   }
 
-  static bool _saveToFile() {
+  /// if could not save then remove form memory also
+  static Future<bool> _saveToFile() async {
     if (_bookMarkedWords.isEmpty) {
       try {
-        if (_bookMarkFile.existsSync()) _bookMarkFile.deleteSync();
+        if (await _bookMarkFile.exists()) await _bookMarkFile.delete();
       } catch (_) {
         return false;
       }
@@ -101,13 +132,13 @@ class BookMarks {
     final txt = _bookMarkedWords.join("\n");
 
     try {
-      _bookMarkFileTmp.writeAsStringSync(txt);
+      await _bookMarkFileTmp.writeAsString(txt);
     } catch (e) {
       return false;
     }
 
     try {
-      _bookMarkFileTmp.renameSync(_bookMarkFile.path);
+      await _bookMarkFileTmp.rename(_bookMarkFile.path);
     } catch (e) {
       return false;
     }
@@ -187,8 +218,17 @@ class _BookMarkPageState extends State<BookMarkPage> {
                           'Are you sure you want to delete all bookmarked words?\nThis action cannot be undone.',
                     );
                     if (res ?? false) {
-                      BookMarks.rmAll();
+                      final rmCound = await BookMarks.rmAll();
+
+                      if (!context.mounted) return;
                       setState(() {});
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            'Deleted $rmCound word${rmCound > 1 ? "s" : ""} to bookmark',
+                          ),
+                        ),
+                      );
                     }
                   },
           ),
@@ -242,14 +282,16 @@ class _BookMarkPageState extends State<BookMarkPage> {
                   final Uint8List fileBytes = result.files.single.bytes!;
                   final String content = utf8.decode(fileBytes);
                   final res = <String>[];
-                  for (var w in content.split(RegExp(r'\r\n?|\n'))) {
+
+                  for (var w in LineSplitter.split(content)) {
                     w = cleanWord(w);
                     if (w.isEmpty) continue;
                     res.add(w);
                   }
-                  final addedCound = BookMarks.addAll(res);
-                  setState(() {});
+                  final addedCound = await BookMarks.addAll(res);
+
                   if (!context.mounted) return;
+                  setState(() {});
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(

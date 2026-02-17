@@ -1,7 +1,5 @@
 #!/bin/sh
 
-set -ex
-
 bd="build-release"
 n="Arabic-Lexicons"
 ver=$(grep 'version' pubspec.yaml | sed 's/version: //; s/+.*//')
@@ -11,6 +9,8 @@ pre="$bd/$n"
 [ -n "$ver" ] && pre="${pre}_v$ver"
 
 [ -d "$bd" ] && rm -r "$bd"
+
+set -ex
 
 mkdir "$bd"
 

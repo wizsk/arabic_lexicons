@@ -152,7 +152,6 @@ Future<ReaderPageSettings?> showReaderModeSettings(
   BuildContext context,
   ReaderPageSettings rs,
   List<List<WordEntry>> peras,
-  void Function() closeReader,
 ) {
   final cs = Theme.of(context).colorScheme;
 
@@ -280,44 +279,25 @@ Future<ReaderPageSettings?> showReaderModeSettings(
                         ),
                       ),
                     ),
-                    const SizedBox(height: 30),
+                    // const SizedBox(height: 30),
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                      child: Row(
-                        children: [
-                          FilledButton.icon(
-                            onPressed: () {
-                              Navigator.of(sheetContext).pop();
-                              closeReader();
-                            },
-                            style: FilledButton.styleFrom(
-                              backgroundColor: Theme.of(
-                                context,
-                              ).colorScheme.error, // alert color
-                              foregroundColor: Theme.of(
-                                context,
-                              ).colorScheme.onError, // text/icon color
-                            ),
-                            label: const Text('Exit Reader'),
-                            icon: Icon(Icons.exit_to_app_outlined),
-                            iconAlignment: IconAlignment.end,
-                            // child: const Text('Exit Reader'),
-                          ),
-                          SizedBox(width: 12),
-                          Expanded(
-                            child: FilledButton.icon(
-                              onPressed: () {
-                                Navigator.of(sheetContext).pop((rs));
-                              },
-                              label: const Text('Save'),
-                              icon: Icon(Icons.save_outlined),
-                              iconAlignment: IconAlignment.end,
-                            ),
-                          ),
-                        ],
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8.0,
+                        vertical: 12,
+                      ),
+                      child: SizedBox(
+                        width: double.infinity,
+                        child: FilledButton.icon(
+                          onPressed: () {
+                            Navigator.of(sheetContext).pop((rs));
+                          },
+                          label: const Text('Save'),
+                          icon: Icon(Icons.save_outlined),
+                          iconAlignment: IconAlignment.end,
+                        ),
                       ),
                     ),
-                    const SizedBox(height: 30),
+                    // const SizedBox(height: 30),
                   ],
                 ),
               ),

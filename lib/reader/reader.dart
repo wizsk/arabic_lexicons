@@ -4,20 +4,6 @@ import 'package:ara_dict/reader/reader_utils.dart';
 import 'package:ara_dict/reader/reader_widgets.dart';
 import 'package:ara_dict/wigds.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
-
-void openReaderPage(BuildContext context, List<List<WordEntry>> paras) {
-  Navigator.pushReplacement(
-    context,
-    MaterialPageRoute(
-      settings: const RouteSettings(name: Routes.readerPage),
-      builder: (_) => ReaderPage(paras: paras),
-    ),
-  );
-}
-
-void _exitReaderPage(BuildContext context) =>
-    Navigator.pushReplacementNamed(context, Routes.readerInput);
 
 class ReaderPage extends StatefulWidget {
   final List<List<WordEntry>> paras;
@@ -29,8 +15,6 @@ class ReaderPage extends StatefulWidget {
 }
 
 class _ReaderPageState extends State<ReaderPage> {
-  final ScrollController _scrollController = ScrollController();
-  bool _isFabVisible = true;
   late final List<List<WordEntry>> _paras;
   late String _title;
 
@@ -46,28 +30,26 @@ class _ReaderPageState extends State<ReaderPage> {
     super.initState();
     _paras = widget.paras;
     _title = readerAppbarTitle(_paras, false);
-
-    _scrollController.addListener(() {
-      if (_scrollController.position.userScrollDirection ==
-              ScrollDirection.reverse &&
-          _isFabVisible) {
-        setState(() {
-          _isFabVisible = false;
-        });
-      } else if (_scrollController.position.userScrollDirection ==
-              ScrollDirection.forward &&
-          !_isFabVisible) {
-        setState(() {
-          _isFabVisible = true;
-        });
-      }
-    });
   }
 
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
+  void _settingsDrawer() async {
+    final res = await showReaderModeSettings(context, _rs.copyWith(), _paras);
+    if (res == null || _rs.isEqual(res)) {
+      return;
+    }
+
+    if (_rs.isOpenLexiconDirecly != res.isOpenLexiconDirecly) {
+      await appSettingsNotifier.saveReaderIsOpenLexiconDirecly(
+        res.isOpenLexiconDirecly,
+      );
+    }
+
+    if (_rs.isRmTashkil != res.isRmTashkil) {
+      _title = readerAppbarTitle(_paras, res.isRmTashkil);
+    }
+
+    _rs = res;
+    setState(() {});
   }
 
   @override
@@ -84,17 +66,28 @@ class _ReaderPageState extends State<ReaderPage> {
           style: TextStyle(fontFamily: arabicFontStyle.fontFamily),
         ),
         actions: [
+          IconButton(icon: Icon(Icons.settings), onPressed: _settingsDrawer),
           IconButton(
             icon: Icon(Icons.exit_to_app_outlined),
             tooltip: 'Exit Reader',
-            onPressed: () => _exitReaderPage(context),
+            onPressed: () async {
+              if (!context.mounted) return;
+              if (await showConfirmDialog(
+                    context,
+                    'Exit Reader',
+                    message: 'Go to reader input page?',
+                  ) ??
+                  false) {
+                if (!context.mounted) return;
+                _exitReaderPage(context);
+              }
+            },
           ),
         ],
       ),
       drawer: buildDrawer(context),
       body: SafeArea(
         child: ListView.builder(
-          controller: _scrollController,
           padding: const EdgeInsets.symmetric(
             horizontal: 16,
             vertical: 8,
@@ -117,43 +110,19 @@ class _ReaderPageState extends State<ReaderPage> {
           },
         ),
       ),
-
-      floatingActionButton: AnimatedSlide(
-        duration: Duration(milliseconds: 300),
-        offset: _isFabVisible ? Offset.zero : Offset(0, 2),
-        child: AnimatedOpacity(
-          duration: Duration(milliseconds: 300),
-          opacity: _isFabVisible ? 1.0 : 0.0,
-          child: FloatingActionButton.small(
-            onPressed: () async {
-              final res = await showReaderModeSettings(
-                context,
-                _rs.copyWith(),
-                _paras,
-                () => _exitReaderPage(context),
-              );
-
-              if (res == null || _rs.isEqual(res)) {
-                return;
-              }
-
-              if (_rs.isOpenLexiconDirecly != res.isOpenLexiconDirecly) {
-                await appSettingsNotifier.saveReaderIsOpenLexiconDirecly(
-                  res.isOpenLexiconDirecly,
-                );
-              }
-
-              if (_rs.isRmTashkil != res.isRmTashkil) {
-                _title = readerAppbarTitle(_paras, res.isRmTashkil);
-              }
-
-              _rs = res;
-              setState(() {});
-            },
-            child: Icon(Icons.settings),
-          ),
-        ),
-      ),
     );
   }
 }
+
+void openReaderPage(BuildContext context, List<List<WordEntry>> paras) {
+  Navigator.pushReplacement(
+    context,
+    MaterialPageRoute(
+      settings: const RouteSettings(name: Routes.readerPage),
+      builder: (_) => ReaderPage(paras: paras),
+    ),
+  );
+}
+
+void _exitReaderPage(BuildContext context) =>
+    Navigator.pushReplacementNamed(context, Routes.readerInput);

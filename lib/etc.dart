@@ -287,8 +287,8 @@ Future<ReaderPageSettings?> showReaderModeSettings(
                         children: [
                           FilledButton.icon(
                             onPressed: () {
-                              closeReader();
                               Navigator.of(sheetContext).pop();
+                              closeReader();
                             },
                             style: FilledButton.styleFrom(
                               backgroundColor: Theme.of(

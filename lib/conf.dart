@@ -85,6 +85,7 @@ class AppSettingsController extends ChangeNotifier {
   }
 
   Future<void> setFontSize(double size) async {
+    if (_fontSize == size) return;
     _fontSize = size;
     final prefs = await SharedPreferences.getInstance();
     notifyListeners();

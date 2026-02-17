@@ -91,6 +91,13 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
 
   void _showText(BuildContext context) {
     final text = _controller.text.trim();
+    if (text.isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Insert some text first!')));
+      return;
+    }
+
     final paras = cleanReaderInputAndPrepare(text);
     if (!_isTempMode && paras.isNotEmpty) _saveBookTxt(paras);
     _resetReaderInputPage();
@@ -164,13 +171,21 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
     final file = File(
       join(_ReaderInputPageData.booksDir!.path, '${entry.hash}.txt'),
     );
-    if (!await file.exists()) return;
+    try {
+      if (!await file.exists()) throw "";
 
-    final content = await file.readAsString();
-    final paras = cleanReaderInputAndPrepare(content);
-
-    if (context.mounted) {
-      _openReaderPage(context, paras);
+      final content = await file.readAsString();
+      final paras = cleanReaderInputAndPrepare(content);
+      if (context.mounted) {
+        _openReaderPage(context, paras);
+      }
+    } catch (_) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Could not open book')));
+      }
+      return;
     }
   }
 
@@ -179,6 +194,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Could not open book')));
+      return;
     }
     openReaderPage(context, paras);
   }
@@ -201,7 +217,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          /*txt*/ 'القارئ',
+          /*txt*/ 'مدخل القارئ',
           textDirection: TextDirection.rtl,
           style: TextStyle(fontFamily: arabicFontStyle.fontFamily),
         ),

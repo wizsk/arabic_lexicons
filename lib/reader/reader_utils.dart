@@ -1,8 +1,11 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:ara_dict/alphabets.dart';
 import 'package:ara_dict/data.dart';
+import 'package:ara_dict/font_size.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 const int _maxAppbarTitleLen = 40;
 
@@ -118,6 +121,164 @@ Future<void> showWordReadeActionsDialog(
             ),
           ),
         ),
+      );
+    },
+  );
+}
+
+Future<ReaderPageSettings?> showReaderModeSettings(
+  BuildContext context,
+  ReaderPageSettings rs,
+  List<List<WordEntry>> peras,
+) {
+  final cs = Theme.of(context).colorScheme;
+
+  return showModalBottomSheet<ReaderPageSettings?>(
+    context: context,
+    backgroundColor: cs.surface,
+    isScrollControlled: true,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+    ),
+    builder: (sheetContext) {
+      bool isCopiedMsgShowing = false;
+      bool isCoping = false;
+
+      return StatefulBuilder(
+        builder: (context, setState) {
+          // final sh = MediaQuery.of(context).size.height;
+
+          return SafeArea(
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+              child: Column(
+                mainAxisSize: MainAxisSize.min, // 🔥 THIS is the magic
+                children: [
+                  // drag handle
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      margin: const EdgeInsets.only(bottom: 16),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade500,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+
+                  Flexible(
+                    child: SingleChildScrollView(
+                      child: Column(
+                        children: [
+                          SwitchListTile(
+                            title: const Text('Qasidah mode'),
+                            secondary: Icon(Icons.notes),
+                            value: rs.isQasidah,
+                            onChanged: (v) {
+                              setState(() {
+                                rs.isQasidah = v;
+                              });
+                            },
+                          ),
+
+                          // const Divider(),
+                          SwitchListTile(
+                            title: const Text('Right-aligned text'),
+                            secondary: Icon(Icons.format_align_right),
+                            value:
+                                rs.textAlign == TextAlign.right || rs.isQasidah,
+                            onChanged: rs.isQasidah
+                                ? null
+                                : (v) {
+                                    setState(() {
+                                      rs.textAlign = v
+                                          ? TextAlign.right
+                                          : TextAlign.justify;
+                                    });
+                                  },
+                          ),
+                          SwitchListTile(
+                            title: const Text('Remove Tashkil'),
+                            secondary: Icon(Icons.do_not_disturb),
+                            value: rs.isRmTashkil,
+                            onChanged: (v) {
+                              setState(() {
+                                rs.isRmTashkil = v;
+                              });
+                            },
+                          ),
+                          SwitchListTile(
+                            title: const Text('Open Lexicon Direcly'),
+                            secondary: Icon(Icons.directions),
+                            value: rs.isOpenLexiconDirecly,
+                            onChanged: (v) {
+                              setState(() {
+                                rs.isOpenLexiconDirecly = v;
+                              });
+                            },
+                          ),
+                          ListTile(
+                            title: const Text('Change Font Size'),
+                            leading: Icon(Icons.text_fields),
+                            onTap: () {
+                              showFontSizeBottomSheet(context);
+                            },
+                          ),
+                          const Divider(),
+                          ListTile(
+                            title: isCopiedMsgShowing
+                                ? const Text('Text Copied')
+                                : const Text('Copy Text'),
+                            leading: const Icon(Icons.copy),
+                            onTap: () async {
+                              if (isCoping) return;
+                              isCoping = true;
+                              await Clipboard.setData(
+                                ClipboardData(
+                                  text: peras
+                                      .map((p) => p.map((w) => w.ar).join(" "))
+                                      .join("\n"),
+                                ),
+                              );
+
+                              isCopiedMsgShowing = true;
+                              setState(() {});
+                              Timer(Duration(seconds: 1), () {
+                                isCopiedMsgShowing = false;
+                                isCoping = false;
+                                setState(() {});
+                              });
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  // const SizedBox(height: 30),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8.0,
+                      vertical: 12,
+                    ),
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: FilledButton.icon(
+                        onPressed: () {
+                          Navigator.of(sheetContext).pop((rs));
+                        },
+                        label: const Text('Save'),
+                        icon: Icon(Icons.save_outlined),
+                        iconAlignment: IconAlignment.end,
+                      ),
+                    ),
+                  ),
+                  // const SizedBox(height: 30),
+                ],
+              ),
+            ),
+          );
+        },
       );
     },
   );

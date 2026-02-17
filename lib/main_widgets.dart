@@ -98,7 +98,8 @@ Widget buildDrawer(BuildContext context) {
           leading: const Icon(Icons.text_fields),
           onTap: () {
             Navigator.pop(context);
-            showFontSizeDialog(context, appSettingsNotifier);
+            // showFontSizeDialog(context, appSettingsNotifier);
+            showFontSizeBottomSheet(context);
           },
         ),
         SwitchListTile(

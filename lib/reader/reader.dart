@@ -1,5 +1,4 @@
 import 'package:ara_dict/data.dart';
-import 'package:ara_dict/etc.dart';
 import 'package:ara_dict/reader/reader_utils.dart';
 import 'package:ara_dict/reader/reader_widgets.dart';
 import 'package:ara_dict/main_widgets.dart';

@@ -35,7 +35,7 @@ class ArabicNormalizer {
 
     return word
         .replaceAll(_nonArabicLetters, '')
-        .replaceAll(_farsiYaEnd, '')
+        .replaceAll(_farsiYaEnd, 'ى')
         .replaceAll(_farsiYaMiddle, 'ي');
   }
 

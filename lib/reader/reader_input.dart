@@ -6,7 +6,7 @@ import 'package:ara_dict/reader/reader_utils.dart';
 import 'package:ara_dict/sv.dart';
 import 'package:ara_dict/utils.dart';
 import 'package:crypto/crypto.dart'; // for hashing
-import 'package:ara_dict/wigds.dart';
+import 'package:ara_dict/main_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';

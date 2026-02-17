@@ -5,7 +5,7 @@ import 'dart:typed_data';
 import 'package:ara_dict/alphabets.dart';
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/utils.dart';
-import 'package:ara_dict/wigds.dart';
+import 'package:ara_dict/main_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:path/path.dart';

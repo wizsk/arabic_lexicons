@@ -2,7 +2,7 @@ import 'package:ara_dict/ar_en.dart';
 import 'package:ara_dict/book_marks.dart';
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/db.dart';
-import 'package:ara_dict/wigds.dart';
+import 'package:ara_dict/main_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -36,7 +36,6 @@ class _StartupScreenState extends State<StartupScreen> {
         context,
         appSettingsNotifier.lastRoute,
       );
-
     } catch (e) {
       if (mounted) {
         await showInfoDialog(

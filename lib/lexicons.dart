@@ -2,7 +2,7 @@ import 'package:ara_dict/ar_en.dart';
 import 'package:ara_dict/book_marks.dart';
 import 'package:flutter/material.dart';
 import 'package:ara_dict/txt.dart';
-import 'package:ara_dict/wigds.dart';
+import 'package:ara_dict/main_widgets.dart';
 import 'package:flutter/foundation.dart';
 import 'package:ara_dict/etc.dart';
 import 'package:ara_dict/res.dart';

@@ -14,13 +14,14 @@ const dictWordSelectModalOpenIcon = Icons.swap_horiz_rounded;
 
 class Routes {
   static const dictionary = '/dictionary';
-  static const reader = '/reader';
+  static const readerInput = '/readerInput';
+  static const readerPage = '/readerPage';
   static const bookMarks = '/bookMarks';
   static const startupscreen = '/startupscreen';
   // static const help = '/help';
 }
 
-const routesToBeSavedInPref = [Routes.dictionary, Routes.reader];
+const routesToBeSavedInPref = [Routes.dictionary, Routes.readerInput];
 
 class DictEntry {
   final Dict d;
@@ -109,6 +110,14 @@ class ReaderPageSettings {
       isOpenLexiconDirecly: isOpenLexiconDirecly ?? this.isOpenLexiconDirecly,
       textAlign: textAlign ?? this.textAlign,
     );
+  }
+
+  @override
+  String toString() {
+    return 'ReaderPageSettings(isQasidah: $isQasidah, '
+        'isRmTashkil: $isRmTashkil, '
+        'isOpenLexiconDirecly: $isOpenLexiconDirecly, '
+        'textAlign: $textAlign)';
   }
 }
 

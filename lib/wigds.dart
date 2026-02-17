@@ -39,14 +39,16 @@ Widget buildDrawer(BuildContext context) {
                 },
               ),
               ListTile(
-                selected: currRoute == Routes.reader,
+                selected:
+                    currRoute == Routes.readerInput ||
+                    currRoute == Routes.readerPage,
                 title: Text("Reader"),
                 leading: Icon(Icons.notes),
                 onTap: () {
                   Navigator.pop(context);
-                  if (currRoute != Routes.reader) {
-                    Navigator.pushReplacementNamed(context, Routes.reader);
-                    appSettingsNotifier.saveRoute(Routes.reader);
+                  if (currRoute != Routes.readerInput) {
+                    Navigator.pushReplacementNamed(context, Routes.readerInput);
+                    appSettingsNotifier.saveRoute(Routes.readerInput);
                   }
                 },
               ),

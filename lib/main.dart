@@ -1,6 +1,6 @@
 import 'package:ara_dict/book_marks.dart';
+import 'package:ara_dict/reader/reader_input.dart';
 import 'package:ara_dict/startup_screen.dart';
-import 'package:ara_dict/reader.dart';
 import 'package:ara_dict/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:ara_dict/data.dart';
@@ -34,7 +34,8 @@ class MyApp extends StatelessWidget {
             routes: {
               Routes.startupscreen: (_) => const StartupScreen(),
               Routes.dictionary: (_) => const SearchLexicons(),
-              Routes.reader: (_) => const ReaderPage(),
+              Routes.readerInput: (_) => const ReaderInputPage
+              (),
               Routes.bookMarks: (_) => const BookMarkPage(),
               // Routes.fams: (_) => const ArabicFamilyList(),
               // Routes.help: (_) => const HelpPage(),

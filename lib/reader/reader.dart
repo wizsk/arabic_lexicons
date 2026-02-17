@@ -22,7 +22,9 @@ class _ReaderPageState extends State<ReaderPage> {
     isQasidah: false,
     isRmTashkil: false,
     isOpenLexiconDirecly: appSettingsNotifier.readerIsOpenLexiconDirecly,
-    textAlign: TextAlign.justify,
+    textAlign: appSettingsNotifier.readerRightAligned
+        ? TextAlign.right
+        : TextAlign.justify,
   );
 
   @override
@@ -41,6 +43,12 @@ class _ReaderPageState extends State<ReaderPage> {
     if (_rs.isOpenLexiconDirecly != res.isOpenLexiconDirecly) {
       await appSettingsNotifier.saveReaderIsOpenLexiconDirecly(
         res.isOpenLexiconDirecly,
+      );
+    }
+
+    if (_rs.textAlign != res.textAlign) {
+      await appSettingsNotifier.saveReaderRightAligned(
+        res.textAlign == TextAlign.right,
       );
     }
 

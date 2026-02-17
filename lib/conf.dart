@@ -10,10 +10,12 @@ class AppSettingsController extends ChangeNotifier {
   static const _fontKey = 'ar_font_size';
   static const _lastRouteKey = 'route';
   static const _readerIsOpenLexiconDireclyKey = 'reader_db_pop';
+  static const _readerRightAlignedKey = 'readerRightAlign';
 
   double _fontSize = defaultArabicFontSize;
   ThemeMode _theme = ThemeMode.light;
   bool _readerIsOpenLexiconDirecly = false;
+  bool _readerRightAligned = false;
   String _lastRoute = routesToBeSavedInPref.first;
 
   final wake = _WakelockController();
@@ -26,9 +28,13 @@ class AppSettingsController extends ChangeNotifier {
     _theme = mode == 'dark' ? ThemeMode.dark : _theme;
 
     _fontSize = prefs.getDouble(_fontKey) ?? _fontSize;
+
     _readerIsOpenLexiconDirecly =
         prefs.getBool(_readerIsOpenLexiconDireclyKey) ??
         _readerIsOpenLexiconDirecly;
+
+    _readerRightAligned =
+        prefs.getBool(_readerRightAlignedKey) ?? _readerRightAligned;
 
     _lastRoute = prefs.getString(_lastRouteKey) ?? _lastRoute;
 
@@ -46,7 +52,6 @@ class AppSettingsController extends ChangeNotifier {
     await prefs.setString(_themeKey, mode == ThemeMode.dark ? 'dark' : 'light');
   }
 
-  /// DB -> dictionary, bookmark
   Future<void> saveReaderIsOpenLexiconDirecly(bool v) async {
     final prefs = await SharedPreferences.getInstance();
     _readerIsOpenLexiconDirecly = v;
@@ -55,6 +60,16 @@ class AppSettingsController extends ChangeNotifier {
 
   bool get readerIsOpenLexiconDirecly {
     return _readerIsOpenLexiconDirecly;
+  }
+
+  Future<void> saveReaderRightAligned(bool v) async {
+    final prefs = await SharedPreferences.getInstance();
+    _readerRightAligned = v;
+    await prefs.setBool(_readerRightAlignedKey, v);
+  }
+
+  bool get readerRightAligned {
+    return _readerRightAligned;
   }
 
   Future<void> saveRoute(String r) async {

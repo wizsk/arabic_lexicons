@@ -58,56 +58,56 @@ class _ReaderPageState extends State<ReaderPage> {
     final arabicFontStyle = appSettingsNotifier.getArabicTextStyle(context);
     final highWordStyle = arabicFontStyle.copyWith(color: cs.error);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          _title,
-          textDirection: TextDirection.rtl,
-          style: TextStyle(fontFamily: arabicFontStyle.fontFamily),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) return;
+        _exitReaderPage(context);
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(
+            _title,
+            textDirection: TextDirection.rtl,
+            style: TextStyle(fontFamily: arabicFontStyle.fontFamily),
+          ),
+          actions: [
+            IconButton(
+              icon: Icon(Icons.settings),
+              onPressed: _settingsDrawer,
+              tooltip: 'Reader Mode settings',
+            ),
+            IconButton(
+              icon: Icon(Icons.exit_to_app_outlined),
+              tooltip: 'Exit Reader',
+              onPressed: () => _exitReaderPage(context),
+            ),
+          ],
         ),
-        actions: [
-          IconButton(icon: Icon(Icons.settings), onPressed: _settingsDrawer),
-          IconButton(
-            icon: Icon(Icons.exit_to_app_outlined),
-            tooltip: 'Exit Reader',
-            onPressed: () async {
-              if (!context.mounted) return;
-              if (await showConfirmDialog(
-                    context,
-                    'Exit Reader',
-                    message: 'Go to reader input page?',
-                  ) ??
-                  false) {
-                if (!context.mounted) return;
-                _exitReaderPage(context);
-              }
+        drawer: buildDrawer(context),
+        body: SafeArea(
+          child: ListView.builder(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 8,
+            ).copyWith(bottom: 128),
+            itemCount: _paras.length,
+            itemBuilder: (context, index) {
+              final textAlign = _rs.isQasidah ? TextAlign.right : _rs.textAlign;
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: ClickableParagraph(
+                  peraIndex: index,
+                  rs: _rs,
+                  pera: _paras[index],
+                  textStyleBodyMedium: arabicFontStyle,
+                  highTextStyleBodyMedium: highWordStyle,
+                  textAlign: textAlign,
+                  onChange: () => setState(() {}),
+                ),
+              );
             },
           ),
-        ],
-      ),
-      drawer: buildDrawer(context),
-      body: SafeArea(
-        child: ListView.builder(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 8,
-          ).copyWith(bottom: 128),
-          itemCount: _paras.length,
-          itemBuilder: (context, index) {
-            final textAlign = _rs.isQasidah ? TextAlign.right : _rs.textAlign;
-            return Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              child: ClickableParagraph(
-                peraIndex: index,
-                rs: _rs,
-                pera: _paras[index],
-                textStyleBodyMedium: arabicFontStyle,
-                highTextStyleBodyMedium: highWordStyle,
-                textAlign: textAlign,
-                onChange: () => setState(() {}),
-              ),
-            );
-          },
         ),
       ),
     );
@@ -124,5 +124,15 @@ void openReaderPage(BuildContext context, List<List<WordEntry>> paras) {
   );
 }
 
-void _exitReaderPage(BuildContext context) =>
+void _exitReaderPage(BuildContext context) async {
+  if (!context.mounted) return;
+  if (await showConfirmDialog(
+        context,
+        'Exit Reader',
+        message: 'Go to reader input page?',
+      ) ??
+      false) {
+    if (!context.mounted) return;
     Navigator.pushReplacementNamed(context, Routes.readerInput);
+  }
+}

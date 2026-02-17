@@ -46,7 +46,8 @@ Widget buildDrawer(BuildContext context) {
                 leading: Icon(Icons.notes),
                 onTap: () {
                   Navigator.pop(context);
-                  if (currRoute != Routes.readerInput) {
+                  if (currRoute != Routes.readerInput &&
+                      currRoute != Routes.readerPage) {
                     Navigator.pushReplacementNamed(context, Routes.readerInput);
                     appSettingsNotifier.saveRoute(Routes.readerInput);
                   }

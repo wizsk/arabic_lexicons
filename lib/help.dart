@@ -1,3 +1,4 @@
+import 'package:ara_dict/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -6,9 +7,22 @@ import 'package:ara_dict/data.dart';
 
 class HelpPage extends StatelessWidget {
   const HelpPage({super.key});
+  static const buildUnix = int.fromEnvironment('BUILD_UNIX_TIME');
+  static const appVersion = String.fromEnvironment('APP_VERSION');
 
   @override
   Widget build(BuildContext context) {
+    String buildTimeFormatted = '';
+
+    if (buildUnix != 0) {
+      DateTime buildTimeUtc = DateTime.fromMillisecondsSinceEpoch(
+        buildUnix * 1000,
+        isUtc: true,
+      );
+      DateTime buildTimeLocal = buildTimeUtc.toLocal();
+      buildTimeFormatted = formatDateTime(context, buildTimeLocal);
+    }
+
     return Scaffold(
       appBar: AppBar(title: Text('Help')),
       // drawer: buildDrawer(context),
@@ -17,7 +31,9 @@ class HelpPage extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 8),
           child: Text.rich(
             style: TextStyle(
-              fontSize: appSettingsNotifier.getArabicTextStyle(context).fontSize,
+              fontSize: appSettingsNotifier
+                  .getArabicTextStyle(context)
+                  .fontSize,
             ),
             TextSpan(
               children: [
@@ -70,7 +86,48 @@ class HelpPage extends StatelessWidget {
                       'When typing the edited word will automatically selected. For example you have typed "Foo bar bazz", by default "bazz" will be selected as it\'s the last word, then if you edit "bar" to "baar", then "baar" will be selected.\n\n',
                 ),
 
-                const TextSpan(text: 'Mail: '),
+                const TextSpan(
+                  text: 'For more info and updates:',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                const TextSpan(text: '\nGo to: '),
+                TextSpan(
+                  text: 'github.com/wizsk/arabic_lexicons/',
+                  style: const TextStyle(
+                    color: Colors.blueAccent,
+                    decoration: TextDecoration.underline,
+                  ),
+                  recognizer: TapGestureRecognizer()
+                    ..onTap = () {
+                      launchUrl(
+                        Uri.parse('https://github.com/wizsk/arabic_lexicons/'),
+                      );
+                    },
+                ),
+
+                if (appVersion.isNotEmpty || buildTimeFormatted.isNotEmpty)
+                  const TextSpan(text: '\n'),
+
+                if (appVersion.isNotEmpty) ...[
+                  const TextSpan(
+                    text: '\nApp version:',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  TextSpan(text: ' $appVersion'),
+                ],
+
+                if (buildTimeFormatted.isNotEmpty) ...[
+                  const TextSpan(
+                    text: '\nBuild Time:',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  TextSpan(text: ' $buildTimeFormatted'),
+                ],
+
+                const TextSpan(
+                  text: '\n\nMail: ',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
                 TextSpan(
                   text: 'sakibul706@gmail.com',
                   style: const TextStyle(
@@ -83,7 +140,10 @@ class HelpPage extends StatelessWidget {
                     },
                 ),
 
-                const TextSpan(text: '\nGitHub: '),
+                const TextSpan(
+                  text: '\nGitHub: ',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
 
                 TextSpan(
                   text: 'github.com/wizsk',

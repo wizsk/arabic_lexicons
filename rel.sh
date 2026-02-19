@@ -2,7 +2,8 @@
 
 bd="build-release"
 n="Arabic-Lexicons"
-ver=$(grep 'version' pubspec.yaml | sed 's/version: //; s/+.*//')
+# ver=$(grep 'version' pubspec.yaml | sed 's/version: //; s/+.*//')
+ver=$(grep 'version' pubspec.yaml | sed 's/version: //')
 
 pre="$bd/$n"
 
@@ -14,10 +15,16 @@ set -ex
 
 mkdir "$bd"
 
-flutter build apk --release --split-per-abi
+flutter build apk --release --split-per-abi \
+  --dart-define=APP_VERSION="$ver" \
+  --dart-define=BUILD_UNIX_TIME=$(date +%s)
+
 mv 'build/app/outputs/flutter-apk/app-arm64-v8a-release.apk' "${pre}_arm64-v8a.apk"
 mv 'build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk' "${pre}_armeabi-v7a.apk"
 mv 'build/app/outputs/flutter-apk/app-x86_64-release.apk' "${pre}_x86_64.apk"
 
-flutter build apk --release
+flutter build apk --release \
+  --dart-define=APP_VERSION="$ver" \
+  --dart-define=BUILD_UNIX_TIME=$(date +%s)
+
 mv 'build/app/outputs/flutter-apk/app-release.apk' "${pre}_universal.apk"

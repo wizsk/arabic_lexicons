@@ -9,6 +9,8 @@ class HelpPage extends StatelessWidget {
   const HelpPage({super.key});
   static const buildUnix = int.fromEnvironment('BUILD_UNIX_TIME');
   static const appVersion = String.fromEnvironment('APP_VERSION');
+  static const gitCommit = String.fromEnvironment('GIT_COMMIT');
+  static const gitCommitMsg = String.fromEnvironment('GIT_COMMIT_MSG');
 
   @override
   Widget build(BuildContext context) {
@@ -105,7 +107,10 @@ class HelpPage extends StatelessWidget {
                     },
                 ),
 
-                if (appVersion.isNotEmpty || buildTimeFormatted.isNotEmpty)
+                if (appVersion.isNotEmpty ||
+                    buildTimeFormatted.isNotEmpty ||
+                    gitCommit.isNotEmpty ||
+                    gitCommitMsg.isNotEmpty)
                   const TextSpan(text: '\n'),
 
                 if (appVersion.isNotEmpty) ...[
@@ -122,6 +127,22 @@ class HelpPage extends StatelessWidget {
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                   TextSpan(text: ' $buildTimeFormatted'),
+                ],
+
+                if (buildTimeFormatted.isNotEmpty) ...[
+                  const TextSpan(
+                    text: '\nGit commit:',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  TextSpan(text: ' $gitCommit'),
+                ],
+
+                if (buildTimeFormatted.isNotEmpty) ...[
+                  const TextSpan(
+                    text: '\nGit commit msg:',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  TextSpan(text: ' $gitCommitMsg'),
                 ],
 
                 const TextSpan(

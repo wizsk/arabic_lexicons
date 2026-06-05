@@ -7,14 +7,13 @@ import 'package:path_provider/path_provider.dart';
 abstract final class BookMarks {
   static const bookMarkFileName = 'arabic_lexicons_bookMarks.txt';
 
-  static Future<void> migrateOld(bool delete) async {
+  static Future<void> migrateOld() async {
     try {
       final dir = await getApplicationDocumentsDirectory();
 
       final f = File(join(dir.path, bookMarkFileName));
       final r = await f.readAsLines();
       WordStore.addBMs(r);
-      if (delete) await f.delete();
     } catch (_) {}
   }
 }

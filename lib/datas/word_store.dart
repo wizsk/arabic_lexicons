@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:ara_dict/bm/book_marks.dart';
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/history/history.dart';
+import 'package:ara_dict/reader/book_store.dart';
 import 'package:ara_dict/reader/input.dart';
 import 'package:ara_dict/reader/settings_class.dart';
 import 'package:path/path.dart';
@@ -22,6 +23,8 @@ abstract final class WordStore {
   static final List<String> foreignWords = <String>[];
 
   static final List<SearchHistItem> searchHist = []; //<SearchHist>{};
+
+  static final List<BookEntry> books = [];
 
   /// word not okay
   static bool _wnok(String s) => s.isEmpty || s.length > _maxBookMarkWrodSize;
@@ -57,6 +60,7 @@ abstract final class WordStore {
             created_at INTEGER NOT NULL
           )
         ''');
+
           await db.execute('''
           CREATE TABLE search_history (
             word TEXT PRIMARY KEY,
@@ -64,6 +68,22 @@ abstract final class WordStore {
             created_at INTEGER NOT NULL
           );
           ''');
+
+          await db.execute('''
+            CREATE TABLE books (
+                id        TEXT PRIMARY KEY,          -- hash of book content
+                title     TEXT NOT NULL,
+                title_cl  TEXT NOT NULL,
+                author    TEXT,
+
+                total_para  INTEGER NOT NULL,
+                total_words INTEGER NOT NULL,
+
+                pinned        INTEGER NOT NULL DEFAULT 0,  -- 0=false, 1=true
+                config        TEXT,                  -- JSON string
+                current_para  INTEGER NOT NULL DEFAULT 0
+            );
+            ''');
         },
       );
 
@@ -112,6 +132,18 @@ abstract final class WordStore {
         searchHist.add(SearchHistItem(word: word, dict: dicts[dictIndex]));
       }
     }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Books
+  // ---------------------------------------------------------------------------
+
+  Future<void> loadBooks() async {
+    // nice
+    // final books = await ReaderInputPageData.init();
+    // if (books.isNotEmpty) {
+    //   // do sutff
+    // }
   }
 
   // ---------------------------------------------------------------------------
@@ -387,22 +419,12 @@ abstract final class WordStore {
   }
 }
 
-// TODO: remove this in v5.0.0
-bool _migratedForeigns = false;
 Future<void> migrateForeigns() async {
-  if (_migratedForeigns) return;
-  if (!ReaderInputPageData.isInited) {
-    await ReaderInputPageData.init();
-    if (!ReaderInputPageData.isInited) return;
-  }
-
-  _migratedForeigns = true;
-
-  for (final b in ReaderInputPageData.books) {
+  for (final b in BookStore.books) {
     final f = await ReaderPageSettings.lurFile(b.hash);
     try {
       WordStore.addForeigns(await f.readAsLines());
-      if (WordStore._inited) await f.delete();
+      await f.delete();
     } catch (_) {}
   }
 }

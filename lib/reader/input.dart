@@ -4,11 +4,11 @@ import 'dart:io';
 import 'package:ara_dict/alphabets.dart';
 import 'package:ara_dict/conf.dart';
 import 'package:ara_dict/data.dart';
-import 'package:ara_dict/datas/word_store.dart';
 import 'package:ara_dict/first_run.dart';
 import 'package:ara_dict/helper_widgets.dart';
 import 'package:ara_dict/main_widgets.dart';
 import 'package:ara_dict/multi_selection.dart';
+import 'package:ara_dict/reader/book_store.dart';
 import 'package:ara_dict/reader/data.dart';
 import 'package:ara_dict/reader/reader.dart';
 import 'package:ara_dict/reader/settings_class.dart';
@@ -26,49 +26,52 @@ class BookEntry {
   final String hash;
   final String name;
   final String nameCl;
-  final bool pinned;
 
-  const BookEntry({
+  final int totalParas;
+  final int totalWords;
+
+  int currentPara;
+  bool pinned;
+
+  BookEntry({
     required this.hash,
     required this.name,
     required this.nameCl,
     required this.pinned,
+    required this.totalParas,
+    required this.totalWords,
+    required this.currentPara,
   });
 
-  BookEntry copyWith({
-    String? hash,
-    String? name,
-    String? nameCl,
-    bool? pinned,
-    bool? selected,
-  }) {
-    return BookEntry(
-      hash: hash ?? this.hash,
-      name: name ?? this.name,
-      nameCl: nameCl ?? this.nameCl,
-      pinned: pinned ?? this.pinned,
-    );
-  }
+  // BookEntry copyWith({
+  //   String? hash,
+  //   String? name,
+  //   String? nameCl,
+  //   bool? pinned,
+  //   bool? selected,
+  // }) {
+  //   return BookEntry(
+  //     hash: hash ?? this.hash,
+  //     name: name ?? this.name,
+  //     nameCl: nameCl ?? this.nameCl,
+  //     pinned: pinned ?? this.pinned,
+  //   );
+  // }
 }
 
 String bookPath(String bookHash) =>
     path.join(ReaderInputPageData.booksDir!.path, '$bookHash.txt');
 
 class ReaderInputPageData {
-  static bool isInited = false;
   static Directory? booksDir;
   static File? indexFile;
   static File? tmpIndexFile;
-  static List<BookEntry> books = [];
   static List<BookEntry> booksUnord = [];
+  static List<BookEntry> get books => BookStore.books;
+
   static const booksIndexName = 'books.txt';
 
-  static Future<void> init() async {
-    if (isInited) {
-      setBookUnord();
-      return;
-    }
-
+  static Future<bool> shouldMigrate() async {
     try {
       final dir = await getApplicationDocumentsDirectory();
       booksDir = Directory(path.join(dir.path, 'books'));
@@ -77,49 +80,57 @@ class ReaderInputPageData {
       }
       indexFile = File(path.join(booksDir!.path, booksIndexName));
       tmpIndexFile = File(path.join(booksDir!.path, 'books_tmp.txt'));
-      isInited = true;
     } catch (e) {
       debugPrint('err while initing booksdir: $e');
-      isInited = false;
-      return;
+      return false;
     }
 
-    if (!await indexFile!.exists()) return;
-    final lines = await indexFile!.readAsLines();
-
-    books.clear();
-    books = parseBooks(lines);
-    setBookUnord();
+    return !await indexFile!.exists();
   }
 
   static List<BookEntry> parseBooks(Iterable<String> lines) {
     return lines
-        .map((line) {
+        .map((line) async {
           final parts = line.split(':');
+
           if (parts.length == 3) {
             final pinned = parts[0] == '1';
             final hash = parts[1];
             final name = parts.sublist(2).join(':');
+
+            PeraEntries txt;
+            try {
+              final data = await File(bookPath(hash)).readAsString();
+              txt = cleanReaderInputAndPrepare(data);
+            } catch (_) {
+              return null;
+            }
+
+            int wordC = 0;
+            int paraC = txt.length;
+
+            for (final l in txt) {
+              wordC += l.length;
+            }
+
+            int idx = 0;
+            try {
+              final idxStr = await (await ReaderPageSettings.lastReadPosFile(
+                hash,
+              ))?.readAsString();
+              if (idxStr != null) idx = int.tryParse(idxStr) ?? 0;
+            } catch (_) {}
+
             return BookEntry(
               hash: hash,
               name: name,
               nameCl: ArabicNormalizer.cleanLineForSearch(name),
+              totalParas: paraC,
+              totalWords: wordC,
+              currentPara: idx,
               pinned: pinned,
             );
           }
-
-          // legacy
-          if (parts.length == 2) {
-            final hash = parts[0];
-            final name = parts.sublist(1).join(':');
-            return BookEntry(
-              hash: hash,
-              name: name,
-              nameCl: ArabicNormalizer.cleanLineForSearch(name),
-              pinned: false,
-            );
-          }
-
           return null;
         })
         .whereType<BookEntry>()
@@ -198,11 +209,6 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
       if (mounted) setState(() {});
     });
 
-    ReaderInputPageData.init().then((_) async {
-      if (mounted) setState(() {});
-      await migrateForeigns();
-    });
-
     showFirstRunPopupPostFrame(context);
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
@@ -250,7 +256,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
     bool fresh = true;
 
     if (!_isTempMode) {
-      (bookHash, fresh) = await _saveBookTxt(paras);
+      (bookHash, fresh) = await _saveBook(paras);
       if (bookHash.isEmpty) {
         if (context.mounted) {
           showSnackL(context, en: 'Could not save book', ar: 'تعذر حفظ الكتاب');
@@ -258,13 +264,6 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
         return;
       }
     }
-
-    // final rs = fresh
-    //     ? ReaderPageSettings.def(hash: bookHash, isQasidah: _isQasidahMode)
-    //     : await ReaderPageSettings.loadFromFile(
-    //         bookHash,
-    //         isQasidah: _isQasidahMode,
-    //       );
 
     if (context.mounted) {
       _openReaderPage(
@@ -276,8 +275,8 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
     }
   }
 
-  Future<(String, bool)> _saveBookTxt(PeraEntries peras) async {
-    if (!ReaderInputPageData.isInited || peras.isEmpty) return ("", false);
+  Future<(String, bool)> _saveBook(PeraEntries peras) async {
+    if (peras.isEmpty) return ("", false);
 
     String displayName = peras.first.map((w) => w.ar).join(" ").trim();
     if (displayName.length > 100) {
@@ -288,29 +287,36 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
     final hash = _hashText(content);
 
     final exists = ReaderInputPageData.books.indexWhere((b) => b.hash == hash);
+
     if (exists > -1) {
       final rd = ReaderInputPageData.books[exists];
       if (rd.pinned != _isPinned) {
-        ReaderInputPageData.books[exists] = rd.copyWith(pinned: _isPinned);
-        await _saveBookEntriesFile();
+        rd.pinned = _isPinned;
+        await BookStore.add(rd);
       }
       return (hash, false);
     }
 
-    final file = File(
-      path.join(ReaderInputPageData.booksDir!.path, '$hash.txt'),
-    );
     try {
-      await file.writeAsString(content, flush: true);
-      ReaderInputPageData.books.add(
+      int wordC = 0;
+      int paraC = peras.length;
+
+      for (final l in peras) {
+        wordC += l.length;
+      }
+
+      await BookStore.add(
         BookEntry(
           hash: hash,
           name: displayName,
           nameCl: ArabicNormalizer.keepOnlyArWithSpace(displayName),
+          currentPara: 0,
+          totalParas: paraC,
+          totalWords: wordC,
           pinned: _isPinned,
         ),
+        content: content,
       );
-      await _saveBookEntriesFile();
     } catch (e) {
       if (kDebugMode) {
         debugPrint('save book failed: $e');
@@ -319,66 +325,6 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
     }
 
     return (hash, true);
-  }
-
-  Future<void> _saveBookEntriesFile() async {
-    if (!ReaderInputPageData.isInited) return;
-    if (ReaderInputPageData.indexFile == null ||
-        ReaderInputPageData.tmpIndexFile == null) {
-      return;
-    }
-
-    final txt = ReaderInputPageData.books
-        .map((be) => '${be.pinned ? "1" : "0"}:${be.hash}:${be.name}')
-        .join("\n");
-
-    try {
-      await ReaderInputPageData.tmpIndexFile!.writeAsString(txt, flush: true);
-
-      // if (await ReaderInputPageData.indexFile!.exists()) {
-      //   await ReaderInputPageData.indexFile!.delete();
-      //
-
-      await ReaderInputPageData.tmpIndexFile!.rename(
-        ReaderInputPageData.indexFile!.path,
-      );
-    } catch (e) {
-      if (kDebugMode) {
-        debugPrint('save books index failed: $e');
-      }
-    }
-
-    ReaderInputPageData.setBookUnord(
-      match: _searchText,
-      newToOld: _isShowEntrieNewToOld,
-    );
-    if (mounted) setState(() {});
-  }
-
-  Future<void> _deleteFile(BookEntry en) async {
-    final index = ReaderInputPageData.books.indexWhere(
-      (e) => e.hash == en.hash,
-    );
-    if (index < 0) return;
-
-    final file = File(
-      path.join(ReaderInputPageData.booksDir!.path, '${en.hash}.txt'),
-    );
-
-    try {
-      if (await file.exists()) {
-        await file.delete();
-      }
-    } catch (e) {
-      if (kDebugMode) {
-        debugPrint('delete book file failed: $e');
-      }
-      return;
-    }
-
-    final be = ReaderInputPageData.books.removeAt(index);
-    await _saveBookEntriesFile();
-    ReaderPageSettings.delete(be.hash);
   }
 
   Future<void> _openBook(BuildContext context, BookEntry entry) async {
@@ -537,7 +483,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
   }
 
   Future<void> _exportBooks(BuildContext context) async {
-    if (!ReaderInputPageData.isInited || ReaderInputPageData.books.isEmpty) {
+    if (ReaderInputPageData.books.isEmpty) {
       if (context.mounted) {
         showSnackL(
           context,
@@ -709,21 +655,13 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
           continue;
         }
 
-        final outFile = File(path.join(d, '${b.hash}.txt'));
-
         try {
-          await outFile.writeAsString(
-            utf8.decode(fileBytes, allowMalformed: true),
-            flush: true,
-          );
-          ReaderInputPageData.books.add(b);
+          BookStore.add(b, )
           added++;
         } catch (_) {
           skipped++;
         }
       }
-
-      await _saveBookEntriesFile();
 
       if (context.mounted) {
         showSnackL(
@@ -1294,7 +1232,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                                                           }
 
                                                           final pinned =
-                                                              await _tglPinBookEntries(
+                                                              await BookStore.touglePin(
                                                                 en.hash,
                                                               );
                                                           if (context.mounted) {
@@ -1355,7 +1293,9 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                                                             return;
                                                           }
 
-                                                          await _deleteFile(en);
+                                                          await BookStore.delete(
+                                                            en.hash,
+                                                          );
                                                           if (context.mounted) {
                                                             showSnackL(
                                                               context,
@@ -1401,14 +1341,11 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
     );
   }
 
-  Future<bool> _tglPinBookEntries(String hash) async {
-    final idx = ReaderInputPageData.books.indexWhere((b) => b.hash == hash);
-    if (idx < 0) return false;
+  // Future<bool> _tglPinBookEntries(String hash) async {
 
-    final en = ReaderInputPageData.books[idx];
-    final nEn = en.copyWith(pinned: !en.pinned);
-    ReaderInputPageData.books[idx] = nEn;
-    await _saveBookEntriesFile();
-    return nEn.pinned;
-  }
+  //   final nEn = en.copyWith(pinned: !en.pinned);
+  //   ReaderInputPageData.books[idx] = nEn;
+  //   await _saveBookEntriesFile();
+  //   return nEn.pinned;
+  // }
 }

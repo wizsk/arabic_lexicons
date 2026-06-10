@@ -68,13 +68,20 @@ BorderRadius roundedBottm(double round) => BorderRadius.only(
   bottomRight: Radius.circular(round),
 );
 
-class Routes {
+abstract final class Routes {
+  static const startupscreen = '/startupscreen';
+
   static const dictionary = '/dictionary';
   static const readerInput = '/readerInput';
   static const readerPage = '/readerPage';
+
   static const bookMarks = '/bookMarks';
-  static const startupscreen = '/startupscreen';
-  // static const help = '/help';
+  static const foreings = '/foreigns';
+  static const searhHist = '/sHist';
+
+  static const settings = '/settings';
+  static const fams = '/fams';
+  static const help = '/help';
 }
 
 const routesToBeSavedInPref = [

@@ -53,11 +53,10 @@ class _WordListPageState extends State<WordListPage> {
         _clearAll = WordStore.clearBookmarks;
         _exportFileName = 'Arabic_Lexicons_Boookamrks.txt';
         _hasDeleteInList = false;
-        _words = WordStore.bookmarkedWords;
         break;
 
       case WordListType.foreings:
-        _titleMain = 'Foreign Words';
+        _titleMain = 'Foreigns';
         _words = WordStore.foreignWords;
         _add = WordStore.addForeign;
         _addMulti = WordStore.addForeigns;

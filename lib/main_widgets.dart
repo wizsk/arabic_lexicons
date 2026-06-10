@@ -5,9 +5,7 @@ import 'package:ara_dict/pages/fams/fams.dart';
 import 'package:ara_dict/pages/foreings_all.dart';
 import 'package:ara_dict/pages/help/help.dart';
 import 'package:ara_dict/pages/settings.dart';
-import 'package:ara_dict/reader/reader.dart';
 import 'package:ara_dict/utils.dart';
-
 import 'package:flutter/material.dart';
 
 Widget buildDrawer(BuildContext context) {
@@ -28,7 +26,7 @@ Widget buildDrawer(BuildContext context) {
 
       final isReading = currRoute == Routes.readerPage;
       if (isReading && (index == 0 || index == 1)) {
-        final res = await exitReaderPage(context, exit: false);
+        final res = await showConfirmDialog(context, 'Exit Reader?', confirmText: 'Exit');
         if (!context.mounted || res != true) return;
       }
 

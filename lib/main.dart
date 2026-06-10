@@ -1,9 +1,12 @@
 import 'package:ara_dict/conf.dart';
 import 'package:ara_dict/data.dart';
+import 'package:ara_dict/history/page.dart';
 import 'package:ara_dict/lex/lexicons.dart';
+import 'package:ara_dict/pages/fams/fams.dart';
+import 'package:ara_dict/pages/help/help.dart';
+import 'package:ara_dict/pages/settings.dart';
 import 'package:ara_dict/pages/startup_screen.dart';
 import 'package:ara_dict/reader/input.dart';
-import 'package:ara_dict/reader/reader.dart';
 import 'package:ara_dict/theme.dart';
 import 'package:ara_dict/word_list/page.dart';
 import 'package:flutter/foundation.dart';
@@ -42,11 +45,17 @@ class MyApp extends StatelessWidget {
               Routes.startupscreen: (_) => const StartupScreen(),
               Routes.dictionary: (_) => const SearchLexicons(),
               Routes.readerInput: (_) => const ReaderInputPage(),
-              Routes.readerPage: (_) => const ReaderPage(bookHash: null),
+              // Routes.readerPage: (_) => const ReaderPage(bookHash: null),
+
               Routes.bookMarks: (_) =>
                   const WordListPage(listType: WordListType.bookmarks),
-              // Routes.fams: (_) => const ArabicFamilyList(),
-              // Routes.help: (_) => const HelpPage(),
+              Routes.foreings: (_) =>
+                  const WordListPage(listType: WordListType.foreings),
+              Routes.searhHist: (_) => const HistPage(),
+
+              Routes.settings: (_) => const SettingsPage(),
+              Routes.fams: (_) => const ArabicFamilyList(),
+              Routes.help: (_) => const HelpPage(),
             },
           ),
         );

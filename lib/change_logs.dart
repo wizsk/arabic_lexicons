@@ -2,7 +2,7 @@ final releases = [
   Release(
     version: 'v3.1.0',
     changes: '''
-    add export and import to foreing word list
+    add export and import to foreign word list
     ''',
   ),
   Release(

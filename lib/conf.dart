@@ -1,12 +1,11 @@
 import 'dart:async';
 
+import 'package:ara_dict/change_logs.dart';
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/lex/isolate.dart';
-import 'package:ara_dict/pages/settings.dart';
 import 'package:ara_dict/pages/width_padd.dart';
 import 'package:ara_dict/play_rate.dart';
 import 'package:ara_dict/reader/settings_class.dart';
-
 import 'package:ara_dict/theme.dart';
 import 'package:ara_dict/utils.dart';
 import 'package:ara_dict/widgets/change_logs_widget.dart';
@@ -273,16 +272,17 @@ class AppSettingsController extends ChangeNotifier {
     await pref.setInt(_playRateKey, -1);
   }
 
+  static final _currentVersion = releases.first.version;
   Future<bool> showChangeChangelog(BuildContext context) async {
-    if (BuildInfo.appVersion.isEmpty || _appVersion == BuildInfo.appVersion) {
+    if (_appVersion == _currentVersion) {
       return false;
     }
 
     await showWhatsNewSheet(context);
 
     final pref = await SharedPreferences.getInstance();
-    _appVersion = BuildInfo.appVersion;
-    await pref.setString(_appVersionKey, BuildInfo.appVersion);
+    _appVersion = _currentVersion;
+    await pref.setString(_appVersionKey, _currentVersion);
 
     return true;
   }

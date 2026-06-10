@@ -1,5 +1,8 @@
+import 'dart:convert';
 import 'dart:math';
 
+import 'package:flutter/foundation.dart';
+import 'package:http/http.dart' as http;
 import 'package:ara_dict/conf.dart';
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/pages/width_padd.dart';
@@ -9,6 +12,12 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
 enum _ChatData { none, selected, all }
+
+class Chat {
+  final String user;
+  final String bot;
+  const Chat({required this.user, required this.bot});
+}
 
 typedef SelectableTextScreenFunc = String Function(int? start, int? end);
 
@@ -67,18 +76,25 @@ class SelectableTextScreen extends StatefulWidget {
   State<SelectableTextScreen> createState() => _SelectableTextScreenState();
 }
 
-class _SelectableTextScreenState extends State<SelectableTextScreen> {
+class _SelectableTextScreenState extends State<SelectableTextScreen>
+    with TickerProviderStateMixin {
   late String _txt;
   late final int? _currIdx;
   late final int? _length;
   int? _start;
   final TextEditingController _tc = TextEditingController();
+  final List<Chat> _chats = [];
 
   String? _selectedTxt;
   String? _selectedTxtSaved;
   bool _chatting = false;
   TextDirection _chatDirection = L.dir;
-  _ChatData _include = _ChatData.all;
+  _ChatData _include = _ChatData.none;
+
+  late final TabController _tabController = TabController(
+    length: 2,
+    vsync: this,
+  );
 
   /// [_end] is exclusive
   ///
@@ -105,6 +121,13 @@ class _SelectableTextScreenState extends State<SelectableTextScreen> {
     }
 
     _setTxt();
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    _tc.dispose();
+    super.dispose();
   }
 
   void _setTxt() {
@@ -196,10 +219,14 @@ class _SelectableTextScreenState extends State<SelectableTextScreen> {
               },
             ),
           IconButton(
-            icon: Icon(Icons.message),
+            icon: Icon(
+              _chatting ? Icons.message : Icons.message_outlined,
+              color: _chatting ? cs.primary : null,
+            ),
             onPressed: () {
               setState(() {
                 _chatting = !_chatting;
+                _tabController.index = 0;
               });
             },
           ),
@@ -210,49 +237,94 @@ class _SelectableTextScreenState extends State<SelectableTextScreen> {
           textDirection: widget.dir,
           child: Column(
             children: [
+              if (_chatting && _chats.isNotEmpty)
+                TabBar(
+                  controller: _tabController,
+                  tabs: const [
+                    Tab(text: 'Text'),
+                    Tab(text: 'Chats'),
+                  ],
+                ),
+              SizedBox(height: 8),
               Expanded(
-                child: ListView(
-                  padding: EdgeInsetsGeometry.only(
-                    left: sidePadd,
-                    right: sidePadd,
-                    top: 12,
-                    bottom: readerPadd.bottom,
-                  ),
+                child: TabBarView(
+                  physics: _chatting ? null : NeverScrollableScrollPhysics(),
+                  controller: _tabController,
                   children: [
-                    SelectionArea(
-                      onSelectionChanged: (SelectedContent? c) {
-                        String? t = c?.plainText.trim();
-                        if (t == '') t = null;
-                        if (_selectedTxt == null && t != null) {
-                          setState(() {
+                    ListView(
+                      padding: EdgeInsetsGeometry.only(
+                        left: sidePadd,
+                        right: sidePadd,
+                        top: 12,
+                        bottom: readerPadd.bottom,
+                      ),
+                      children: [
+                        SelectionArea(
+                          onSelectionChanged: (SelectedContent? c) {
+                            String? t = c?.plainText.trim();
+                            if (t == '') t = null;
+                            if (_selectedTxt == null && t != null) {
+                              setState(() {
+                                _selectedTxt = t;
+                              });
+                            } else if (_selectedTxt != null && t == null) {
+                              setState(() {
+                                _selectedTxt = null;
+                              });
+                            }
                             _selectedTxt = t;
-                          });
-                        } else if (_selectedTxt != null && t == null) {
-                          setState(() {
-                            _selectedTxt = null;
-                          });
-                        }
-                        _selectedTxt = t;
-                      },
-                      magnifierConfiguration:
-                          TextMagnifierConfiguration.disabled,
+                          },
+                          magnifierConfiguration:
+                              TextMagnifierConfiguration.disabled,
 
-                      contextMenuBuilder: (context, selectableRegionState) {
-                        return AdaptiveTextSelectionToolbar.buttonItems(
-                          anchors: selectableRegionState.contextMenuAnchors,
-                          buttonItems:
-                              selectableRegionState.contextMenuButtonItems,
+                          contextMenuBuilder: (context, selectableRegionState) {
+                            return AdaptiveTextSelectionToolbar.buttonItems(
+                              anchors: selectableRegionState.contextMenuAnchors,
+                              buttonItems:
+                                  selectableRegionState.contextMenuButtonItems,
+                            );
+                          },
+                          child: Text(
+                            _txt,
+                            textAlign: widget.textAlign,
+                            style: widget.textStyleBodyMedium.copyWith(
+                              // height: 2.0,
+                              leadingDistribution: TextLeadingDistribution.even,
+                              color: cs.onSurface,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    ListView.builder(
+                      padding: EdgeInsets.symmetric(
+                        vertical: 12,
+                        horizontal: sidePadd,
+                      ),
+                      itemCount: _chats.length,
+                      itemBuilder: (context, index) {
+                        final c = _chats[index];
+
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: _Bubble(text: c.user, isUser: true),
+                            ),
+
+                            const SizedBox(height: 8),
+
+                            Align(
+                              alignment: Alignment.centerLeft,
+                              child: _Bubble(text: c.bot, isUser: false),
+                            ),
+
+                            const SizedBox(height: 16),
+                          ],
                         );
                       },
-                      child: Text(
-                        _txt,
-                        textAlign: widget.textAlign,
-                        style: widget.textStyleBodyMedium.copyWith(
-                          // height: 2.0,
-                          leadingDistribution: TextLeadingDistribution.even,
-                          color: cs.onSurface,
-                        ),
-                      ),
                     ),
                   ],
                 ),
@@ -405,7 +477,19 @@ class _SelectableTextScreenState extends State<SelectableTextScreen> {
                                             : '',
                                     };
 
-                                    print('$pre$txt');
+                                    final u = '$pre$txt';
+                                    try {
+                                      getOpenAIReply(u).then((r) {
+                                        if (!context.mounted) return;
+                                        setState(() {
+                                          _selectedTxtSaved = null;
+                                          _chats.add(Chat(user: u, bot: r));
+                                          _tabController.index = 1;
+                                        });
+                                      });
+                                    } catch (e) {
+                                      if (kDebugMode) debugPrint('$e');
+                                    }
                                   },
                                 ),
                               ],
@@ -613,4 +697,61 @@ class _ValueEditor extends StatelessWidget {
       ],
     );
   }
+}
+
+class _Bubble extends StatelessWidget {
+  const _Bubble({required this.text, required this.isUser});
+
+  final String text;
+  final bool isUser;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      constraints: const BoxConstraints(maxWidth: 500),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: isUser
+            ? Theme.of(context).colorScheme.primaryContainer
+            : Theme.of(context).colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Text(text, textDirection: _direction(text)),
+    );
+  }
+}
+
+TextDirection _direction(String text) {
+  final arabic = RegExp(r'[\u0600-\u06FF]');
+  return arabic.hasMatch(text) ? TextDirection.rtl : TextDirection.ltr;
+}
+
+Future<String> getOpenAIReply(String message) async {
+  const apiKey = 'api-key';
+
+  final res = await http.post(
+    Uri.parse('https://api.openai.com/v1/chat/completions'),
+    headers: {
+      'Authorization': 'Bearer $apiKey',
+      'Content-Type': 'application/json',
+    },
+    body: jsonEncode({
+      "model": "gpt-4o-mini",
+      "messages": [
+        {
+          "role": "system",
+          "content":
+              "You are a helpful assistant for an Arabic reader app. "
+              "Answer questions about the book the user is reading. "
+              "Keep replies VERY short, plain text only, no emojis, no formatting, no extra explanation unless necessary.",
+        },
+        {"role": "user", "content": message},
+      ],
+      "temperature": 0.3,
+    }),
+  );
+
+  final data = jsonDecode(res.body);
+  print(data);
+  return data["choices"][0]["message"]["content"].trim();
 }

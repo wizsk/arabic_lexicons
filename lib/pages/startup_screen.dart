@@ -5,6 +5,7 @@ import 'package:ara_dict/lex/dicts/db.dart';
 import 'package:ara_dict/lex/isolate.dart';
 import 'package:ara_dict/lex/rearrange_dicts.dart';
 import 'package:ara_dict/main_widgets.dart';
+import 'package:ara_dict/widgets/selectable_text_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -30,6 +31,7 @@ class _StartupScreenState extends State<StartupScreen> {
         DbService.init(),
         WordStore.init(),
         Isolates.spawn(),
+        Chats.load(),
       ]);
 
       await Isolates.initArEn();

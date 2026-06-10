@@ -1,22 +1,90 @@
 import 'dart:convert';
+import 'dart:io';
 import 'dart:math';
 
-import 'package:flutter/foundation.dart';
-import 'package:http/http.dart' as http;
 import 'package:ara_dict/conf.dart';
 import 'package:ara_dict/data.dart';
+import 'package:ara_dict/main_widgets.dart';
 import 'package:ara_dict/pages/width_padd.dart';
 import 'package:ara_dict/reader/reader_utils.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart';
 
 enum _ChatData { none, selected, all }
 
 class Chat {
   final String user;
   final String bot;
-  const Chat({required this.user, required this.bot});
+  final String prompt;
+
+  const Chat({required this.user, required this.bot, required this.prompt});
+
+  Map<String, dynamic> toJson() => {'user': user, 'bot': bot, 'prompt': prompt};
+
+  static Chat fromJson(Map<String, dynamic> json) {
+    return Chat(
+      user: json['user'] as String,
+      bot: json['bot'] as String,
+      prompt: json['prompt'] as String,
+    );
+  }
+}
+
+abstract final class Chats {
+  static List<Chat> chats = [];
+
+  static const _fileName = 'chats.json';
+
+  static Future<File> _getFile() async {
+    final dir = await getApplicationDocumentsDirectory();
+    return File('${dir.path}/$_fileName');
+  }
+
+  static Future<void> _saveToFile() async {
+    try {
+      final file = await _getFile();
+
+      final tmpFile = File('${file.path}.tmp');
+
+      final data = jsonEncode(chats.map((e) => e.toJson()).toList());
+
+      await tmpFile.writeAsString(data, flush: true);
+
+      // atomic replace
+      if (await file.exists()) {
+        await file.delete();
+      }
+      await tmpFile.rename(file.path);
+    } catch (_) {}
+  }
+
+  static bool _inited = false;
+  static Future<void> load() async {
+    if (_inited) return;
+    _inited = true;
+
+    try {
+      final file = await _getFile();
+
+      if (!await file.exists()) {
+        chats = [];
+        return;
+      }
+
+      final content = await file.readAsString();
+      final List decoded = jsonDecode(content);
+
+      chats = decoded
+          .map((e) => Chat.fromJson(e as Map<String, dynamic>))
+          .toList();
+    } catch (e) {
+      if (kDebugMode) debugPrint('while loading chat history: $e');
+    }
+  }
 }
 
 typedef SelectableTextScreenFunc = String Function(int? start, int? end);
@@ -83,7 +151,9 @@ class _SelectableTextScreenState extends State<SelectableTextScreen>
   late final int? _length;
   int? _start;
   final TextEditingController _tc = TextEditingController();
-  final List<Chat> _chats = [];
+  final ScrollController _sc = ScrollController();
+
+  final List<Chat> _chats = Chats.chats;
 
   bool _requesting = false;
   String? _selectedTxt;
@@ -314,12 +384,15 @@ class _SelectableTextScreenState extends State<SelectableTextScreen>
                     ),
 
                     ListView.builder(
+                      controller: _sc,
+                      reverse: true,
                       padding: EdgeInsets.symmetric(
                         vertical: 12,
                         horizontal: sidePadd,
                       ),
                       itemCount: _chats.length,
                       itemBuilder: (context, index) {
+                        index = (_chats.length - 1) - index;
                         final c = _chats[index];
 
                         return Column(
@@ -530,13 +603,35 @@ Question: $question
                                                 _requesting = false;
                                                 _selectedTxtSaved = null;
                                                 _chats.add(
-                                                  Chat(user: msg, bot: r),
+                                                  Chat(
+                                                    user: msg,
+                                                    prompt: prompt,
+                                                    bot: r,
+                                                  ),
                                                 );
                                                 _tabController.index = 1;
+
+                                                Chats._saveToFile();
+
+                                                if (_sc.hasClients) {
+                                                  _sc.jumpTo(0);
+                                                }
                                               });
                                             });
+
+                                            Chats._saveToFile();
                                           } catch (e) {
                                             if (kDebugMode) debugPrint('$e');
+                                            showInfoDialog(
+                                              context,
+                                              'Error',
+                                              message: '$e',
+                                              constraints: true,
+                                            );
+
+                                            setState(() {
+                                              _requesting = false;
+                                            });
                                           }
                                         },
                                 ),
@@ -783,17 +878,17 @@ class _Bubble extends StatelessWidget {
             ],
           ),
         ),
-        PopupMenuItem(
-          value: 'reply',
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.reply_outlined, size: 18),
-              SizedBox(width: 10),
-              Text('Reply'),
-            ],
-          ),
-        ),
+        // PopupMenuItem(
+        //   value: 'reply',
+        //   child: Row(
+        //     mainAxisSize: MainAxisSize.min,
+        //     children: [
+        //       Icon(Icons.reply_outlined, size: 18),
+        //       SizedBox(width: 10),
+        //       Text('Reply'),
+        //     ],
+        //   ),
+        // ),
       ],
     );
 
@@ -842,7 +937,6 @@ TextDirection _direction(String text) {
 }
 
 Future<String> getGeminiReply(String message) async {
-  return 'yoooooooooooo';
   // Replace with your Google AI Studio API key
   const apiKey = String.fromEnvironment('GK', defaultValue: '');
 

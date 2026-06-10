@@ -85,6 +85,7 @@ class _SelectableTextScreenState extends State<SelectableTextScreen>
   final TextEditingController _tc = TextEditingController();
   final List<Chat> _chats = [];
 
+  bool _requesting = false;
   String? _selectedTxt;
   String? _selectedTxtSaved;
   bool _chatting = false;
@@ -104,6 +105,19 @@ class _SelectableTextScreenState extends State<SelectableTextScreen>
   @override
   void initState() {
     super.initState();
+
+    _tabController.addListener(() {
+      if (_selectedTxtSaved != null && _tabController.index != 0) {
+        return;
+      }
+
+      if (!mounted) return;
+      setState(() {
+        _selectedTxt = null;
+        _include = _ChatData.none;
+      });
+    });
+
     _currIdx = widget.currentIdx;
     _length = widget.length;
 
@@ -248,7 +262,9 @@ class _SelectableTextScreenState extends State<SelectableTextScreen>
               SizedBox(height: 8),
               Expanded(
                 child: TabBarView(
-                  physics: _chatting ? null : NeverScrollableScrollPhysics(),
+                  physics: _chatting && _chats.isNotEmpty
+                      ? null
+                      : NeverScrollableScrollPhysics(),
                   controller: _tabController,
                   children: [
                     ListView(
@@ -311,14 +327,22 @@ class _SelectableTextScreenState extends State<SelectableTextScreen>
                           children: [
                             Align(
                               alignment: Alignment.centerRight,
-                              child: _Bubble(text: c.user, isUser: true),
+                              child: _Bubble(
+                                text: c.user,
+                                isUser: true,
+                                onReply: () {},
+                              ),
                             ),
 
                             const SizedBox(height: 8),
 
                             Align(
                               alignment: Alignment.centerLeft,
-                              child: _Bubble(text: c.bot, isUser: false),
+                              child: _Bubble(
+                                text: c.bot,
+                                isUser: false,
+                                onReply: () {},
+                              ),
                             ),
 
                             const SizedBox(height: 16),
@@ -463,34 +487,58 @@ class _SelectableTextScreenState extends State<SelectableTextScreen>
                                 const SizedBox(height: 12),
                                 IconButton.filled(
                                   icon: Icon(Icons.arrow_forward),
-                                  onPressed: () {
-                                    final txt = _tc.text.trim();
-                                    _tc.clear();
-                                    if (txt.isEmpty) return;
+                                  onPressed: _requesting
+                                      ? null
+                                      : () {
+                                          final question = _tc.text.trim();
+                                          _tc.clear();
+                                          if (question.isEmpty) return;
 
-                                    final pre = switch (_include) {
-                                      _ChatData.none => '',
-                                      _ChatData.all => '$_txt\n\n',
-                                      _ChatData.selected =>
-                                        _selectedTxtSaved != null
-                                            ? '$_selectedTxtSaved\n\n'
-                                            : '',
-                                    };
+                                          final pre = switch (_include) {
+                                            _ChatData.none => '',
+                                            _ChatData.all => '$_txt\n\n',
+                                            _ChatData.selected =>
+                                              _selectedTxtSaved != null
+                                                  ? '$_selectedTxtSaved\n\n'
+                                                  : '',
+                                          };
 
-                                    final u = '$pre$txt';
-                                    try {
-                                      getOpenAIReply(u).then((r) {
-                                        if (!context.mounted) return;
-                                        setState(() {
-                                          _selectedTxtSaved = null;
-                                          _chats.add(Chat(user: u, bot: r));
-                                          _tabController.index = 1;
-                                        });
-                                      });
-                                    } catch (e) {
-                                      if (kDebugMode) debugPrint('$e');
-                                    }
-                                  },
+                                          final (msg, prompt) = pre.isEmpty
+                                              ? (
+                                                  question,
+                                                  'Question: $question',
+                                                )
+                                              : (
+                                                  '$pre\n\n$question',
+                                                  '''<context>
+$pre
+</context>
+
+Question: $question
+
+(Reply in ${_chatDirection == TextDirection.ltr ? 'English' : 'Arabic'})''',
+                                                );
+
+                                          setState(() {
+                                            _requesting = true;
+                                          });
+
+                                          try {
+                                            getGeminiReply(prompt).then((r) {
+                                              if (!context.mounted) return;
+                                              setState(() {
+                                                _requesting = false;
+                                                _selectedTxtSaved = null;
+                                                _chats.add(
+                                                  Chat(user: msg, bot: r),
+                                                );
+                                                _tabController.index = 1;
+                                              });
+                                            });
+                                          } catch (e) {
+                                            if (kDebugMode) debugPrint('$e');
+                                          }
+                                        },
                                 ),
                               ],
                             ),
@@ -700,23 +748,90 @@ class _ValueEditor extends StatelessWidget {
 }
 
 class _Bubble extends StatelessWidget {
-  const _Bubble({required this.text, required this.isUser});
+  const _Bubble({required this.text, required this.isUser, this.onReply});
 
   final String text;
   final bool isUser;
+  final VoidCallback? onReply; // parent wires this to its reply handler
+
+  Future<void> _showBubbleMenu(
+    BuildContext context,
+    Offset globalPosition,
+  ) async {
+    HapticFeedback.mediumImpact(); // tactile confirmation before menu appears
+
+    final overlay =
+        Overlay.of(context).context.findRenderObject()! as RenderBox;
+
+    final result = await showMenu<String>(
+      context: context,
+      // anchor the menu exactly where the finger pressed
+      position: RelativeRect.fromRect(
+        Rect.fromLTWH(globalPosition.dx, globalPosition.dy, 0, 0),
+        Offset.zero & overlay.size,
+      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      items: const [
+        PopupMenuItem(
+          value: 'copy',
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.copy_outlined, size: 18),
+              SizedBox(width: 10),
+              Text('Copy'),
+            ],
+          ),
+        ),
+        PopupMenuItem(
+          value: 'reply',
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.reply_outlined, size: 18),
+              SizedBox(width: 10),
+              Text('Reply'),
+            ],
+          ),
+        ),
+      ],
+    );
+
+    if (!context.mounted) return; // guard after every async gap
+
+    switch (result) {
+      case 'copy':
+        await Clipboard.setData(ClipboardData(text: text));
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Copied to clipboard'),
+              duration: Duration(seconds: 1),
+              behavior: SnackBarBehavior.floating, // doesn't cover input bar
+            ),
+          );
+        }
+      case 'reply':
+        onReply?.call();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      constraints: const BoxConstraints(maxWidth: 500),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: isUser
-            ? Theme.of(context).colorScheme.primaryContainer
-            : Theme.of(context).colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(16),
+    return GestureDetector(
+      onLongPressStart: (details) =>
+          _showBubbleMenu(context, details.globalPosition),
+      child: Container(
+        constraints: const BoxConstraints(maxWidth: 500),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: isUser
+              ? Theme.of(context).colorScheme.primaryContainer
+              : Theme.of(context).colorScheme.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Text(text, textDirection: _direction(text)),
       ),
-      child: Text(text, textDirection: _direction(text)),
     );
   }
 }
@@ -724,6 +839,46 @@ class _Bubble extends StatelessWidget {
 TextDirection _direction(String text) {
   final arabic = RegExp(r'[\u0600-\u06FF]');
   return arabic.hasMatch(text) ? TextDirection.rtl : TextDirection.ltr;
+}
+
+Future<String> getGeminiReply(String message) async {
+  return 'yoooooooooooo';
+  // Replace with your Google AI Studio API key
+  const apiKey = String.fromEnvironment('GK', defaultValue: '');
+
+  final res = await http.post(
+    // Gemini's OpenAI-compatible endpoint
+    Uri.parse(
+      'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions',
+    ),
+    headers: {
+      'Authorization': 'Bearer $apiKey',
+      'Content-Type': 'application/json',
+    },
+    body: jsonEncode({
+      // A highly efficient, free-tier eligible model
+      "model": "gemini-2.5-flash",
+      "messages": [
+        {
+          "role": "system",
+          "content":
+              "You are a helpful assistant for an Arabic reader app. "
+              "Answer questions about the book or text the user is reading. "
+              "Keep replies concise, clear, and comprehensive. "
+              "Use plain text only—no emojis and no markdown markdown styling like bolding or headers. "
+              "You may use text-based bullet points (using '•') to organize information if needed. "
+              "There may be a context section followed by the user question. Reply in the language specified.",
+        },
+        {"role": "user", "content": message},
+      ],
+      "temperature": 0.3,
+    }),
+  );
+
+  final data = jsonDecode(res.body);
+
+  // The JSON response structure remains exactly identical to OpenAI
+  return data["choices"][0]["message"]["content"].trim();
 }
 
 Future<String> getOpenAIReply(String message) async {
@@ -743,7 +898,8 @@ Future<String> getOpenAIReply(String message) async {
           "content":
               "You are a helpful assistant for an Arabic reader app. "
               "Answer questions about the book the user is reading. "
-              "Keep replies VERY short, plain text only, no emojis, no formatting, no extra explanation unless necessary.",
+              "Keep replies VERY short, plain text only, no emojis, no formatting, no extra explanation unless necessary. "
+              "There may be a context section then user quesion. if the quesiton in arabic then reply in arabic otherwise just english",
         },
         {"role": "user", "content": message},
       ],
@@ -752,6 +908,5 @@ Future<String> getOpenAIReply(String message) async {
   );
 
   final data = jsonDecode(res.body);
-  print(data);
   return data["choices"][0]["message"]["content"].trim();
 }

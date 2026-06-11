@@ -1130,32 +1130,32 @@ TextDirection _direction(String text) {
   return arabic.hasMatch(text) ? TextDirection.rtl : TextDirection.ltr;
 }
 
+// Pass your Google AI Studio API key via compile-time variables
+const apiKey = String.fromEnvironment('GK', defaultValue: '');
+const apiKey2 = String.fromEnvironment('GK2', defaultValue: '');
+const apiKey3 = String.fromEnvironment('GK3', defaultValue: '');
+const apiKey4 = String.fromEnvironment('GK4', defaultValue: '');
+
+const apiKeys = [
+  if (apiKey != '') apiKey,
+  if (apiKey2 != '') apiKey2,
+  if (apiKey3 != '') apiKey3,
+  if (apiKey4 != '') apiKey4,
+];
+
+const models = [
+  // 'gemma-4-26b-a4b-it', // gives crazy replies
+  'gemini-3.5-flash',
+  'gemini-3-flash',
+  'gemini-2.5-flash',
+  'gemini-3.1-flash-lite',
+  'gemini-2.5-flash-lite',
+];
+
 Future<String> getGeminiReply(String message) async {
-  // Pass your Google AI Studio API key via compile-time variables
-  const apiKey = String.fromEnvironment('GK', defaultValue: '');
-  const apiKey2 = String.fromEnvironment('GK2', defaultValue: '');
-  const apiKey3 = String.fromEnvironment('GK3', defaultValue: '');
-  const apiKey4 = String.fromEnvironment('GK4', defaultValue: '');
-
-  const keys = [
-    if (apiKey != '') apiKey,
-    if (apiKey2 != '') apiKey2,
-    if (apiKey3 != '') apiKey3,
-    if (apiKey4 != '') apiKey4,
-  ];
-
-  const models = [
-    // 'gemma-4-26b-a4b-it', // gives crazy replies
-    'gemini-3.5-flash',
-    'gemini-3-flash',
-    'gemini-2.5-flash',
-    'gemini-3.1-flash-lite',
-    'gemini-2.5-flash-lite',
-  ];
-
   // Native endpoint string using the stable free-tier flash model
   for (final m in models) {
-    for (final k in keys) {
+    for (final k in apiKeys) {
       if (kDebugMode) debugPrint('trying: $m');
       try {
         final url = Uri.parse(

@@ -20,22 +20,41 @@ class Chat {
   final String user;
   final String bot;
   final String prompt;
+  final DateTime? time;
 
-  const Chat({required this.user, required this.bot, required this.prompt});
+  const Chat({
+    required this.user,
+    required this.bot,
+    required this.prompt,
+    required this.time,
+  });
 
-  Map<String, dynamic> toJson() => {'user': user, 'bot': bot, 'prompt': prompt};
+  Map<String, dynamic> toJson() => {
+    'user': user,
+    'bot': bot,
+    'prompt': prompt,
+    if (time != null) 'time': time!.millisecondsSinceEpoch,
+  };
 
   static Chat fromJson(Map<String, dynamic> json) {
+    DateTime? t;
+    final unix = json['time'] as int?;
+    if (unix != null) {
+      t = DateTime.fromMillisecondsSinceEpoch(unix, isUtc: true);
+    }
     return Chat(
       user: json['user'] as String,
       bot: json['bot'] as String,
       prompt: json['prompt'] as String,
+      time: t,
     );
   }
 }
 
 abstract final class Chats {
   static List<Chat> chats = [];
+
+  static int get length => chats.length;
 
   static const _fileName = 'chats.json';
 
@@ -44,7 +63,12 @@ abstract final class Chats {
     return File('${dir.path}/$_fileName');
   }
 
-  static Future<void> _saveToFile() async {
+  static Future<void> add(Chat c) async {
+    chats.add(c);
+    return saveToFile();
+  }
+
+  static Future<void> saveToFile() async {
     try {
       final file = await _getFile();
 
@@ -421,7 +445,7 @@ class _SelectableTextScreenState extends State<SelectableTextScreen>
                             children: [
                               Align(
                                 alignment: Alignment.centerRight,
-                                child: _Bubble(
+                                child: ChatBubble(
                                   text: c.user,
                                   isUser: true,
                                   onReply: () {},
@@ -432,7 +456,7 @@ class _SelectableTextScreenState extends State<SelectableTextScreen>
 
                               Align(
                                 alignment: Alignment.centerLeft,
-                                child: _Bubble(
+                                child: ChatBubble(
                                   text: c.bot,
                                   isUser: false,
                                   onReply: () {},
@@ -659,7 +683,7 @@ class _SelectableTextScreenState extends State<SelectableTextScreen>
                                             if (res != true) return;
 
                                             Chats.chats.clear();
-                                            Chats._saveToFile();
+                                            Chats.saveToFile();
 
                                             _tabController.index = 0;
                                             if (context.mounted) {
@@ -731,10 +755,11 @@ Question: $question
                                                         user: msg,
                                                         prompt: prompt,
                                                         bot: r,
+                                                        time: DateTime.now(),
                                                       ),
                                                     );
 
-                                                    Chats._saveToFile();
+                                                    Chats.saveToFile();
 
                                                     if (!context.mounted) {
                                                       return;
@@ -751,7 +776,7 @@ Question: $question
                                                       _sc.jumpTo(0);
                                                     }
 
-                                                    Chats._saveToFile();
+                                                    Chats.saveToFile();
                                                   } catch (e) {
                                                     if (kDebugMode) {
                                                       debugPrint('$e');
@@ -1002,8 +1027,13 @@ class _ValueEditor extends StatelessWidget {
   }
 }
 
-class _Bubble extends StatelessWidget {
-  const _Bubble({required this.text, required this.isUser, this.onReply});
+class ChatBubble extends StatelessWidget {
+  const ChatBubble({
+    super.key,
+    required this.text,
+    required this.isUser,
+    this.onReply,
+  });
 
   final String text;
   final bool isUser;

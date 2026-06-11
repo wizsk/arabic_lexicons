@@ -111,195 +111,14 @@ class WordDictPickerResult {
   final Dict? d;
   final String? word;
   final bool? openSettings;
+  final bool? openChat;
 
-  const WordDictPickerResult({this.d, this.word, this.openSettings});
-}
-
-Future<WordDictPickerResult?> showWordPickerBottomSheet_(
-  BuildContext context,
-  SearchLexiconsDatas datas,
-  TextStyle ts,
-) {
-  // ts = ts.copyWith(fontSize: 0.85 * (ts.fontSize ?? defaultArabicFontSize));
-  final ts = L.arStyle;
-
-  return showModalBottomSheet<WordDictPickerResult?>(
-    context: context,
-    isScrollControlled: true,
-    backgroundColor: Colors.transparent,
-    useSafeArea: true,
-    builder: (context) {
-      final sh = MediaQuery.of(context).size.height;
-      final th = Theme.of(context).textTheme;
-      final maxHeight = sh * 0.9;
-      final minHeight = sh * 0.4;
-      final cs = Theme.of(context).colorScheme;
-
-      return ConstrainedBox(
-        constraints: BoxConstraints(
-          maxHeight: maxHeight,
-          minHeight: minHeight,
-          minWidth: double.infinity,
-        ),
-        child: Material(
-          shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-          ),
-          color: cs.surface,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16).copyWith(
-              top: 12,
-              bottom: MediaQuery.of(context).padding.bottom + 16,
-            ),
-            child: Column(
-              // textDirection: TextDirection.rtl,
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                // drag handle
-                Center(
-                  child: Container(
-                    margin: const EdgeInsets.only(bottom: 12),
-                    width: 40,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: cs.onSurfaceVariant.withAlpha(70),
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                ),
-
-                Padding(
-                  padding: const EdgeInsets.only(left: 12),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              // 'Switcher',
-                              'Switch Lexicon or Word',
-                              style: th.titleMedium?.copyWith(
-                                color: cs.onSurface.withAlpha(200),
-                              ),
-                            ),
-                            // const SizedBox(height: 2),
-                            // Text(
-                            //   'Change Lexicon or Word',
-                            //   style: th.bodySmall?.copyWith(
-                            //     color: cs.onSurfaceVariant,
-                            //   ),
-                            // ),
-                          ],
-                        ),
-                      ),
-                      OutlinedButton.icon(
-                        label: Text('Rearragne'),
-                        icon: const Icon(Icons.settings),
-                        // label: Text('Reset'),
-                        onPressed: () {
-                          Navigator.pop(
-                            context,
-                            WordDictPickerResult(openSettings: true),
-                          );
-                          // setState(() {
-                          //   _dicts = List.from(allDicts);
-                          // });
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 12),
-                const Divider(height: 0),
-                const SizedBox(height: 12),
-
-                if (!datas.areWordsEmpty) ...[
-                  Flexible(
-                    // Scroll
-                    child: SingleChildScrollView(
-                      padding: const EdgeInsets.only(bottom: 8),
-                      child: Wrap(
-                        textDirection: TextDirection.rtl,
-                        spacing: 8,
-                        runSpacing: 8,
-                        children: datas.words.map((word) {
-                          final s = datas.selectedWord == word;
-                          var tw = word.replaceAll('_', ' ').trim();
-                          if (tw.length > 30) {
-                            tw = '${tw.substring(0, 30)}…';
-                          }
-                          return ChoiceChip(
-                            showCheckmark: false,
-                            label: Text(
-                              tw,
-                              textDirection: TextDirection.rtl,
-                              textAlign: TextAlign.right,
-                            ),
-                            selected: s,
-                            labelStyle: s
-                                ? ts.copyWith(color: cs.onPrimary)
-                                : ts,
-                            selectedColor: cs.primary,
-                            onSelected: (value) {
-                              if (s) {
-                                Navigator.pop(context);
-                                return;
-                              }
-                              Navigator.pop(
-                                context,
-                                WordDictPickerResult(word: word),
-                              );
-                            },
-                          );
-                        }).toList(),
-                      ),
-                    ),
-                  ),
-
-                  SizedBox(height: 16),
-                  Divider(height: 0),
-                  SizedBox(height: 12),
-                ],
-
-                Align(
-                  alignment: L.alignment,
-                  child: Wrap(
-                    textDirection: L.dir,
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: allDictsOrd.map((dict) {
-                      final s = datas.selectedDict == dict;
-                      return ChoiceChip(
-                        showCheckmark: false,
-                        label: Text(L.p(dict.en, dict.ar)),
-                        tooltip: dict.enLong,
-                        selected: s,
-                        labelStyle: s
-                            ? L.arStyleOrNew.copyWith(
-                                color: s ? cs.onPrimary : cs.onSurface,
-                              )
-                            : L.arStyleIf,
-                        selectedColor: cs.primary,
-                        onSelected: (value) {
-                          if (s) {
-                            Navigator.pop(context);
-                            return;
-                          }
-                          Navigator.pop(context, WordDictPickerResult(d: dict));
-                        },
-                      );
-                    }).toList(),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-    },
-  );
+  const WordDictPickerResult({
+    this.d,
+    this.word,
+    this.openSettings,
+    this.openChat,
+  });
 }
 
 Future<WordDictPickerResult?> showWordPickerBottomSheet(
@@ -380,6 +199,17 @@ class _WordDictPickerSheet extends StatelessWidget {
                       ],
                     ),
                   ),
+                  IconButton.filledTonal(
+                    onPressed: () {
+                      Navigator.pop(
+                        context,
+                        WordDictPickerResult(openChat: true),
+                      );
+                    },
+                    icon: const Icon(Icons.chat),
+                    // label: const Text('Rearrange'),
+                  ),
+                  const SizedBox(width: 4),
                   IconButton.filledTonal(
                     onPressed: () {
                       Navigator.pop(

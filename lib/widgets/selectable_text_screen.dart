@@ -7,6 +7,7 @@ import 'package:ara_dict/data.dart';
 import 'package:ara_dict/main_widgets.dart';
 import 'package:ara_dict/pages/width_padd.dart';
 import 'package:ara_dict/reader/reader_utils.dart';
+import 'package:ara_dict/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -150,8 +151,10 @@ class _SelectableTextScreenState extends State<SelectableTextScreen>
   late final int? _currIdx;
   late final int? _length;
   int? _start;
+
   final TextEditingController _tc = TextEditingController();
   final ScrollController _sc = ScrollController();
+  final FocusNode _focusNode = FocusNode();
 
   final List<Chat> _chats = Chats.chats;
 
@@ -161,6 +164,7 @@ class _SelectableTextScreenState extends State<SelectableTextScreen>
   bool _chatting = false;
   TextDirection _chatDirection = L.dir;
   _ChatData _include = _ChatData.none;
+  bool _chatBoxCollapsed = false;
 
   late final TabController _tabController = TabController(
     length: 2,
@@ -211,6 +215,7 @@ class _SelectableTextScreenState extends State<SelectableTextScreen>
   void dispose() {
     _tabController.dispose();
     _tc.dispose();
+    _focusNode.dispose();
     super.dispose();
   }
 
@@ -221,6 +226,7 @@ class _SelectableTextScreenState extends State<SelectableTextScreen>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final th = theme.textTheme;
     final cs = theme.colorScheme;
 
     final readerPadd = readerPadding(
@@ -320,331 +326,470 @@ class _SelectableTextScreenState extends State<SelectableTextScreen>
       body: SafeArea(
         child: Directionality(
           textDirection: widget.dir,
-          child: Column(
-            children: [
-              if (_chatting && _chats.isNotEmpty)
-                TabBar(
-                  controller: _tabController,
-                  tabs: const [
-                    Tab(text: 'Text'),
-                    Tab(text: 'Chats'),
-                  ],
-                ),
-              SizedBox(height: 8),
-              Expanded(
-                child: TabBarView(
-                  physics: _chatting && _chats.isNotEmpty
-                      ? null
-                      : NeverScrollableScrollPhysics(),
-                  controller: _tabController,
-                  children: [
-                    ListView(
-                      padding: EdgeInsetsGeometry.only(
-                        left: sidePadd,
-                        right: sidePadd,
-                        top: 12,
-                        bottom: readerPadd.bottom,
-                      ),
-                      children: [
-                        SelectionArea(
-                          onSelectionChanged: (SelectedContent? c) {
-                            String? t = c?.plainText.trim();
-                            if (t == '') t = null;
-                            if (_selectedTxt == null && t != null) {
-                              setState(() {
-                                _selectedTxt = t;
-                              });
-                            } else if (_selectedTxt != null && t == null) {
-                              setState(() {
-                                _selectedTxt = null;
-                              });
-                            }
-                            _selectedTxt = t;
-                          },
-                          magnifierConfiguration:
-                              TextMagnifierConfiguration.disabled,
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () {
+              if (_focusNode.hasFocus) {
+                FocusManager.instance.primaryFocus?.unfocus();
+              }
+            },
 
-                          contextMenuBuilder: (context, selectableRegionState) {
-                            return AdaptiveTextSelectionToolbar.buttonItems(
-                              anchors: selectableRegionState.contextMenuAnchors,
-                              buttonItems:
-                                  selectableRegionState.contextMenuButtonItems,
-                            );
-                          },
-                          child: Text(
-                            _txt,
-                            textAlign: widget.textAlign,
-                            style: widget.textStyleBodyMedium.copyWith(
-                              // height: 2.0,
-                              leadingDistribution: TextLeadingDistribution.even,
-                              color: cs.onSurface,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    ListView.builder(
-                      controller: _sc,
-                      reverse: true,
-                      padding: EdgeInsets.symmetric(
-                        vertical: 12,
-                        horizontal: sidePadd,
-                      ),
-                      itemCount: _chats.length,
-                      itemBuilder: (context, index) {
-                        index = (_chats.length - 1) - index;
-                        final c = _chats[index];
-
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Align(
-                              alignment: Alignment.centerRight,
-                              child: _Bubble(
-                                text: c.user,
-                                isUser: true,
-                                onReply: () {},
-                              ),
-                            ),
-
-                            const SizedBox(height: 8),
-
-                            Align(
-                              alignment: Alignment.centerLeft,
-                              child: _Bubble(
-                                text: c.bot,
-                                isUser: false,
-                                onReply: () {},
-                              ),
-                            ),
-
-                            const SizedBox(height: 16),
-                          ],
-                        );
-                      },
-                    ),
-                  ],
-                ),
-              ),
-
-              if (_chatting)
-                Padding(
-                  padding: EdgeInsets.only(
-                    right: sidePaddNormal,
-                    left: sidePaddNormal,
-                    bottom: max(MediaQuery.of(context).padding.bottom, 12),
+            child: Column(
+              children: [
+                if (_chatting && _chats.isNotEmpty)
+                  TabBar(
+                    controller: _tabController,
+                    tabs: const [
+                      Tab(text: 'Text'),
+                      Tab(text: 'Chats'),
+                    ],
                   ),
-                  child: Column(
+                SizedBox(height: 8),
+                Expanded(
+                  child: TabBarView(
+                    physics: _chatting && _chats.isNotEmpty
+                        ? null
+                        : NeverScrollableScrollPhysics(),
+                    controller: _tabController,
                     children: [
-                      Divider(height: 0),
-                      const SizedBox(height: 8),
+                      ListView(
+                        keyboardDismissBehavior:
+                            ScrollViewKeyboardDismissBehavior.onDrag,
+                        padding: EdgeInsetsGeometry.only(
+                          left: sidePadd,
+                          right: sidePadd,
+                          top: 12,
+                          bottom: readerPadd.bottom,
+                        ),
+                        children: [
+                          SelectionArea(
+                            onSelectionChanged: (SelectedContent? c) {
+                              String? t = c?.plainText.trim();
+                              if (t == '') t = null;
+                              if (_selectedTxt == null && t != null) {
+                                setState(() {
+                                  _selectedTxt = t;
+                                });
+                              } else if (_selectedTxt != null && t == null) {
+                                setState(() {
+                                  _selectedTxt = null;
+                                });
+                              }
+                              _selectedTxt = t;
+                            },
+                            magnifierConfiguration:
+                                TextMagnifierConfiguration.disabled,
 
-                      if (_include == _ChatData.selected &&
-                          _selectedTxtSaved != null) ...[
-                        ConstrainedBox(
-                          constraints: BoxConstraints(maxHeight: 50),
-                          child: SingleChildScrollView(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 8,
-                            ),
+                            contextMenuBuilder: (context, selectableRegionState) {
+                              return AdaptiveTextSelectionToolbar.buttonItems(
+                                anchors:
+                                    selectableRegionState.contextMenuAnchors,
+                                buttonItems: selectableRegionState
+                                    .contextMenuButtonItems,
+                              );
+                            },
                             child: Text(
-                              _selectedTxtSaved!,
-                              textAlign: TextAlign.center,
-                              // maxLines: 1,
-                              // overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                fontFamily: widget.dir == TextDirection.rtl
-                                    ? fontNotoSansArabic
-                                    : null,
+                              _txt,
+                              textAlign: widget.textAlign,
+                              style: widget.textStyleBodyMedium.copyWith(
+                                // height: 2.0,
+                                leadingDistribution:
+                                    TextLeadingDistribution.even,
+                                color: cs.onSurface,
                               ),
                             ),
                           ),
-                        ),
-
-                        const SizedBox(height: 12),
-                      ],
-                      Directionality(
-                        textDirection: TextDirection.ltr,
-                        child: Wrap(
-                          spacing: 6,
-                          runSpacing: 6,
-                          runAlignment: WrapAlignment.center,
-                          alignment: WrapAlignment.center,
-                          children: [
-                            FilterChip(
-                              showCheckmark: false,
-                              avatar: const Icon(Icons.fullscreen, size: 18),
-                              label: Text('All'),
-                              selected: _ChatData.all == _include,
-                              onSelected: (_) => setState(() {
-                                _include = _ChatData.all;
-                              }),
-                            ),
-                            FilterChip(
-                              showCheckmark: false,
-                              avatar: const Icon(Icons.select_all, size: 18),
-                              label: Text('Selected'),
-                              selected: _ChatData.selected == _include,
-                              onSelected: _selectedTxt == null
-                                  ? null
-                                  : (_) => setState(() {
-                                      _selectedTxtSaved = _selectedTxt;
-                                      _include = _ChatData.selected;
-                                    }),
-                            ),
-                            FilterChip(
-                              showCheckmark: false,
-                              avatar: const Icon(
-                                Icons.disabled_visible,
-                                size: 18,
-                              ),
-                              label: Text('None'),
-                              selected: _ChatData.none == _include,
-                              onSelected: (_) => setState(() {
-                                _include = _ChatData.none;
-                              }),
-                            ),
-                          ],
-                        ),
+                        ],
                       ),
-                      const SizedBox(height: 8),
-                      Directionality(
-                        textDirection: TextDirection.ltr,
-                        child: Row(
-                          children: [
-                            Flexible(
-                              child: TextField(
-                                controller: _tc,
-                                magnifierConfiguration:
-                                    TextMagnifierConfiguration.disabled,
-                                contextMenuBuilder:
-                                    (context, selectableRegionState) {
-                                      return AdaptiveTextSelectionToolbar.buttonItems(
-                                        anchors: selectableRegionState
-                                            .contextMenuAnchors,
-                                        buttonItems: selectableRegionState
-                                            .contextMenuButtonItems,
-                                      );
-                                    },
-                                maxLines: 4,
-                                textDirection: _chatDirection,
-                                decoration: InputDecoration(
-                                  hintText: switch (_chatDirection) {
-                                    TextDirection.ltr => 'Search Words',
-                                    TextDirection.rtl => 'ابحث',
-                                  },
-                                  hintTextDirection: _chatDirection,
+
+                      ListView.builder(
+                        keyboardDismissBehavior:
+                            ScrollViewKeyboardDismissBehavior.onDrag,
+                        controller: _sc,
+                        reverse: true,
+                        padding: EdgeInsets.symmetric(
+                          vertical: 12,
+                          horizontal: sidePadd,
+                        ),
+                        itemCount: _chats.length,
+                        itemBuilder: (context, index) {
+                          index = (_chats.length - 1) - index;
+                          final c = _chats[index];
+
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Align(
+                                alignment: Alignment.centerRight,
+                                child: _Bubble(
+                                  text: c.user,
+                                  isUser: true,
+                                  onReply: () {},
                                 ),
                               ),
-                            ),
 
-                            const SizedBox(width: 12),
-                            Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                IconButton.filledTonal(
-                                  icon: switch (_chatDirection) {
-                                    TextDirection.ltr => Icon(Icons.language),
-                                    TextDirection.rtl => Icon(Icons.translate),
-                                  },
-                                  onPressed: () {
-                                    setState(() {
-                                      _chatDirection =
-                                          _chatDirection == TextDirection.ltr
-                                          ? TextDirection.rtl
-                                          : TextDirection.ltr;
-                                    });
-                                  },
+                              const SizedBox(height: 8),
+
+                              Align(
+                                alignment: Alignment.centerLeft,
+                                child: _Bubble(
+                                  text: c.bot,
+                                  isUser: false,
+                                  onReply: () {},
                                 ),
-                                const SizedBox(height: 12),
-                                IconButton.filled(
-                                  icon: Icon(Icons.arrow_forward),
-                                  onPressed: _requesting
-                                      ? null
-                                      : () {
-                                          final question = _tc.text.trim();
-                                          _tc.clear();
-                                          if (question.isEmpty) return;
+                              ),
 
-                                          final pre = switch (_include) {
-                                            _ChatData.none => '',
-                                            _ChatData.all => '$_txt\n\n',
-                                            _ChatData.selected =>
-                                              _selectedTxtSaved != null
-                                                  ? '$_selectedTxtSaved\n\n'
-                                                  : '',
-                                          };
+                              const SizedBox(height: 16),
+                            ],
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ),
 
-                                          final (msg, prompt) = pre.isEmpty
-                                              ? (
-                                                  question,
-                                                  'Question: $question',
-                                                )
-                                              : (
-                                                  '$pre\n\n$question',
-                                                  '''<context>
-$pre
+                if (_chatting)
+                  Padding(
+                    padding: EdgeInsets.only(
+                      right: sidePaddNormal,
+                      left: sidePaddNormal,
+                      bottom: max(MediaQuery.of(context).padding.bottom, 12),
+                    ),
+                    child: Stack(
+                      children: [
+                        Directionality(
+                          textDirection: TextDirection.ltr,
+                          child: _chatBoxCollapsed
+                              ? Column(
+                                  children: [
+                                    Divider(height: 0),
+                                    const SizedBox(height: 8),
+                                    IconButton(
+                                      icon: Icon(Icons.arrow_upward_rounded),
+                                      visualDensity: VisualDensity.compact,
+                                      onPressed: () => setState(() {
+                                        _chatBoxCollapsed = false;
+                                      }),
+                                    ),
+                                  ],
+                                )
+                              : Column(
+                                  children: [
+                                    Divider(height: 0),
+                                    const SizedBox(height: 8),
+                                    IconButton(
+                                      icon: Icon(Icons.arrow_downward_rounded),
+                                      visualDensity: VisualDensity.compact,
+                                      onPressed: () => setState(() {
+                                        _chatBoxCollapsed = true;
+                                      }),
+                                    ),
+                                    const SizedBox(height: 8),
+
+                                    if (_include == _ChatData.selected &&
+                                        _selectedTxtSaved != null) ...[
+                                      ConstrainedBox(
+                                        constraints: BoxConstraints(
+                                          maxHeight: 50,
+                                        ),
+                                        child: SingleChildScrollView(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 8,
+                                            vertical: 8,
+                                          ),
+                                          child: Text(
+                                            _selectedTxtSaved!,
+                                            textAlign: TextAlign.center,
+                                            // maxLines: 1,
+                                            // overflow: TextOverflow.ellipsis,
+                                            style: TextStyle(
+                                              fontFamily:
+                                                  widget.dir ==
+                                                      TextDirection.rtl
+                                                  ? fontNotoSansArabic
+                                                  : null,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+
+                                      const SizedBox(height: 12),
+                                    ],
+
+                                    Wrap(
+                                      spacing: 6,
+                                      runSpacing: 6,
+                                      runAlignment: WrapAlignment.center,
+                                      alignment: WrapAlignment.center,
+                                      children: [
+                                        FilterChip(
+                                          showCheckmark: false,
+                                          // avatar: const Icon(
+                                          //   Icons.fullscreen,
+                                          //   size: 18,
+                                          // ),
+                                          label: Text('All'),
+                                          selected: _ChatData.all == _include,
+                                          onSelected: (_) => setState(() {
+                                            _include = _ChatData.all;
+                                          }),
+                                        ),
+                                        FilterChip(
+                                          showCheckmark: false,
+                                          label: Text('Selected'),
+                                          selected:
+                                              _ChatData.selected == _include,
+                                          onSelected: _selectedTxt == null
+                                              ? null
+                                              : (_) => setState(() {
+                                                  _selectedTxtSaved =
+                                                      _selectedTxt;
+                                                  _include = _ChatData.selected;
+                                                }),
+                                        ),
+                                        FilterChip(
+                                          visualDensity: VisualDensity.compact,
+                                          showCheckmark: false,
+                                          label: Text('None'),
+                                          selected: _ChatData.none == _include,
+                                          onSelected: (_) => setState(() {
+                                            _include = _ChatData.none;
+                                          }),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Wrap(
+                                      spacing: 6,
+                                      runSpacing: 6,
+                                      runAlignment: WrapAlignment.center,
+                                      alignment: WrapAlignment.center,
+                                      children: [
+                                        ActionChip(
+                                          visualDensity: VisualDensity.compact,
+                                          avatar: Icon(switch (_chatDirection) {
+                                            TextDirection.ltr => Icons.language,
+                                            TextDirection.rtl =>
+                                              Icons.translate,
+                                          }, size: 18),
+                                          label: Text(switch (_chatDirection) {
+                                            TextDirection.ltr => 'English',
+                                            TextDirection.rtl => 'Arabic',
+                                          }),
+                                          onPressed: () {
+                                            setState(() {
+                                              _chatDirection =
+                                                  _chatDirection ==
+                                                      TextDirection.ltr
+                                                  ? TextDirection.rtl
+                                                  : TextDirection.ltr;
+                                            });
+                                          },
+                                        ),
+                                        ActionChip(
+                                          visualDensity: VisualDensity.compact,
+                                          avatar: Icon(
+                                            Icons.auto_awesome_rounded,
+                                            size: 18,
+                                          ),
+                                          label: Text('Gemini'),
+                                          onPressed: () {
+                                            // setState(() {
+                                            // });
+                                          },
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Row(
+                                      children: [
+                                        Flexible(
+                                          child: Directionality(
+                                            textDirection: _chatDirection,
+                                            child: TextField(
+                                              focusNode: _focusNode,
+                                              controller: _tc,
+                                              magnifierConfiguration:
+                                                  TextMagnifierConfiguration
+                                                      .disabled,
+                                              contextMenuBuilder:
+                                                  (
+                                                    context,
+                                                    selectableRegionState,
+                                                  ) {
+                                                    return AdaptiveTextSelectionToolbar.buttonItems(
+                                                      anchors:
+                                                          selectableRegionState
+                                                              .contextMenuAnchors,
+                                                      buttonItems:
+                                                          selectableRegionState
+                                                              .contextMenuButtonItems,
+                                                    );
+                                                  },
+                                              minLines: 1,
+                                              maxLines: 2,
+                                              textDirection: _chatDirection,
+                                              style: L.arStyle,
+                                              decoration: InputDecoration(
+                                                hintText:
+                                                    switch (_chatDirection) {
+                                                      TextDirection.ltr =>
+                                                        'Ask...',
+                                                      TextDirection.rtl =>
+                                                        'اسأل...',
+                                                    },
+                                                hintTextDirection:
+                                                    _chatDirection,
+                                                // prefixIcon: IconButton(
+                                                //   icon: Icon(Icons.arrow_forward_rounded),
+                                                //   onPressed: () {},
+                                                // ),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+
+                                        const SizedBox(width: 6),
+                                        IconButton.filled(
+                                          icon: Icon(Icons.arrow_forward),
+                                          onPressed: _requesting
+                                              ? null
+                                              : () async {
+                                                  // setState(() {
+                                                  //   _requesting = true;
+                                                  // });
+                                                  // await Future.delayed(
+                                                  //   Duration(seconds: 2),
+                                                  // );
+                                                  // if (context.mounted) {
+                                                  //   setState(() {
+                                                  //     _requesting = false;
+                                                  //   });
+                                                  // }
+                                                  // return;
+
+                                                  final question = _tc.text
+                                                      .trim();
+                                                  _tc.clear();
+                                                  if (question.isEmpty) return;
+
+                                                  final pre = switch (_include) {
+                                                    _ChatData.none => '',
+                                                    _ChatData.all =>
+                                                      '$_txt\n\n',
+                                                    _ChatData.selected =>
+                                                      _selectedTxtSaved != null
+                                                          ? '$_selectedTxtSaved\n\n'
+                                                          : '',
+                                                  };
+
+                                                  final (
+                                                    msg,
+                                                    prompt,
+                                                  ) = pre.isEmpty
+                                                      ? (
+                                                          question,
+                                                          'Question: $question',
+                                                        )
+                                                      : (
+                                                          '$pre\n\n$question',
+                                                          '''<context>
+                            $pre
 </context>
 
 Question: $question
 
 (Reply in ${_chatDirection == TextDirection.ltr ? 'English' : 'Arabic'})''',
-                                                );
+                                                        );
 
-                                          setState(() {
-                                            _requesting = true;
-                                          });
+                                                  FocusManager
+                                                      .instance
+                                                      .primaryFocus
+                                                      ?.unfocus();
 
-                                          try {
-                                            getGeminiReply(prompt).then((r) {
-                                              if (!context.mounted) return;
-                                              setState(() {
-                                                _requesting = false;
-                                                _selectedTxtSaved = null;
-                                                _chats.add(
-                                                  Chat(
-                                                    user: msg,
-                                                    prompt: prompt,
-                                                    bot: r,
-                                                  ),
-                                                );
-                                                _tabController.index = 1;
+                                                  setState(() {
+                                                    _requesting = true;
+                                                  });
 
-                                                Chats._saveToFile();
+                                                  try {
+                                                    getGeminiReply(prompt).then(
+                                                      (r) {
+                                                        Chats.chats.add(
+                                                          Chat(
+                                                            user: msg,
+                                                            prompt: prompt,
+                                                            bot: r,
+                                                          ),
+                                                        );
+                                                        Chats._saveToFile();
 
-                                                if (_sc.hasClients) {
-                                                  _sc.jumpTo(0);
-                                                }
-                                              });
-                                            });
+                                                        if (!context.mounted) {
+                                                          return;
+                                                        }
 
-                                            Chats._saveToFile();
-                                          } catch (e) {
-                                            if (kDebugMode) debugPrint('$e');
-                                            showInfoDialog(
-                                              context,
-                                              'Error',
-                                              message: '$e',
-                                              constraints: true,
-                                            );
+                                                        setState(() {
+                                                          _requesting = false;
+                                                          _selectedTxtSaved =
+                                                              null;
+                                                          _tabController.index =
+                                                              1;
+                                                        });
 
-                                            setState(() {
-                                              _requesting = false;
-                                            });
-                                          }
-                                        },
+                                                        if (_sc.hasClients) {
+                                                          _sc.jumpTo(0);
+                                                        }
+                                                      },
+                                                    );
+
+                                                    Chats._saveToFile();
+                                                  } catch (e) {
+                                                    if (kDebugMode) {
+                                                      debugPrint('$e');
+                                                    }
+                                                    showInfoDialog(
+                                                      context,
+                                                      'Error',
+                                                      message: '$e',
+                                                      constraints: true,
+                                                    );
+
+                                                    setState(() {
+                                                      _requesting = false;
+                                                    });
+                                                  }
+                                                },
+                                        ),
+                                      ],
+                                    ),
+                                  ],
                                 ),
-                              ],
-                            ),
-                          ],
                         ),
-                      ),
-                    ],
+
+                        if (_requesting) ...[
+                          Positioned(
+                            top: 0,
+                            right: 0,
+                            left: 0,
+                            bottom: 0,
+                            child: ColoredBox(color: Colors.transparent),
+                          ),
+
+                          Positioned(
+                            top: 0,
+                            right: 0,
+                            left: 0,
+                            bottom: 0,
+                            child: Align(
+                              alignment: AlignmentGeometry.center,
+                              child: CircularProgressIndicator(),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
                   ),
-                ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -899,12 +1044,10 @@ class _Bubble extends StatelessWidget {
       case 'copy':
         await Clipboard.setData(ClipboardData(text: text));
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Copied to clipboard'),
-              duration: Duration(seconds: 1),
-              behavior: SnackBarBehavior.floating, // doesn't cover input bar
-            ),
+          showSnack(
+            context,
+            'Copied to clipboard',
+            duration: Duration(seconds: 1),
           );
         }
       case 'reply':
@@ -914,6 +1057,8 @@ class _Bubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final dir = _direction(text);
+
     return GestureDetector(
       onLongPressStart: (details) =>
           _showBubbleMenu(context, details.globalPosition),
@@ -926,7 +1071,11 @@ class _Bubble extends StatelessWidget {
               : Theme.of(context).colorScheme.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(16),
         ),
-        child: Text(text, textDirection: _direction(text)),
+        child: Text(
+          text,
+          textDirection: dir,
+          style: dir == TextDirection.rtl ? L.arStyle : null,
+        ),
       ),
     );
   }

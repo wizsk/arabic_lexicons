@@ -336,7 +336,7 @@ class _SelectableTextScreenState extends State<SelectableTextScreen>
 
             child: Column(
               children: [
-                if (_chatting && _chats.isNotEmpty)
+                if (_chatting && _chats.isNotEmpty && !_chatBoxCollapsed)
                   TabBar(
                     controller: _tabController,
                     tabs: const [

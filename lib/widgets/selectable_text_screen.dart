@@ -229,7 +229,8 @@ class _SelectableTextScreenState extends State<SelectableTextScreen>
       sidePadd: appConf.padding,
     );
 
-    final sidePadd = max(24.0, readerPadd.right);
+    final sidePaddNormal = readerPadd.right;
+    final sidePadd = max(24.0, sidePaddNormal);
 
     return Scaffold(
       appBar: AppBar(
@@ -430,8 +431,8 @@ class _SelectableTextScreenState extends State<SelectableTextScreen>
               if (_chatting)
                 Padding(
                   padding: EdgeInsets.only(
-                    right: sidePadd,
-                    left: sidePadd,
+                    right: sidePaddNormal,
+                    left: sidePaddNormal,
                     bottom: max(MediaQuery.of(context).padding.bottom, 12),
                   ),
                   child: Column(

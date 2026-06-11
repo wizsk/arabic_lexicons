@@ -524,10 +524,7 @@ class _SelectableTextScreenState extends State<SelectableTextScreen>
                                       children: [
                                         FilterChip(
                                           showCheckmark: false,
-                                          // avatar: const Icon(
-                                          //   Icons.fullscreen,
-                                          //   size: 18,
-                                          // ),
+                                          visualDensity: VisualDensity.compact,
                                           label: Text('All'),
                                           selected: _ChatData.all == _include,
                                           onSelected: (_) => setState(() {
@@ -536,6 +533,7 @@ class _SelectableTextScreenState extends State<SelectableTextScreen>
                                         ),
                                         FilterChip(
                                           showCheckmark: false,
+                                          visualDensity: VisualDensity.compact,
                                           label: Text('Selected'),
                                           selected:
                                               _ChatData.selected == _include,
@@ -652,6 +650,20 @@ class _SelectableTextScreenState extends State<SelectableTextScreen>
                                         const SizedBox(width: 6),
                                         IconButton.filled(
                                           icon: Icon(Icons.arrow_forward),
+                                          onLongPress: () async {
+                                            final res = await showConfirmDialog(
+                                              context,
+                                              'Clear chat?',
+                                            );
+
+                                            if (res != true) return;
+
+                                            Chats.chats.clear();
+                                            Chats._saveToFile();
+                                            if (context.mounted) {
+                                              setState(() {});
+                                            }
+                                          },
                                           onPressed: _requesting
                                               ? null
                                               : () async {

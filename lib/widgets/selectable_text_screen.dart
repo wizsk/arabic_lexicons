@@ -7,7 +7,6 @@ import 'package:ara_dict/data.dart';
 import 'package:ara_dict/main_widgets.dart';
 import 'package:ara_dict/pages/width_padd.dart';
 import 'package:ara_dict/reader/reader_utils.dart';
-import 'package:ara_dict/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -226,7 +225,7 @@ class _SelectableTextScreenState extends State<SelectableTextScreen>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final th = theme.textTheme;
+    // final th = theme.textTheme;
     final cs = theme.colorScheme;
 
     final readerPadd = readerPadding(
@@ -456,30 +455,30 @@ class _SelectableTextScreenState extends State<SelectableTextScreen>
                       left: sidePaddNormal,
                       bottom: max(MediaQuery.of(context).padding.bottom, 12),
                     ),
-                    child: Stack(
-                      children: [
-                        Directionality(
-                          textDirection: TextDirection.ltr,
-                          child: _chatBoxCollapsed
-                              ? Column(
+                    child: Directionality(
+                      textDirection: TextDirection.ltr,
+                      child: _chatBoxCollapsed
+                          ? Column(
+                              children: [
+                                Divider(height: 0),
+                                const SizedBox(height: 8),
+                                IconButton(
+                                  icon: Icon(Icons.expand_less),
+                                  visualDensity: VisualDensity.compact,
+                                  onPressed: () => setState(() {
+                                    _chatBoxCollapsed = false;
+                                  }),
+                                ),
+                              ],
+                            )
+                          : Stack(
+                              children: [
+                                Column(
                                   children: [
                                     Divider(height: 0),
                                     const SizedBox(height: 8),
                                     IconButton(
-                                      icon: Icon(Icons.arrow_upward_rounded),
-                                      visualDensity: VisualDensity.compact,
-                                      onPressed: () => setState(() {
-                                        _chatBoxCollapsed = false;
-                                      }),
-                                    ),
-                                  ],
-                                )
-                              : Column(
-                                  children: [
-                                    Divider(height: 0),
-                                    const SizedBox(height: 8),
-                                    IconButton(
-                                      icon: Icon(Icons.arrow_downward_rounded),
+                                      icon: Icon(Icons.expand_more),
                                       visualDensity: VisualDensity.compact,
                                       onPressed: () => setState(() {
                                         _chatBoxCollapsed = true;
@@ -585,18 +584,18 @@ class _SelectableTextScreenState extends State<SelectableTextScreen>
                                             });
                                           },
                                         ),
-                                        ActionChip(
-                                          visualDensity: VisualDensity.compact,
-                                          avatar: Icon(
-                                            Icons.auto_awesome_rounded,
-                                            size: 18,
-                                          ),
-                                          label: Text('Gemini'),
-                                          onPressed: () {
-                                            // setState(() {
-                                            // });
-                                          },
-                                        ),
+                                        // ActionChip(
+                                        //   visualDensity: VisualDensity.compact,
+                                        //   avatar: Icon(
+                                        //     Icons.auto_awesome_rounded,
+                                        //     size: 18,
+                                        //   ),
+                                        //   label: Text('Gemini'),
+                                        //   onPressed: () {
+                                        //     // setState(() {
+                                        //     // });
+                                        //   },
+                                        // ),
                                       ],
                                     ),
                                     const SizedBox(height: 8),
@@ -774,29 +773,31 @@ Question: $question
                                     ),
                                   ],
                                 ),
-                        ),
 
-                        if (_requesting) ...[
-                          Positioned(
-                            top: 0,
-                            right: 0,
-                            left: 0,
-                            bottom: 0,
-                            child: ColoredBox(color: Colors.transparent),
-                          ),
+                                if (_requesting) ...[
+                                  Positioned(
+                                    top: 0,
+                                    right: 0,
+                                    left: 0,
+                                    bottom: 0,
+                                    child: ColoredBox(
+                                      color: cs.surface.withAlpha(150),
+                                    ),
+                                  ),
 
-                          Positioned(
-                            top: 0,
-                            right: 0,
-                            left: 0,
-                            bottom: 0,
-                            child: Align(
-                              alignment: AlignmentGeometry.center,
-                              child: CircularProgressIndicator(),
+                                  Positioned(
+                                    top: 0,
+                                    right: 0,
+                                    left: 0,
+                                    bottom: 0,
+                                    child: Align(
+                                      alignment: AlignmentGeometry.center,
+                                      child: CircularProgressIndicator(),
+                                    ),
+                                  ),
+                                ],
+                              ],
                             ),
-                          ),
-                        ],
-                      ],
                     ),
                   ),
               ],

@@ -318,6 +318,7 @@ class _SelectableTextScreenState extends State<SelectableTextScreen>
               setState(() {
                 _chatting = !_chatting;
                 _tabController.index = 0;
+                _chatBoxCollapsed = false;
               });
             },
           ),
@@ -660,6 +661,8 @@ class _SelectableTextScreenState extends State<SelectableTextScreen>
 
                                             Chats.chats.clear();
                                             Chats._saveToFile();
+
+                                            _tabController.index = 0;
                                             if (context.mounted) {
                                               setState(() {});
                                             }

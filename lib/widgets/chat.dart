@@ -1,4 +1,5 @@
 import 'package:ara_dict/conf.dart';
+import 'package:ara_dict/data.dart';
 import 'package:ara_dict/main_widgets.dart';
 import 'package:ara_dict/widgets/selectable_text_screen.dart';
 import 'package:flutter/foundation.dart';
@@ -6,6 +7,24 @@ import 'package:flutter/material.dart';
 
 class ChatView extends StatefulWidget {
   const ChatView({super.key});
+
+  static Future<void> bottomSheet(BuildContext context) async {
+    await showModalBottomSheet(
+      constraints: BoxConstraints(maxWidth: 600),
+      useSafeArea: true,
+      isScrollControlled: true,
+      showDragHandle: true,
+      context: context,
+      builder: (context) {
+        return Padding(
+          padding: EdgeInsets.only(
+            bottom: scrollPaddingBottmSheet(context).bottom,
+          ),
+          child: ChatView(),
+        );
+      },
+    );
+  }
 
   @override
   State<ChatView> createState() => _ChatViewState();

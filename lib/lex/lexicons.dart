@@ -260,6 +260,7 @@ class _SearchLexiconsState extends State<SearchLexicons>
                 children: [
                   IconButton.filled(
                     icon: Icon(dictWordSelectModalOpenIcon),
+                    onLongPress: () => ChatView.bottomSheet(context),
                     onPressed: () async {
                       FocusManager.instance.primaryFocus?.unfocus();
 
@@ -272,22 +273,7 @@ class _SearchLexiconsState extends State<SearchLexicons>
 
                       if (res.openChat == true) {
                         if (!context.mounted) return;
-
-                        showModalBottomSheet(
-                          constraints: BoxConstraints(maxWidth: 600),
-                          useSafeArea: true,
-                          isScrollControlled: true,
-                          showDragHandle: true,
-                          context: context,
-                          builder: (context) {
-                            return Padding(
-                              padding: EdgeInsets.only(
-                                bottom: scrollPaddingBottmSheet(context).bottom,
-                              ),
-                              child: ChatView(),
-                            );
-                          },
-                        );
+                        ChatView.bottomSheet(context);
                         return;
                       }
                       if (res.openSettings == true) {

@@ -1133,6 +1133,16 @@ TextDirection _direction(String text) {
 Future<String> getGeminiReply(String message) async {
   // Pass your Google AI Studio API key via compile-time variables
   const apiKey = String.fromEnvironment('GK', defaultValue: '');
+  const apiKey2 = String.fromEnvironment('GK2', defaultValue: '');
+  const apiKey3 = String.fromEnvironment('GK3', defaultValue: '');
+  const apiKey4 = String.fromEnvironment('GK4', defaultValue: '');
+
+  const keys = [
+    if (apiKey != '') apiKey,
+    if (apiKey2 != '') apiKey2,
+    if (apiKey3 != '') apiKey3,
+    if (apiKey4 != '') apiKey4,
+  ];
 
   const models = [
     // 'gemma-4-26b-a4b-it', // gives crazy replies
@@ -1145,53 +1155,55 @@ Future<String> getGeminiReply(String message) async {
 
   // Native endpoint string using the stable free-tier flash model
   for (final m in models) {
-    if (kDebugMode) debugPrint('trying: $m');
-    try {
-      final url = Uri.parse(
-        'https://generativelanguage.googleapis.com/v1beta/models/$m:generateContent',
-      );
+    for (final k in keys) {
+      if (kDebugMode) debugPrint('trying: $m');
+      try {
+        final url = Uri.parse(
+          'https://generativelanguage.googleapis.com/v1beta/models/$m:generateContent',
+        );
 
-      final res = await http.post(
-        url,
-        headers: {
-          'x-goog-api-key': apiKey, // Google's official API key header
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({
-          "contents": [
-            {
-              "role": "user",
-              "parts": [
-                {
-                  "text":
-                      "System Instruction: You are a helpful assistant for an Arabic reader app. "
-                      "Answer questions about the book or text the user is reading. "
-                      "Keep replies concise, clear, and comprehensive. "
-                      "Use plain text only—no emojis and no markdown styling like bolding or headers. "
-                      "You may use text-based bullet points (using '•') to organize information if needed. "
-                      "There may be a context section followed by the user question. Reply in the language specified.\n\n"
-                      "User Message: $message",
-                },
-              ],
-            },
-          ],
-          "generationConfig": {"temperature": 0.3},
-        }),
-      );
+        final res = await http.post(
+          url,
+          headers: {
+            'x-goog-api-key': k, // Google's official API key header
+            'Content-Type': 'application/json',
+          },
+          body: jsonEncode({
+            "contents": [
+              {
+                "role": "user",
+                "parts": [
+                  {
+                    "text":
+                        "System Instruction: You are a helpful assistant for an Arabic reader app. "
+                        "Answer questions about the book or text the user is reading. "
+                        "Keep replies concise, clear, and comprehensive. "
+                        "Use plain text only—no emojis and no markdown styling like bolding or headers. "
+                        "You may use text-based bullet points (using '•') to organize information if needed. "
+                        "There may be a context section followed by the user question. Reply in the language specified.\n\n"
+                        "User Message: $message",
+                  },
+                ],
+              },
+            ],
+            "generationConfig": {"temperature": 0.3},
+          }),
+        );
 
-      if (res.statusCode != 200) {
-        throw Exception('Gemini API Error: ${res.body}');
+        if (res.statusCode != 200) {
+          throw Exception('Gemini API Error: ${res.body}');
+        }
+
+        final data = jsonDecode(res.body);
+
+        // Safe navigation down Google's native JSON tree response
+        final parts = data["candidates"]?[0]["content"]["parts"] as List?;
+        if (parts != null && parts.isNotEmpty) {
+          return parts[0]["text"].toString().trim();
+        }
+      } catch (e) {
+        // if (kDebugMode) debugPrint('while getting res: $e');
       }
-
-      final data = jsonDecode(res.body);
-
-      // Safe navigation down Google's native JSON tree response
-      final parts = data["candidates"]?[0]["content"]["parts"] as List?;
-      if (parts != null && parts.isNotEmpty) {
-        return parts[0]["text"].toString().trim();
-      }
-    } catch (e) {
-      // if (kDebugMode) debugPrint('while getting res: $e');
     }
   }
   throw Exception('No response fround from all the models');

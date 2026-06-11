@@ -701,10 +701,7 @@ class _SelectableTextScreenState extends State<SelectableTextScreen>
                                                     msg,
                                                     prompt,
                                                   ) = pre.isEmpty
-                                                      ? (
-                                                          question,
-                                                          'Question: $question',
-                                                        )
+                                                      ? (question, question)
                                                       : (
                                                           '$pre\n\n$question',
                                                           '''<context>

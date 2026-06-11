@@ -260,7 +260,7 @@ class _SearchLexiconsState extends State<SearchLexicons>
                 children: [
                   IconButton.filled(
                     icon: Icon(dictWordSelectModalOpenIcon),
-                    onLongPress: () => ChatView.bottomSheet(context),
+                    onLongPress: () => ChatView.screen(context),
                     onPressed: () async {
                       FocusManager.instance.primaryFocus?.unfocus();
 
@@ -273,7 +273,7 @@ class _SearchLexiconsState extends State<SearchLexicons>
 
                       if (res.openChat == true) {
                         if (!context.mounted) return;
-                        ChatView.bottomSheet(context);
+                        ChatView.screen(context);
                         return;
                       }
                       if (res.openSettings == true) {

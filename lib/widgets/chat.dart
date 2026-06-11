@@ -1,5 +1,4 @@
 import 'package:ara_dict/conf.dart';
-import 'package:ara_dict/data.dart';
 import 'package:ara_dict/main_widgets.dart';
 import 'package:ara_dict/widgets/selectable_text_screen.dart';
 import 'package:flutter/foundation.dart';
@@ -8,23 +7,35 @@ import 'package:flutter/material.dart';
 class ChatView extends StatefulWidget {
   const ChatView({super.key});
 
-  static Future<void> bottomSheet(BuildContext context) async {
-    await showModalBottomSheet(
-      constraints: BoxConstraints(maxWidth: 600),
-      useSafeArea: true,
-      isScrollControlled: true,
-      showDragHandle: true,
-      context: context,
-      builder: (context) {
-        return Padding(
-          padding: EdgeInsets.only(
-            bottom: scrollPaddingBottmSheet(context).bottom,
-          ),
-          child: ChatView(),
-        );
-      },
+  static Future<void> screen(BuildContext context) async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => Scaffold(
+          appBar: AppBar(title: const Text('Chat')),
+          body: const SafeArea(child: ChatView()),
+        ),
+      ),
     );
   }
+
+  // static Future<void> bottomSheet(BuildContext context) async {
+  //   await showModalBottomSheet(
+  //     constraints: BoxConstraints(maxWidth: 600),
+  //     useSafeArea: true,
+  //     isScrollControlled: true,
+  //     showDragHandle: true,
+  //     context: context,
+  //     builder: (context) {
+  //       return Padding(
+  //         padding: EdgeInsets.only(
+  //           bottom: scrollPaddingBottmSheet(context).bottom,
+  //         ),
+  //         child: ChatView(),
+  //       );
+  //     },
+  //   );
+  // }
 
   @override
   State<ChatView> createState() => _ChatViewState();
@@ -37,6 +48,7 @@ class _ChatViewState extends State<ChatView> {
 
   final _sc = ScrollController();
   final _tc = TextEditingController();
+  final _focusNode = FocusNode();
 
   @override
   void dispose() {
@@ -47,225 +59,237 @@ class _ChatViewState extends State<ChatView> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        // MaterialBanner(
-        //   content: const Text('Previous messages are not sent to the model.'),
-        //   actions: [TextButton(onPressed: () {}, child: const Text('OK'))],
-        // ),
-        Expanded(
-          child: ListView.separated(
-            reverse: true,
-            padding: const EdgeInsets.all(16),
-            itemCount: Chats.length,
-            separatorBuilder: (_, _) => const SizedBox(height: 12),
-            itemBuilder: (context, index) {
-              index = (Chats.length - 1) - index;
-              final c = Chats.chats[index];
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () {
+        if (_focusNode.hasFocus) {
+          FocusManager.instance.primaryFocus?.unfocus();
+        }
+      },
+      child: Column(
+        children: [
+          // MaterialBanner(
+          //   content: const Text('Previous messages are not sent to the model.'),
+          //   actions: [TextButton(onPressed: () {}, child: const Text('OK'))],
+          // ),
+          Expanded(
+            child: ListView.separated(
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+              reverse: true,
+              padding: const EdgeInsets.all(16),
+              itemCount: Chats.length,
+              separatorBuilder: (_, _) => const SizedBox(height: 12),
+              itemBuilder: (context, index) {
+                index = (Chats.length - 1) - index;
+                final c = Chats.chats[index];
 
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  ChatTimestamp(time: c.time),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: ChatBubble(
-                      text: c.user,
-                      isUser: true,
-                      onReply: () {},
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    ChatTimestamp(time: c.time),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: ChatBubble(
+                        text: c.user,
+                        isUser: true,
+                        onReply: () {},
+                      ),
                     ),
-                  ),
 
-                  const SizedBox(height: 8),
+                    const SizedBox(height: 8),
 
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: ChatBubble(
-                      text: c.bot,
-                      isUser: false,
-                      onReply: () {},
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: ChatBubble(
+                        text: c.bot,
+                        isUser: false,
+                        onReply: () {},
+                      ),
                     ),
-                  ),
 
-                  const SizedBox(height: 16),
-                ],
-              );
-            },
+                    const SizedBox(height: 16),
+                  ],
+                );
+              },
+            ),
           ),
-        ),
 
-        const Divider(height: 0),
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Wrap(
-            spacing: 6,
-            runSpacing: 6,
-            runAlignment: WrapAlignment.center,
-            alignment: WrapAlignment.center,
-            children: [
-              ActionChip(
-                visualDensity: VisualDensity.compact,
-                avatar: Icon(switch (_chatDirection) {
-                  TextDirection.ltr => Icons.language,
-                  TextDirection.rtl => Icons.translate,
-                }, size: 18),
-                label: Text(switch (_chatDirection) {
-                  TextDirection.ltr => 'English',
-                  TextDirection.rtl => 'Arabic',
-                }),
-                onPressed: () {
-                  setState(() {
-                    _chatDirection = _chatDirection == TextDirection.ltr
-                        ? TextDirection.rtl
-                        : TextDirection.ltr;
-                  });
-                },
-              ),
-              // ActionChip(
-              //   visualDensity: VisualDensity.compact,
-              //   avatar: Icon(
-              //     Icons.auto_awesome_rounded,
-              //     size: 18,
-              //   ),
-              //   label: Text('Gemini'),
-              //   onPressed: () {
-              //     // setState(() {
-              //     // });
-              //   },
-              // ),
-            ],
+          const Divider(height: 0),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Wrap(
+              spacing: 6,
+              runSpacing: 6,
+              runAlignment: WrapAlignment.center,
+              alignment: WrapAlignment.center,
+              children: [
+                ActionChip(
+                  visualDensity: VisualDensity.compact,
+                  avatar: Icon(switch (_chatDirection) {
+                    TextDirection.ltr => Icons.language,
+                    TextDirection.rtl => Icons.translate,
+                  }, size: 18),
+                  label: Text(switch (_chatDirection) {
+                    TextDirection.ltr => 'English',
+                    TextDirection.rtl => 'Arabic',
+                  }),
+                  onPressed: () {
+                    setState(() {
+                      _chatDirection = _chatDirection == TextDirection.ltr
+                          ? TextDirection.rtl
+                          : TextDirection.ltr;
+                    });
+                  },
+                ),
+                // ActionChip(
+                //   visualDensity: VisualDensity.compact,
+                //   avatar: Icon(
+                //     Icons.auto_awesome_rounded,
+                //     size: 18,
+                //   ),
+                //   label: Text('Gemini'),
+                //   onPressed: () {
+                //     // setState(() {
+                //     // });
+                //   },
+                // ),
+              ],
+            ),
           ),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-          child: Row(
-            children: [
-              Flexible(
-                child: Directionality(
-                  textDirection: _chatDirection,
-                  child: TextField(
-                    // focusNode: _focusNode,
-                    controller: _tc,
-                    magnifierConfiguration: TextMagnifierConfiguration.disabled,
-                    contextMenuBuilder: (context, selectableRegionState) {
-                      return AdaptiveTextSelectionToolbar.buttonItems(
-                        anchors: selectableRegionState.contextMenuAnchors,
-                        buttonItems:
-                            selectableRegionState.contextMenuButtonItems,
-                      );
-                    },
-                    minLines: 1,
-                    maxLines: 2,
+          Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: 8.0,
+            ).copyWith(bottom: 10.0),
+            child: Row(
+              children: [
+                Flexible(
+                  child: Directionality(
                     textDirection: _chatDirection,
-                    style: L.arStyle,
-                    decoration: InputDecoration(
-                      hintText: switch (_chatDirection) {
-                        TextDirection.ltr => 'Ask...',
-                        TextDirection.rtl => 'اسأل...',
+                    child: TextField(
+                      focusNode: _focusNode,
+                      controller: _tc,
+                      magnifierConfiguration:
+                          TextMagnifierConfiguration.disabled,
+                      contextMenuBuilder: (context, selectableRegionState) {
+                        return AdaptiveTextSelectionToolbar.buttonItems(
+                          anchors: selectableRegionState.contextMenuAnchors,
+                          buttonItems:
+                              selectableRegionState.contextMenuButtonItems,
+                        );
                       },
-                      hintTextDirection: _chatDirection,
-                      // prefixIcon: IconButton(
-                      //   icon: Icon(Icons.arrow_forward_rounded),
-                      //   onPressed: () {},
-                      // ),
+                      minLines: 1,
+                      maxLines: 2,
+                      textDirection: _chatDirection,
+                      style: L.arStyle,
+                      decoration: InputDecoration(
+                        hintText: switch (_chatDirection) {
+                          TextDirection.ltr => 'Ask...',
+                          TextDirection.rtl => 'اسأل...',
+                        },
+                        hintTextDirection: _chatDirection,
+                        // prefixIcon: IconButton(
+                        //   icon: Icon(Icons.arrow_forward_rounded),
+                        //   onPressed: () {},
+                        // ),
+                      ),
                     ),
                   ),
                 ),
-              ),
-              const SizedBox(width: 6),
-              IconButton.filled(
-                icon: Icon(Icons.arrow_forward),
-                onLongPress: () async {
-                  final res = await showConfirmDialog(context, 'Clear chat?');
+                const SizedBox(width: 6),
+                IconButton.filled(
+                  icon: Icon(Icons.arrow_forward),
+                  onLongPress: () async {
+                    final res = await showConfirmDialog(context, 'Clear chat?');
 
-                  if (res != true) return;
+                    if (res != true) return;
 
-                  Chats.chats.clear();
-                  Chats.saveToFile();
+                    Chats.chats.clear();
+                    Chats.saveToFile();
 
-                  if (context.mounted) {
-                    setState(() {});
-                  }
-                },
-                onPressed: _requesting
-                    ? null
-                    : () async {
-                        // setState(() {
-                        //   _requesting = true;
-                        // });
-                        // await Future.delayed(
-                        //   Duration(seconds: 2),
-                        // );
-                        // if (context.mounted) {
-                        //   setState(() {
-                        //     _requesting = false;
-                        //   });
-                        // }
-                        // return;
+                    if (context.mounted) {
+                      setState(() {});
+                    }
+                  },
+                  onPressed: _requesting
+                      ? null
+                      : () async {
+                          // setState(() {
+                          //   _requesting = true;
+                          // });
+                          // await Future.delayed(
+                          //   Duration(seconds: 2),
+                          // );
+                          // if (context.mounted) {
+                          //   setState(() {
+                          //     _requesting = false;
+                          //   });
+                          // }
+                          // return;
 
-                        final question = _tc.text.trim();
-                        if (question.isEmpty) return;
+                          final question = _tc.text.trim();
+                          if (question.isEmpty) return;
 
-                        final (msg, prompt) = (
-                          question,
-                          '''Question: $question
+                          final (msg, prompt) = (
+                            question,
+                            '''Question: $question
 
     (Reply in ${_chatDirection == TextDirection.ltr ? 'English' : 'Arabic'})''',
-                        );
-
-                        FocusManager.instance.primaryFocus?.unfocus();
-
-                        setState(() {
-                          _requesting = true;
-                        });
-
-                        try {
-                          final r = await getGeminiReply(prompt);
-
-                          await Chats.add(
-                            Chat(
-                              user: msg,
-                              prompt: prompt,
-                              bot: r,
-                              time: DateTime.now(),
-                            ),
                           );
 
-                          if (!context.mounted) {
-                            return;
-                          }
+                          FocusManager.instance.primaryFocus?.unfocus();
 
                           setState(() {
-                            _tc.clear();
-                            _requesting = false;
+                            _requesting = true;
                           });
 
-                          if (_sc.hasClients) {
-                            _sc.jumpTo(0);
-                          }
-                        } catch (e) {
-                          if (kDebugMode) {
-                            debugPrint('$e');
-                          }
+                          try {
+                            final r = await getGeminiReply(prompt);
 
-                          showInfoDialog(
-                            context,
-                            'Error',
-                            message:
-                                'Please try again, could not get any response.',
-                            constraints: true,
-                          );
+                            await Chats.add(
+                              Chat(
+                                user: msg,
+                                prompt: prompt,
+                                bot: r,
+                                time: DateTime.now(),
+                              ),
+                            );
 
-                          setState(() {
-                            _requesting = false;
-                          });
-                        }
-                      },
-              ),
-            ],
+                            if (!context.mounted) {
+                              return;
+                            }
+
+                            setState(() {
+                              _tc.clear();
+                              _requesting = false;
+                            });
+
+                            if (_sc.hasClients) {
+                              _sc.jumpTo(0);
+                            }
+                          } catch (e) {
+                            if (kDebugMode) {
+                              debugPrint('$e');
+                            }
+
+                            showInfoDialog(
+                              context,
+                              'Error',
+                              message:
+                                  'Please try again, could not get any response.',
+                              constraints: true,
+                            );
+
+                            setState(() {
+                              _requesting = false;
+                            });
+                          }
+                        },
+                ),
+              ],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

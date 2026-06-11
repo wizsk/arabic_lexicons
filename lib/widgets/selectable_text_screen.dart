@@ -1087,42 +1087,55 @@ TextDirection _direction(String text) {
 }
 
 Future<String> getGeminiReply(String message) async {
-  // Replace with your Google AI Studio API key
+  // Pass your Google AI Studio API key via compile-time variables
   const apiKey = String.fromEnvironment('GK', defaultValue: '');
 
+  // Native endpoint string using the stable free-tier flash model
+  final url = Uri.parse(
+    'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent',
+  );
+
   final res = await http.post(
-    // Gemini's OpenAI-compatible endpoint
-    Uri.parse(
-      'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions',
-    ),
+    url,
     headers: {
-      'Authorization': 'Bearer $apiKey',
+      'x-goog-api-key': apiKey, // Google's official API key header
       'Content-Type': 'application/json',
     },
     body: jsonEncode({
-      // A highly efficient, free-tier eligible model
-      "model": "gemini-2.5-flash",
-      "messages": [
+      "contents": [
         {
-          "role": "system",
-          "content":
-              "You are a helpful assistant for an Arabic reader app. "
-              "Answer questions about the book or text the user is reading. "
-              "Keep replies concise, clear, and comprehensive. "
-              "Use plain text only—no emojis and no markdown markdown styling like bolding or headers. "
-              "You may use text-based bullet points (using '•') to organize information if needed. "
-              "There may be a context section followed by the user question. Reply in the language specified.",
+          "role": "user",
+          "parts": [
+            {
+              "text":
+                  "System Instruction: You are a helpful assistant for an Arabic reader app. "
+                  "Answer questions about the book or text the user is reading. "
+                  "Keep replies concise, clear, and comprehensive. "
+                  "Use plain text only—no emojis and no markdown styling like bolding or headers. "
+                  "You may use text-based bullet points (using '•') to organize information if needed. "
+                  "There may be a context section followed by the user question. Reply in the language specified.\n\n"
+                  "User Message: $message",
+            },
+          ],
         },
-        {"role": "user", "content": message},
       ],
-      "temperature": 0.3,
+      "generationConfig": {"temperature": 0.3},
     }),
   );
 
+  if (res.statusCode != 200) {
+    throw Exception('Gemini API Error: ${res.body}');
+  }
+
   final data = jsonDecode(res.body);
 
-  // The JSON response structure remains exactly identical to OpenAI
-  return data["choices"][0]["message"]["content"].trim();
+  // Safe navigation down Google's native JSON tree response
+  final parts = data["candidates"]?[0]["content"]["parts"] as List?;
+  if (parts != null && parts.isNotEmpty) {
+    return parts[0]["text"].toString().trim();
+  }
+
+  throw Exception('Unexpected response format from Gemini');
 }
 
 Future<String> getOpenAIReply(String message) async {

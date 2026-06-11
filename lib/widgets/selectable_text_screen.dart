@@ -690,11 +690,10 @@ class _SelectableTextScreenState extends State<SelectableTextScreen>
 
                                                   final pre = switch (_include) {
                                                     _ChatData.none => '',
-                                                    _ChatData.all =>
-                                                      '$_txt\n\n',
+                                                    _ChatData.all => _txt,
                                                     _ChatData.selected =>
                                                       _selectedTxtSaved != null
-                                                          ? '$_selectedTxtSaved\n\n'
+                                                          ? '$_selectedTxtSaved'
                                                           : '',
                                                   };
 

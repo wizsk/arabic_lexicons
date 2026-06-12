@@ -104,7 +104,7 @@ abstract final class AppChatsDb {
 
   static Future<void> loadChats() async {
     chats.clear();
-    final rows = await _db.query('chats', orderBy: 'time DESC');
+    final rows = await _db.query('chats', orderBy: 'time ASC');
 
     for (final r in rows) {
       chats.add(

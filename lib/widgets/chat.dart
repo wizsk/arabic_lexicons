@@ -75,12 +75,12 @@ class _ChatViewState extends State<ChatView> {
           //   actions: [TextButton(onPressed: () {}, child: const Text('OK'))],
           // ),
           Expanded(
-            child: ListView.separated(
+            child: ListView.builder(
               keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
               reverse: true,
               padding: const EdgeInsets.all(16),
               itemCount: AppChatsDb.chats.length,
-              separatorBuilder: (_, _) => const SizedBox(height: 12),
+              // separatorBuilder: (_, _) => const SizedBox(height: 12),
               itemBuilder: (context, index) {
                 index = (AppChatsDb.chats.length - 1) - index;
                 final c = AppChatsDb.chats[index];
@@ -88,6 +88,7 @@ class _ChatViewState extends State<ChatView> {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+                    // const SizedBox(height: 8),
                     ChatTimestamp(time: c.time),
                     Align(
                       alignment: Alignment.centerRight,
@@ -99,7 +100,7 @@ class _ChatViewState extends State<ChatView> {
                       ),
                     ),
 
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 12),
 
                     Align(
                       alignment: Alignment.centerLeft,
@@ -110,8 +111,7 @@ class _ChatViewState extends State<ChatView> {
                         afterChange: () => setState(() {}),
                       ),
                     ),
-
-                    const SizedBox(height: 16),
+                    // const SizedBox(height: 8),
                   ],
                 );
               },

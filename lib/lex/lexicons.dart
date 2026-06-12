@@ -260,7 +260,9 @@ class _SearchLexiconsState extends State<SearchLexicons>
                 children: [
                   IconButton.filled(
                     icon: Icon(dictWordSelectModalOpenIcon),
-                    onLongPress: () => ChatView.screen(context),
+                    // onLongPress: () => ChatView.screen(context),
+                    onLongPress: () =>
+                        Navigator.pushNamed(context, Routes.chatHist),
                     onPressed: () async {
                       FocusManager.instance.primaryFocus?.unfocus();
 

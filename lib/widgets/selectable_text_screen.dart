@@ -1248,7 +1248,7 @@ class ChatBubble extends StatelessWidget {
     final dir = _direction(text);
 
     return GestureDetector(
-      onLongPressStart: (details) =>
+      onDoubleTapDown: (details) =>
           _showBubbleMenu(context, text, details.globalPosition),
       // onTapDown: (details) => // bad cause scroll time act
       //     _showBubbleMenu(context, text, details.globalPosition),

@@ -254,11 +254,13 @@ class _ChatViewState extends State<ChatView> {
                             _requesting = false;
                           });
 
-                          showSnack(
-                            context,
-                            'Got response',
-                            duration: const Duration(seconds: 2),
-                          );
+                          if (success) {
+                            showSnack(
+                              context,
+                              'Got response',
+                              duration: const Duration(seconds: 2),
+                            );
+                          }
 
                           if (success && _sc.hasClients) {
                             _sc.jumpTo(0);

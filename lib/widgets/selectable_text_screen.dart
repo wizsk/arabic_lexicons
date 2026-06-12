@@ -874,13 +874,15 @@ class _SelectableTextScreenState extends State<SelectableTextScreen>
                                                     }
                                                   });
 
-                                                  showSnack(
-                                                    context,
-                                                    'Got response',
-                                                    duration: const Duration(
-                                                      seconds: 2,
-                                                    ),
-                                                  );
+                                                  if (success) {
+                                                    showSnack(
+                                                      context,
+                                                      'Got response',
+                                                      duration: const Duration(
+                                                        seconds: 2,
+                                                      ),
+                                                    );
+                                                  }
 
                                                   if (success &&
                                                       _sc.hasClients) {

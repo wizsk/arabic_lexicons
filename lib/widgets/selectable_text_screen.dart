@@ -157,12 +157,16 @@ abstract final class Chats {
   static const _apiKey3 = String.fromEnvironment('GK3', defaultValue: '');
   static const _apiKey4 = String.fromEnvironment('GK4', defaultValue: '');
 
+  static List<String> get geminiApiKeys => _apiKeys;
+
   static const _apiKeys = [
     if (_apiKey != '') _apiKey,
     if (_apiKey2 != '') _apiKey2,
     if (_apiKey3 != '') _apiKey3,
     if (_apiKey4 != '') _apiKey4,
   ];
+
+  static List<String> get geminiModels => _models;
 
   static const _models = [
     // 'gemma-4-26b-a4b-it', // gives crazy replies
@@ -227,11 +231,43 @@ abstract final class Chats {
             return (res: r, model: m);
           }
         } catch (e) {
-          // if (kDebugMode) debugPrint('while getting res: $e');
+          if (kDebugMode) debugPrint('while getting res: $e');
         }
       }
     }
     throw Exception('No response fround from all the models');
+  }
+
+  Future<String> _getOpenAIReply(String message) async {
+    const apiKey = 'api-key';
+
+    final res = await http.post(
+      Uri.parse('https://api.openai.com/v1/chat/completions'),
+      headers: {
+        'Authorization': 'Bearer $apiKey',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        "model": "gpt-4o-mini",
+        "messages": [
+          {
+            "role": "system",
+            "content":
+                "System Instruction: You are a helpful assistant for an Arabic reader app. "
+                "Answer questions about the book or text the user is reading. "
+                "Keep replies concise, clear, and comprehensive. "
+                "Use plain text only—no emojis and no markdown styling like bolding or headers. "
+                "You may use text-based bullet points (using '•') to organize information if needed. "
+                "There may be a context section followed by the user question. Reply in the language specified.",
+          },
+          {"role": "user", "content": message},
+        ],
+        "temperature": 0.3,
+      }),
+    );
+
+    final data = jsonDecode(res.body);
+    return data["choices"][0]["message"]["content"].trim();
   }
 
   static bool _inited = false;
@@ -1301,34 +1337,4 @@ TextDirection _direction(String text) {
   return RegExp(r'[\u0600-\u06FF]').hasMatch(char)
       ? TextDirection.rtl
       : TextDirection.ltr;
-}
-
-Future<String> getOpenAIReply(String message) async {
-  const apiKey = 'api-key';
-
-  final res = await http.post(
-    Uri.parse('https://api.openai.com/v1/chat/completions'),
-    headers: {
-      'Authorization': 'Bearer $apiKey',
-      'Content-Type': 'application/json',
-    },
-    body: jsonEncode({
-      "model": "gpt-4o-mini",
-      "messages": [
-        {
-          "role": "system",
-          "content":
-              "You are a helpful assistant for an Arabic reader app. "
-              "Answer questions about the book the user is reading. "
-              "Keep replies VERY short, plain text only, no emojis, no formatting, no extra explanation unless necessary. "
-              "There may be a context section then user quesion. if the quesiton in arabic then reply in arabic otherwise just english",
-        },
-        {"role": "user", "content": message},
-      ],
-      "temperature": 0.3,
-    }),
-  );
-
-  final data = jsonDecode(res.body);
-  return data["choices"][0]["message"]["content"].trim();
 }

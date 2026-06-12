@@ -129,7 +129,7 @@ void touggleFullScreen() {
   }
 }
 
-List<Widget> separatedList<T>({
+List<Widget> separatedListBuilder<T>({
   required List<T> items,
   required Widget Function(T item, int index) itemBuilder,
   required Widget Function(int index) separatorBuilder,
@@ -138,6 +138,23 @@ List<Widget> separatedList<T>({
 
   for (int i = 0; i < items.length; i++) {
     result.add(itemBuilder(items[i], i));
+
+    if (i != items.length - 1) {
+      result.add(separatorBuilder(i));
+    }
+  }
+
+  return result;
+}
+
+List<Widget> separatedList<T>({
+  required List<Widget> items,
+  required Widget Function(int index) separatorBuilder,
+}) {
+  final result = <Widget>[];
+
+  for (int i = 0; i < items.length; i++) {
+    result.add(items[i]);
 
     if (i != items.length - 1) {
       result.add(separatorBuilder(i));

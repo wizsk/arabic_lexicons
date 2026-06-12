@@ -4,6 +4,7 @@ import 'package:ara_dict/llm/llm_prover.dart';
 import 'package:ara_dict/main_widgets.dart';
 import 'package:ara_dict/play_rate.dart';
 import 'package:ara_dict/reader/reader_utils.dart';
+import 'package:ara_dict/utils.dart';
 import 'package:ara_dict/widgets/selectable_text_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -103,44 +104,109 @@ class _ChatHistoryScreenState extends State<ChatHistoryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final padd = appConf.readerPadd(context);
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Chats'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.delete_sweep_outlined),
+            onPressed: () async {
+              final res = await showConfirmDialog(context, 'Clear chat?');
+
+              if (res != true) return;
+
+              AppChatsDb.clearChats();
+
+              if (context.mounted) {
+                setState(() {});
+              }
+            },
+          ),
+        ],
+      ),
       body: SafeArea(
-        top: false,
-        bottom: !appConf.fullScreen,
         child: Column(
           children: [
             Expanded(
-              child: CustomScrollView(
-                slivers: [
-                  _buildAppBar(),
-                  if (_chats.isEmpty)
-                    const SliverFillRemaining(child: _EmptyState())
-                  else
-                    SliverPadding(
-                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
-                      sliver: SliverList.separated(
-                        itemCount: _chats.length,
-                        separatorBuilder: (_, _) => const SizedBox(height: 12),
-                        itemBuilder: (context, indexFr) {
-                          final index = _chats.length - indexFr - 1;
-                          final chat = _chats[index];
-                          return ChatCard(
-                            key: ValueKey(_chats[index].id),
-                            chat: chat,
-                            onDelete: () => _confirmDelete(chat.id!),
-                            onCopy: _copyText,
-                            onInfo: () => _showInfoSheet(chat),
-                          );
-                        },
+              child: _chats.isEmpty
+                  ? const Center(child: _EmptyState())
+                  : ListView.separated(
+                      reverse: true,
+                      padding: EdgeInsets.only(
+                        right: padd.right,
+                        left: padd.left,
+                        bottom: 12,
+                        top: scrollPadding.bottom,
                       ),
+                      itemCount: _chats.length,
+                      separatorBuilder: (_, _) => const SizedBox(height: 12),
+                      itemBuilder: (context, indexFr) {
+                        final index = _chats.length - indexFr - 1;
+                        final chat = _chats[index];
+                        return ChatCard(
+                          key: ValueKey(_chats[index].id),
+                          chat: chat,
+                          onDelete: () => _confirmDelete(chat.id!),
+                          onCopy: _copyText,
+                          onInfo: () => _showInfoSheet(chat),
+                        );
+                      },
                     ),
-                ],
-              ),
             ),
 
             Padding(
+              padding: EdgeInsets.symmetric(horizontal: padd.right),
+              child: const Divider(height: 0),
+            ),
+            Padding(
               padding: EdgeInsets.symmetric(
-                horizontal: 8.0,
+                horizontal: padd.right,
+                vertical: 8.0,
+              ),
+              child: Wrap(
+                spacing: 6,
+                runSpacing: 6,
+                runAlignment: WrapAlignment.center,
+                alignment: WrapAlignment.center,
+                children: [
+                  ActionChip(
+                    visualDensity: VisualDensity.compact,
+                    avatar: Icon(switch (_chatDirection) {
+                      TextDirection.ltr => Icons.language,
+                      TextDirection.rtl => Icons.translate,
+                    }, size: 18),
+                    label: Text(switch (_chatDirection) {
+                      TextDirection.ltr => 'English',
+                      TextDirection.rtl => 'Arabic',
+                    }),
+                    onPressed: () {
+                      setState(() {
+                        _chatDirection = _chatDirection == TextDirection.ltr
+                            ? TextDirection.rtl
+                            : TextDirection.ltr;
+                      });
+                    },
+                  ),
+                  ActionChip(
+                    visualDensity: VisualDensity.compact,
+                    avatar: Icon(Icons.auto_awesome_rounded, size: 18),
+                    label: Text(_provider.name),
+                    onPressed: () {
+                      setState(() {
+                        _provider = switch (_provider) {
+                          LlmModels.gemini => LlmModels.chatGpt,
+                          LlmModels.chatGpt => LlmModels.gemini,
+                        };
+                      });
+                    },
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: padd.right,
               ).copyWith(bottom: 10.0),
               child: Row(
                 children: [
@@ -180,20 +246,6 @@ class _ChatHistoryScreenState extends State<ChatHistoryScreen> {
                   const SizedBox(width: 6),
                   IconButton.filled(
                     icon: Icon(Icons.arrow_forward),
-                    onLongPress: () async {
-                      final res = await showConfirmDialog(
-                        context,
-                        'Clear chat?',
-                      );
-
-                      if (res != true) return;
-
-                      AppChatsDb.clearChats();
-
-                      if (context.mounted) {
-                        setState(() {});
-                      }
-                    },
                     onPressed: _requesting
                         ? null
                         : () async {
@@ -250,24 +302,15 @@ class _ChatHistoryScreenState extends State<ChatHistoryScreen> {
                 ],
               ),
             ),
-            if (appConf.fullScreen) const SizedBox(height: 10),
           ],
         ),
       ),
     );
   }
-
-  SliverAppBar _buildAppBar() {
-    return SliverAppBar(
-      floating: true,
-      snap: appConf.hideAppbar,
-      pinned: !appConf.hideAppbar,
-      title: const Text('Chats'),
-    );
-  }
 }
 
-class ChatCard extends StatefulWidget {
+// class _ChatCardState extends State<ChatCard> {
+class ChatCard extends StatelessWidget {
   final Chat chat;
   final VoidCallback onDelete;
   final ValueChanged<String> onCopy;
@@ -282,13 +325,7 @@ class ChatCard extends StatefulWidget {
   });
 
   @override
-  State<ChatCard> createState() => _ChatCardState();
-}
-
-class _ChatCardState extends State<ChatCard> {
-  @override
   Widget build(BuildContext context) {
-    final chat = widget.chat;
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
 
@@ -302,11 +339,7 @@ class _ChatCardState extends State<ChatCard> {
       child: Column(
         children: [
           // ── Header row ──
-          _CardHeader(
-            chat: chat,
-            onDelete: widget.onDelete,
-            onInfo: widget.onInfo,
-          ),
+          _CardHeader(chat: chat, onDelete: onDelete, onInfo: onInfo),
 
           // ── Divider ──
           const Divider(height: 1),
@@ -317,7 +350,7 @@ class _ChatCardState extends State<ChatCard> {
             icon: Icons.person_rounded,
             text: chat.user,
             maxCollapsedLines: 2,
-            onCopy: () => widget.onCopy(chat.user),
+            onCopy: () => onCopy(chat.user),
           ),
 
           // ── Divider ──
@@ -329,7 +362,7 @@ class _ChatCardState extends State<ChatCard> {
             icon: chat.provider.icon,
             text: chat.bot,
             maxCollapsedLines: 3,
-            onCopy: () => widget.onCopy(chat.bot),
+            onCopy: () => onCopy(chat.bot),
           ),
         ],
       ),
@@ -378,15 +411,6 @@ class _CardHeader extends StatelessWidget {
             color: cs.error,
             onTap: onDelete,
           ),
-          // const SizedBox(width: 2),
-          // // Expand toggle
-          // _HeaderIconBtn(
-          //   icon: expanded
-          //       ? Icons.keyboard_arrow_up_rounded
-          //       : Icons.keyboard_arrow_down_rounded,
-          //   color: _textSecondary,
-          //   onTap: onToggle,
-          // ),
         ],
       ),
     );
@@ -504,8 +528,7 @@ class _MessageBubbleState extends State<_MessageBubble> {
                 icon: Icon(Icons.copy),
                 iconSize: 16,
                 padding: EdgeInsets.zero,
-                constraints:
-                    const BoxConstraints(), // Removes default bounding box
+                constraints: const BoxConstraints(),
                 visualDensity: VisualDensity.compact,
                 onPressed: widget.onCopy,
               ),
@@ -527,11 +550,7 @@ class _MessageBubbleState extends State<_MessageBubble> {
                 overflow: _showAll
                     ? TextOverflow.visible
                     : TextOverflow.ellipsis,
-                style: TextStyle(
-                  // fontSize: 13.5,
-                  height: 1.6,
-                  fontFamily: L.arFont,
-                ),
+                style: TextStyle(height: 1.6, fontFamily: L.arFont),
               ),
             ),
           ),
@@ -565,49 +584,55 @@ class _InfoSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final th = theme.textTheme;
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
+    return SingleChildScrollView(
+      padding: scrollPaddingBottmSheet(context, sides: 16),
       child: Column(
         mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
+        // crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Title
           Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               _ProviderBadge(provider: chat.provider),
               const SizedBox(width: 10),
               Text('Chat Info', style: th.titleMedium),
             ],
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 12),
 
+          ...separatedList(
+            separatorBuilder: (_) => Divider(height: 6),
+            items: [
+              _infoTile(theme, Icons.tag_rounded, 'ID', '#${chat.id ?? '—'}'),
+              _infoTile(theme, Icons.memory_rounded, 'Model', chat.model),
+              _infoTile(
+                theme,
+                Icons.access_time_rounded,
+                'Time',
+                _formatFull(chat.time),
+              ),
+              _infoTile(
+                theme,
+                Icons.format_size_rounded,
+                'User length',
+                '${chat.user.length} chars',
+              ),
+              _infoTile(
+                theme,
+                Icons.smart_toy_rounded,
+                'Bot length',
+                '${chat.bot.length} chars',
+              ),
+              _infoTile(
+                theme,
+                Icons.language_rounded,
+                'Language',
+                _isArabic(chat.user) ? 'Arabic (RTL)' : 'English (LTR)',
+              ),
+            ],
+          ),
           // Info rows
-          _infoTile(theme, Icons.tag_rounded, 'ID', '#${chat.id ?? '—'}'),
-          _infoTile(theme, Icons.memory_rounded, 'Model', chat.model),
-          _infoTile(
-            theme,
-            Icons.access_time_rounded,
-            'Time',
-            _formatFull(chat.time),
-          ),
-          _infoTile(
-            theme,
-            Icons.format_size_rounded,
-            'User length',
-            '${chat.user.length} chars',
-          ),
-          _infoTile(
-            theme,
-            Icons.smart_toy_rounded,
-            'Bot length',
-            '${chat.bot.length} chars',
-          ),
-          _infoTile(
-            theme,
-            Icons.language_rounded,
-            'Language',
-            _isArabic(chat.user) ? 'Arabic (RTL)' : 'English (LTR)',
-          ),
           const SizedBox(height: 8),
         ],
       ),

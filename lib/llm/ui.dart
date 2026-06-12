@@ -1,25 +1,13 @@
 import 'package:ara_dict/conf.dart';
 import 'package:ara_dict/data.dart';
+import 'package:ara_dict/llm/helper.dart';
 import 'package:ara_dict/llm/llm_prover.dart';
+import 'package:ara_dict/llm/utils.dart';
 import 'package:ara_dict/main_widgets.dart';
 import 'package:ara_dict/play_rate.dart';
 import 'package:ara_dict/reader/reader_utils.dart';
-import 'package:ara_dict/utils.dart';
-import 'package:ara_dict/widgets/selectable_text_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
-bool _isArabic(String text) {
-  final firstLetter = RegExp(r'\p{L}', unicode: true).firstMatch(text);
-
-  if (firstLetter == null) {
-    return false;
-  }
-
-  final char = firstLetter.group(0)!;
-
-  return RegExp(r'[\u0600-\u06FF]').hasMatch(char);
-}
 
 String _timeAgo(DateTime dt) {
   final diff = DateTime.now().difference(dt);
@@ -28,10 +16,6 @@ String _timeAgo(DateTime dt) {
   if (diff.inHours < 24) return '${diff.inHours}h ago';
   return '${diff.inDays}d ago';
 }
-
-String _formatFull(DateTime dt) =>
-    '${dt.year}-${dt.month.toString().padLeft(2, '0')}-${dt.day.toString().padLeft(2, '0')}  '
-    '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
 
 extension LlmVisuals on LlmModels {
   IconData get icon => switch (this) {
@@ -48,49 +32,11 @@ class ChatHistoryScreen extends StatefulWidget {
 }
 
 class _ChatHistoryScreenState extends State<ChatHistoryScreen> {
-  final List<Chat> _chats = AppChatsDb.chats;
-
-  Future<void> _deleteChat(int id) async {
-    AppChatsDb.deleteChat(id);
-    if (!mounted) return;
-
-    setState(() {});
-    showSnack(
-      context,
-      'Entry deleted',
-      // forceCloseAfter: Duration(seconds: 6),
-      // action: SnackBarAction(
-      //   label: 'Undo',
-      //   onPressed: () => setState(() => _chats.insert(index, removed)),
-      // ),
-    );
-  }
+  List<Chat> get _chats => AppChatsDb.chats;
 
   void _copyText(String text) {
     Clipboard.setData(ClipboardData(text: text));
     showSnack(context, 'Copied to clipboard');
-  }
-
-  void _showInfoSheet(Chat chat) {
-    showModalBottomSheet(
-      context: context,
-      useSafeArea: true,
-      showDragHandle: true,
-      constraints: const BoxConstraints(maxWidth: 400),
-      builder: (_) => _InfoSheet(chat: chat),
-    );
-  }
-
-  Future<void> _confirmDelete(int id) async {
-    final res = await showConfirmDialog(
-      context,
-      'Delete entry?',
-      message: 'This chat entry will be permanently removed.',
-      confirmText: 'Delete',
-      destructive: true,
-    );
-    if (res != true) return;
-    _deleteChat(id);
   }
 
   TextDirection _chatDirection = L.dir;
@@ -107,9 +53,10 @@ class _ChatHistoryScreenState extends State<ChatHistoryScreen> {
     final padd = appConf.readerPadd(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Chats'),
+        title: Text('Chats ${_chats.length}'),
         actions: [
           IconButton(
+            tooltip: 'Clear Chat history',
             icon: Icon(Icons.delete_sweep_outlined),
             onPressed: () async {
               final res = await showConfirmDialog(context, 'Clear chat?');
@@ -126,183 +73,197 @@ class _ChatHistoryScreenState extends State<ChatHistoryScreen> {
         ],
       ),
       body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: _chats.isEmpty
-                  ? const Center(child: _EmptyState())
-                  : ListView.separated(
-                      reverse: true,
-                      padding: EdgeInsets.only(
-                        right: padd.right,
-                        left: padd.left,
-                        bottom: 12,
-                        top: scrollPadding.bottom,
-                      ),
-                      itemCount: _chats.length,
-                      separatorBuilder: (_, _) => const SizedBox(height: 12),
-                      itemBuilder: (context, indexFr) {
-                        final index = _chats.length - indexFr - 1;
-                        final chat = _chats[index];
-                        return ChatCard(
-                          key: ValueKey(_chats[index].id),
-                          chat: chat,
-                          onDelete: () => _confirmDelete(chat.id!),
-                          onCopy: _copyText,
-                          onInfo: () => _showInfoSheet(chat),
-                        );
-                      },
-                    ),
-            ),
-
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: padd.right),
-              child: const Divider(height: 0),
-            ),
-            Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: padd.right,
-                vertical: 8.0,
-              ),
-              child: Wrap(
-                spacing: 6,
-                runSpacing: 6,
-                runAlignment: WrapAlignment.center,
-                alignment: WrapAlignment.center,
-                children: [
-                  ActionChip(
-                    visualDensity: VisualDensity.compact,
-                    avatar: Icon(switch (_chatDirection) {
-                      TextDirection.ltr => Icons.language,
-                      TextDirection.rtl => Icons.translate,
-                    }, size: 18),
-                    label: Text(switch (_chatDirection) {
-                      TextDirection.ltr => 'English',
-                      TextDirection.rtl => 'Arabic',
-                    }),
-                    onPressed: () {
-                      setState(() {
-                        _chatDirection = _chatDirection == TextDirection.ltr
-                            ? TextDirection.rtl
-                            : TextDirection.ltr;
-                      });
-                    },
-                  ),
-                  ActionChip(
-                    visualDensity: VisualDensity.compact,
-                    avatar: Icon(Icons.auto_awesome_rounded, size: 18),
-                    label: Text(_provider.name),
-                    onPressed: () {
-                      setState(() {
-                        _provider = switch (_provider) {
-                          LlmModels.gemini => LlmModels.chatGpt,
-                          LlmModels.chatGpt => LlmModels.gemini,
-                        };
-                      });
-                    },
-                  ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: padd.right,
-              ).copyWith(bottom: 10.0),
-              child: Row(
-                children: [
-                  Flexible(
-                    child: Directionality(
-                      textDirection: _chatDirection,
-                      child: TextField(
-                        focusNode: _focusNode,
-                        controller: _tc,
-                        magnifierConfiguration:
-                            TextMagnifierConfiguration.disabled,
-                        contextMenuBuilder: (context, selectableRegionState) {
-                          return AdaptiveTextSelectionToolbar.buttonItems(
-                            anchors: selectableRegionState.contextMenuAnchors,
-                            buttonItems:
-                                selectableRegionState.contextMenuButtonItems,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () {
+            if (_focusNode.hasFocus) {
+              FocusManager.instance.primaryFocus?.unfocus();
+            }
+          },
+          child: Column(
+            children: [
+              Expanded(
+                child: _chats.isEmpty
+                    ? const Center(child: _EmptyState())
+                    : ListView.separated(
+                        keyboardDismissBehavior:
+                            ScrollViewKeyboardDismissBehavior.onDrag,
+                        reverse: true,
+                        padding: EdgeInsets.only(
+                          right: padd.right,
+                          left: padd.left,
+                          bottom: 12,
+                          top: scrollPadding.bottom,
+                        ),
+                        itemCount: _chats.length,
+                        separatorBuilder: (_, _) => const SizedBox(height: 12),
+                        itemBuilder: (context, indexFr) {
+                          final index = _chats.length - indexFr - 1;
+                          final chat = _chats[index];
+                          return ChatCard(
+                            key: ValueKey(_chats[index].id),
+                            chat: chat,
+                            onDelete: () => confirmDeleteChatEntry(
+                              context,
+                              chat.id!,
+                              () => setState(() {}),
+                            ),
+                            onCopy: _copyText,
+                            onInfo: () => showChatInfoSheet(context, chat),
                           );
                         },
-                        minLines: 1,
-                        maxLines: 2,
+                      ),
+              ),
+
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: padd.right),
+                child: const Divider(height: 0),
+              ),
+              Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: padd.right,
+                  vertical: 8.0,
+                ),
+                child: Wrap(
+                  spacing: 6,
+                  runSpacing: 6,
+                  runAlignment: WrapAlignment.center,
+                  alignment: WrapAlignment.center,
+                  children: [
+                    ActionChip(
+                      visualDensity: VisualDensity.compact,
+                      avatar: Icon(switch (_chatDirection) {
+                        TextDirection.ltr => Icons.language,
+                        TextDirection.rtl => Icons.translate,
+                      }, size: 18),
+                      label: Text(switch (_chatDirection) {
+                        TextDirection.ltr => 'English',
+                        TextDirection.rtl => 'Arabic',
+                      }),
+                      onPressed: () {
+                        setState(() {
+                          _chatDirection = _chatDirection == TextDirection.ltr
+                              ? TextDirection.rtl
+                              : TextDirection.ltr;
+                        });
+                      },
+                    ),
+                    ActionChip(
+                      visualDensity: VisualDensity.compact,
+                      avatar: Icon(Icons.auto_awesome_rounded, size: 18),
+                      label: Text(_provider.name),
+                      onPressed: () {
+                        setState(() {
+                          _provider = switch (_provider) {
+                            LlmModels.gemini => LlmModels.chatGpt,
+                            LlmModels.chatGpt => LlmModels.gemini,
+                          };
+                        });
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: padd.right,
+                ).copyWith(bottom: 10.0),
+                child: Row(
+                  children: [
+                    Flexible(
+                      child: Directionality(
                         textDirection: _chatDirection,
-                        style: L.arStyle,
-                        decoration: InputDecoration(
-                          hintText: switch (_chatDirection) {
-                            TextDirection.ltr => 'Ask...',
-                            TextDirection.rtl => 'اسأل...',
+                        child: TextField(
+                          focusNode: _focusNode,
+                          controller: _tc,
+                          magnifierConfiguration:
+                              TextMagnifierConfiguration.disabled,
+                          contextMenuBuilder: (context, selectableRegionState) {
+                            return AdaptiveTextSelectionToolbar.buttonItems(
+                              anchors: selectableRegionState.contextMenuAnchors,
+                              buttonItems:
+                                  selectableRegionState.contextMenuButtonItems,
+                            );
                           },
-                          hintTextDirection: _chatDirection,
-                          // prefixIcon: IconButton(
-                          //   icon: Icon(Icons.arrow_forward_rounded),
-                          //   onPressed: () {},
-                          // ),
+                          minLines: 1,
+                          maxLines: 2,
+                          textDirection: _chatDirection,
+                          style: L.arStyle,
+                          decoration: InputDecoration(
+                            hintText: switch (_chatDirection) {
+                              TextDirection.ltr => 'Ask...',
+                              TextDirection.rtl => 'اسأل...',
+                            },
+                            hintTextDirection: _chatDirection,
+                            // prefixIcon: IconButton(
+                            //   icon: Icon(Icons.arrow_forward_rounded),
+                            //   onPressed: () {},
+                            // ),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 6),
-                  IconButton.filled(
-                    icon: Icon(Icons.arrow_forward),
-                    onPressed: _requesting
-                        ? null
-                        : () async {
-                            // setState(() {
-                            //   _requesting = true;
-                            // });
-                            // await Future.delayed(Duration(seconds: 2));
-                            // if (context.mounted) {
-                            //   setState(() {
-                            //     _requesting = false;
-                            //   });
-                            // }
-                            // return;
+                    const SizedBox(width: 6),
+                    IconButton.filled(
+                      icon: Icon(Icons.arrow_forward),
+                      onPressed: _requesting
+                          ? null
+                          : () async {
+                              // setState(() {
+                              //   _requesting = true;
+                              // });
+                              // await Future.delayed(Duration(seconds: 2));
+                              // if (context.mounted) {
+                              //   setState(() {
+                              //     _requesting = false;
+                              //   });
+                              // }
+                              // return;
 
-                            final question = _tc.text.trim();
-                            if (question.isEmpty) return;
-                            FocusManager.instance.primaryFocus?.unfocus();
-                            setState(() {
-                              _requesting = true;
-                            });
+                              final question = _tc.text.trim();
+                              if (question.isEmpty) return;
+                              FocusManager.instance.primaryFocus?.unfocus();
+                              setState(() {
+                                _requesting = true;
+                              });
 
-                            final (msg, prompt) = (
-                              question,
-                              'Question: $question\n\n'
-                                  '(Reply in ${_chatDirection == TextDirection.ltr ? 'English' : 'Arabic'})',
-                            );
-
-                            final success = await ChatHelper.getRes(
-                              context,
-                              _provider,
-                              prompt,
-                              msg,
-                            );
-
-                            if (!context.mounted) return;
-                            setState(() {
-                              if (success) _tc.clear();
-                              _requesting = false;
-                            });
-
-                            if (success) {
-                              showSnack(
-                                context,
-                                'Got response',
-                                duration: const Duration(seconds: 2),
+                              final (msg, prompt) = (
+                                question,
+                                'Question: $question\n\n'
+                                    '(Reply in ${_chatDirection == TextDirection.ltr ? 'English' : 'Arabic'})',
                               );
-                            }
 
-                            if (success && _sc.hasClients) {
-                              _sc.jumpTo(0);
-                            }
-                          },
-                  ),
-                ],
+                              final success = await ChatHelper.getRes(
+                                context,
+                                _provider,
+                                prompt,
+                                msg,
+                              );
+
+                              if (!context.mounted) return;
+                              setState(() {
+                                if (success) _tc.clear();
+                                _requesting = false;
+                              });
+
+                              if (success) {
+                                showSnack(
+                                  context,
+                                  'Got response',
+                                  duration: const Duration(seconds: 2),
+                                );
+                              }
+
+                              if (success && _sc.hasClients) {
+                                _sc.jumpTo(0);
+                              }
+                            },
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -389,8 +350,9 @@ class _CardHeader extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       child: Row(
+        spacing: 0,
         children: [
-          _ProviderBadge(provider: chat.provider),
+          ProviderBadge(provider: chat.provider),
           const Spacer(),
           // Time
           Text(
@@ -404,7 +366,7 @@ class _CardHeader extends StatelessWidget {
             color: cs.secondary,
             onTap: onInfo,
           ),
-          const SizedBox(width: 2),
+          const SizedBox(width: 6),
           // Delete button
           _HeaderIconBtn(
             icon: Icons.delete_outline_rounded,
@@ -430,20 +392,21 @@ class _HeaderIconBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: Padding(
-        padding: const EdgeInsets.all(4),
-        child: Icon(icon, size: 18, color: color),
-      ),
+    return IconButton(
+      icon: Icon(icon),
+      iconSize: 20,
+      color: color,
+      padding: EdgeInsets.zero,
+      constraints: const BoxConstraints(),
+      visualDensity: VisualDensity.compact,
+      onPressed: onTap,
     );
   }
 }
 
-class _ProviderBadge extends StatelessWidget {
+class ProviderBadge extends StatelessWidget {
   final LlmModels provider;
-  const _ProviderBadge({required this.provider});
+  const ProviderBadge({super.key, required this.provider});
 
   @override
   Widget build(BuildContext context) {
@@ -496,14 +459,14 @@ class _MessageBubbleState extends State<_MessageBubble> {
 
   @override
   Widget build(BuildContext context) {
-    final arabic = _isArabic(widget.text);
+    final arabic = isArabic(widget.text);
     final dir = arabic ? TextDirection.rtl : TextDirection.ltr;
 
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
 
     return Padding(
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
       child: Column(
         // crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -523,14 +486,10 @@ class _MessageBubbleState extends State<_MessageBubble> {
               ),
               const Spacer(),
 
-              // Copy button
-              IconButton(
-                icon: Icon(Icons.copy),
-                iconSize: 16,
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-                visualDensity: VisualDensity.compact,
-                onPressed: widget.onCopy,
+              _HeaderIconBtn(
+                icon: Icons.copy_rounded,
+                color: cs.secondary,
+                onTap: widget.onCopy,
               ),
             ],
           ),
@@ -558,97 +517,14 @@ class _MessageBubbleState extends State<_MessageBubble> {
           // Show more/less
           if (widget.text.length > 100) ...[
             const SizedBox(height: 6),
-            GestureDetector(
-              onTap: () => setState(() => _showAll = !_showAll),
+            TextButton(
               child: Text(
                 _showAll ? 'Show less' : 'Show more',
-                style: TextStyle(
-                  color: cs.primary,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                ),
+                style: L.arStyle,
               ),
+              onPressed: () => setState(() => _showAll = !_showAll),
             ),
           ],
-        ],
-      ),
-    );
-  }
-}
-
-class _InfoSheet extends StatelessWidget {
-  final Chat chat;
-  const _InfoSheet({required this.chat});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final th = theme.textTheme;
-    return SingleChildScrollView(
-      padding: scrollPaddingBottmSheet(context, sides: 16),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        // crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Title
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              _ProviderBadge(provider: chat.provider),
-              const SizedBox(width: 10),
-              Text('Chat Info', style: th.titleMedium),
-            ],
-          ),
-          const SizedBox(height: 12),
-
-          ...separatedList(
-            separatorBuilder: (_) => Divider(height: 6),
-            items: [
-              _infoTile(theme, Icons.tag_rounded, 'ID', '#${chat.id ?? '—'}'),
-              _infoTile(theme, Icons.memory_rounded, 'Model', chat.model),
-              _infoTile(
-                theme,
-                Icons.access_time_rounded,
-                'Time',
-                _formatFull(chat.time),
-              ),
-              _infoTile(
-                theme,
-                Icons.format_size_rounded,
-                'User length',
-                '${chat.user.length} chars',
-              ),
-              _infoTile(
-                theme,
-                Icons.smart_toy_rounded,
-                'Bot length',
-                '${chat.bot.length} chars',
-              ),
-              _infoTile(
-                theme,
-                Icons.language_rounded,
-                'Language',
-                _isArabic(chat.user) ? 'Arabic (RTL)' : 'English (LTR)',
-              ),
-            ],
-          ),
-          // Info rows
-          const SizedBox(height: 8),
-        ],
-      ),
-    );
-  }
-
-  Widget _infoTile(ThemeData theme, IconData icon, String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 7),
-      child: Row(
-        children: [
-          Icon(icon, size: 15, color: theme.colorScheme.primary),
-          const SizedBox(width: 10),
-          Text(label, style: theme.textTheme.titleSmall),
-          const Spacer(),
-          Text(value, style: theme.textTheme.titleSmall),
         ],
       ),
     );

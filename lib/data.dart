@@ -82,6 +82,10 @@ abstract final class Routes {
   static const settings = '/settings';
   static const fams = '/fams';
   static const help = '/help';
+
+  static const llmModelsEdit = '/llmEdit';
+
+  static const chatHist = '/chatHist';
 }
 
 const routesToBeSavedInPref = [

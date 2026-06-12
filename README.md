@@ -71,7 +71,7 @@ The app includes 9 comprehensive dictionaries - 2 English-Arabic dictionaries an
 - **Quick switching**: Easily switch between different words and lexicons
 - **Advanced Search suggesions**: For finding words with ease
 - **Reader mode**: Read Arabic text or poetry - tap any word for its meaning
-- **Fully offline**: The app doesn't even require internet permission - all dictionaries work completely offline
+<!-- - **Fully offline**: The app doesn't even require internet permission - all dictionaries work completely offline -->
 - **BookMark**: BookMark words to review later. And highligh words while reading.
 - **Lightweight design**: Despite containing extensive lexical data, the app is optimized to be as small as possible (Database is ~50mb compressed + other resources)
 

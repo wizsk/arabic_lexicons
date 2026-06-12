@@ -13,6 +13,7 @@ import 'package:ara_dict/lex/data.dart';
 import 'package:ara_dict/lex/sugg/widgets.dart';
 import 'package:ara_dict/main_widgets.dart';
 import 'package:ara_dict/utils.dart';
+import 'package:ara_dict/widgets/chat.dart';
 import 'package:flutter/material.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
@@ -259,6 +260,9 @@ class _SearchLexiconsState extends State<SearchLexicons>
                 children: [
                   IconButton.filled(
                     icon: Icon(dictWordSelectModalOpenIcon),
+                    // onLongPress: () => ChatView.screen(context),
+                    onLongPress: () =>
+                        Navigator.pushNamed(context, Routes.chatHist),
                     onPressed: () async {
                       FocusManager.instance.primaryFocus?.unfocus();
 
@@ -269,6 +273,11 @@ class _SearchLexiconsState extends State<SearchLexicons>
 
                       if (res == null) return;
 
+                      if (res.openChat == true) {
+                        if (!context.mounted) return;
+                        ChatView.screen(context);
+                        return;
+                      }
                       if (res.openSettings == true) {
                         WidgetsBinding.instance.addPostFrameCallback(
                           (_) => showDictReorderSheet(

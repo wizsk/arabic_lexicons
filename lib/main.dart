@@ -2,8 +2,10 @@ import 'package:ara_dict/conf.dart';
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/history/page.dart';
 import 'package:ara_dict/lex/lexicons.dart';
+import 'package:ara_dict/llm/ui.dart';
 import 'package:ara_dict/pages/fams/fams.dart';
 import 'package:ara_dict/pages/help/help.dart';
+import 'package:ara_dict/pages/models.dart';
 import 'package:ara_dict/pages/settings.dart';
 import 'package:ara_dict/pages/startup_screen.dart';
 import 'package:ara_dict/reader/input.dart';
@@ -57,6 +59,9 @@ class MyApp extends StatelessWidget {
               Routes.settings: (_) => const SettingsPage(),
               Routes.fams: (_) => const ArabicFamilyList(),
               Routes.help: (_) => const HelpPage(),
+
+              Routes.llmModelsEdit: (_) => const LlmModelsEditPage(),
+              Routes.chatHist: (_) => const ChatHistoryScreen(),
             },
           ),
         );

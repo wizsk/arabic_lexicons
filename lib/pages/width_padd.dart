@@ -506,7 +506,7 @@ class _FontPicker extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-            ...separatedList(
+            ...separatedListBuilder(
               items: fonts,
               separatorBuilder: (_) => const SizedBox(height: 10),
               itemBuilder: (font, _) {

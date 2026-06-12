@@ -1,9 +1,10 @@
 import 'package:ara_dict/data.dart';
+import 'package:ara_dict/datas/app_db.dart';
 import 'package:ara_dict/datas/word_store.dart';
 import 'package:ara_dict/lex/dicts/db.dart';
-
 import 'package:ara_dict/lex/isolate.dart';
 import 'package:ara_dict/lex/rearrange_dicts.dart';
+import 'package:ara_dict/llm/llm_prover.dart';
 import 'package:ara_dict/main_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -28,11 +29,13 @@ class _StartupScreenState extends State<StartupScreen> {
         appConf.load(),
         setDictOrdFromFile(),
         DbService.init(),
-        WordStore.init(),
+        AppDb.init(),
         Isolates.spawn(),
       ]);
 
-      await Isolates.initArEn();
+      await Future.wait([WordStore.init(), Isolates.initArEn()]);
+
+      AppChatsDb.init();
       Isolates.initSugg();
 
       appConf.notify();

@@ -228,6 +228,17 @@ class _SettingsPageState extends State<SettingsPage> {
                                 notifier.saveHideStatusBar(value);
                               },
                       ),
+                      ListTile(
+                        leading: const FilledIcon(Icons.coffee),
+                        title: const Text('LLm Models'),
+                        subtitle: const Text(
+                          "Set llm model entries and api keys",
+                        ),
+                        trailing: const Icon(Icons.chevron_right),
+                        onTap: () async {
+                          Navigator.pushNamed(context, Routes.llmModelsEdit);
+                        },
+                      ),
                     ],
                   ),
 

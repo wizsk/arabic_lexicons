@@ -24,6 +24,7 @@ dependencies:
   html: ^0.15.6
   share_plus: ^13.1.0
   archive: ^4.0.9
+  http: ^1.6.0
 dev_dependencies:
   flutter_test:
     sdk: flutter

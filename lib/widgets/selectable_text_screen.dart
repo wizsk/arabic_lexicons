@@ -16,6 +16,27 @@ import 'package:path_provider/path_provider.dart';
 
 enum _ChatData { none, selected, all }
 
+({String msg, String prompt}) _msgAndPrompt(
+  String pre,
+  String question,
+  TextDirection dir,
+) {
+  final rl = '(Reply in ${dir == TextDirection.ltr ? 'English' : 'Arabic'})';
+
+  if (pre.isEmpty) {
+    return (msg: question, prompt: '$question\n\n$rl');
+  }
+
+  final prompt =
+      '<context>\n'
+      '$pre\n'
+      '</context>\n\n'
+      'Question: $question\n\n'
+      '$rl';
+
+  return (msg: '$pre\n\n$question', prompt: prompt);
+}
+
 class Chat {
   final String user;
   final String bot;
@@ -67,7 +88,38 @@ abstract final class Chats {
     return File('${dir.path}/$_fileName');
   }
 
-  static Future<void> add(Chat c) async {
+  static Future<bool> getRes(
+    String prompt,
+    String user, {
+    BuildContext? ctx,
+  }) async {
+    try {
+      final (:res, :model) = await _getGeminiReply(prompt);
+
+      final c = Chat(
+        user: user,
+        prompt: prompt,
+        bot: res,
+        model: model,
+        time: DateTime.now(),
+      );
+      await _add(c);
+    } catch (e) {
+      if (kDebugMode) debugPrint('While getting ai res: $e');
+
+      if (ctx == null || !ctx.mounted) return false;
+      showInfoDialog(
+        ctx,
+        'Error',
+        message: 'Could not get results, please try again later :D',
+      );
+      return false;
+    }
+
+    return true;
+  }
+
+  static Future<void> _add(Chat c) async {
     chats.add(c);
     return saveToFile();
   }
@@ -98,6 +150,88 @@ abstract final class Chats {
       }
       await tmpFile.rename(file.path);
     } catch (_) {}
+  }
+
+  static const _apiKey = String.fromEnvironment('GK', defaultValue: '');
+  static const _apiKey2 = String.fromEnvironment('GK2', defaultValue: '');
+  static const _apiKey3 = String.fromEnvironment('GK3', defaultValue: '');
+  static const _apiKey4 = String.fromEnvironment('GK4', defaultValue: '');
+
+  static const _apiKeys = [
+    if (_apiKey != '') _apiKey,
+    if (_apiKey2 != '') _apiKey2,
+    if (_apiKey3 != '') _apiKey3,
+    if (_apiKey4 != '') _apiKey4,
+  ];
+
+  static const _models = [
+    // 'gemma-4-26b-a4b-it', // gives crazy replies
+    'gemini-3.5-flash',
+    'gemini-3-flash',
+    'gemini-2.5-flash',
+    'gemini-3.1-flash-lite',
+    'gemini-2.5-flash-lite',
+  ];
+
+  static Future<({String res, String model})> _getGeminiReply(
+    String message, {
+    BuildContext? ctx,
+  }) async {
+    // Native endpoint string using the stable free-tier flash model
+    for (final m in _models) {
+      for (final k in _apiKeys) {
+        if (kDebugMode) debugPrint('trying: $m');
+        try {
+          final url = Uri.parse(
+            'https://generativelanguage.googleapis.com/v1beta/models/$m:generateContent',
+          );
+
+          final res = await http.post(
+            url,
+            headers: {
+              'x-goog-api-key': k, // Google's official API key header
+              'Content-Type': 'application/json',
+            },
+            body: jsonEncode({
+              "contents": [
+                {
+                  "role": "user",
+                  "parts": [
+                    {
+                      "text":
+                          "System Instruction: You are a helpful assistant for an Arabic reader app. "
+                          "Answer questions about the book or text the user is reading. "
+                          "Keep replies concise, clear, and comprehensive. "
+                          "Use plain text only—no emojis and no markdown styling like bolding or headers. "
+                          "You may use text-based bullet points (using '•') to organize information if needed. "
+                          "There may be a context section followed by the user question. Reply in the language specified.\n\n"
+                          "User Message: $message",
+                    },
+                  ],
+                },
+              ],
+              "generationConfig": {"temperature": 0.3},
+            }),
+          );
+
+          if (res.statusCode != 200) {
+            throw Exception('Gemini API Error: ${res.body}');
+          }
+
+          final data = jsonDecode(res.body);
+
+          // Safe navigation down Google's native JSON tree response
+          final parts = data["candidates"]?[0]["content"]["parts"] as List?;
+          if (parts != null && parts.isNotEmpty) {
+            final r = parts[0]["text"].toString().trim();
+            return (res: r, model: m);
+          }
+        } catch (e) {
+          // if (kDebugMode) debugPrint('while getting res: $e');
+        }
+      }
+    }
+    throw Exception('No response fround from all the models');
   }
 
   static bool _inited = false;
@@ -726,6 +860,11 @@ class _SelectableTextScreenState extends State<SelectableTextScreen>
                                                       .trim();
                                                   if (question.isEmpty) return;
 
+                                                  FocusManager
+                                                      .instance
+                                                      .primaryFocus
+                                                      ?.unfocus();
+
                                                   final pre = switch (_include) {
                                                     _ChatData.none => '',
                                                     _ChatData.all => _txt,
@@ -736,83 +875,40 @@ class _SelectableTextScreenState extends State<SelectableTextScreen>
                                                   };
 
                                                   final (
-                                                    msg,
-                                                    prompt,
-                                                  ) = pre.isEmpty
-                                                      ? (question, question)
-                                                      : (
-                                                          '$pre\n\n$question',
-                                                          '''<context>
-                            $pre
-</context>
-
-Question: $question
-
-(Reply in ${_chatDirection == TextDirection.ltr ? 'English' : 'Arabic'})''',
-                                                        );
-
-                                                  FocusManager
-                                                      .instance
-                                                      .primaryFocus
-                                                      ?.unfocus();
+                                                    :msg,
+                                                    :prompt,
+                                                  ) = _msgAndPrompt(
+                                                    pre,
+                                                    question,
+                                                    _chatDirection,
+                                                  );
 
                                                   setState(() {
                                                     _requesting = true;
                                                   });
 
-                                                  try {
-                                                    final (
-                                                      :res,
-                                                      :model,
-                                                    ) = await getGeminiReply(
-                                                      prompt,
-                                                      ctx: context,
-                                                    );
+                                                  final success =
+                                                      await Chats.getRes(
+                                                        prompt,
+                                                        msg,
+                                                        ctx: context,
+                                                      );
 
-                                                    Chats.chats.add(
-                                                      Chat(
-                                                        user: msg,
-                                                        prompt: prompt,
-                                                        bot: res,
-                                                        model: model,
-                                                        time: DateTime.now(),
-                                                      ),
-                                                    );
-
-                                                    Chats.saveToFile();
-
-                                                    if (!context.mounted) {
-                                                      return;
-                                                    }
-
-                                                    setState(() {
-                                                      _tc.clear();
-                                                      _requesting = false;
+                                                  if (!context.mounted) return;
+                                                  setState(() {
+                                                    _requesting = false;
+                                                    if (success) {
                                                       _selectedTxtSaved = null;
+                                                      _tc.clear();
+                                                      _selectedTxt = null;
+                                                      _include = _ChatData.none;
                                                       _tabController.index = 1;
-                                                    });
-
-                                                    if (_sc.hasClients) {
-                                                      _sc.jumpTo(0);
                                                     }
+                                                  });
 
-                                                    Chats.saveToFile();
-                                                  } catch (e) {
-                                                    if (kDebugMode) {
-                                                      debugPrint('$e');
-                                                    }
-
-                                                    showInfoDialog(
-                                                      context,
-                                                      'Error',
-                                                      message:
-                                                          'Please try again, could not get any response.',
-                                                      constraints: true,
-                                                    );
-
-                                                    setState(() {
-                                                      _requesting = false;
-                                                    });
+                                                  if (success &&
+                                                      _sc.hasClients) {
+                                                    _sc.jumpTo(0);
                                                   }
                                                 },
                                         ),
@@ -1205,89 +1301,6 @@ TextDirection _direction(String text) {
   return RegExp(r'[\u0600-\u06FF]').hasMatch(char)
       ? TextDirection.rtl
       : TextDirection.ltr;
-}
-
-// Pass your Google AI Studio API key via compile-time variables
-const apiKey = String.fromEnvironment('GK', defaultValue: '');
-const apiKey2 = String.fromEnvironment('GK2', defaultValue: '');
-const apiKey3 = String.fromEnvironment('GK3', defaultValue: '');
-const apiKey4 = String.fromEnvironment('GK4', defaultValue: '');
-
-const apiKeys = [
-  if (apiKey != '') apiKey,
-  if (apiKey2 != '') apiKey2,
-  if (apiKey3 != '') apiKey3,
-  if (apiKey4 != '') apiKey4,
-];
-
-const models = [
-  // 'gemma-4-26b-a4b-it', // gives crazy replies
-  'gemini-3.5-flash',
-  'gemini-3-flash',
-  'gemini-2.5-flash',
-  'gemini-3.1-flash-lite',
-  'gemini-2.5-flash-lite',
-];
-
-Future<({String res, String model})> getGeminiReply(
-  String message, {
-  BuildContext? ctx,
-}) async {
-  // Native endpoint string using the stable free-tier flash model
-  for (final m in models) {
-    for (final k in apiKeys) {
-      if (kDebugMode) debugPrint('trying: $m');
-      try {
-        final url = Uri.parse(
-          'https://generativelanguage.googleapis.com/v1beta/models/$m:generateContent',
-        );
-
-        final res = await http.post(
-          url,
-          headers: {
-            'x-goog-api-key': k, // Google's official API key header
-            'Content-Type': 'application/json',
-          },
-          body: jsonEncode({
-            "contents": [
-              {
-                "role": "user",
-                "parts": [
-                  {
-                    "text":
-                        "System Instruction: You are a helpful assistant for an Arabic reader app. "
-                        "Answer questions about the book or text the user is reading. "
-                        "Keep replies concise, clear, and comprehensive. "
-                        "Use plain text only—no emojis and no markdown styling like bolding or headers. "
-                        "You may use text-based bullet points (using '•') to organize information if needed. "
-                        "There may be a context section followed by the user question. Reply in the language specified.\n\n"
-                        "User Message: $message",
-                  },
-                ],
-              },
-            ],
-            "generationConfig": {"temperature": 0.3},
-          }),
-        );
-
-        if (res.statusCode != 200) {
-          throw Exception('Gemini API Error: ${res.body}');
-        }
-
-        final data = jsonDecode(res.body);
-
-        // Safe navigation down Google's native JSON tree response
-        final parts = data["candidates"]?[0]["content"]["parts"] as List?;
-        if (parts != null && parts.isNotEmpty) {
-          final r = parts[0]["text"].toString().trim();
-          return (res: r, model: m);
-        }
-      } catch (e) {
-        // if (kDebugMode) debugPrint('while getting res: $e');
-      }
-    }
-  }
-  throw Exception('No response fround from all the models');
 }
 
 Future<String> getOpenAIReply(String message) async {

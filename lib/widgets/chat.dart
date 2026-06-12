@@ -1,7 +1,6 @@
 import 'package:ara_dict/conf.dart';
 import 'package:ara_dict/main_widgets.dart';
 import 'package:ara_dict/widgets/selectable_text_screen.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class ChatView extends StatefulWidget {
@@ -233,9 +232,8 @@ class _ChatViewState extends State<ChatView> {
 
                           final (msg, prompt) = (
                             question,
-                            '''Question: $question
-
-    (Reply in ${_chatDirection == TextDirection.ltr ? 'English' : 'Arabic'})''',
+                            'Question: $question\n\n'
+                                '(Reply in ${_chatDirection == TextDirection.ltr ? 'English' : 'Arabic'})',
                           );
 
                           FocusManager.instance.primaryFocus?.unfocus();
@@ -244,50 +242,20 @@ class _ChatViewState extends State<ChatView> {
                             _requesting = true;
                           });
 
-                          try {
-                            final (:res, :model) = await getGeminiReply(
-                              prompt,
-                              ctx: context,
-                            );
+                          final success = await Chats.getRes(
+                            prompt,
+                            msg,
+                            ctx: context,
+                          );
 
-                            await Chats.add(
-                              Chat(
-                                user: msg,
-                                prompt: prompt,
-                                bot: res,
-                                model: model,
-                                time: DateTime.now(),
-                              ),
-                            );
+                          if (!context.mounted) return;
+                          setState(() {
+                            if (success) _tc.clear();
+                            _requesting = false;
+                          });
 
-                            if (!context.mounted) {
-                              return;
-                            }
-
-                            setState(() {
-                              _tc.clear();
-                              _requesting = false;
-                            });
-
-                            if (_sc.hasClients) {
-                              _sc.jumpTo(0);
-                            }
-                          } catch (e) {
-                            if (kDebugMode) {
-                              debugPrint('$e');
-                            }
-
-                            showInfoDialog(
-                              context,
-                              'Error',
-                              message:
-                                  'Please try again, could not get any response.',
-                              constraints: true,
-                            );
-
-                            setState(() {
-                              _requesting = false;
-                            });
+                          if (success && _sc.hasClients) {
+                            _sc.jumpTo(0);
                           }
                         },
                 ),

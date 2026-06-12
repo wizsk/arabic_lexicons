@@ -20,6 +20,7 @@ class Chat {
   final String user;
   final String bot;
   final String prompt;
+  final String model;
   final DateTime? time;
 
   const Chat({
@@ -27,6 +28,7 @@ class Chat {
     required this.bot,
     required this.prompt,
     required this.time,
+    required this.model,
   });
 
   Map<String, dynamic> toJson() => {
@@ -34,6 +36,7 @@ class Chat {
     'bot': bot,
     'prompt': prompt,
     if (time != null) 'time': time!.millisecondsSinceEpoch,
+    'model': model,
   };
 
   static Chat fromJson(Map<String, dynamic> json) {
@@ -47,6 +50,7 @@ class Chat {
       bot: json['bot'] as String,
       prompt: json['prompt'] as String,
       time: t,
+      model: (json['model'] as String?) ?? '',
     );
   }
 }
@@ -66,6 +70,16 @@ abstract final class Chats {
   static Future<void> add(Chat c) async {
     chats.add(c);
     return saveToFile();
+  }
+
+  static Future<void> remove(Chat c) async {
+    final idx = Chats.chats.indexWhere(
+      (i) => i.user == c.user && i.bot == c.bot && i.model == c.model,
+    );
+
+    if (idx < 0) return;
+    Chats.chats.removeAt(idx);
+    await Chats.saveToFile();
   }
 
   static Future<void> saveToFile() async {
@@ -446,9 +460,10 @@ class _SelectableTextScreenState extends State<SelectableTextScreen>
                               Align(
                                 alignment: Alignment.centerRight,
                                 child: ChatBubble(
-                                  text: c.user,
+                                  c: c,
                                   isUser: true,
                                   onReply: () {},
+                                  afterChange: () => setState(() {}),
                                 ),
                               ),
 
@@ -457,9 +472,10 @@ class _SelectableTextScreenState extends State<SelectableTextScreen>
                               Align(
                                 alignment: Alignment.centerLeft,
                                 child: ChatBubble(
-                                  text: c.bot,
+                                  c: c,
                                   isUser: false,
                                   onReply: () {},
+                                  afterChange: () => setState(() {}),
                                 ),
                               ),
 
@@ -745,16 +761,20 @@ Question: $question
                                                   });
 
                                                   try {
-                                                    final r =
-                                                        await getGeminiReply(
-                                                          prompt,
-                                                        );
+                                                    final (
+                                                      :res,
+                                                      :model,
+                                                    ) = await getGeminiReply(
+                                                      prompt,
+                                                      ctx: context,
+                                                    );
 
                                                     Chats.chats.add(
                                                       Chat(
                                                         user: msg,
                                                         prompt: prompt,
-                                                        bot: r,
+                                                        bot: res,
+                                                        model: model,
                                                         time: DateTime.now(),
                                                       ),
                                                     );
@@ -1030,20 +1050,23 @@ class _ValueEditor extends StatelessWidget {
 class ChatBubble extends StatelessWidget {
   const ChatBubble({
     super.key,
-    required this.text,
+    required this.c,
     required this.isUser,
+    required this.afterChange,
     this.onReply,
   });
 
-  final String text;
+  final Chat c;
   final bool isUser;
   final VoidCallback? onReply; // parent wires this to its reply handler
+  final VoidCallback afterChange; // parent wires this to its reply handler
 
   Future<void> _showBubbleMenu(
     BuildContext context,
+    String text,
     Offset globalPosition,
   ) async {
-    HapticFeedback.mediumImpact(); // tactile confirmation before menu appears
+    // HapticFeedback.mediumImpact(); // tactile confirmation before menu appears
 
     final overlay =
         Overlay.of(context).context.findRenderObject()! as RenderBox;
@@ -1056,8 +1079,8 @@ class ChatBubble extends StatelessWidget {
         Offset.zero & overlay.size,
       ),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      items: const [
-        PopupMenuItem(
+      items: [
+        const PopupMenuItem(
           value: 'copy',
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -1065,6 +1088,29 @@ class ChatBubble extends StatelessWidget {
               Icon(Icons.copy_outlined, size: 18),
               SizedBox(width: 10),
               Text('Copy'),
+            ],
+          ),
+        ),
+        if (!isUser)
+          PopupMenuItem(
+            value: 'info',
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.info_outlined, size: 18),
+                SizedBox(width: 10),
+                Text('Info'),
+              ],
+            ),
+          ),
+        PopupMenuItem(
+          value: 'rm',
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.delete_outlined, size: 18),
+              SizedBox(width: 10),
+              Text('Delete'),
             ],
           ),
         ),
@@ -1094,18 +1140,44 @@ class ChatBubble extends StatelessWidget {
             duration: Duration(seconds: 1),
           );
         }
+        break;
       case 'reply':
         onReply?.call();
+        break;
+
+      case 'rm':
+        final confirm = await showConfirmDialog(
+          context,
+          'Delete Chat?',
+          message: 'Delete current chat.',
+          confirmText: 'Delete',
+          destructive: true,
+        );
+        if (confirm != true) return;
+
+        await Chats.remove(c);
+        if (context.mounted) afterChange();
+        break;
+
+      case 'info':
+        showSnack(
+          context,
+          'Model used: ${c.model.isEmpty ? "Unkown" : c.model}',
+        );
+        break;
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final text = isUser ? c.user : c.bot;
     final dir = _direction(text);
 
     return GestureDetector(
-      onLongPressStart: (details) =>
-          _showBubbleMenu(context, details.globalPosition),
+      // onLongPressStart: (details) =>
+      //     _showBubbleMenu(context, text, details.globalPosition),
+      onTapDown: (details) =>
+          _showBubbleMenu(context, text, details.globalPosition),
       child: Container(
         constraints: const BoxConstraints(maxWidth: 500),
         padding: const EdgeInsets.all(12),
@@ -1115,19 +1187,24 @@ class ChatBubble extends StatelessWidget {
               : Theme.of(context).colorScheme.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(16),
         ),
-        child: Text(
-          text,
-          textDirection: dir,
-          style: dir == TextDirection.rtl ? L.arStyle : null,
-        ),
+        child: Text(text, textDirection: dir, style: L.arStyle),
       ),
     );
   }
 }
 
 TextDirection _direction(String text) {
-  final arabic = RegExp(r'[\u0600-\u06FF]');
-  return arabic.hasMatch(text) ? TextDirection.rtl : TextDirection.ltr;
+  final firstLetter = RegExp(r'\p{L}', unicode: true).firstMatch(text);
+
+  if (firstLetter == null) {
+    return TextDirection.ltr;
+  }
+
+  final char = firstLetter.group(0)!;
+
+  return RegExp(r'[\u0600-\u06FF]').hasMatch(char)
+      ? TextDirection.rtl
+      : TextDirection.ltr;
 }
 
 // Pass your Google AI Studio API key via compile-time variables
@@ -1152,7 +1229,10 @@ const models = [
   'gemini-2.5-flash-lite',
 ];
 
-Future<String> getGeminiReply(String message) async {
+Future<({String res, String model})> getGeminiReply(
+  String message, {
+  BuildContext? ctx,
+}) async {
   // Native endpoint string using the stable free-tier flash model
   for (final m in models) {
     for (final k in apiKeys) {
@@ -1199,7 +1279,8 @@ Future<String> getGeminiReply(String message) async {
         // Safe navigation down Google's native JSON tree response
         final parts = data["candidates"]?[0]["content"]["parts"] as List?;
         if (parts != null && parts.isNotEmpty) {
-          return parts[0]["text"].toString().trim();
+          final r = parts[0]["text"].toString().trim();
+          return (res: r, model: m);
         }
       } catch (e) {
         // if (kDebugMode) debugPrint('while getting res: $e');

@@ -90,8 +90,9 @@ class _ChatViewState extends State<ChatView> {
                     Align(
                       alignment: Alignment.centerRight,
                       child: ChatBubble(
-                        text: c.user,
+                        c: c,
                         isUser: true,
+                        afterChange: () => setState(() {}),
                         onReply: () {},
                       ),
                     ),
@@ -101,9 +102,10 @@ class _ChatViewState extends State<ChatView> {
                     Align(
                       alignment: Alignment.centerLeft,
                       child: ChatBubble(
-                        text: c.bot,
+                        c: c,
                         isUser: false,
                         onReply: () {},
+                        afterChange: () => setState(() {}),
                       ),
                     ),
 
@@ -243,13 +245,17 @@ class _ChatViewState extends State<ChatView> {
                           });
 
                           try {
-                            final r = await getGeminiReply(prompt);
+                            final (:res, :model) = await getGeminiReply(
+                              prompt,
+                              ctx: context,
+                            );
 
                             await Chats.add(
                               Chat(
                                 user: msg,
                                 prompt: prompt,
-                                bot: r,
+                                bot: res,
+                                model: model,
                                 time: DateTime.now(),
                               ),
                             );

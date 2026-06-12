@@ -1306,10 +1306,10 @@ class ChatBubble extends StatelessWidget {
     final dir = _direction(text);
 
     return GestureDetector(
-      // onLongPressStart: (details) =>
-      //     _showBubbleMenu(context, text, details.globalPosition),
-      onTapDown: (details) =>
+      onLongPressStart: (details) =>
           _showBubbleMenu(context, text, details.globalPosition),
+      // onTapDown: (details) => // bad cause scroll time act
+      //     _showBubbleMenu(context, text, details.globalPosition),
       child: Container(
         constraints: const BoxConstraints(maxWidth: 500),
         padding: const EdgeInsets.all(12),

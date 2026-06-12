@@ -1,5 +1,7 @@
 import 'package:ara_dict/conf.dart';
+import 'package:ara_dict/llm/llm_prover.dart';
 import 'package:ara_dict/main_widgets.dart';
+import 'package:ara_dict/reader/reader_utils.dart';
 import 'package:ara_dict/widgets/selectable_text_screen.dart';
 import 'package:flutter/material.dart';
 
@@ -42,6 +44,7 @@ class ChatView extends StatefulWidget {
 
 class _ChatViewState extends State<ChatView> {
   TextDirection _chatDirection = L.dir;
+  LlmModels _provider = LlmModels.gemini;
 
   bool _requesting = false;
 
@@ -76,11 +79,11 @@ class _ChatViewState extends State<ChatView> {
               keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
               reverse: true,
               padding: const EdgeInsets.all(16),
-              itemCount: Chats.length,
+              itemCount: AppChatsDb.chats.length,
               separatorBuilder: (_, _) => const SizedBox(height: 12),
               itemBuilder: (context, index) {
-                index = (Chats.length - 1) - index;
-                final c = Chats.chats[index];
+                index = (AppChatsDb.chats.length - 1) - index;
+                final c = AppChatsDb.chats[index];
 
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -142,18 +145,19 @@ class _ChatViewState extends State<ChatView> {
                     });
                   },
                 ),
-                // ActionChip(
-                //   visualDensity: VisualDensity.compact,
-                //   avatar: Icon(
-                //     Icons.auto_awesome_rounded,
-                //     size: 18,
-                //   ),
-                //   label: Text('Gemini'),
-                //   onPressed: () {
-                //     // setState(() {
-                //     // });
-                //   },
-                // ),
+                ActionChip(
+                  visualDensity: VisualDensity.compact,
+                  avatar: Icon(Icons.auto_awesome_rounded, size: 18),
+                  label: Text(_provider.name),
+                  onPressed: () {
+                    setState(() {
+                      _provider = switch (_provider) {
+                        LlmModels.gemini => LlmModels.chatGpt,
+                        LlmModels.chatGpt => LlmModels.gemini,
+                      };
+                    });
+                  },
+                ),
               ],
             ),
           ),
@@ -204,8 +208,7 @@ class _ChatViewState extends State<ChatView> {
 
                     if (res != true) return;
 
-                    Chats.chats.clear();
-                    Chats.saveToFile();
+                    AppChatsDb.clearChats();
 
                     if (context.mounted) {
                       setState(() {});
@@ -217,9 +220,7 @@ class _ChatViewState extends State<ChatView> {
                           // setState(() {
                           //   _requesting = true;
                           // });
-                          // await Future.delayed(
-                          //   Duration(seconds: 2),
-                          // );
+                          // await Future.delayed(Duration(seconds: 2));
                           // if (context.mounted) {
                           //   setState(() {
                           //     _requesting = false;
@@ -229,6 +230,10 @@ class _ChatViewState extends State<ChatView> {
 
                           final question = _tc.text.trim();
                           if (question.isEmpty) return;
+                          FocusManager.instance.primaryFocus?.unfocus();
+                          setState(() {
+                            _requesting = true;
+                          });
 
                           final (msg, prompt) = (
                             question,
@@ -236,16 +241,11 @@ class _ChatViewState extends State<ChatView> {
                                 '(Reply in ${_chatDirection == TextDirection.ltr ? 'English' : 'Arabic'})',
                           );
 
-                          FocusManager.instance.primaryFocus?.unfocus();
-
-                          setState(() {
-                            _requesting = true;
-                          });
-
-                          final success = await Chats.getRes(
+                          final success = await ChatHelper.getRes(
+                            context,
+                            _provider,
                             prompt,
                             msg,
-                            ctx: context,
                           );
 
                           if (!context.mounted) return;
@@ -253,6 +253,12 @@ class _ChatViewState extends State<ChatView> {
                             if (success) _tc.clear();
                             _requesting = false;
                           });
+
+                          showSnack(
+                            context,
+                            'Got response',
+                            duration: const Duration(seconds: 2),
+                          );
 
                           if (success && _sc.hasClients) {
                             _sc.jumpTo(0);

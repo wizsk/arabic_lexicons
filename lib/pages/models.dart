@@ -1,28 +1,8 @@
+import 'dart:async';
+
+import 'package:ara_dict/llm/llm_prover.dart';
 import 'package:ara_dict/main_widgets.dart';
-import 'package:ara_dict/widgets/selectable_text_screen.dart';
 import 'package:flutter/material.dart';
-
-enum LlmModels {
-  chatGpt(name: 'ChatGPT', ar: 'شات جي بي تي'),
-  gemini(name: 'Gemini', ar: 'جيميني');
-
-  final String name;
-  final String ar;
-
-  const LlmModels({required this.name, required this.ar});
-}
-
-class LlmModel {
-  final LlmModels model;
-  final List<String> models;
-  final List<String> apiKeys;
-
-  const LlmModel({
-    required this.model,
-    required this.models,
-    required this.apiKeys,
-  });
-}
 
 class LlmModelsEditPage extends StatefulWidget {
   const LlmModelsEditPage({super.key});
@@ -32,17 +12,10 @@ class LlmModelsEditPage extends StatefulWidget {
 }
 
 class _LlmModelsEditPageState extends State<LlmModelsEditPage> {
-  final _models = [
-    LlmModel(
-      model: LlmModels.gemini,
-      models: Chats.geminiModels.toList(),
-      apiKeys: Chats.geminiApiKeys.toList(),
-    ),
-  ];
-
   Future<void> _addValue({
     required String title,
-    required void Function(String value) onAdd,
+    required FutureOr<void> Function(String value) onAdd,
+    required bool commaSep,
   }) async {
     final controller = TextEditingController();
 
@@ -50,11 +23,15 @@ class _LlmModelsEditPageState extends State<LlmModelsEditPage> {
       context: context,
       builder: (context) {
         return AlertDialog(
+          constraints: const BoxConstraints(maxWidth: 600),
           title: Text(title),
           content: TextField(
             controller: controller,
             autofocus: true,
-            decoration: const InputDecoration(border: OutlineInputBorder()),
+            decoration: InputDecoration(
+              hintText: commaSep ? 'Comma seperated allowd' : null,
+              border: OutlineInputBorder(),
+            ),
             onSubmitted: (v) => Navigator.pop(context, v),
           ),
           actions: [
@@ -75,8 +52,8 @@ class _LlmModelsEditPageState extends State<LlmModelsEditPage> {
 
     if (value == null || value.isEmpty) return;
 
-    onAdd(value);
-    setState(() {});
+    await onAdd(value);
+    if (context.mounted) setState(() {});
   }
 
   @override
@@ -87,10 +64,14 @@ class _LlmModelsEditPageState extends State<LlmModelsEditPage> {
       appBar: AppBar(title: const Text('LLM Models')),
       body: ListView.separated(
         padding: const EdgeInsets.all(16),
-        itemCount: _models.length,
+        itemCount: LlmModels.values.length,
         separatorBuilder: (_, _) => const SizedBox(height: 16),
         itemBuilder: (context, index) {
-          final m = _models[index];
+          final provider = LlmModels.values[index];
+
+          final m = AppChatsDb.models[provider];
+
+          if (m == null) return SizedBox.shrink();
 
           return Card(
             clipBehavior: Clip.antiAlias,
@@ -110,7 +91,19 @@ class _LlmModelsEditPageState extends State<LlmModelsEditPage> {
                         onPressed: () {
                           _addValue(
                             title: 'Add Model',
-                            onAdd: (v) => m.models.add(v),
+                            commaSep: true,
+                            onAdd: (v) async {
+                              final values = v
+                                  .trim()
+                                  .split(',')
+                                  .map((l) => l.trim())
+                                  .takeWhile((l) => l.isNotEmpty)
+                                  .toList();
+
+                              for (final v in values) {
+                                await AppChatsDb.addModel(provider, v);
+                              }
+                            },
                           );
                         },
                         icon: const Icon(Icons.add),
@@ -139,9 +132,8 @@ class _LlmModelsEditPageState extends State<LlmModelsEditPage> {
 
                             if (confirm != true || !context.mounted) return;
 
-                            setState(() {
-                              m.models.remove(model);
-                            });
+                            await AppChatsDb.deleteModel(provider, model);
+                            if (context.mounted) setState(() {});
                           },
                         ),
                     ],
@@ -155,8 +147,10 @@ class _LlmModelsEditPageState extends State<LlmModelsEditPage> {
                       FilledButton.icon(
                         onPressed: () {
                           _addValue(
+                            commaSep: false,
                             title: 'Add API Key',
-                            onAdd: (v) => m.apiKeys.add(v),
+                            onAdd: (v) async =>
+                                await AppChatsDb.addApiKey(provider, v),
                           );
                         },
                         icon: const Icon(Icons.add),
@@ -199,9 +193,8 @@ class _LlmModelsEditPageState extends State<LlmModelsEditPage> {
 
                             if (confirm != true || !context.mounted) return;
 
-                            setState(() {
-                              m.apiKeys.remove(key);
-                            });
+                            await AppChatsDb.deleteApiKey(provider, key);
+                            if (context.mounted) setState(() {});
                           },
                         ),
                     ],

@@ -1,9 +1,9 @@
 import 'dart:convert';
-import 'dart:io';
 import 'dart:math';
 
 import 'package:ara_dict/conf.dart';
 import 'package:ara_dict/data.dart';
+import 'package:ara_dict/llm/llm_prover.dart';
 import 'package:ara_dict/main_widgets.dart';
 import 'package:ara_dict/pages/width_padd.dart';
 import 'package:ara_dict/reader/reader_utils.dart';
@@ -12,7 +12,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
-import 'package:path_provider/path_provider.dart';
+
+typedef _LlmRes = ({String res, String model});
 
 enum _ChatData { none, selected, all }
 
@@ -37,153 +38,70 @@ enum _ChatData { none, selected, all }
   return (msg: '$pre\n\n$question', prompt: prompt);
 }
 
-class Chat {
-  final String user;
-  final String bot;
-  final String prompt;
-  final String model;
-  final DateTime? time;
-
-  const Chat({
-    required this.user,
-    required this.bot,
-    required this.prompt,
-    required this.time,
-    required this.model,
-  });
-
-  Map<String, dynamic> toJson() => {
-    'user': user,
-    'bot': bot,
-    'prompt': prompt,
-    if (time != null) 'time': time!.millisecondsSinceEpoch,
-    'model': model,
-  };
-
-  static Chat fromJson(Map<String, dynamic> json) {
-    DateTime? t;
-    final unix = json['time'] as int?;
-    if (unix != null) {
-      t = DateTime.fromMillisecondsSinceEpoch(unix, isUtc: true);
-    }
-    return Chat(
-      user: json['user'] as String,
-      bot: json['bot'] as String,
-      prompt: json['prompt'] as String,
-      time: t,
-      model: (json['model'] as String?) ?? '',
-    );
-  }
-}
-
-abstract final class Chats {
-  static List<Chat> chats = [];
-
-  static int get length => chats.length;
-
-  static const _fileName = 'chats.json';
-
-  static Future<File> _getFile() async {
-    final dir = await getApplicationDocumentsDirectory();
-    return File('${dir.path}/$_fileName');
-  }
-
+abstract final class ChatHelper {
   static Future<bool> getRes(
+    BuildContext context,
+    LlmModels provider,
     String prompt,
-    String user, {
-    BuildContext? ctx,
-  }) async {
+    String user,
+  ) async {
     try {
-      final (:res, :model) = await _getGeminiReply(prompt);
+      _LlmRes? res;
+      switch (provider) {
+        case LlmModels.gemini:
+          res = await _getGeminiReply(prompt, ctx: context);
+          break;
+        case LlmModels.chatGpt:
+          res = await _getOpenAIReply(context, prompt);
+          break;
+      }
+
+      if (res == null) return false;
 
       final c = Chat(
         user: user,
         prompt: prompt,
-        bot: res,
-        model: model,
+        provider: LlmModels.gemini,
+        bot: res.res,
+        model: res.model,
         time: DateTime.now(),
       );
-      await _add(c);
+      AppChatsDb.addChat(c);
+
+      return true;
     } catch (e) {
       if (kDebugMode) debugPrint('While getting ai res: $e');
 
-      if (ctx == null || !ctx.mounted) return false;
+      if (!context.mounted) return false;
       showInfoDialog(
-        ctx,
+        context,
         'Error',
         message: 'Could not get results, please try again later :D',
       );
       return false;
     }
-
-    return true;
   }
 
-  static Future<void> _add(Chat c) async {
-    chats.add(c);
-    return saveToFile();
-  }
-
-  static Future<void> remove(Chat c) async {
-    final idx = Chats.chats.indexWhere(
-      (i) => i.user == c.user && i.bot == c.bot && i.model == c.model,
-    );
-
-    if (idx < 0) return;
-    Chats.chats.removeAt(idx);
-    await Chats.saveToFile();
-  }
-
-  static Future<void> saveToFile() async {
-    try {
-      final file = await _getFile();
-
-      final tmpFile = File('${file.path}.tmp');
-
-      final data = jsonEncode(chats.map((e) => e.toJson()).toList());
-
-      await tmpFile.writeAsString(data, flush: true);
-
-      // atomic replace
-      if (await file.exists()) {
-        await file.delete();
-      }
-      await tmpFile.rename(file.path);
-    } catch (_) {}
-  }
-
-  static const _apiKey = String.fromEnvironment('GK', defaultValue: '');
-  static const _apiKey2 = String.fromEnvironment('GK2', defaultValue: '');
-  static const _apiKey3 = String.fromEnvironment('GK3', defaultValue: '');
-  static const _apiKey4 = String.fromEnvironment('GK4', defaultValue: '');
-
-  static List<String> get geminiApiKeys => _apiKeys;
-
-  static const _apiKeys = [
-    if (_apiKey != '') _apiKey,
-    if (_apiKey2 != '') _apiKey2,
-    if (_apiKey3 != '') _apiKey3,
-    if (_apiKey4 != '') _apiKey4,
-  ];
-
-  static List<String> get geminiModels => _models;
-
-  static const _models = [
-    // 'gemma-4-26b-a4b-it', // gives crazy replies
-    'gemini-3.5-flash',
-    'gemini-3-flash',
-    'gemini-2.5-flash',
-    'gemini-3.1-flash-lite',
-    'gemini-2.5-flash-lite',
-  ];
-
-  static Future<({String res, String model})> _getGeminiReply(
+  static Future<_LlmRes?> _getGeminiReply(
     String message, {
-    BuildContext? ctx,
+    required BuildContext ctx,
   }) async {
     // Native endpoint string using the stable free-tier flash model
-    for (final m in _models) {
-      for (final k in _apiKeys) {
+    final gemini = AppChatsDb.models[LlmModels.gemini];
+
+    if (gemini == null || gemini.models.isEmpty || gemini.apiKeys.isEmpty) {
+      if (ctx.mounted) {
+        await showInfoDialog(
+          ctx,
+          'No models or api key found',
+          message: 'Please add some from the settings page.',
+        );
+      }
+      return null;
+    }
+
+    for (final m in gemini.models) {
+      for (final k in gemini.apiKeys) {
         if (kDebugMode) debugPrint('trying: $m');
         try {
           final url = Uri.parse(
@@ -238,60 +156,63 @@ abstract final class Chats {
     throw Exception('No response fround from all the models');
   }
 
-  Future<String> _getOpenAIReply(String message) async {
-    const apiKey = 'api-key';
+  static Future<_LlmRes?> _getOpenAIReply(
+    BuildContext ctx,
+    String message,
+  ) async {
+    final gpt = AppChatsDb.models[LlmModels.chatGpt];
 
-    final res = await http.post(
-      Uri.parse('https://api.openai.com/v1/chat/completions'),
-      headers: {
-        'Authorization': 'Bearer $apiKey',
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode({
-        "model": "gpt-4o-mini",
-        "messages": [
-          {
-            "role": "system",
-            "content":
-                "System Instruction: You are a helpful assistant for an Arabic reader app. "
-                "Answer questions about the book or text the user is reading. "
-                "Keep replies concise, clear, and comprehensive. "
-                "Use plain text only—no emojis and no markdown styling like bolding or headers. "
-                "You may use text-based bullet points (using '•') to organize information if needed. "
-                "There may be a context section followed by the user question. Reply in the language specified.",
-          },
-          {"role": "user", "content": message},
-        ],
-        "temperature": 0.3,
-      }),
-    );
-
-    final data = jsonDecode(res.body);
-    return data["choices"][0]["message"]["content"].trim();
-  }
-
-  static bool _inited = false;
-  static Future<void> load() async {
-    if (_inited) return;
-    _inited = true;
-
-    try {
-      final file = await _getFile();
-
-      if (!await file.exists()) {
-        chats = [];
-        return;
+    if (gpt == null || gpt.models.isEmpty || gpt.apiKeys.isEmpty) {
+      if (ctx.mounted) {
+        await showInfoDialog(
+          ctx,
+          'No models or api key found',
+          message: 'Please add some from the settings page.',
+        );
       }
-
-      final content = await file.readAsString();
-      final List decoded = jsonDecode(content);
-
-      chats = decoded
-          .map((e) => Chat.fromJson(e as Map<String, dynamic>))
-          .toList();
-    } catch (e) {
-      if (kDebugMode) debugPrint('while loading chat history: $e');
+      return null;
     }
+
+    for (final m in gpt.models) {
+      for (final k in gpt.apiKeys) {
+        if (kDebugMode) debugPrint('trying: $m');
+
+        try {
+          final res = await http.post(
+            Uri.parse('https://api.openai.com/v1/chat/completions'),
+            headers: {
+              'Authorization': 'Bearer $k',
+              'Content-Type': 'application/json',
+            },
+            body: jsonEncode({
+              "model": m,
+              "messages": [
+                {
+                  "role": "system",
+                  "content":
+                      "System Instruction: You are a helpful assistant for an Arabic reader app. "
+                      "Answer questions about the book or text the user is reading. "
+                      "Keep replies concise, clear, and comprehensive. "
+                      "Use plain text only—no emojis and no markdown styling like bolding or headers. "
+                      "You may use text-based bullet points (using '•') to organize information if needed. "
+                      "There may be a context section followed by the user question. Reply in the language specified.",
+                },
+                {"role": "user", "content": message},
+              ],
+              "temperature": 0.3,
+            }),
+          );
+
+          final data = jsonDecode(res.body);
+          final r = data["choices"][0]["message"]["content"].trim() as String;
+
+          return (model: m, res: r);
+        } catch (_) {
+          if (kDebugMode) debugPrint('while getting res: $e');
+        }
+      }
+    }
+    throw Exception('No response fround from all the models');
   }
 }
 
@@ -363,7 +284,8 @@ class _SelectableTextScreenState extends State<SelectableTextScreen>
   final ScrollController _sc = ScrollController();
   final FocusNode _focusNode = FocusNode();
 
-  final List<Chat> _chats = Chats.chats;
+  LlmModels _provider = LlmModels.gemini;
+  final List<Chat> _chats = AppChatsDb.chats;
 
   bool _requesting = false;
   String? _selectedTxt;
@@ -398,6 +320,12 @@ class _SelectableTextScreenState extends State<SelectableTextScreen>
         _include = _ChatData.none;
       });
     });
+
+    for (final m in AppChatsDb.models.values) {
+      if (m.apiKeys.isNotEmpty && m.models.isNotEmpty) {
+        _provider = m.model;
+      }
+    }
 
     _currIdx = widget.currentIdx;
     _length = widget.length;
@@ -794,18 +722,24 @@ class _SelectableTextScreenState extends State<SelectableTextScreen>
                                             });
                                           },
                                         ),
-                                        // ActionChip(
-                                        //   visualDensity: VisualDensity.compact,
-                                        //   avatar: Icon(
-                                        //     Icons.auto_awesome_rounded,
-                                        //     size: 18,
-                                        //   ),
-                                        //   label: Text('Gemini'),
-                                        //   onPressed: () {
-                                        //     // setState(() {
-                                        //     // });
-                                        //   },
-                                        // ),
+                                        ActionChip(
+                                          visualDensity: VisualDensity.compact,
+                                          avatar: Icon(
+                                            Icons.auto_awesome_rounded,
+                                            size: 18,
+                                          ),
+                                          label: Text(_provider.name),
+                                          onPressed: () {
+                                            setState(() {
+                                              _provider = switch (_provider) {
+                                                LlmModels.gemini =>
+                                                  LlmModels.chatGpt,
+                                                LlmModels.chatGpt =>
+                                                  LlmModels.gemini,
+                                              };
+                                            });
+                                          },
+                                        ),
                                       ],
                                     ),
                                     const SizedBox(height: 8),
@@ -867,9 +801,7 @@ class _SelectableTextScreenState extends State<SelectableTextScreen>
                                             );
 
                                             if (res != true) return;
-
-                                            Chats.chats.clear();
-                                            Chats.saveToFile();
+                                            AppChatsDb.clearChats();
 
                                             _tabController.index = 0;
                                             if (context.mounted) {
@@ -895,11 +827,14 @@ class _SelectableTextScreenState extends State<SelectableTextScreen>
                                                   final question = _tc.text
                                                       .trim();
                                                   if (question.isEmpty) return;
-
                                                   FocusManager
                                                       .instance
                                                       .primaryFocus
                                                       ?.unfocus();
+
+                                                  setState(() {
+                                                    _requesting = true;
+                                                  });
 
                                                   final pre = switch (_include) {
                                                     _ChatData.none => '',
@@ -919,15 +854,12 @@ class _SelectableTextScreenState extends State<SelectableTextScreen>
                                                     _chatDirection,
                                                   );
 
-                                                  setState(() {
-                                                    _requesting = true;
-                                                  });
-
                                                   final success =
-                                                      await Chats.getRes(
+                                                      await ChatHelper.getRes(
+                                                        context,
+                                                        _provider,
                                                         prompt,
                                                         msg,
-                                                        ctx: context,
                                                       );
 
                                                   if (!context.mounted) return;
@@ -941,6 +873,14 @@ class _SelectableTextScreenState extends State<SelectableTextScreen>
                                                       _tabController.index = 1;
                                                     }
                                                   });
+
+                                                  showSnack(
+                                                    context,
+                                                    'Got response',
+                                                    duration: const Duration(
+                                                      seconds: 2,
+                                                    ),
+                                                  );
 
                                                   if (success &&
                                                       _sc.hasClients) {
@@ -1287,7 +1227,7 @@ class ChatBubble extends StatelessWidget {
         );
         if (confirm != true) return;
 
-        await Chats.remove(c);
+        await AppChatsDb.deleteChat(c.id!);
         if (context.mounted) afterChange();
         break;
 

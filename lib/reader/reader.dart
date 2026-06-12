@@ -15,6 +15,7 @@ import 'package:ara_dict/reader/reader_widgets.dart';
 import 'package:ara_dict/reader/settings.dart';
 import 'package:ara_dict/reader/settings_class.dart';
 import 'package:ara_dict/utils.dart';
+import 'package:ara_dict/widgets/chat.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -309,18 +310,13 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
           textDirection: TextDirection.rtl,
           style: TextStyle(fontFamily: arabicFontStyle.fontFamily),
         ),
-        // actions: [
-        //   IconButton(
-        //     tooltip: 'Reader Mode settings',
-        //     onPressed: _settingsDrawer,
-        //     icon: const Icon(Icons.tune),
-        //   ),
-        //   IconButton(
-        //     icon: const Icon(Icons.exit_to_app_outlined),
-        //     tooltip: 'Exit Reader',
-        //     onPressed: () => exitReaderPage(context),
-        //   ),
-        // ],
+        actions: [
+          IconButton(
+            tooltip: 'Open Chat',
+            onPressed: () => ChatView.screen(context),
+            icon: const Icon(Icons.chat_outlined),
+          ),
+        ],
       ),
     );
   }
@@ -490,6 +486,7 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
                   opacity: isFabVisable ? 1.0 : 0.0,
                   child: FloatingActionButton(
                     child: Icon(Icons.menu_book),
+
                     onPressed: () async {
                       int readWords = 0;
                       for (int i = 0; i < _currPeraIndex; i++) {

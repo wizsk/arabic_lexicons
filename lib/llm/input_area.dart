@@ -14,7 +14,8 @@ class LlmInput extends StatefulWidget {
   /// from the book
   final String? Function()? questionContext;
 
-  final void Function(VoidCallback) onGettingSuccessfulReply;
+  // final void Function(VoidCallback) onGettingSuccessfulReply;
+  final VoidCallback onGettingSuccessfulReply;
 
   const LlmInput({
     super.key,
@@ -195,7 +196,7 @@ class _LlmInputState extends State<LlmInput> {
                           });
 
                           if (success) {
-                            widget.onGettingSuccessfulReply(() {});
+                            widget.onGettingSuccessfulReply();
 
                             WidgetsBinding.instance.addPostFrameCallback((_) {
                               showSnack(

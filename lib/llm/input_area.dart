@@ -215,7 +215,7 @@ class _LlmInputState extends State<LlmInput> {
                 ),
               ],
             ),
-            const SizedBox(height: 8,),
+            const SizedBox(height: 12),
             LlmInput.bottomPadd(),
           ],
         ),

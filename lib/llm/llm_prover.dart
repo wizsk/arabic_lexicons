@@ -1,4 +1,5 @@
 import 'package:ara_dict/datas/app_db.dart';
+import 'package:ara_dict/llm/utils.dart';
 import 'package:sqflite/sqflite.dart';
 
 enum LlmModels {
@@ -20,7 +21,11 @@ class Chat {
   final int? id;
 
   final String user;
+  final bool userRtl;
+
   final String bot;
+  final bool botRtl;
+
   final String prompt;
 
   final LlmModels provider;
@@ -31,7 +36,9 @@ class Chat {
   const Chat({
     this.id,
     required this.user,
+    required this.userRtl,
     required this.bot,
+    required this.botRtl,
     required this.prompt,
     required this.provider,
     required this.model,
@@ -42,7 +49,9 @@ class Chat {
     return Chat(
       id: id,
       user: user,
+      userRtl: userRtl,
       bot: bot,
+      botRtl: botRtl,
       prompt: prompt,
       provider: provider,
       model: model,
@@ -107,11 +116,18 @@ abstract final class AppChatsDb {
     final rows = await _db.query('chats', orderBy: 'time ASC');
 
     for (final r in rows) {
+      final user = r['user_text'] as String;
+      final userRtl = RtlLangs.test(user);
+      final bot = r['bot_text'] as String;
+      final botRtl = RtlLangs.test(bot);
+
       chats.add(
         Chat(
           id: r['id'] as int,
-          user: r['user_text'] as String,
-          bot: r['bot_text'] as String,
+          user: user,
+          userRtl: userRtl,
+          bot: bot,
+          botRtl: botRtl,
           prompt: r['prompt'] as String,
           provider: LlmModels.fromDbName(r['provider'] as String),
           model: r['model'] as String,

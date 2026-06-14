@@ -85,12 +85,12 @@ class _InfoSheet extends StatelessWidget {
                 'Bot length',
                 '${chat.bot.length} chars',
               ),
-              _infoTile(
-                theme,
-                Icons.language_rounded,
-                'Language',
-                isArabic(chat.user) ? 'Arabic (RTL)' : 'English (LTR)',
-              ),
+              // _infoTile(
+              //   theme,
+              //   Icons.language_rounded,
+              //   'Language',
+              //   RtlLangs.test(chat.user) ? 'Arabic (RTL)' : 'English (LTR)',
+              // ),
             ],
           ),
           // Info rows
@@ -116,14 +116,22 @@ class _InfoSheet extends StatelessWidget {
   }
 }
 
-bool isArabic(String text) {
-  final firstLetter = RegExp(r'\p{L}', unicode: true).firstMatch(text);
+abstract final class RtlLangs {
+  static final _letter = RegExp(r'\p{L}', unicode: true);
 
-  if (firstLetter == null) {
+  static bool test(String text) {
+    final match = _letter.firstMatch(text);
+    if (match == null) return false;
+
+    final cp = match.group(0)!.runes.first;
+
+    // Arabic script — covers Arabic, Persian, Urdu, Pashto, Kurdish Sorani, etc.
+    if (cp >= 0x0600 && cp <= 0x06FF) return true;
+    // Hebrew
+    if (cp >= 0x0590 && cp <= 0x05FF) return true;
+    // Thaana — Dhivehi (Maldivian)
+    if (cp >= 0x0780 && cp <= 0x07BF) return true;
+
     return false;
   }
-
-  final char = firstLetter.group(0)!;
-
-  return RegExp(r'[\u0600-\u06FF]').hasMatch(char);
 }

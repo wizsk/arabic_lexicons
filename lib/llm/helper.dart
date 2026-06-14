@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:ara_dict/llm/llm_prover.dart';
+import 'package:ara_dict/llm/utils.dart';
 import 'package:ara_dict/main_widgets.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -9,14 +10,47 @@ import 'package:http/http.dart' as http;
 typedef _LlmRes = ({String res, String model});
 
 abstract final class ChatHelper {
+  static bool requesting = false;
+  static bool _cancelled = false;
+  static VoidCallback? _onCancelSuccess;
+
+  static void tryCancelReq(VoidCallback onSuccess) {
+    _cancelled = true;
+    _onCancelSuccess = onSuccess;
+  }
+
   static Future<bool> getRes(
     BuildContext context,
     LlmModels provider,
     String prompt,
     String user,
   ) async {
+    requesting = true;
+    _cancelled = false;
     try {
       _LlmRes? res;
+
+      AppChatsDb.chats.add(
+        Chat(
+          provider: LlmModels.gemini,
+          bot: 'nice',
+          botRtl: false,
+          user: user,
+          userRtl: RtlLangs.test(user),
+          model: 'me---me',
+          prompt: '',
+          time: DateTime.now(),
+        ),
+      );
+      return true;
+      // while (true) {
+      //   if (_cancelled) {
+      //     _onCancelSuccess?.call();
+      //     return false;
+      //   }
+      //   await Future.delayed(Duration(seconds: 4));
+      // }
+
       switch (provider) {
         case LlmModels.gemini:
           res = await _getGeminiReply(prompt, ctx: context);
@@ -32,12 +66,13 @@ abstract final class ChatHelper {
         user: user,
         prompt: prompt,
         provider: LlmModels.gemini,
+        userRtl: RtlLangs.test(user),
         bot: res.res,
+        botRtl: RtlLangs.test(res.res),
         model: res.model,
         time: DateTime.now(),
       );
       AppChatsDb.addChat(c);
-
       return true;
     } catch (e) {
       if (kDebugMode) debugPrint('While getting ai res: $e');
@@ -49,6 +84,8 @@ abstract final class ChatHelper {
         message: 'Could not get results, please try again later :D',
       );
       return false;
+    } finally {
+      requesting = false;
     }
   }
 
@@ -72,6 +109,10 @@ abstract final class ChatHelper {
 
     for (final m in gemini.models) {
       for (final k in gemini.apiKeys) {
+        if (_cancelled) {
+          _onCancelSuccess?.call();
+          return null;
+        }
         if (kDebugMode) debugPrint('trying: $m');
         try {
           final url = Uri.parse(
@@ -145,6 +186,11 @@ abstract final class ChatHelper {
 
     for (final m in gpt.models) {
       for (final k in gpt.apiKeys) {
+        if (_cancelled) {
+          _onCancelSuccess?.call();
+          return null;
+        }
+
         if (kDebugMode) debugPrint('trying: $m');
 
         try {

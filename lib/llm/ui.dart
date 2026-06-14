@@ -1,13 +1,12 @@
 import 'package:ara_dict/conf.dart';
 import 'package:ara_dict/data.dart';
-import 'package:ara_dict/llm/helper.dart';
+import 'package:ara_dict/llm/input_area.dart';
 import 'package:ara_dict/llm/llm_prover.dart';
 import 'package:ara_dict/llm/utils.dart';
 import 'package:ara_dict/main_widgets.dart';
 import 'package:ara_dict/play_rate.dart';
 import 'package:ara_dict/reader/reader_utils.dart';
 import 'package:ara_dict/widgets/expandable_text/expandable_text.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -33,66 +32,58 @@ class ChatHistoryScreen extends StatefulWidget {
   State<ChatHistoryScreen> createState() => _ChatHistoryScreenState();
 }
 
-final List<Chat> __chats = [
-  Chat(
-    id: 1,
-    user: 'What is the difference between Flutter and React Native?',
-    bot:
-        'Flutter uses Dart and renders everything via its own Skia/Impeller engine, giving pixel-perfect UI on all platforms. React Native bridges JavaScript to native components, which can feel more "native" but introduces a JS bridge overhead. Flutter generally wins on performance consistency; React Native wins if your team already knows JavaScript.',
-    prompt: 'You are a mobile development expert.',
-    provider: LlmModels.gemini,
-    model: 'gemini-1.5-pro',
-    time: DateTime.now().subtract(const Duration(hours: 3, minutes: 14)),
-  ),
-  Chat(
-    id: 2,
-    user: 'ما هي أفضل طريقة لتعلم البرمجة من الصفر؟',
-    bot:
-        'أفضل طريقة هي البدء بلغة بسيطة مثل Python، ثم التركيز على حل المشكلات الصغيرة يومياً. استخدم منصات مثل freeCodeCamp أو Codecademy للبداية، وانتقل بعدها إلى مشاريع حقيقية. الثبات والممارسة اليومية أهم من أي دورة أو كتاب.',
-    prompt: 'أنت مساعد تعليمي متخصص في البرمجة.',
-    provider: LlmModels.chatGpt,
-    model: 'gpt-4o',
-    time: DateTime.now().subtract(const Duration(hours: 1, minutes: 5)),
-  ),
-  Chat(
-    id: 3,
-    user: 'Summarize the key principles of clean architecture.',
-    bot:
-        'Clean Architecture (Uncle Bob) centres on the Dependency Rule: source code dependencies must point inward only. The layers are: Entities (business rules), Use Cases (app logic), Interface Adapters (controllers/presenters), and Frameworks/Drivers (UI, DB). The goal is to keep the core independent of frameworks, databases, and delivery mechanisms so the system is testable and change-resilient.',
-    prompt: 'You are a senior software architect.',
-    provider: LlmModels.gemini,
-    model: 'gemini-1.5-flash',
-    time: DateTime.now().subtract(const Duration(minutes: 22)),
-  ),
-  Chat(
-    id: 4,
-    user: 'كيف أتعامل مع القلق والتوتر اليومي؟',
-    bot:
-        'تقنيات فعّالة: تنفس عميق (٤ ثوانٍ شهيق، ٤ حبس، ٦ زفير)، ممارسة الرياضة 30 دقيقة يومياً، وتحديد أوقات ثابتة للنوم. من الناحية المعرفية، دوّن أفكارك القلقة وتحقق من واقعيتها. إذا استمر القلق، استشر متخصصاً.',
-    prompt: 'أنت معالج نفسي متعاطف.',
-    provider: LlmModels.chatGpt,
-    model: 'gpt-4o-mini',
-    time: DateTime.now().subtract(const Duration(minutes: 7)),
-  ),
-];
+// final List<Chat> __chats = [
+//   Chat(
+//     id: 1,
+//     user: 'What is the difference between Flutter and React Native?',
+//     bot:
+//         'Flutter uses Dart and renders everything via its own Skia/Impeller engine, giving pixel-perfect UI on all platforms. React Native bridges JavaScript to native components, which can feel more "native" but introduces a JS bridge overhead. Flutter generally wins on performance consistency; React Native wins if your team already knows JavaScript.',
+//     prompt: 'You are a mobile development expert.',
+//     provider: LlmModels.gemini,
+//     model: 'gemini-1.5-pro',
+//     time: DateTime.now().subtract(const Duration(hours: 3, minutes: 14)),
+//   ),
+//   Chat(
+//     id: 2,
+//     user: 'ما هي أفضل طريقة لتعلم البرمجة من الصفر؟',
+//     bot:
+//         'أفضل طريقة هي البدء بلغة بسيطة مثل Python، ثم التركيز على حل المشكلات الصغيرة يومياً. استخدم منصات مثل freeCodeCamp أو Codecademy للبداية، وانتقل بعدها إلى مشاريع حقيقية. الثبات والممارسة اليومية أهم من أي دورة أو كتاب.',
+//     prompt: 'أنت مساعد تعليمي متخصص في البرمجة.',
+//     provider: LlmModels.chatGpt,
+//     model: 'gpt-4o',
+//     time: DateTime.now().subtract(const Duration(hours: 1, minutes: 5)),
+//   ),
+//   Chat(
+//     id: 3,
+//     user: 'Summarize the key principles of clean architecture.',
+//     bot:
+//         'Clean Architecture (Uncle Bob) centres on the Dependency Rule: source code dependencies must point inward only. The layers are: Entities (business rules), Use Cases (app logic), Interface Adapters (controllers/presenters), and Frameworks/Drivers (UI, DB). The goal is to keep the core independent of frameworks, databases, and delivery mechanisms so the system is testable and change-resilient.',
+//     prompt: 'You are a senior software architect.',
+//     provider: LlmModels.gemini,
+//     model: 'gemini-1.5-flash',
+//     time: DateTime.now().subtract(const Duration(minutes: 22)),
+//   ),
+//   Chat(
+//     id: 4,
+//     user: 'كيف أتعامل مع القلق والتوتر اليومي؟',
+//     bot:
+//         'تقنيات فعّالة: تنفس عميق (٤ ثوانٍ شهيق، ٤ حبس، ٦ زفير)، ممارسة الرياضة 30 دقيقة يومياً، وتحديد أوقات ثابتة للنوم. من الناحية المعرفية، دوّن أفكارك القلقة وتحقق من واقعيتها. إذا استمر القلق، استشر متخصصاً.',
+//     prompt: 'أنت معالج نفسي متعاطف.',
+//     provider: LlmModels.chatGpt,
+//     model: 'gpt-4o-mini',
+//     time: DateTime.now().subtract(const Duration(minutes: 7)),
+//   ),
+// ];
 
 class _ChatHistoryScreenState extends State<ChatHistoryScreen> {
-  List<Chat> get _chats => kDebugMode ? __chats : AppChatsDb.chats;
+  List<Chat> get _chats => AppChatsDb.chats;
 
   void _copyText(String text) {
-    print('hi');
     Clipboard.setData(ClipboardData(text: text));
     if (mounted) showSnack(context, 'Copied to clipboard');
   }
 
-  TextDirection _chatDirection = L.dir;
-  LlmModels _provider = LlmModels.gemini;
-
-  bool _requesting = false;
-
   final _sc = ScrollController();
-  final _tc = TextEditingController();
-  final _focusNode = FocusNode();
 
   @override
   Widget build(BuildContext context) {
@@ -122,9 +113,7 @@ class _ChatHistoryScreenState extends State<ChatHistoryScreen> {
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
           onTap: () {
-            if (_focusNode.hasFocus) {
-              FocusManager.instance.primaryFocus?.unfocus();
-            }
+            FocusManager.instance.primaryFocus?.unfocus();
           },
           child: Column(
             children: [
@@ -166,147 +155,8 @@ class _ChatHistoryScreenState extends State<ChatHistoryScreen> {
                 child: const Divider(height: 0),
               ),
               Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: padd.right,
-                  vertical: 8.0,
-                ),
-                child: Wrap(
-                  spacing: 6,
-                  runSpacing: 6,
-                  runAlignment: WrapAlignment.center,
-                  alignment: WrapAlignment.center,
-                  children: [
-                    ActionChip(
-                      visualDensity: VisualDensity.compact,
-                      avatar: Icon(switch (_chatDirection) {
-                        TextDirection.ltr => Icons.language,
-                        TextDirection.rtl => Icons.translate,
-                      }, size: 18),
-                      label: Text(switch (_chatDirection) {
-                        TextDirection.ltr => 'English',
-                        TextDirection.rtl => 'Arabic',
-                      }),
-                      onPressed: () {
-                        setState(() {
-                          _chatDirection = _chatDirection == TextDirection.ltr
-                              ? TextDirection.rtl
-                              : TextDirection.ltr;
-                        });
-                      },
-                    ),
-                    ActionChip(
-                      visualDensity: VisualDensity.compact,
-                      avatar: Icon(Icons.auto_awesome_rounded, size: 18),
-                      label: Text(_provider.name),
-                      onPressed: () {
-                        setState(() {
-                          _provider = switch (_provider) {
-                            LlmModels.gemini => LlmModels.chatGpt,
-                            LlmModels.chatGpt => LlmModels.gemini,
-                          };
-                        });
-                      },
-                    ),
-                  ],
-                ),
-              ),
-              Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: padd.right,
-                ).copyWith(bottom: 10.0),
-                child: Row(
-                  children: [
-                    Flexible(
-                      child: Directionality(
-                        textDirection: _chatDirection,
-                        child: TextField(
-                          focusNode: _focusNode,
-                          controller: _tc,
-                          magnifierConfiguration:
-                              TextMagnifierConfiguration.disabled,
-                          contextMenuBuilder: (context, selectableRegionState) {
-                            return AdaptiveTextSelectionToolbar.buttonItems(
-                              anchors: selectableRegionState.contextMenuAnchors,
-                              buttonItems:
-                                  selectableRegionState.contextMenuButtonItems,
-                            );
-                          },
-                          minLines: 1,
-                          maxLines: 2,
-                          textDirection: _chatDirection,
-                          style: L.arStyle,
-                          decoration: InputDecoration(
-                            hintText: switch (_chatDirection) {
-                              TextDirection.ltr => 'Ask...',
-                              TextDirection.rtl => 'اسأل...',
-                            },
-                            hintTextDirection: _chatDirection,
-                            // prefixIcon: IconButton(
-                            //   icon: Icon(Icons.arrow_forward_rounded),
-                            //   onPressed: () {},
-                            // ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 6),
-                    IconButton.filled(
-                      icon: Icon(Icons.arrow_forward),
-                      onPressed: _requesting
-                          ? null
-                          : () async {
-                              // setState(() {
-                              //   _requesting = true;
-                              // });
-                              // await Future.delayed(Duration(seconds: 2));
-                              // if (context.mounted) {
-                              //   setState(() {
-                              //     _requesting = false;
-                              //   });
-                              // }
-                              // return;
-
-                              final question = _tc.text.trim();
-                              if (question.isEmpty) return;
-                              FocusManager.instance.primaryFocus?.unfocus();
-                              setState(() {
-                                _requesting = true;
-                              });
-
-                              final (msg, prompt) = (
-                                question,
-                                'Question: $question\n\n'
-                                    '(Reply in ${_chatDirection == TextDirection.ltr ? 'English' : 'Arabic'})',
-                              );
-
-                              final success = await ChatHelper.getRes(
-                                context,
-                                _provider,
-                                prompt,
-                                msg,
-                              );
-
-                              if (!context.mounted) return;
-                              setState(() {
-                                if (success) _tc.clear();
-                                _requesting = false;
-                              });
-
-                              if (success) {
-                                showSnack(
-                                  context,
-                                  'Got response',
-                                  duration: const Duration(seconds: 2),
-                                );
-                              }
-
-                              if (success && _sc.hasClients) {
-                                _sc.jumpTo(0);
-                              }
-                            },
-                    ),
-                  ],
-                ),
+                padding: EdgeInsets.symmetric(horizontal: padd.right),
+                child: LlmInput(sc: _sc, parentState: setState),
               ),
             ],
           ),
@@ -355,11 +205,19 @@ class ChatCard extends StatelessWidget {
 
           const Divider(height: 4),
 
-          _MessageBubble(text: chat.user, maxCollapsedLines: 2),
+          _MessageBubble(
+            text: chat.user,
+            maxCollapsedLines: 2,
+            isRtl: chat.userRtl,
+          ),
 
           const Divider(height: 4),
 
-          _MessageBubble(text: chat.bot, maxCollapsedLines: 2),
+          _MessageBubble(
+            text: chat.bot,
+            maxCollapsedLines: 2,
+            isRtl: chat.botRtl,
+          ),
         ],
       ),
     );
@@ -477,28 +335,32 @@ class _CardHeader extends StatelessWidget {
 class _MessageBubble extends StatelessWidget {
   final int maxCollapsedLines;
   final String text;
+  final bool isRtl;
 
-  const _MessageBubble({required this.text, required this.maxCollapsedLines});
+  const _MessageBubble({
+    required this.text,
+    required this.maxCollapsedLines,
+    required this.isRtl,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final arabic = isArabic(text);
-    final dir = arabic ? TextDirection.rtl : TextDirection.ltr;
+    final dir = isRtl ? TextDirection.rtl : TextDirection.ltr;
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
       child: Align(
-        alignment: arabic
+        alignment: isRtl
             ? AlignmentGeometry.topRight
             : AlignmentGeometry.topLeft,
         child: Directionality(
           textDirection: dir,
           child: ExpandableText(
             text,
-            expandText: arabic ? 'أظهر المزيد' : 'Show more',
-            collapseText: arabic ? 'أظهر أقل' : 'Show less',
+            expandText: isRtl ? 'أظهر المزيد' : 'Show more',
+            collapseText: isRtl ? 'أظهر أقل' : 'Show less',
             maxLines: maxCollapsedLines,
-            textAlign: arabic ? TextAlign.right : TextAlign.left,
+            textAlign: isRtl ? TextAlign.right : TextAlign.left,
             style: TextStyle(height: 1.6, fontFamily: L.arFont),
           ),
         ),

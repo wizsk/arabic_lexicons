@@ -374,7 +374,7 @@ class _SelectableTextScreenState extends State<SelectableTextScreen>
                               _chatBoxCollapsed = false;
                             }),
                           ),
-                          LlmInput.bottomPadd(context),
+                          LlmInput.bottomPadd(),
                         ] else
                           IconButton(
                             tooltip: 'Hide',

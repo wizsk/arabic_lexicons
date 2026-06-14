@@ -1,6 +1,5 @@
-import 'dart:math';
-
 import 'package:ara_dict/conf.dart';
+import 'package:ara_dict/data.dart';
 import 'package:ara_dict/llm/helper.dart';
 import 'package:ara_dict/llm/llm_prover.dart';
 import 'package:ara_dict/llm/utils.dart';
@@ -25,8 +24,10 @@ class LlmInput extends StatefulWidget {
     required this.onGettingSuccessfulReply,
   });
 
-  static Widget bottomPadd(BuildContext context) =>
-      SizedBox(height: max(MediaQuery.of(context).padding.bottom, 12));
+  static Widget bottomPadd() {
+    if (appConf.fullScreen) const SizedBox(height: 10);
+    return const SizedBox();
+  }
 
   @override
   State<LlmInput> createState() => _LlmInputState();
@@ -214,7 +215,8 @@ class _LlmInputState extends State<LlmInput> {
                 ),
               ],
             ),
-            LlmInput.bottomPadd(context),
+            const SizedBox(height: 8,),
+            LlmInput.bottomPadd(),
           ],
         ),
 

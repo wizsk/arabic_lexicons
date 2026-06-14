@@ -249,7 +249,10 @@ class _SearchLexiconsState extends State<SearchLexicons>
               ),
             ),
 
-            Divider(thickness: 0.5, height: 0),
+            Padding(
+              padding: EdgeInsetsGeometry.symmetric(horizontal: padd.right),
+              child: Divider(thickness: 0.5, height: 0),
+            ),
             Padding(
               padding: EdgeInsetsGeometry.symmetric(
                 horizontal: padd.right,

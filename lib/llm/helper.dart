@@ -7,7 +7,26 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
-typedef _LlmRes = ({String res, String model});
+String _promt(String? context, String question, String lang) {
+  final rl = '(Reply in $lang)';
+
+  if (context == null || context.isEmpty) {
+    return '$question\n\n$rl';
+  }
+
+  return '<context>\n'
+      '$context\n'
+      '</context>\n\n'
+      'Question: $question\n\n'
+      '$rl';
+}
+
+class _LlmRes {
+  final String res;
+  final String model;
+
+  const _LlmRes({required this.res, required this.model});
+}
 
 abstract final class ChatHelper {
   static bool requesting = false;
@@ -22,27 +41,30 @@ abstract final class ChatHelper {
   static Future<bool> getRes(
     BuildContext context,
     LlmModels provider,
-    String prompt,
-    String user,
+    String? qContext,
+    String question,
+    String lang,
   ) async {
     requesting = true;
     _cancelled = false;
+    final prompt = _promt(qContext, question, lang);
+
     try {
       _LlmRes? res;
 
-      AppChatsDb.chats.add(
-        Chat(
-          provider: LlmModels.gemini,
-          bot: 'nice',
-          botRtl: false,
-          user: user,
-          userRtl: RtlLangs.test(user),
-          model: 'me---me',
-          prompt: '',
-          time: DateTime.now(),
-        ),
-      );
-      return true;
+      // AppChatsDb.chats.add(
+      //   Chat(
+      //     provider: LlmModels.gemini,
+      //     reply: 'nice',
+      //     replyRtl: false,
+      //     question: question,
+      //     context: qContext,
+      //     questionRtl: RtlLangs.test(question),
+      //     model: 'me---me',
+      //     time: DateTime.now(),
+      //   ),
+      // );
+      // return true;
       // while (true) {
       //   if (_cancelled) {
       //     _onCancelSuccess?.call();
@@ -63,15 +85,16 @@ abstract final class ChatHelper {
       if (res == null) return false;
 
       final c = Chat(
-        user: user,
-        prompt: prompt,
+        context: qContext,
+        question: question,
+        questionRtl: RtlLangs.test(question),
+        reply: res.res,
+        replyRtl: RtlLangs.test(res.res),
         provider: LlmModels.gemini,
-        userRtl: RtlLangs.test(user),
-        bot: res.res,
-        botRtl: RtlLangs.test(res.res),
         model: res.model,
         time: DateTime.now(),
       );
+
       AppChatsDb.addChat(c);
       return true;
     } catch (e) {
@@ -157,7 +180,7 @@ abstract final class ChatHelper {
           final parts = data["candidates"]?[0]["content"]["parts"] as List?;
           if (parts != null && parts.isNotEmpty) {
             final r = parts[0]["text"].toString().trim();
-            return (res: r, model: m);
+            return _LlmRes(res: r, model: m);
           }
         } catch (e) {
           if (kDebugMode) debugPrint('while getting res: $e');
@@ -222,7 +245,7 @@ abstract final class ChatHelper {
           final data = jsonDecode(res.body);
           final r = data["choices"][0]["message"]["content"].trim() as String;
 
-          return (model: m, res: r);
+          return _LlmRes(model: m, res: r);
         } catch (e) {
           if (kDebugMode) debugPrint('while getting res: $e');
         }

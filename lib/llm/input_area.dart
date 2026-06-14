@@ -1,8 +1,10 @@
 import 'dart:math';
 
 import 'package:ara_dict/conf.dart';
+import 'package:ara_dict/first_run.dart';
 import 'package:ara_dict/llm/helper.dart';
 import 'package:ara_dict/llm/llm_prover.dart';
+import 'package:ara_dict/llm/utils.dart';
 import 'package:ara_dict/reader/reader_utils.dart';
 import 'package:flutter/material.dart';
 
@@ -10,16 +12,17 @@ class LlmInput extends StatefulWidget {
   final ScrollController sc;
   final List<Widget>? pre;
 
-  final (String, String) Function(String question, String lang)? msgAndPrompt;
+  /// from the book
+  final String? Function()? questionContext;
 
-  final void Function(void Function()) parentState;
+  final VoidCallback onGettingSuccessfulReply;
 
   const LlmInput({
     super.key,
     required this.sc,
-    required this.parentState,
     this.pre,
-    this.msgAndPrompt,
+    this.questionContext,
+    required this.onGettingSuccessfulReply,
   });
 
   static Widget bottomPadd(BuildContext context) =>
@@ -32,15 +35,25 @@ class LlmInput extends StatefulWidget {
 enum _LlmReplyL { en, ar, auto }
 
 class _LlmInputState extends State<LlmInput> {
+  String _inputTxt = '';
+
   TextDirection get _chatDirection => switch (_replyL) {
     _LlmReplyL.ar => TextDirection.rtl,
-    _ => TextDirection.ltr,
+    _LlmReplyL.en => TextDirection.ltr,
+    _LlmReplyL.auto =>
+      RtlLangs.test(_inputTxt) ? TextDirection.rtl : TextDirection.ltr,
   };
 
   _LlmReplyL _replyL = L.isAr ? _LlmReplyL.ar : _LlmReplyL.en;
 
   LlmModels _provider = LlmModels.gemini;
   final _tc = TextEditingController();
+
+  @override
+  void dispose() {
+    _tc.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -116,6 +129,14 @@ class _LlmInputState extends State<LlmInput> {
                               selectableRegionState.contextMenuButtonItems,
                         );
                       },
+                      onChanged: (s) {
+                        final cl = s.trim();
+                        if (cl != _inputTxt) {
+                          setState(() {
+                            _inputTxt = cl;
+                          });
+                        }
+                      },
                       minLines: 1,
                       maxLines: 2,
                       textDirection: _chatDirection,
@@ -133,7 +154,7 @@ class _LlmInputState extends State<LlmInput> {
                 const SizedBox(width: 6),
                 IconButton.filled(
                   icon: Icon(Icons.arrow_forward),
-                  onPressed: ChatHelper.requesting
+                  onPressed: _inputTxt.isEmpty
                       ? null
                       : () async {
                           // setState(() {
@@ -160,36 +181,32 @@ class _LlmInputState extends State<LlmInput> {
                             _LlmReplyL.auto => 'same language as the questoin',
                           };
 
-                          final (msg, prompt) =
-                              widget.msgAndPrompt?.call(question, replyLang) ??
-                              (
-                                question,
-                                'Question: $question\n\n'
-                                    '(Reply in $replyLang)',
-                              );
-
                           final success = await ChatHelper.getRes(
                             context,
                             _provider,
-                            prompt,
-                            msg,
+                            widget.questionContext?.call(),
+                            question,
+                            replyLang,
                           );
 
                           if (!context.mounted) return;
                           if (!success) {
                             setState(() {});
                           } else {
+                            widget.onGettingSuccessfulReply.call();
                             if (success) _tc.clear();
-                            widget.parentState(() {});
-                            showSnack(
-                              context,
-                              'Got response',
-                              duration: const Duration(seconds: 2),
-                            );
 
-                            if (widget.sc.hasClients) {
-                              widget.sc.jumpTo(0);
-                            }
+                            WidgetsBinding.instance.addPostFrameCallback((_) {
+                              showSnack(
+                                context,
+                                'Got response',
+                                duration: const Duration(seconds: 2),
+                              );
+
+                              if (widget.sc.hasClients) {
+                                widget.sc.jumpTo(0);
+                              }
+                            });
                           }
                         },
                 ),

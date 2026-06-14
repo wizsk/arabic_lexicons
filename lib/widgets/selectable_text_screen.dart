@@ -2,35 +2,16 @@ import 'dart:math';
 
 import 'package:ara_dict/conf.dart';
 import 'package:ara_dict/data.dart';
-import 'package:ara_dict/llm/helper.dart';
 import 'package:ara_dict/llm/input_area.dart';
 import 'package:ara_dict/llm/llm_prover.dart';
 import 'package:ara_dict/llm/ui.dart';
 import 'package:ara_dict/llm/utils.dart';
-import 'package:ara_dict/main_widgets.dart';
 import 'package:ara_dict/reader/reader_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
 enum _ChatData { none, selected, all }
-
-(String, String) _msgAndPrompt(String pre, String question, String lang) {
-  final rl = '(Reply in $lang';
-
-  if (pre.isEmpty) {
-    return (question, '$question\n\n$rl');
-  }
-
-  final prompt =
-      '<context>\n'
-      '$pre\n'
-      '</context>\n\n'
-      'Question: $question\n\n'
-      '$rl';
-
-  return ('$pre\n\n$question', prompt);
-}
 
 typedef SelectableTextScreenFunc = String Function(int? start, int? end);
 
@@ -96,18 +77,13 @@ class _SelectableTextScreenState extends State<SelectableTextScreen>
   late final int? _length;
   int? _start;
 
-  final TextEditingController _tc = TextEditingController();
   final ScrollController _sc = ScrollController();
-  final FocusNode _focusNode = FocusNode();
 
-  LlmModels _provider = LlmModels.gemini;
-  final List<Chat> _chats = AppChatsDb.chats;
+  List<Chat> get _chats => AppChatsDb.chats;
 
-  bool _requesting = false;
   String? _selectedTxt;
   String? _selectedTxtSaved;
   bool _chatting = false;
-  TextDirection _chatDirection = L.dir;
   _ChatData _include = _ChatData.none;
   bool _chatBoxCollapsed = false;
 
@@ -137,12 +113,6 @@ class _SelectableTextScreenState extends State<SelectableTextScreen>
       });
     });
 
-    for (final m in AppChatsDb.models.values) {
-      if (m.apiKeys.isNotEmpty && m.models.isNotEmpty) {
-        _provider = m.model;
-      }
-    }
-
     _currIdx = widget.currentIdx;
     _length = widget.length;
 
@@ -165,8 +135,7 @@ class _SelectableTextScreenState extends State<SelectableTextScreen>
   @override
   void dispose() {
     _tabController.dispose();
-    _tc.dispose();
-    _focusNode.dispose();
+    _sc.dispose();
     super.dispose();
   }
 
@@ -282,9 +251,7 @@ class _SelectableTextScreenState extends State<SelectableTextScreen>
           child: GestureDetector(
             behavior: HitTestBehavior.opaque,
             onTap: () {
-              if (_focusNode.hasFocus) {
-                FocusManager.instance.primaryFocus?.unfocus();
-              }
+              FocusManager.instance.primaryFocus?.unfocus();
             },
 
             child: Column(
@@ -357,7 +324,9 @@ class _SelectableTextScreenState extends State<SelectableTextScreen>
 
                       Directionality(
                         textDirection: TextDirection.ltr,
-                        child: ListView.builder(
+                        child: ListView.separated(
+                          separatorBuilder: (_, _) =>
+                              const SizedBox(height: 12),
                           keyboardDismissBehavior:
                               ScrollViewKeyboardDismissBehavior.onDrag,
                           controller: _sc,
@@ -426,7 +395,15 @@ class _SelectableTextScreenState extends State<SelectableTextScreen>
                       textDirection: TextDirection.ltr,
                       child: LlmInput(
                         sc: _sc,
-                        parentState: setState,
+                        onGettingSuccessfulReply: () {
+                          setState(() {
+                            _tabController.index = 1;
+                            _selectedTxtSaved = null;
+                            _selectedTxt = null;
+                            _include = _ChatData.none;
+                            _tabController.index = 1;
+                          });
+                        },
                         pre: [
                           if (_include == _ChatData.selected &&
                               _selectedTxtSaved != null) ...[
@@ -490,13 +467,13 @@ class _SelectableTextScreenState extends State<SelectableTextScreen>
                             ],
                           ),
                         ],
-                        msgAndPrompt: (question, lang) {
+                        questionContext: () {
                           final pre = switch (_include) {
                             _ChatData.all => _txt,
                             _ChatData.selected => _selectedTxtSaved ?? '',
                             _ChatData.none => '',
                           };
-                          return _msgAndPrompt(pre, question, lang);
+                          return pre.isEmpty ? null : pre;
                         },
                       ),
                     ),
@@ -699,164 +676,4 @@ class _ValueEditor extends StatelessWidget {
       ],
     );
   }
-}
-
-class ChatBubble extends StatelessWidget {
-  const ChatBubble({
-    super.key,
-    required this.c,
-    required this.isUser,
-    required this.afterChange,
-    this.onReply,
-  });
-
-  final Chat c;
-  final bool isUser;
-  final VoidCallback? onReply; // parent wires this to its reply handler
-  final VoidCallback afterChange; // parent wires this to its reply handler
-
-  Future<void> _showBubbleMenu(
-    BuildContext context,
-    String text,
-    Offset globalPosition,
-  ) async {
-    // HapticFeedback.mediumImpact(); // tactile confirmation before menu appears
-
-    final overlay =
-        Overlay.of(context).context.findRenderObject()! as RenderBox;
-
-    final result = await showMenu<String>(
-      context: context,
-      // anchor the menu exactly where the finger pressed
-      position: RelativeRect.fromRect(
-        Rect.fromLTWH(globalPosition.dx, globalPosition.dy, 0, 0),
-        Offset.zero & overlay.size,
-      ),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      items: [
-        const PopupMenuItem(
-          value: 'copy',
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.copy_outlined, size: 18),
-              SizedBox(width: 10),
-              Text('Copy'),
-            ],
-          ),
-        ),
-        if (!isUser)
-          PopupMenuItem(
-            value: 'info',
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.info_outlined, size: 18),
-                SizedBox(width: 10),
-                Text('Info'),
-              ],
-            ),
-          ),
-        PopupMenuItem(
-          value: 'rm',
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.delete_outlined, size: 18),
-              SizedBox(width: 10),
-              Text('Delete'),
-            ],
-          ),
-        ),
-        // PopupMenuItem(
-        //   value: 'reply',
-        //   child: Row(
-        //     mainAxisSize: MainAxisSize.min,
-        //     children: [
-        //       Icon(Icons.reply_outlined, size: 18),
-        //       SizedBox(width: 10),
-        //       Text('Reply'),
-        //     ],
-        //   ),
-        // ),
-      ],
-    );
-
-    if (!context.mounted) return; // guard after every async gap
-
-    switch (result) {
-      case 'copy':
-        await Clipboard.setData(ClipboardData(text: text));
-        if (context.mounted) {
-          showSnack(
-            context,
-            'Copied to clipboard',
-            duration: Duration(seconds: 1),
-          );
-        }
-        break;
-      case 'reply':
-        onReply?.call();
-        break;
-
-      case 'rm':
-        final confirm = await showConfirmDialog(
-          context,
-          'Delete Chat?',
-          message: 'Delete current chat.',
-          confirmText: 'Delete',
-          destructive: true,
-        );
-        if (confirm != true) return;
-
-        await AppChatsDb.deleteChat(c.id!);
-        if (context.mounted) afterChange();
-        break;
-
-      case 'info':
-        showSnack(
-          context,
-          'Model used: ${c.model.isEmpty ? "Unkown" : c.model}',
-        );
-        break;
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final text = isUser ? c.user : c.bot;
-    final dir = _direction(text);
-
-    return GestureDetector(
-      onDoubleTapDown: (details) =>
-          _showBubbleMenu(context, text, details.globalPosition),
-      // onTapDown: (details) => // bad cause scroll time act
-      //     _showBubbleMenu(context, text, details.globalPosition),
-      child: Container(
-        constraints: const BoxConstraints(maxWidth: 500),
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: isUser
-              ? Theme.of(context).colorScheme.primaryContainer
-              : Theme.of(context).colorScheme.surfaceContainerHighest,
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Text(text, textDirection: dir, style: L.arStyle),
-      ),
-    );
-  }
-}
-
-TextDirection _direction(String text) {
-  final firstLetter = RegExp(r'\p{L}', unicode: true).firstMatch(text);
-
-  if (firstLetter == null) {
-    return TextDirection.ltr;
-  }
-
-  final char = firstLetter.group(0)!;
-
-  return RegExp(r'[\u0600-\u06FF]').hasMatch(char)
-      ? TextDirection.rtl
-      : TextDirection.ltr;
 }

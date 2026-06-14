@@ -86,6 +86,12 @@ class _ChatHistoryScreenState extends State<ChatHistoryScreen> {
   final _sc = ScrollController();
 
   @override
+  void dispose() {
+    _sc.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final padd = appConf.readerPadd(context);
     return Scaffold(
@@ -156,7 +162,12 @@ class _ChatHistoryScreenState extends State<ChatHistoryScreen> {
               ),
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: padd.right),
-                child: LlmInput(sc: _sc, parentState: setState),
+                child: LlmInput(
+                  sc: _sc,
+                  onGettingSuccessfulReply: () {
+                    if (context.mounted) setState(() {});
+                  },
+                ),
               ),
             ],
           ),
@@ -188,7 +199,7 @@ class ChatCard extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: cs.surfaceContainer,
+        color: cs.surfaceContainerLow,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(width: 1, color: cs.outlineVariant),
       ),
@@ -200,7 +211,7 @@ class ChatCard extends StatelessWidget {
             onDelete: onDelete,
             onInfo: onInfo,
             onCopyUser: () => onCopy(chat.user),
-            onCopyBot: () => onCopy(chat.bot),
+            onCopyBot: () => onCopy(chat.reply),
           ),
 
           const Divider(height: 4),
@@ -208,15 +219,15 @@ class ChatCard extends StatelessWidget {
           _MessageBubble(
             text: chat.user,
             maxCollapsedLines: 2,
-            isRtl: chat.userRtl,
+            isRtl: chat.questionRtl,
           ),
 
           const Divider(height: 4),
 
           _MessageBubble(
-            text: chat.bot,
+            text: chat.reply,
             maxCollapsedLines: 2,
-            isRtl: chat.botRtl,
+            isRtl: chat.replyRtl,
           ),
         ],
       ),
@@ -346,6 +357,7 @@ class _MessageBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final dir = isRtl ? TextDirection.rtl : TextDirection.ltr;
+    final cs = Theme.of(context).colorScheme;
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
@@ -362,6 +374,7 @@ class _MessageBubble extends StatelessWidget {
             maxLines: maxCollapsedLines,
             textAlign: isRtl ? TextAlign.right : TextAlign.left,
             style: TextStyle(height: 1.6, fontFamily: L.arFont),
+            linkColor: cs.secondary,
           ),
         ),
       ),

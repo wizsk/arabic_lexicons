@@ -83,7 +83,7 @@ class _InfoSheet extends StatelessWidget {
                 theme,
                 Icons.smart_toy_rounded,
                 'Bot length',
-                '${chat.bot.length} chars',
+                '${chat.reply.length} chars',
               ),
               // _infoTile(
               //   theme,
@@ -120,6 +120,8 @@ abstract final class RtlLangs {
   static final _letter = RegExp(r'\p{L}', unicode: true);
 
   static bool test(String text) {
+    if (text.isEmpty) return false;
+
     final match = _letter.firstMatch(text);
     if (match == null) return false;
 

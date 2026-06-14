@@ -45,12 +45,12 @@ abstract final class AppDb {
         ''');
 
       await txn.execute('''
-        CREATE TABLE IF NOT EXISTS chats(
+        CREATE TABLE IF NOT EXISTS llm_chats(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
 
-        user_text TEXT NOT NULL,
-        bot_text TEXT NOT NULL,
-        prompt TEXT NOT NULL,
+        question TEXT NOT NULL,
+        context TEXT,
+        reply TEXT NOT NULL,
 
         provider TEXT NOT NULL,
         model TEXT NOT NULL,

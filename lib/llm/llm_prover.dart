@@ -20,13 +20,14 @@ enum LlmModels {
 class Chat {
   final int? id;
 
-  final String user;
-  final bool userRtl;
+  final bool questionRtl;
+  String get user => context == null ? question : '$context\n\n$question';
 
-  final String bot;
-  final bool botRtl;
+  final String? context;
+  final String question;
 
-  final String prompt;
+  final String reply;
+  final bool replyRtl;
 
   final LlmModels provider;
   final String model;
@@ -35,11 +36,11 @@ class Chat {
 
   const Chat({
     this.id,
-    required this.user,
-    required this.userRtl,
-    required this.bot,
-    required this.botRtl,
-    required this.prompt,
+    required this.context,
+    required this.question,
+    required this.questionRtl,
+    required this.reply,
+    required this.replyRtl,
     required this.provider,
     required this.model,
     required this.time,
@@ -48,11 +49,11 @@ class Chat {
   Chat withId(int id) {
     return Chat(
       id: id,
-      user: user,
-      userRtl: userRtl,
-      bot: bot,
-      botRtl: botRtl,
-      prompt: prompt,
+      question: question,
+      context: context,
+      questionRtl: questionRtl,
+      reply: reply,
+      replyRtl: replyRtl,
       provider: provider,
       model: model,
       time: time,
@@ -88,10 +89,10 @@ abstract final class AppChatsDb {
   // ===========================
 
   static Future<void> addChat(Chat chat) async {
-    final id = await _db.insert('chats', {
-      'user_text': chat.user,
-      'bot_text': chat.bot,
-      'prompt': chat.prompt,
+    final id = await _db.insert('llm_chats', {
+      'question': chat.question,
+      if (chat.context != null) 'context': chat.context,
+      'reply': chat.reply,
       'provider': chat.provider.dbName,
       'model': chat.model,
       'time': chat.time.millisecondsSinceEpoch,
@@ -103,32 +104,33 @@ abstract final class AppChatsDb {
     final idx = chats.indexWhere((i) => i.id == id);
     if (idx > -1) chats.removeAt(idx);
 
-    await _db.delete('chats', where: 'id = ?', whereArgs: [id]);
+    await _db.delete('llm_chats', where: 'id = ?', whereArgs: [id]);
   }
 
   static Future<void> clearChats() async {
     chats.clear();
-    await _db.delete('chats');
+    await _db.delete('llm_chats');
   }
 
   static Future<void> loadChats() async {
     chats.clear();
-    final rows = await _db.query('chats', orderBy: 'time ASC');
+    final rows = await _db.query('llm_chats', orderBy: 'time ASC');
 
     for (final r in rows) {
-      final user = r['user_text'] as String;
-      final userRtl = RtlLangs.test(user);
-      final bot = r['bot_text'] as String;
-      final botRtl = RtlLangs.test(bot);
+      final question = r['question'] as String;
+      final questionRtl = RtlLangs.test(question);
+
+      final reply = r['reply'] as String;
+      final replyRtl = RtlLangs.test(reply);
 
       chats.add(
         Chat(
           id: r['id'] as int,
-          user: user,
-          userRtl: userRtl,
-          bot: bot,
-          botRtl: botRtl,
-          prompt: r['prompt'] as String,
+          question: question,
+          context: r['context'] as String?,
+          questionRtl: questionRtl,
+          reply: reply,
+          replyRtl: replyRtl,
           provider: LlmModels.fromDbName(r['provider'] as String),
           model: r['model'] as String,
           time: DateTime.fromMillisecondsSinceEpoch(r['time'] as int),

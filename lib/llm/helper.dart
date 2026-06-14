@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:ara_dict/llm/llm_prover.dart';
 import 'package:ara_dict/llm/utils.dart';
@@ -38,6 +39,9 @@ abstract final class ChatHelper {
     _onCancelSuccess = onSuccess;
   }
 
+  // ignore: unused_field
+  static final _rand = Random();
+
   static Future<bool> getRes(
     BuildContext context,
     LlmModels provider,
@@ -52,6 +56,9 @@ abstract final class ChatHelper {
     try {
       _LlmRes? res;
 
+      // final delay = _rand.nextInt(6);
+      // print('will be delayed: $delay');
+      // await Future.delayed(Duration(seconds: delay));
       // AppChatsDb.chats.add(
       //   Chat(
       //     provider: LlmModels.gemini,
@@ -64,6 +71,7 @@ abstract final class ChatHelper {
       //     time: DateTime.now(),
       //   ),
       // );
+      // print('done delay: $delay');
       // return true;
       // while (true) {
       //   if (_cancelled) {

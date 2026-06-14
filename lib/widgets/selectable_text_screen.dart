@@ -395,8 +395,9 @@ class _SelectableTextScreenState extends State<SelectableTextScreen>
                       textDirection: TextDirection.ltr,
                       child: LlmInput(
                         sc: _sc,
-                        onGettingSuccessfulReply: () {
+                        onGettingSuccessfulReply: (f) {
                           setState(() {
+                            f();
                             _tabController.index = 1;
                             _selectedTxtSaved = null;
                             _selectedTxt = null;

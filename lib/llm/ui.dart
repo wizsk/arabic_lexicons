@@ -164,8 +164,11 @@ class _ChatHistoryScreenState extends State<ChatHistoryScreen> {
                 padding: EdgeInsets.symmetric(horizontal: padd.right),
                 child: LlmInput(
                   sc: _sc,
-                  onGettingSuccessfulReply: () {
-                    if (context.mounted) setState(() {});
+                  onGettingSuccessfulReply: (f) {
+                    if (context.mounted) return;
+                    setState(() {
+                      f();
+                    });
                   },
                 ),
               ),

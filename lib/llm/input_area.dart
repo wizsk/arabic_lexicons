@@ -1,7 +1,6 @@
 import 'dart:math';
 
 import 'package:ara_dict/conf.dart';
-import 'package:ara_dict/first_run.dart';
 import 'package:ara_dict/llm/helper.dart';
 import 'package:ara_dict/llm/llm_prover.dart';
 import 'package:ara_dict/llm/utils.dart';
@@ -15,7 +14,7 @@ class LlmInput extends StatefulWidget {
   /// from the book
   final String? Function()? questionContext;
 
-  final VoidCallback onGettingSuccessfulReply;
+  final void Function(VoidCallback) onGettingSuccessfulReply;
 
   const LlmInput({
     super.key,
@@ -190,11 +189,13 @@ class _LlmInputState extends State<LlmInput> {
                           );
 
                           if (!context.mounted) return;
-                          if (!success) {
-                            setState(() {});
-                          } else {
-                            widget.onGettingSuccessfulReply.call();
+
+                          setState(() {
                             if (success) _tc.clear();
+                          });
+
+                          if (success) {
+                            widget.onGettingSuccessfulReply(() {});
 
                             WidgetsBinding.instance.addPostFrameCallback((_) {
                               showSnack(

@@ -6,6 +6,7 @@ import 'package:ara_dict/llm/utils.dart';
 import 'package:ara_dict/main_widgets.dart';
 import 'package:ara_dict/play_rate.dart';
 import 'package:ara_dict/reader/reader_utils.dart';
+import 'package:ara_dict/widgets/expandable_text/expandable_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -31,8 +32,51 @@ class ChatHistoryScreen extends StatefulWidget {
   State<ChatHistoryScreen> createState() => _ChatHistoryScreenState();
 }
 
+final List<Chat> __chats = [
+  Chat(
+    id: 1,
+    user: 'What is the difference between Flutter and React Native?',
+    bot:
+        'Flutter uses Dart and renders everything via its own Skia/Impeller engine, giving pixel-perfect UI on all platforms. React Native bridges JavaScript to native components, which can feel more "native" but introduces a JS bridge overhead. Flutter generally wins on performance consistency; React Native wins if your team already knows JavaScript.',
+    prompt: 'You are a mobile development expert.',
+    provider: LlmModels.gemini,
+    model: 'gemini-1.5-pro',
+    time: DateTime.now().subtract(const Duration(hours: 3, minutes: 14)),
+  ),
+  Chat(
+    id: 2,
+    user: 'ما هي أفضل طريقة لتعلم البرمجة من الصفر؟',
+    bot:
+        'أفضل طريقة هي البدء بلغة بسيطة مثل Python، ثم التركيز على حل المشكلات الصغيرة يومياً. استخدم منصات مثل freeCodeCamp أو Codecademy للبداية، وانتقل بعدها إلى مشاريع حقيقية. الثبات والممارسة اليومية أهم من أي دورة أو كتاب.',
+    prompt: 'أنت مساعد تعليمي متخصص في البرمجة.',
+    provider: LlmModels.chatGpt,
+    model: 'gpt-4o',
+    time: DateTime.now().subtract(const Duration(hours: 1, minutes: 5)),
+  ),
+  Chat(
+    id: 3,
+    user: 'Summarize the key principles of clean architecture.',
+    bot:
+        'Clean Architecture (Uncle Bob) centres on the Dependency Rule: source code dependencies must point inward only. The layers are: Entities (business rules), Use Cases (app logic), Interface Adapters (controllers/presenters), and Frameworks/Drivers (UI, DB). The goal is to keep the core independent of frameworks, databases, and delivery mechanisms so the system is testable and change-resilient.',
+    prompt: 'You are a senior software architect.',
+    provider: LlmModels.gemini,
+    model: 'gemini-1.5-flash',
+    time: DateTime.now().subtract(const Duration(minutes: 22)),
+  ),
+  Chat(
+    id: 4,
+    user: 'كيف أتعامل مع القلق والتوتر اليومي؟',
+    bot:
+        'تقنيات فعّالة: تنفس عميق (٤ ثوانٍ شهيق، ٤ حبس، ٦ زفير)، ممارسة الرياضة 30 دقيقة يومياً، وتحديد أوقات ثابتة للنوم. من الناحية المعرفية، دوّن أفكارك القلقة وتحقق من واقعيتها. إذا استمر القلق، استشر متخصصاً.',
+    prompt: 'أنت معالج نفسي متعاطف.',
+    provider: LlmModels.chatGpt,
+    model: 'gpt-4o-mini',
+    time: DateTime.now().subtract(const Duration(minutes: 7)),
+  ),
+];
+
 class _ChatHistoryScreenState extends State<ChatHistoryScreen> {
-  List<Chat> get _chats => AppChatsDb.chats;
+  List<Chat> get _chats => true ? __chats : AppChatsDb.chats;
 
   void _copyText(String text) {
     Clipboard.setData(ClipboardData(text: text));
@@ -292,39 +336,28 @@ class ChatCard extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: cs.surfaceContainerLow,
+        color: cs.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(width: 1, color: cs.outline),
+        border: Border.all(width: 1, color: cs.outlineVariant),
       ),
       clipBehavior: Clip.antiAlias,
       child: Column(
         children: [
-          // ── Header row ──
-          _CardHeader(chat: chat, onDelete: onDelete, onInfo: onInfo),
-
-          // ── Divider ──
-          const Divider(height: 1),
-
-          // ── User bubble ──
-          _MessageBubble(
-            role: 'You',
-            icon: Icons.person_rounded,
-            text: chat.user,
-            maxCollapsedLines: 2,
-            onCopy: () => onCopy(chat.user),
+          _CardHeader(
+            chat: chat,
+            onDelete: onDelete,
+            onInfo: onInfo,
+            onCopyUser: () => onCopy(chat.user),
+            onCopyBot: () => onCopy(chat.bot),
           ),
 
-          // ── Divider ──
-          const Divider(height: 1),
+          const Divider(height: 4),
 
-          // ── Bot bubble ──
-          _MessageBubble(
-            role: chat.provider.name,
-            icon: chat.provider.icon,
-            text: chat.bot,
-            maxCollapsedLines: 3,
-            onCopy: () => onCopy(chat.bot),
-          ),
+          _MessageBubble(text: chat.user, maxCollapsedLines: 2),
+
+          const Divider(height: 4),
+
+          _MessageBubble(text: chat.bot, maxCollapsedLines: 2),
         ],
       ),
     );
@@ -335,11 +368,15 @@ class _CardHeader extends StatelessWidget {
   final Chat chat;
   final VoidCallback onDelete;
   final VoidCallback onInfo;
+  final VoidCallback onCopyUser;
+  final VoidCallback onCopyBot;
 
   const _CardHeader({
     required this.chat,
     required this.onDelete,
     required this.onInfo,
+    required this.onCopyUser,
+    required this.onCopyBot,
   });
 
   @override
@@ -352,7 +389,10 @@ class _CardHeader extends StatelessWidget {
       child: Row(
         spacing: 0,
         children: [
-          ProviderBadge(provider: chat.provider),
+          Text(
+            chat.provider.name,
+            style: theme.textTheme.titleSmall?.copyWith(color: cs.primary),
+          ),
           const Spacer(),
           // Time
           Text(
@@ -360,172 +400,106 @@ class _CardHeader extends StatelessWidget {
             style: theme.textTheme.bodySmall?.copyWith(color: cs.secondary),
           ),
           const SizedBox(width: 6),
-          // Info button
-          _HeaderIconBtn(
-            icon: Icons.info_outline_rounded,
-            color: cs.secondary,
-            onTap: onInfo,
-          ),
-          const SizedBox(width: 6),
-          // Delete button
-          _HeaderIconBtn(
-            icon: Icons.delete_outline_rounded,
-            color: cs.error,
-            onTap: onDelete,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _HeaderIconBtn extends StatelessWidget {
-  final IconData icon;
-  final Color color;
-  final VoidCallback onTap;
-
-  const _HeaderIconBtn({
-    required this.icon,
-    required this.color,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return IconButton(
-      icon: Icon(icon),
-      iconSize: 20,
-      color: color,
-      padding: EdgeInsets.zero,
-      constraints: const BoxConstraints(),
-      visualDensity: VisualDensity.compact,
-      onPressed: onTap,
-    );
-  }
-}
-
-class ProviderBadge extends StatelessWidget {
-  final LlmModels provider;
-  const ProviderBadge({super.key, required this.provider});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 6.0, vertical: 3.0),
-      decoration: BoxDecoration(
-        color: cs.primary,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Row(
-        children: [
-          Icon(provider.icon, size: 16, color: cs.onPrimary),
-          const SizedBox(width: 4),
-          Text(
-            provider.name,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: cs.onPrimary,
-              fontWeight: FontWeight.w500,
+          PopupMenuButton<String>(
+            child: const SizedBox(
+              width: 26,
+              height: 26,
+              child: Icon(Icons.more_vert, size: 20),
             ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _MessageBubble extends StatefulWidget {
-  final String role;
-  final IconData icon;
-  final String text;
-  final int maxCollapsedLines;
-  final VoidCallback onCopy;
-
-  const _MessageBubble({
-    required this.role,
-    required this.icon,
-    required this.text,
-    required this.maxCollapsedLines,
-    required this.onCopy,
-  });
-
-  @override
-  State<_MessageBubble> createState() => _MessageBubbleState();
-}
-
-class _MessageBubbleState extends State<_MessageBubble> {
-  bool _showAll = false;
-
-  @override
-  Widget build(BuildContext context) {
-    final arabic = isArabic(widget.text);
-    final dir = arabic ? TextDirection.rtl : TextDirection.ltr;
-
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
-      child: Column(
-        // crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Role row
-          Row(
-            children: [
-              Icon(widget.icon, size: 14, color: cs.onPrimaryContainer),
-              const SizedBox(width: 5),
-              Text(
-                widget.role,
-                style: TextStyle(
-                  color: cs.onPrimaryContainer,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 0.3,
+            onSelected: (value) async {
+              switch (value) {
+                case 'info':
+                  onInfo();
+                  break;
+                case 'delete':
+                  onDelete();
+                  break;
+                case 'cp_u':
+                  onCopyUser();
+                  break;
+                case 'cp_b':
+                  onCopyBot();
+                  break;
+              }
+            },
+            itemBuilder: (context) => [
+              PopupMenuItem(
+                value: 'export',
+                child: Row(
+                  children: [
+                    const Icon(Icons.person_outline_rounded),
+                    const SizedBox(width: 10),
+                    Text('Copy User'),
+                  ],
                 ),
               ),
-              const Spacer(),
-
-              _HeaderIconBtn(
-                icon: Icons.copy_rounded,
-                color: cs.secondary,
-                onTap: widget.onCopy,
+              PopupMenuItem(
+                value: 'import',
+                child: Row(
+                  children: [
+                    const Icon(Icons.smart_toy_outlined),
+                    const SizedBox(width: 10),
+                    Text('Copy Bot'),
+                  ],
+                ),
+              ),
+              const PopupMenuDivider(),
+              PopupMenuItem(
+                value: 'delete',
+                child: Row(
+                  children: [
+                    const Icon(Icons.delete_outline_rounded),
+                    const SizedBox(width: 10),
+                    Text('Delete'),
+                  ],
+                ),
+              ),
+              PopupMenuItem(
+                value: 'info',
+                child: Row(
+                  children: [
+                    const Icon(Icons.info_outline_rounded),
+                    const SizedBox(width: 10),
+                    Text('Info'),
+                  ],
+                ),
               ),
             ],
           ),
-          const SizedBox(height: 8),
-
-          // Message text with RTL support
-          Align(
-            alignment: arabic
-                ? AlignmentGeometry.topRight
-                : AlignmentGeometry.topLeft,
-            child: Directionality(
-              textDirection: dir,
-              child: Text(
-                widget.text,
-                textAlign: arabic ? TextAlign.right : TextAlign.left,
-                maxLines: _showAll ? null : widget.maxCollapsedLines,
-                overflow: _showAll
-                    ? TextOverflow.visible
-                    : TextOverflow.ellipsis,
-                style: TextStyle(height: 1.6, fontFamily: L.arFont),
-              ),
-            ),
-          ),
-
-          // Show more/less
-          if (widget.text.length > 100) ...[
-            const SizedBox(height: 6),
-            TextButton(
-              child: Text(
-                _showAll ? 'Show less' : 'Show more',
-                style: L.arStyle,
-              ),
-              onPressed: () => setState(() => _showAll = !_showAll),
-            ),
-          ],
         ],
+      ),
+    );
+  }
+}
+
+class _MessageBubble extends StatelessWidget {
+  final int maxCollapsedLines;
+  final String text;
+
+  const _MessageBubble({required this.text, required this.maxCollapsedLines});
+
+  @override
+  Widget build(BuildContext context) {
+    final arabic = isArabic(text);
+    final dir = arabic ? TextDirection.rtl : TextDirection.ltr;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
+      child: Align(
+        alignment: arabic
+            ? AlignmentGeometry.topRight
+            : AlignmentGeometry.topLeft,
+        child: Directionality(
+          textDirection: dir,
+          child: ExpandableText(
+            text,
+            expandText: arabic ? 'أظهر المزيد' : 'Show more',
+            collapseText: arabic ? 'أظهر أقل' : 'Show less',
+            maxLines: maxCollapsedLines,
+            textAlign: arabic ? TextAlign.right : TextAlign.left,
+            style: TextStyle(height: 1.6, fontFamily: L.arFont),
+          ),
+        ),
       ),
     );
   }

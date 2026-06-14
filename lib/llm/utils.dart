@@ -32,6 +32,7 @@ void showChatInfoSheet(BuildContext context, Chat chat) {
     context: context,
     useSafeArea: true,
     showDragHandle: true,
+    isScrollControlled: true,
     constraints: const BoxConstraints(maxWidth: 400),
     builder: (_) => _InfoSheet(chat: chat),
   );
@@ -52,20 +53,19 @@ class _InfoSheet extends StatelessWidget {
         // crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Title
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              ProviderBadge(provider: chat.provider),
-              const SizedBox(width: 10),
-              Text('Chat Info', style: th.titleMedium),
-            ],
-          ),
+          Text('Chat Info', style: th.titleMedium),
           const SizedBox(height: 12),
 
           ...separatedList(
             separatorBuilder: (_) => Divider(height: 6),
             items: [
               _infoTile(theme, Icons.tag_rounded, 'ID', '#${chat.id ?? '—'}'),
+              _infoTile(
+                theme,
+                chat.provider.icon,
+                'Provider',
+                chat.provider.name,
+              ),
               _infoTile(theme, Icons.memory_rounded, 'Model', chat.model),
               _infoTile(
                 theme,

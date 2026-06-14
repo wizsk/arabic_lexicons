@@ -7,6 +7,7 @@ import 'package:ara_dict/main_widgets.dart';
 import 'package:ara_dict/play_rate.dart';
 import 'package:ara_dict/reader/reader_utils.dart';
 import 'package:ara_dict/widgets/expandable_text/expandable_text.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -76,11 +77,12 @@ final List<Chat> __chats = [
 ];
 
 class _ChatHistoryScreenState extends State<ChatHistoryScreen> {
-  List<Chat> get _chats => true ? __chats : AppChatsDb.chats;
+  List<Chat> get _chats => kDebugMode ? __chats : AppChatsDb.chats;
 
   void _copyText(String text) {
+    print('hi');
     Clipboard.setData(ClipboardData(text: text));
-    showSnack(context, 'Copied to clipboard');
+    if (mounted) showSnack(context, 'Copied to clipboard');
   }
 
   TextDirection _chatDirection = L.dir;
@@ -336,7 +338,7 @@ class ChatCard extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: cs.surfaceContainerLowest,
+        color: cs.surfaceContainer,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(width: 1, color: cs.outlineVariant),
       ),
@@ -424,22 +426,22 @@ class _CardHeader extends StatelessWidget {
             },
             itemBuilder: (context) => [
               PopupMenuItem(
-                value: 'export',
+                value: 'cp_u',
                 child: Row(
                   children: [
                     const Icon(Icons.person_outline_rounded),
                     const SizedBox(width: 10),
-                    Text('Copy User'),
+                    Text('Copy Prompt'),
                   ],
                 ),
               ),
               PopupMenuItem(
-                value: 'import',
+                value: 'cp_b',
                 child: Row(
                   children: [
                     const Icon(Icons.smart_toy_outlined),
                     const SizedBox(width: 10),
-                    Text('Copy Bot'),
+                    Text('Copy Response'),
                   ],
                 ),
               ),

@@ -60,10 +60,11 @@ Widget noResUniversal(
   String noWordEn = 'Search for a word',
   String noResAr = "لا توجد نتائج لـ",
   String noResEn = "No resuts for",
+  bool showIcon = true,
 }) {
   if (currWord == null || currWord.isEmpty) {
     return NoResults(
-      icon: Icons.search_outlined,
+      icon: showIcon ? Icons.search_outlined : null,
       title: L.p(noWordEn, noWordAr),
       titleDir: L.dir,
       titleFont: L.arFontIf,
@@ -71,7 +72,7 @@ Widget noResUniversal(
   }
 
   return NoResults(
-    icon: NoResults.searchEmpty,
+    icon: showIcon ? NoResults.searchEmpty : null,
     title: L.p(noResEn, noResAr),
     titleDir: L.dir,
     titleFont: L.arFontIf,

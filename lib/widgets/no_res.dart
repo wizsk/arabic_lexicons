@@ -7,7 +7,7 @@ class NoResults extends StatelessWidget {
 
   const NoResults({
     super.key,
-    required this.icon,
+    this.icon,
     required this.title,
     this.subtitle,
     this.titleDir,
@@ -16,7 +16,7 @@ class NoResults extends StatelessWidget {
     this.subtitleFont,
   });
 
-  final IconData icon;
+  final IconData? icon;
   final String title;
   final String? subtitle;
 
@@ -36,9 +36,11 @@ class NoResults extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          elevatedIcon(cs, icon),
+          if (icon != null) ...[
+            elevatedIcon(cs, icon!),
+            const SizedBox(height: 16),
+          ],
 
-          const SizedBox(height: 12),
           Text(
             title,
             style: th.titleMedium?.copyWith(
@@ -50,19 +52,20 @@ class NoResults extends StatelessWidget {
             softWrap: true,
           ),
 
-          const SizedBox(height: 2),
-
-          if (subtitle != null)
-            Text(
-              subtitle!,
-              style: th.titleMedium?.copyWith(
-                color: cs.secondary,
-                fontFamily: subtitleFont,
+          if (subtitle != null) ...[
+            const SizedBox(height: 2),
+            if (subtitle != null)
+              Text(
+                subtitle!,
+                style: th.titleMedium?.copyWith(
+                  color: cs.secondary,
+                  fontFamily: subtitleFont,
+                ),
+                textDirection: subtitleDir,
+                textAlign: TextAlign.center,
+                softWrap: true,
               ),
-              textDirection: subtitleDir,
-              textAlign: TextAlign.center,
-              softWrap: true,
-            ),
+          ],
         ],
       ),
     );

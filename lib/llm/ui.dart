@@ -4,9 +4,9 @@ import 'package:ara_dict/llm/input_area.dart';
 import 'package:ara_dict/llm/llm_prover.dart';
 import 'package:ara_dict/llm/utils.dart';
 import 'package:ara_dict/main_widgets.dart';
-import 'package:ara_dict/play_rate.dart';
 import 'package:ara_dict/reader/reader_utils.dart';
 import 'package:ara_dict/widgets/expandable_text/expandable_text.dart';
+import 'package:ara_dict/widgets/no_res.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -125,7 +125,13 @@ class _ChatHistoryScreenState extends State<ChatHistoryScreen> {
             children: [
               Expanded(
                 child: _chats.isEmpty
-                    ? const Center(child: _EmptyState())
+                    ? const Center(
+                        child: NoResults(
+                          icon: Icons.chat_bubble_outline_rounded,
+                          title: 'No chats yet',
+                          subtitle: 'Your conversations will appear here',
+                        ),
+                      )
                     : ListView.separated(
                         keyboardDismissBehavior:
                             ScrollViewKeyboardDismissBehavior.onDrag,
@@ -379,36 +385,6 @@ class _MessageBubble extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-}
-
-class _EmptyState extends StatelessWidget {
-  const _EmptyState();
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final th = theme.textTheme;
-    final cs = theme.colorScheme;
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        elevatedIcon(cs, Icons.chat_bubble_outline_rounded),
-        const SizedBox(height: 16),
-        Text(
-          'No chats yet',
-          style: th.bodyMedium?.copyWith(
-            fontWeight: FontWeight.w600,
-            color: cs.primary,
-          ),
-        ),
-        const SizedBox(height: 6),
-        Text(
-          'Your conversations will appear here',
-          style: th.bodySmall?.copyWith(color: cs.secondary, fontSize: 13),
-        ),
-      ],
     );
   }
 }

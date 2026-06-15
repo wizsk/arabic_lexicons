@@ -176,15 +176,23 @@ Widget _arabicLexView(TextStyle ts, SearchLexiconsDatas datas) {
       final txt = showWordTitle ? '${row.word}: ${row.meanings}' : row.meanings;
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 8),
-        child: _arMeaningView(txt, ts),
+        child: _arMeaningView(context, txt, ts),
       );
     },
   );
 }
 
-Widget _arMeaningView(String txt, TextStyle ts) {
-  return SelectionArea(
-    magnifierConfiguration: TextMagnifierConfiguration.disabled,
+Widget _arMeaningView(BuildContext context, String txt, TextStyle ts) {
+  return GestureDetector(
+    onLongPress: () {
+      SelectableTextScreen.show(
+        context,
+        (_, _) => txt,
+        TextAlign.right,
+        TextDirection.rtl,
+        ts,
+      );
+    },
     child: Text(
       txt,
       textDirection: TextDirection.rtl,

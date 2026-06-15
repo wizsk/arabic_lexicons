@@ -58,7 +58,7 @@ class _SettingsPageState extends State<SettingsPage> {
               title: const Text('Settings'),
             ),
             SliverPadding(
-              padding: scrollPaddingW(bottom: 40),
+              padding: appConf.readerPadd(context),
               sliver: SliverList.list(
                 children: [
                   // const SizedBox(height: 12),

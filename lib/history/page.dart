@@ -5,6 +5,7 @@ import 'package:ara_dict/main_widgets.dart';
 import 'package:ara_dict/multi_selection.dart';
 import 'package:ara_dict/pages/utils.dart';
 import 'package:ara_dict/utils.dart';
+import 'package:ara_dict/widgets/no_res.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
@@ -123,18 +124,27 @@ class _HistPageState extends State<HistPage> {
                       padding: EdgeInsets.only(
                         top: MediaQuery.of(context).size.height * 0.3,
                       ),
-                      child: Center(
-                        child: Text(
-                          L.p('Search some words', /*ar */ 'ابحث بعض الكلمات'),
-                          style: L.arStyleIf,
-                          textDirection: L.dir,
+                      child: NoResults(
+                        icon: NoResults.searchEmpty,
+                        title: L.p(
+                          'Search some words',
+                          /*ar */ 'ابحث بعض الكلمات',
                         ),
+                        titleFont: L.arFontIf,
+                        titleDir: L.dir,
                       ),
+                      // child: Center(
+                      //   child: Text(
+                      //     L.p('Search some words', /*ar */ 'ابحث بعض الكلمات'),
+                      //     style: L.arStyleIf,
+                      //     textDirection: L.dir,
+                      //   ),
+                      // ),
                     ),
                   )
                 else
                   SliverPadding(
-                    padding: scrollPaddingW(bottom: 128),
+                    padding: appConf.readerPadd(context),
                     sliver: SliverList.separated(
                       itemCount: WordStore.histLen,
                       separatorBuilder: (_, _) => const SizedBox(height: 8),

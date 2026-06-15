@@ -4,6 +4,7 @@ import 'package:ara_dict/multi_selection.dart';
 import 'package:ara_dict/pages/utils.dart';
 import 'package:ara_dict/reader/word_lists.dart';
 import 'package:ara_dict/utils.dart';
+import 'package:ara_dict/widgets/no_res.dart';
 import 'package:ara_dict/word_list/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -179,12 +180,15 @@ class _WordListPageState extends State<WordListPage> {
                       padding: EdgeInsets.only(
                         top: MediaQuery.of(context).size.height * 0.3,
                       ),
-                      child: const Center(child: Text('No words')),
+                      child: const NoResults(
+                        icon: NoResults.playlistEmpty,
+                        title: 'No words',
+                      ),
                     ),
                   )
                 else
                   SliverPadding(
-                    padding: scrollPaddingW(bottom: 128),
+                    padding: appConf.readerPadd(context),
                     sliver: SliverList.separated(
                       itemCount: _words.length,
                       separatorBuilder: (_, _) => const SizedBox(height: 8),

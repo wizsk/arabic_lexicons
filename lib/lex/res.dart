@@ -2,6 +2,7 @@ import 'package:ara_dict/conf.dart';
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/lex/data.dart';
 import 'package:ara_dict/utils.dart';
+import 'package:ara_dict/widgets/no_res.dart';
 import 'package:ara_dict/widgets/selectable_text_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
@@ -60,24 +61,24 @@ Widget noResUniversal(
   String noResAr = "لا توجد نتائج لـ",
   String noResEn = "No resuts for",
 }) {
-  Widget w;
   if (currWord == null || currWord.isEmpty) {
-    w = Text(L.p(noWordEn, noWordAr), textDirection: L.dir, style: L.arStyleIf);
-  } else {
-    w = Column(
-      spacing: 6,
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text(L.p(noResEn, noResAr), style: L.arStyleIf, textDirection: L.dir),
-        Text(currWord, style: L.arStyle),
-      ],
+    return NoResults(
+      icon: Icons.search_outlined,
+      title: L.p(noWordEn, noWordAr),
+      titleDir: L.dir,
+      titleFont: L.arFontIf,
     );
   }
 
-  // style: L.arStyleIf,
-  // textDirection: L.dir,
-
-  return w;
+  return NoResults(
+    icon: NoResults.searchEmpty,
+    title: L.p(noResEn, noResAr),
+    titleDir: L.dir,
+    titleFont: L.arFontIf,
+    subtitle: currWord.replaceAll("_", " "),
+    subtitleFont: L.arFontIf,
+    subtitleDir: TextDirection.rtl,
+  );
 }
 
 Widget _showArEnRes(TextStyle ts, SearchLexiconsDatas datas) {

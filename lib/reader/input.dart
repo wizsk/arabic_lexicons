@@ -11,9 +11,10 @@ import 'package:ara_dict/main_widgets.dart';
 import 'package:ara_dict/multi_selection.dart';
 import 'package:ara_dict/reader/data.dart';
 import 'package:ara_dict/reader/reader.dart';
-import 'package:ara_dict/reader/settings_class.dart';
 import 'package:ara_dict/reader/reader_utils.dart';
+import 'package:ara_dict/reader/settings_class.dart';
 import 'package:ara_dict/utils.dart';
+import 'package:ara_dict/widgets/no_res.dart';
 import 'package:archive/archive.dart';
 import 'package:crypto/crypto.dart';
 import 'package:file_picker/file_picker.dart';
@@ -926,6 +927,8 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                                 child: Wrap(
                                   spacing: 8,
                                   runSpacing: 6,
+                                  crossAxisAlignment: WrapCrossAlignment.center,
+                                  alignment: WrapAlignment.center,
                                   children: [
                                     FilterChip(
                                       showCheckmark: false,
@@ -1014,7 +1017,29 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                         ),
                       ),
                     ),
-                    if (ReaderInputPageData.books.isNotEmpty) ...[
+                    if (ReaderInputPageData.books.isEmpty)
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 68),
+                          child: NoResults(
+                            icon: Icons.auto_stories_outlined,
+                            title: L.p(
+                              // 'No books found'
+                              'No books found No books found No books found No books found No books found No books found No books found No books found ',
+                              /* en */ 'لا توجد كتب بعد',
+                            ),
+                            subtitle: L.p(
+                              'Add some books!',
+                              /* en */ 'أضف بعض الكتب!',
+                            ),
+                            titleFont: L.arFontIf,
+                            titleDir: L.dir,
+                            subtitleFont: L.arFontIf,
+                            subtitleDir: L.dir,
+                          ),
+                        ),
+                      )
+                    else ...[
                       SliverPadding(
                         padding: padd.copyWith(top: 10, bottom: 8),
                         sliver: SliverToBoxAdapter(
@@ -1072,6 +1097,16 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                           sliver: SliverToBoxAdapter(
                             child: TextField(
                               controller: _searchController,
+                              magnifierConfiguration:
+                                  TextMagnifierConfiguration.disabled,
+                              contextMenuBuilder: (context, selectableRegionState) {
+                                return AdaptiveTextSelectionToolbar.buttonItems(
+                                  anchors:
+                                      selectableRegionState.contextMenuAnchors,
+                                  buttonItems: selectableRegionState
+                                      .contextMenuButtonItems,
+                                );
+                              },
                               style: L.arStyle,
                               onChanged: (input) {
                                 setState(() {});
@@ -1134,25 +1169,17 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                               ? SliverToBoxAdapter(
                                   child: Padding(
                                     padding: const EdgeInsets.only(top: 24.0),
-                                    child: Column(
-                                      spacing: 4,
-                                      children: [
-                                        Text(
-                                          L.p(
-                                            'No matches for',
-                                            /* ar */ 'لا توجد نتائج لـ',
-                                          ),
-                                          textDirection: L.dir,
-                                          style: L.arStyleIf,
-                                        ),
-                                        Text(
-                                          '"$_searchText"',
-                                          textDirection: TextDirection.rtl,
-                                          softWrap: true,
-                                          style: L.arStyle,
-                                        ),
-                                      ],
-                                      // textDirection: L.dir,
+                                    child: NoResults(
+                                      icon: NoResults.searchEmpty,
+                                      title: L.p(
+                                        'No matches for',
+                                        /* ar */ 'لا توجد نتائج لـ',
+                                      ),
+                                      titleDir: L.dir,
+                                      titleFont: L.arFontIf,
+                                      subtitle: _searchText,
+                                      subtitleDir: TextDirection.rtl,
+                                      subtitleFont: L.arFont,
                                     ),
                                   ),
                                 )

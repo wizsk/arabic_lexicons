@@ -40,7 +40,7 @@ Widget noRes(
   return SliverToBoxAdapter(
     child: Padding(
       // padding: const EdgeInsets.all(16.0).copyWith(top: 32),
-      padding: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.3),
+      padding: const EdgeInsets.only(top: 45.0),
       child: Center(
         child: noResUniversal(
           noWordAr: noWordAr,

@@ -87,7 +87,7 @@ Widget showSearchSugg(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(vertical: 5),
                       child: Text(
-                        L.pr('لا توجد نتائج لـ:', 'No results'),
+                        L.pr('لا توجد نتائج', 'No results'),
                         textAlign: TextAlign.center,
                         textDirection: L.dir,
                         style: L.arStyleIf,

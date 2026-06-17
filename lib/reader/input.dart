@@ -4,15 +4,14 @@ import 'dart:io';
 import 'package:ara_dict/alphabets.dart';
 import 'package:ara_dict/conf.dart';
 import 'package:ara_dict/data.dart';
-import 'package:ara_dict/datas/word_store.dart';
 import 'package:ara_dict/first_run.dart';
 import 'package:ara_dict/helper_widgets.dart';
 import 'package:ara_dict/main_widgets.dart';
 import 'package:ara_dict/multi_selection.dart';
 import 'package:ara_dict/reader/data.dart';
 import 'package:ara_dict/reader/reader.dart';
-import 'package:ara_dict/reader/settings_class.dart';
 import 'package:ara_dict/reader/reader_utils.dart';
+import 'package:ara_dict/reader/settings_class.dart';
 import 'package:ara_dict/utils.dart';
 import 'package:archive/archive.dart';
 import 'package:crypto/crypto.dart';
@@ -196,11 +195,6 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
 
     _selection = SelectionController(() {
       if (mounted) setState(() {});
-    });
-
-    ReaderInputPageData.init().then((_) async {
-      if (mounted) setState(() {});
-      await migrateForeigns();
     });
 
     showFirstRunPopupPostFrame(context);

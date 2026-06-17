@@ -1,19 +1,20 @@
 import 'dart:io';
 
 import 'package:ara_dict/data.dart';
+import 'package:ara_dict/datas/app_db.dart';
 import 'package:ara_dict/history/history.dart';
 import 'package:ara_dict/reader/input.dart';
 import 'package:ara_dict/reader/settings_class.dart';
 import 'package:ara_dict/word_list/book_marks.dart';
-import 'package:path/path.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'package:path/path.dart' as path;
 
 abstract final class WordStore {
   static const int histMaxSize = 200;
   static const int _maxBookMarkWrodSize = 10;
 
-  static bool _inited = false;
-  static Database? _db;
+  static Database get _db => AppDb.db;
 
   static final Set<String> _bookmarkedWords = <String>{};
   static final List<String> bookmarkedWords = <String>[];
@@ -30,87 +31,41 @@ abstract final class WordStore {
   // Initialization
   // ---------------------------------------------------------------------------
 
+  static bool _inited = false;
   static Future<void> init() async {
     if (_inited) return;
 
-    try {
-      if (Platform.isLinux || Platform.isWindows || Platform.isMacOS) {
-        sqfliteFfiInit();
-        databaseFactory = databaseFactoryFfi;
-      }
+    await _loadCache();
 
-      final dbPath = await getDatabasesPath();
+    if (bookmarkedWords.isEmpty) await BookMarks.migrateOld();
+    if (foreignEmpty) await _migrateForeigns();
 
-      _db = await openDatabase(
-        join(dbPath, 'words.db'),
-        version: 1,
-        onCreate: (db, version) async {
-          await db.execute('''
-          CREATE TABLE bookmarked_words (
-            word TEXT PRIMARY KEY
-          )
-        ''');
-
-          await db.execute('''
-          CREATE TABLE foreign_words (
-            word TEXT PRIMARY KEY,
-            created_at INTEGER NOT NULL
-          )
-        ''');
-          await db.execute('''
-          CREATE TABLE search_history (
-            word TEXT PRIMARY KEY,
-            dict INTEGER NOT NULL,
-            created_at INTEGER NOT NULL
-          );
-          ''');
-        },
-      );
-
-      await _loadCache();
-
-      _inited = true;
-    } catch (_) {
-      _inited = false;
-    }
-
-    // TODO: remove this in v5.0.0
-    await BookMarks.migrateOld(_inited);
+    _inited = true;
   }
 
   static Future<void> _loadCache() async {
-    // bookmarkedWords.clear();
-    // foreignWords.clear();
-    // searchHist.clear();
+    final bookmarks = await _db.query('bookmarked_words');
+    bookmarkedWords.addAll(bookmarks.map((e) => e['word'] as String));
+    _bookmarkedWords.addAll(bookmarkedWords);
 
-    final bookmarks = await _db?.query('bookmarked_words');
-    if (bookmarks != null) {
-      bookmarkedWords.addAll(bookmarks.map((e) => e['word'] as String));
-      _bookmarkedWords.addAll(bookmarkedWords);
-    }
-
-    final foreigns = await _db?.query(
+    final foreigns = await _db.query(
       'foreign_words',
       orderBy: 'created_at ASC',
     );
 
-    if (foreigns != null) {
-      foreignWords.addAll(foreigns.map((e) => e['word'] as String));
-      _foreignWords.addAll(foreignWords);
-    }
+    foreignWords.addAll(foreigns.map((e) => e['word'] as String));
+    _foreignWords.addAll(foreignWords);
 
-    final hists = await _db?.query('search_history', orderBy: 'created_at ASC');
+    final hists = await _db.query('search_history', orderBy: 'created_at ASC');
 
-    if (hists != null) {
-      final dicts = Dict.values;
-      for (final r in hists) {
-        final word = r['word'] as String;
-        int dictIndex = r['dict'] as int;
+    final dicts = Dict.values;
+    for (final r in hists) {
+      final word = r['word'] as String;
+      int dictIndex = r['dict'] as int;
 
-        if (dictIndex < 0 || dictIndex >= dicts.length) dictIndex = 0;
+      if (dictIndex < 0 || dictIndex >= dicts.length) dictIndex = 0;
 
-        searchHist.add(SearchHistItem(word: word, dict: dicts[dictIndex]));
-      }
+      searchHist.add(SearchHistItem(word: word, dict: dicts[dictIndex]));
     }
   }
 
@@ -133,7 +88,7 @@ abstract final class WordStore {
 
     bookmarkedWords.add(word);
 
-    await _db?.insert('bookmarked_words', {
+    await _db.insert('bookmarked_words', {
       'word': word,
     }, conflictAlgorithm: ConflictAlgorithm.ignore);
   }
@@ -141,7 +96,7 @@ abstract final class WordStore {
   static Future<int> addBMs(Iterable<String> words) async {
     if (words.isEmpty) return 0;
 
-    final batch = _db?.batch();
+    final batch = _db.batch();
 
     int addedCount = 0;
     for (final word in words) {
@@ -153,13 +108,12 @@ abstract final class WordStore {
 
       addedCount++;
 
-      if (batch == null) continue;
       batch.insert('bookmarked_words', {
         'word': word,
       }, conflictAlgorithm: ConflictAlgorithm.ignore);
     }
 
-    await batch?.commit(noResult: true);
+    await batch.commit(noResult: true);
     return addedCount;
   }
 
@@ -169,7 +123,7 @@ abstract final class WordStore {
     _bookmarkedWords.remove(word);
 
     bookmarkedWords.remove(word);
-    await _db?.delete('bookmarked_words', where: 'word = ?', whereArgs: [word]);
+    await _db.delete('bookmarked_words', where: 'word = ', whereArgs: [word]);
   }
 
   static Future<int> rmBMs(Iterable<String> words) async {
@@ -182,12 +136,10 @@ abstract final class WordStore {
       if (bookmarkedWords.remove(w)) rmCount++;
     }
 
-    if (_db == null) return rmCount;
-
     final list = words.toList();
-    final placeholders = List.filled(list.length, '?').join(',');
+    final placeholders = List.filled(list.length, '').join(',');
 
-    await _db?.delete(
+    await _db.delete(
       'bookmarked_words',
       where: 'word IN ($placeholders)',
       whereArgs: list,
@@ -199,7 +151,7 @@ abstract final class WordStore {
   static Future<void> clearBookmarks() async {
     bookmarkedWords.clear();
     _bookmarkedWords.clear();
-    await _db?.delete('bookmarked_words');
+    await _db.delete('bookmarked_words');
   }
 
   // ---------------------------------------------------------------------------
@@ -224,7 +176,7 @@ abstract final class WordStore {
 
     foreignWords.add(word);
 
-    await _db?.insert('foreign_words', {
+    await _db.insert('foreign_words', {
       'word': word,
       'created_at': DateTime.now().millisecondsSinceEpoch,
     }, conflictAlgorithm: ConflictAlgorithm.replace);
@@ -233,7 +185,7 @@ abstract final class WordStore {
   static Future<int> addForeigns(Iterable<String> words) async {
     if (words.isEmpty) return 0;
 
-    final batch = _db?.batch();
+    final batch = _db.batch();
 
     int addCount = 0;
     for (final word in words) {
@@ -247,14 +199,13 @@ abstract final class WordStore {
 
       foreignWords.add(word);
 
-      if (batch == null) continue;
       batch.insert('foreign_words', {
         'word': word,
         'created_at': DateTime.now().millisecondsSinceEpoch,
       }, conflictAlgorithm: ConflictAlgorithm.replace);
     }
 
-    await batch?.commit(noResult: true);
+    await batch.commit(noResult: true);
     return addCount;
   }
 
@@ -264,7 +215,7 @@ abstract final class WordStore {
 
     foreignWords.remove(word);
 
-    await _db?.delete('foreign_words', where: 'word = ?', whereArgs: [word]);
+    await _db.delete('foreign_words', where: 'word = ', whereArgs: [word]);
   }
 
   static Future<int> removeForeignMany(Iterable<String> words) async {
@@ -278,11 +229,9 @@ abstract final class WordStore {
       if (foreignWords.remove(w)) rmCount++;
     }
 
-    if (_db == null) return rmCount;
+    final placeholders = List.filled(list.length, '').join(',');
 
-    final placeholders = List.filled(list.length, '?').join(',');
-
-    await _db?.delete(
+    await _db.delete(
       'foreign_words',
       where: 'word IN ($placeholders)',
       whereArgs: list,
@@ -294,7 +243,7 @@ abstract final class WordStore {
   static Future<void> clearForeign() async {
     foreignWords.clear();
     _foreignWords.clear();
-    await _db?.delete('foreign_words');
+    await _db.delete('foreign_words');
   }
 
   // static List<String> getForeignWords() {
@@ -308,17 +257,6 @@ abstract final class WordStore {
   // static Future<void> reload() async {
   //   await _loadCache();
   // }
-
-  static Future<void> close() async {
-    await _db?.close();
-    _db = null;
-
-    bookmarkedWords.clear();
-    _bookmarkedWords.clear();
-    foreignWords.clear();
-    _foreignWords.clear();
-    searchHist.clear();
-  }
 
   // ---------------------------------------------------------------------------
   // Search History
@@ -338,7 +276,7 @@ abstract final class WordStore {
 
     searchHist.add(item);
 
-    await _db?.insert('search_history', {
+    await _db.insert('search_history', {
       'word': word,
       'dict': d.index,
       'created_at': DateTime.now().millisecondsSinceEpoch,
@@ -371,9 +309,9 @@ abstract final class WordStore {
       }
     }
 
-    final placeholders = List.filled(words.length, '?').join(',');
+    final placeholders = List.filled(words.length, '').join(',');
 
-    await _db?.delete(
+    await _db.delete(
       'search_history',
       where: 'word IN ($placeholders)',
       whereArgs: words,
@@ -383,29 +321,32 @@ abstract final class WordStore {
   static Future<void> rmHistItem(SearchHistItem item) async {
     // remove existing in memory (refresh order)
     searchHist.remove(item);
-    await _db?.delete(
+    await _db.delete(
       'search_history',
-      where: 'word = ?',
+      where: 'word = ',
       whereArgs: [item.word],
     );
   }
 
   static Future<void> clearHist() async {
     searchHist.clear();
-    await _db?.delete('search_history');
+    await _db.delete('search_history');
   }
 }
 
-// TODO: remove this in v5.0.0
-bool _migratedForeigns = false;
-Future<void> migrateForeigns() async {
-  if (_migratedForeigns) return;
+Future<void> _migrateForeigns() async {
+  final migratedFileInicator = File(
+    path.join(
+      (await getApplicationCacheDirectory()).path,
+      '___foreign_migrated',
+    ),
+  );
+  if (await migratedFileInicator.exists()) return;
+
   if (!ReaderInputPageData.isInited) {
     await ReaderInputPageData.init();
     if (!ReaderInputPageData.isInited) return;
   }
-
-  _migratedForeigns = true;
 
   for (final b in ReaderInputPageData.books) {
     final f = await ReaderPageSettings.lurFile(b.hash);
@@ -414,4 +355,8 @@ Future<void> migrateForeigns() async {
       if (WordStore._inited) await f.delete();
     } catch (_) {}
   }
+
+  try {
+    await migratedFileInicator.create();
+  } catch (_) {}
 }

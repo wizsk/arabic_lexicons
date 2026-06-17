@@ -1,7 +1,5 @@
 import 'package:ara_dict/data.dart';
-import 'package:ara_dict/datas/word_store.dart';
-import 'package:ara_dict/lex/dicts/db.dart';
-
+import 'package:ara_dict/datas/app_db.dart';
 import 'package:ara_dict/lex/isolate.dart';
 import 'package:ara_dict/lex/rearrange_dicts.dart';
 import 'package:ara_dict/main_widgets.dart';
@@ -27,8 +25,7 @@ class _StartupScreenState extends State<StartupScreen> {
       await Future.wait([
         appConf.load(),
         setDictOrdFromFile(),
-        DbService.init(),
-        WordStore.init(),
+        AppDb.init(),
         Isolates.spawn(),
       ]);
 

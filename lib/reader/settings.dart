@@ -196,12 +196,20 @@ class _ReaderModeSettingsSheetState extends State<ReaderModeSettingsSheet> {
                   value: rs.isBmColored,
                   onChanged: (v) => setState(() => rs.isBmColored = v),
                 ),
+
+                SwitchListTile(
+                  title: const Text('Foreign'),
+                  subtitle: const Text('Add looked up words to foreing'),
+                  secondary: const FilledIcon(Icons.highlight),
+                  value: rs.foreignAdd,
+                  onChanged: (v) => setState(() => rs.foreignAdd = v),
+                ),
                 SwitchListTile(
                   title: const Text('Foreign Words'),
                   subtitle: const Text('Highlight looked-up words'),
                   secondary: const FilledIcon(Icons.highlight),
-                  value: rs.luwColored,
-                  onChanged: (v) => setState(() => rs.luwColored = v),
+                  value: rs.foreignColored,
+                  onChanged: (v) => setState(() => rs.foreignColored = v),
                 ),
               ],
             ),

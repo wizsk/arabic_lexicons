@@ -194,7 +194,7 @@ TextSpan _readerWordSpan({
   TextStyle ts;
   if (rs.isBmColored && isBmk) {
     ts = highStyle;
-  } else if (rs.luwColored && WordStore.isForeign(word.cl)) {
+  } else if (rs.foreignColored && WordStore.isForeign(word.cl)) {
     ts = styleLU;
   } else {
     ts = style;
@@ -207,7 +207,7 @@ TextSpan _readerWordSpan({
         : (TapGestureRecognizer()
             ..onTap = appConf.readerIsOpenLexiconDirecly
                 ? () {
-                    openDictAndAddForeign(context, word.cl, onChange);
+                    openDictAndAddForeign(context, word.cl, onChange, rs);
                   }
                 : () => showWordReadeActionsDialog(
                     context,
@@ -222,7 +222,7 @@ TextSpan _readerWordSpan({
                       if (context.mounted) onChange();
                     },
                     () {
-                      openDictAndAddForeign(context, word.cl, onChange);
+                      openDictAndAddForeign(context, word.cl, onChange, rs);
                     },
                     style,
                   )),
@@ -256,6 +256,7 @@ Future<void> openDictAndAddForeign(
   BuildContext context,
   String word,
   VoidCallback onChange,
+  ReaderPageSettings rs,
 ) async {
   snackClearForced();
 
@@ -263,30 +264,32 @@ Future<void> openDictAndAddForeign(
     if (!context.mounted) return;
 
     onChange();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      showSnack(
-        context,
-        '',
-        messageWidget: Text.rich(
-          TextSpan(
-            children: [
-              TextSpan(text: 'Foreign added: '),
-              TextSpan(text: word, style: L.arStyle),
-            ],
+    if (rs.foreignAdd) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        showSnack(
+          context,
+          '',
+          messageWidget: Text.rich(
+            TextSpan(
+              children: [
+                TextSpan(text: 'Foreign added: '),
+                TextSpan(text: word, style: L.arStyle),
+              ],
+            ),
           ),
-        ),
-        forceCloseAfter: const Duration(seconds: 5),
-        action: SnackBarAction(
-          label: 'Undo',
-          onPressed: () async {
-            await WordStore.removeForeign(word);
-            if (!context.mounted) return;
-            onChange();
-          },
-        ),
-      );
-    });
+          forceCloseAfter: const Duration(seconds: 5),
+          action: SnackBarAction(
+            label: 'Undo',
+            onPressed: () async {
+              await WordStore.removeForeign(word);
+              if (!context.mounted) return;
+              onChange();
+            },
+          ),
+        );
+      });
+    }
   });
 
-  WordStore.addForeign(word);
+  if (rs.foreignAdd) WordStore.addForeign(word);
 }

@@ -309,7 +309,13 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
           textDirection: TextDirection.rtl,
           style: TextStyle(fontFamily: arabicFontStyle.fontFamily),
         ),
-        // actions: [
+        actions: [
+          IconButton(
+            tooltip: 'Open lexicon on a popup-screen',
+            onPressed: () => openDict(context, ''),
+            icon: const Icon(Icons.book),
+          ),
+        ],
         //   IconButton(
         //     tooltip: 'Reader Mode settings',
         //     onPressed: _settingsDrawer,

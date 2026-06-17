@@ -199,6 +199,10 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
 
     showFirstRunPopupPostFrame(context);
 
+    ReaderInputPageData.init().then((_) {
+      if (mounted) setState(() {});
+    });
+
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final shown = await appConf.showChangeChangelog(context);
 

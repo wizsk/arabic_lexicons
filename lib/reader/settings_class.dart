@@ -35,7 +35,8 @@ class ReaderPageSettings {
   bool isRmTashkil;
   bool isBmColored;
   bool saveLastPeraIdx;
-  bool luwColored;
+  bool foreignAdd;
+  bool foreignColored;
   TextAlign textAlign;
   String fontFam;
   double fontSize;
@@ -53,7 +54,8 @@ class ReaderPageSettings {
     required this.fontFam,
     required this.textAlign,
     required this.fontSize,
-    required this.luwColored,
+    required this.foreignAdd,
+    required this.foreignColored,
     required this.maxWidth,
     required this.padding,
   });
@@ -70,7 +72,8 @@ class ReaderPageSettings {
         fontFam: appConf.readerFont,
         fontSize: appConf.readerFontSize,
         textAlign: TextAlign.justify,
-        luwColored: appConf.luwColored,
+        foreignAdd: true,
+        foreignColored: appConf.luwColored,
         maxWidth: appConf.maxWidth,
         padding: appConf.padding,
       );
@@ -84,7 +87,8 @@ class ReaderPageSettings {
         saveLastPeraIdx == rs.saveLastPeraIdx &&
         fontFam == rs.fontFam &&
         textAlign == rs.textAlign &&
-        luwColored == rs.luwColored &&
+        foreignAdd == rs.foreignAdd &&
+        foreignColored == rs.foreignColored &&
         maxWidth == rs.maxWidth &&
         padding == rs.padding &&
         fontSize == rs.fontSize;
@@ -109,7 +113,8 @@ class ReaderPageSettings {
     String? fontFam,
     TextAlign? textAlign,
     double? fontSize,
-    bool? luwColored,
+    bool? foreignAdd,
+    bool? foreignColored,
     double? padding,
     double? maxWidth,
   }) {
@@ -124,7 +129,8 @@ class ReaderPageSettings {
       fontFam: fontFam ?? this.fontFam,
       textAlign: textAlign ?? this.textAlign,
       fontSize: fontSize ?? this.fontSize,
-      luwColored: luwColored ?? this.luwColored,
+      foreignAdd: foreignAdd ?? this.foreignAdd,
+      foreignColored: foreignColored ?? this.foreignColored,
       maxWidth: maxWidth ?? this.maxWidth,
       padding: padding ?? this.padding,
     );
@@ -141,7 +147,8 @@ class ReaderPageSettings {
       'textAlign': textAlign.name,
       'saveLastPeraIdx': saveLastPeraIdx,
       'fontSize': fontSize,
-      'luwColored': luwColored,
+      'luwAdd': foreignAdd,
+      'luwColored': foreignColored,
       'maxWidth': maxWidth,
       'padding': padding,
     };
@@ -156,6 +163,7 @@ class ReaderPageSettings {
     final isBmColored = map['isBmColored'] as bool?;
     final saveLastPeraIdx = map['saveLastPeraIdx'] as bool?;
     final fontSize = map['fontSize'] as double?;
+    final luwAdd = map['luwAdd'] as bool?;
     final luwColored = map['luwColored'] as bool?;
     final maxWidth = map['maxWidth'] as double?;
     final padding = map['padding'] as double?;
@@ -181,7 +189,8 @@ class ReaderPageSettings {
       textAlign: textAlign,
       saveLastPeraIdx: saveLastPeraIdx,
       fontSize: fontSize,
-      luwColored: luwColored,
+      foreignAdd: luwAdd,
+      foreignColored: luwColored,
       padding: padding,
       maxWidth: maxWidth,
     );

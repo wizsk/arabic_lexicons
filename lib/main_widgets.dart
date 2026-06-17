@@ -26,7 +26,12 @@ Widget buildDrawer(BuildContext context) {
 
       final isReading = currRoute == Routes.readerPage;
       if (isReading && (index == 0 || index == 1)) {
-        final res = await showConfirmDialog(context, 'Exit Reader?', confirmText: 'Exit');
+        final res = await showConfirmDialog(
+          context,
+          'Exit Reader?',
+          confirmText: 'Exit',
+          destructive: true,
+        );
         if (!context.mounted || res != true) return;
       }
 

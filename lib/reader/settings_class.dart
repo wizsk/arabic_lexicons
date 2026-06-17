@@ -222,7 +222,7 @@ class ReaderPageSettings {
 
     try {
       final file = File(join(await _confDir, '$hash.json'));
-      if (!await file.exists()) return def(hash: hash);
+      if (!await file.exists()) return def(hash: hash, isQasidah: isQasidah);
 
       final content = await file.readAsString();
       final rs = ReaderPageSettings.fromJson(hash, content);

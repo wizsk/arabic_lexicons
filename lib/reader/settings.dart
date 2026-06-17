@@ -200,7 +200,7 @@ class _ReaderModeSettingsSheetState extends State<ReaderModeSettingsSheet> {
                 SwitchListTile(
                   title: const Text('Foreign'),
                   subtitle: const Text('Add looked up words to foreing'),
-                  secondary: const FilledIcon(Icons.highlight),
+                  secondary: const FilledIcon(Icons.g_translate),
                   value: rs.foreignAdd,
                   onChanged: (v) => setState(() => rs.foreignAdd = v),
                 ),

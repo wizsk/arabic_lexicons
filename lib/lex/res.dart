@@ -109,7 +109,7 @@ Widget _showArEnRes(
                 DataCell(Text(e.word)),
                 DataCell(
                   Text(e.def),
-                  onLongPress: () async {
+                  onTap: () async {
                     await Clipboard.setData(ClipboardData(text: e.def));
 
                     if (!context.mounted) return;

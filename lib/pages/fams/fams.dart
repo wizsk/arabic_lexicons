@@ -204,7 +204,7 @@ class _ArabicFamilyListState extends State<ArabicFamilyList> {
               ),
             ),
             SliverPadding(
-              padding: scrollPadding,
+              padding: appConf.readerPadd(context),
               sliver: SliverList.separated(
                 itemCount: verbFamilies.length,
                 separatorBuilder: (context, index) =>

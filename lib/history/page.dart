@@ -64,6 +64,7 @@ class _HistPageState extends State<HistPage> {
   @override
   Widget build(BuildContext context) {
     final isFabVisable = appConf.hideAppbar ? _isFabVisable : true;
+    final cs = Theme.of(context).colorScheme;
 
     return PopScope(
       canPop: !_selection.hasSelection,
@@ -134,7 +135,7 @@ class _HistPageState extends State<HistPage> {
                   )
                 else
                   SliverPadding(
-                    padding: scrollPaddingW(bottom: 128),
+                    padding: appConf.readerPadd(context),
                     sliver: SliverList.separated(
                       itemCount: WordStore.histLen,
                       separatorBuilder: (_, _) => const SizedBox(height: 8),
@@ -155,89 +156,13 @@ class _HistPageState extends State<HistPage> {
                           ),
                           subtitle: Text(
                             itm.dict.name,
-                            style: Theme.of(context).textTheme.bodySmall?.ar,
+                            style: Theme.of(
+                              context,
+                            ).textTheme.bodySmall?.ar.copyWith(color: cs.secondary.withAlpha(230)),
                             textAlign: TextAlign.right,
                           ),
                           remove: () async => await WordStore.rmHistItem(itm),
                         );
-
-                        // return Material(
-                        //   color: cs.surfaceContainer,
-                        //   shape: RoundedRectangleBorder(
-                        //     borderRadius: BorderRadius.circular(16),
-                        //     side: BorderSide(color: cs.outlineVariant),
-                        //   ),
-                        //   clipBehavior: Clip.antiAlias,
-                        //   child: ListTile(
-                        //     contentPadding: const EdgeInsets.symmetric(
-                        //       horizontal: 12,
-                        //       vertical: 4,
-                        //     ),
-
-                        //     title: Text(
-                        //       // '${itm.word} • ${itm.dict.name}',
-                        //       itm.word,
-                        //       maxLines: 1,
-                        //       overflow: TextOverflow.ellipsis,
-                        //       textDirection: TextDirection.rtl,
-                        //       textAlign: TextAlign.right,
-                        //       style: L.arStyle,
-                        //     ),
-                        //     onTap: () {
-                        //       openDict(
-                        //         context,
-                        //         itm.word,
-                        //         dict: itm.dict,
-                        //       ).then((_) => setState(() {}));
-                        //     },
-                        //     leading: IconButton(
-                        //       icon: bm
-                        //           ? Icon(Icons.bookmark, color: cs.error)
-                        //           : Icon(Icons.bookmark_outline),
-                        //       onPressed: () async {
-                        //         if (bm) {
-                        //           final confirm = await showConfirmDialog(
-                        //             context,
-                        //             'Remove Bookmark',
-                        //             message: 'Remove: ${itm.word}',
-                        //             destructive: true,
-                        //             confirmText: 'Remove',
-                        //           );
-                        //           if (confirm != true) return;
-                        //           WordStore.rmBM(itm.word);
-                        //         } else {
-                        //           WordStore.addBM(itm.word);
-                        //         }
-                        //         setState(() {});
-                        //       },
-                        //     ),
-                        //     trailing: IconButton(
-                        //       icon: const Icon(Icons.delete_outline),
-                        //       tooltip: L.p('Delete', 'حذف'),
-                        //       onPressed: () async {
-                        //         final confirm = await showConfirmDialog(
-                        //           context,
-                        //           '${L.p('Delete: ', 'حذف:')} ${itm.word}',
-                        //           destructive: true,
-                        //           confirmText: L.p('Delete', 'حذف'),
-                        //           useLClass: true,
-                        //           dir: L.dir,
-                        //         );
-                        //         if (confirm != true) return;
-
-                        //         await WordStore.rmHistItem(itm);
-                        //         setState(() {});
-                        //         if (context.mounted) {
-                        //           showSnackL(
-                        //             context,
-                        //             en: 'Deleted: ${itm.word}',
-                        //             ar: 'تم الحذف: ${itm.word}',
-                        //           );
-                        //         }
-                        //       },
-                        //     ),
-                        //   ),
-                        // );
                       },
                     ),
                   ),

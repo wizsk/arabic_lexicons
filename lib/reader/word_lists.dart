@@ -198,7 +198,7 @@ class _CBWordListState extends State<CBWordList> {
                 )
               else
                 SliverPadding(
-                  padding: scrollPaddingW(bottom: 128),
+                  padding: appConf.readerPadd(context),
                   sliver: SliverList.separated(
                     itemCount: curr.length,
                     separatorBuilder: (_, _) => const SizedBox(height: 8),

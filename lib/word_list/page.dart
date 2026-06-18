@@ -184,7 +184,7 @@ class _WordListPageState extends State<WordListPage> {
                   )
                 else
                   SliverPadding(
-                    padding: scrollPaddingW(bottom: 128),
+                    padding: appConf.readerPadd(context),
                     sliver: SliverList.separated(
                       itemCount: _words.length,
                       separatorBuilder: (_, _) => const SizedBox(height: 8),

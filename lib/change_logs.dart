@@ -3,6 +3,7 @@ final releases = [
     version: 'v3.1.0',
     changes: '''
     add export and import to foreign word list
+    on large screens keep the ui width smaller (if user sets the style)
     ''',
   ),
   Release(

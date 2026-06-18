@@ -1,9 +1,12 @@
+import 'package:ara_dict/alphabets.dart';
 import 'package:ara_dict/conf.dart';
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/lex/data.dart';
+import 'package:ara_dict/reader/reader_utils.dart';
 import 'package:ara_dict/utils.dart';
 import 'package:ara_dict/widgets/selectable_text_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
@@ -19,7 +22,7 @@ Widget showRes(
 
   final curDict = datas.selectedDict;
   if (curDict == Dict.arEn) {
-    return _showArEnRes(ts, datas);
+    return _showArEnRes(context, ts, datas);
   }
 
   if (curDict == Dict.hanswehr || curDict == Dict.laneLexicon) {
@@ -80,7 +83,11 @@ Widget noResUniversal(
   return w;
 }
 
-Widget _showArEnRes(TextStyle ts, SearchLexiconsDatas datas) {
+Widget _showArEnRes(
+  BuildContext context,
+  TextStyle ts,
+  SearchLexiconsDatas datas,
+) {
   return SliverToBoxAdapter(
     child: Center(
       child: SingleChildScrollView(
@@ -100,16 +107,24 @@ Widget _showArEnRes(TextStyle ts, SearchLexiconsDatas datas) {
             return DataRow(
               cells: [
                 DataCell(Text(e.word)),
-                // DataCell(Text(e.def)),
-                DataCell(SelectableText(e.def, style: ts)),
+                DataCell(
+                  Text(e.def),
+                  onLongPress: () async {
+                    await Clipboard.setData(ClipboardData(text: e.def));
+
+                    if (!context.mounted) return;
+                    showSnack(context, 'Definition copied');
+                  },
+                ),
+                // DataCell(SelectableText(e.def, style: ts, maxLines: 1, scrollPhysics: const NeverScrollableScrollPhysics())),
                 // DataCell(Text(e.root)),
                 DataCell(
-                  InkWell(
-                    onTap: () {
-                      datas.onChangeTxt(appendTxt: e.root.split('/')[0]);
-                    },
-                    child: Text(e.root),
-                  ),
+                  Text(e.root),
+                  onTap: () {
+                    final t = ArabicNormalizer.keepOnlyAr(e.root.split('/')[0]);
+                    if (t.isEmpty) return;
+                    datas.onChangeTxt(appendTxt: t);
+                  },
                 ),
               ],
             );

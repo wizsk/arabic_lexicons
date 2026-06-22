@@ -201,7 +201,11 @@ class _SearchLexiconsState extends State<SearchLexicons>
                       if (!willShowSugg) lexAppBar(context, _datas, _setSate),
 
                       SliverPadding(
-                        padding: willShowSugg ? padd.copyWith(bottom: 0) : padd,
+                        padding: _datas.sugg.isEmpty || _datas.resultsAreEmpty
+                            ? EdgeInsets.zero
+                            : willShowSugg
+                            ? padd.copyWith(bottom: 0)
+                            : padd,
                         sliver: _datas.isSelectedWordEmpty
                             ? noRes(context)
                             : !willShowSugg &&

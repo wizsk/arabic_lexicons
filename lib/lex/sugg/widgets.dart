@@ -86,10 +86,10 @@ Widget showSearchSugg(
                   Center(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(vertical: 5),
-                      child: noResUniversal(
-                        datas.selectedWord,
-                        noResAr: 'لا توجد نتائج لـ:',
-                        noResEn: 'No results for:',
+                      child: Text(
+                        L.pr(/*n */ 'لا توجد نتائج', 'No results'),
+                        textDirection: L.dir,
+                        style: L.arStyleIf,
                       ),
                     ),
                   )

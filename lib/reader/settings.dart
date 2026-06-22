@@ -174,7 +174,7 @@ class _ReaderModeSettingsSheetState extends State<ReaderModeSettingsSheet> {
                     if (context.mounted) {
                       showSnack(
                         context,
-                        'Save settings to apply reader style',
+                        'Apply settings to save new Reader style',
                         duration: Duration(seconds: 4),
                       );
                     }

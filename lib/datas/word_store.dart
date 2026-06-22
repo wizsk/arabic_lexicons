@@ -123,7 +123,7 @@ abstract final class WordStore {
     _bookmarkedWords.remove(word);
 
     bookmarkedWords.remove(word);
-    await _db.delete('bookmarked_words', where: 'word = ', whereArgs: [word]);
+    await _db.delete('bookmarked_words', where: 'word = ?', whereArgs: [word]);
   }
 
   static Future<int> rmBMs(Iterable<String> words) async {
@@ -137,7 +137,7 @@ abstract final class WordStore {
     }
 
     final list = words.toList();
-    final placeholders = List.filled(list.length, '').join(',');
+    final placeholders = List.filled(list.length, '?').join(' ,');
 
     await _db.delete(
       'bookmarked_words',
@@ -215,7 +215,7 @@ abstract final class WordStore {
 
     foreignWords.remove(word);
 
-    await _db.delete('foreign_words', where: 'word = ', whereArgs: [word]);
+    await _db.delete('foreign_words', where: 'word = ?', whereArgs: [word]);
   }
 
   static Future<int> removeForeignMany(Iterable<String> words) async {
@@ -229,7 +229,7 @@ abstract final class WordStore {
       if (foreignWords.remove(w)) rmCount++;
     }
 
-    final placeholders = List.filled(list.length, '').join(',');
+    final placeholders = List.filled(list.length, '?').join(' ,');
 
     await _db.delete(
       'foreign_words',
@@ -309,7 +309,7 @@ abstract final class WordStore {
       }
     }
 
-    final placeholders = List.filled(words.length, '').join(',');
+    final placeholders = List.filled(words.length, '?').join(' ,');
 
     await _db.delete(
       'search_history',
@@ -323,7 +323,7 @@ abstract final class WordStore {
     searchHist.remove(item);
     await _db.delete(
       'search_history',
-      where: 'word = ',
+      where: 'word = ?',
       whereArgs: [item.word],
     );
   }

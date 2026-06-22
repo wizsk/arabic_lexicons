@@ -131,6 +131,8 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
       _inited = true;
     });
 
+    _setOnChange();
+
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (_rs.bookHash.isEmpty) {
         showSnack(
@@ -188,6 +190,7 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
   void didChangeDependencies() {
     super.didChangeDependencies();
     touggleFullScreen();
+    _setOnChange();
 
     // SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
   }
@@ -197,6 +200,13 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
     if (state == AppLifecycleState.resumed) {
       WakelockController.toggle();
     }
+  }
+
+  void _setOnChange() {
+    if (!_inited) return;
+    _rs.onChange = () {
+      if (mounted) setState(() {});
+    };
   }
 
   Timer? _scrollPosBuf;

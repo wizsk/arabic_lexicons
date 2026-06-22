@@ -28,6 +28,16 @@ class ReaderPageSettings {
   static const double maxWidthDef = 720;
   static const double paddingDef = 10;
 
+  VoidCallback? _onChange;
+
+  void callOnChange() {
+    _onChange?.call();
+  }
+
+  set onChange(VoidCallback f) {
+    _onChange = f;
+  }
+
   final String bookHash;
   bool isQasidah;
   bool isQasidahCentered;

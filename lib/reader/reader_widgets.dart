@@ -4,8 +4,8 @@ import 'package:ara_dict/conf.dart';
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/datas/word_store.dart';
 import 'package:ara_dict/reader/data.dart';
-import 'package:ara_dict/reader/settings_class.dart';
 import 'package:ara_dict/reader/reader_utils.dart';
+import 'package:ara_dict/reader/settings_class.dart';
 import 'package:ara_dict/utils.dart';
 import 'package:ara_dict/widgets/selectable_text_screen.dart';
 import 'package:flutter/gestures.dart';
@@ -72,7 +72,6 @@ class ClickableParagraph extends StatelessWidget {
           rs: rs,
           isBmk: WordStore.isBm(word.cl),
           word: word,
-          onChange: onChange,
           style: style,
           styleLU: styleLU,
           highStyle: highStyletyle,
@@ -170,7 +169,6 @@ class ClickableBayt extends StatelessWidget {
           rs: rs,
           isBmk: WordStore.isBm(word.cl),
           word: word,
-          onChange: onChange,
           style: style,
           styleLU: styleLU,
           highStyle: highStyletyle,
@@ -186,7 +184,7 @@ TextSpan _readerWordSpan({
   required ReaderPageSettings rs,
   required bool isBmk,
   required WordEntry word,
-  required void Function() onChange,
+  // required void Function() onChange,
   required TextStyle style,
   required TextStyle styleLU,
   required TextStyle highStyle,
@@ -207,7 +205,7 @@ TextSpan _readerWordSpan({
         : (TapGestureRecognizer()
             ..onTap = appConf.readerIsOpenLexiconDirecly
                 ? () {
-                    openDictAndAddForeign(context, word.cl, onChange, rs);
+                    openDictAndAddForeign(context, word.cl, rs);
                   }
                 : () => showWordReadeActionsDialog(
                     context,
@@ -219,10 +217,10 @@ TextSpan _readerWordSpan({
                       } else {
                         await WordStore.addBM(word.cl);
                       }
-                      if (context.mounted) onChange();
+                      rs.callOnChange();
                     },
                     () {
-                      openDictAndAddForeign(context, word.cl, onChange, rs);
+                      openDictAndAddForeign(context, word.cl, rs);
                     },
                     style,
                   )),
@@ -255,7 +253,6 @@ String _peraSelectTxt(
 Future<void> openDictAndAddForeign(
   BuildContext context,
   String word,
-  VoidCallback onChange,
   ReaderPageSettings rs,
 ) async {
   snackClearForced();
@@ -263,7 +260,7 @@ Future<void> openDictAndAddForeign(
   openDict(context, word).then((_) {
     if (!context.mounted) return;
 
-    onChange();
+    rs.callOnChange();
     if (rs.foreignAdd) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         showSnack(
@@ -283,7 +280,7 @@ Future<void> openDictAndAddForeign(
             onPressed: () async {
               await WordStore.removeForeign(word);
               if (!context.mounted) return;
-              onChange();
+              rs.callOnChange();
             },
           ),
         );

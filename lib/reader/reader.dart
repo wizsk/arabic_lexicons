@@ -430,6 +430,7 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
               .readerTS(context)
               .copyWith(
                 fontFamily: _rs.fontFam,
+                fontSize: _rs.fontSize,
                 fontFamilyFallback: [fontKitab],
               );
 

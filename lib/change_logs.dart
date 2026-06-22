@@ -4,6 +4,8 @@ final releases = [
     changes: '''
     add export and import to foreign word list
     on large screens keep the ui width smaller (if user sets the style)
+    fix on foreign undo highlight
+    fix reader font-size not changing
     ''',
   ),
   Release(

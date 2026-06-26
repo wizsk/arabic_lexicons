@@ -44,7 +44,6 @@ class _SettingsPageState extends State<SettingsPage> {
 
   @override
   Widget build(BuildContext context) {
-    BuildInfo.init(context);
     final notifier = appConf;
 
     return Scaffold(
@@ -365,7 +364,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         title: Text('App Version'),
                         subtitle: Text(
                           BuildInfo.appVersion.isNotEmpty
-                              ? 'v${BuildInfo.appVersion}${isGPlayVersion ? ' Play Store' : ''}'
+                              ? 'v${BuildInfo.appVersion}${BuildInfo.isGPlayVersion ? ' Play Store' : ''}'
                               : 'N/A',
                         ),
                         trailing: Icon(Icons.chevron_right),
@@ -373,49 +372,33 @@ class _SettingsPageState extends State<SettingsPage> {
                           launchUrl(Uri.parse(BuildInfo.repoLink));
                         },
                       ),
-                      if (!BuildInfo.fdroidBuild) ...[
-                        ListTile(
-                          leading: const FilledIcon(Icons.date_range),
-                          title: const Text('Build At'),
-                          subtitle: Text(BuildInfo.buildTimeFormatted),
-                          trailing: BuildInfo._gitCommitMsg.isEmpty
-                              ? null
-                              : Icon(Icons.chevron_right),
-                          onTap: BuildInfo._gitCommitMsg.isEmpty
-                              ? null
-                              : () async {
-                                  await showInfoDialog(
-                                    context,
-                                    'Git commit Message',
-                                    message: BuildInfo.gitCommitMsgStr,
-                                  );
-                                },
-                        ),
+                      if (BuildInfo._gitCommit.isNotEmpty)
                         ListTile(
                           leading: const FilledIcon(Icons.question_answer),
                           title: Text('Git Commit'),
-                          subtitle: Text(BuildInfo.gitCommitStr),
-                          trailing: BuildInfo._gitCommit.isEmpty
-                              ? null
-                              : Icon(Icons.chevron_right),
-                          onTap: BuildInfo._gitCommit.isEmpty
-                              ? null
-                              : () {
-                                  launchUrl(
-                                    Uri.parse(
-                                      '${BuildInfo.commitsLink}${BuildInfo._gitCommit}',
-                                    ),
-                                  );
-                                },
+                          subtitle: Text(BuildInfo.gitCommit),
+                          trailing: Icon(Icons.chevron_right),
+                          onTap: () {
+                            launchUrl(
+                              Uri.parse(
+                                '${BuildInfo.commitsLink}${BuildInfo._gitCommit}',
+                              ),
+                            );
+                          },
                         ),
-                      ],
                       ListTile(
                         leading: const FilledIcon(Icons.update_outlined),
                         title: Text('Updates'),
                         subtitle: Text('Go to update page'),
                         trailing: Icon(Icons.chevron_right),
                         onTap: () {
-                          launchUrl(Uri.parse(BuildInfo.downloadUpdates));
+                          launchUrl(
+                            Uri.parse(
+                              BuildInfo.isGPlayVersion
+                                  ? 'https://play.google.com/store/apps/details?id=io.github.wizsk.arabic_lexicons'
+                                  : BuildInfo.downloadUpdates,
+                            ),
+                          );
                         },
                       ),
                       ListTile(
@@ -440,26 +423,26 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 }
 
-class BuildInfo {
+abstract final class BuildInfo {
+  static const isGPlayVersion = bool.fromEnvironment(
+    'GPLAY',
+    defaultValue: false,
+  );
+
   static const String appVersion = String.fromEnvironment(
     'APP_VERSION',
     defaultValue: '',
   );
 
-  static const fdroidBuild = String.fromEnvironment('APP_STORE') == "F-Droid";
-  // Environment variables
-  static const _buildUnix = int.fromEnvironment(
-    'BUILD_UNIX_TIME',
-    defaultValue: 0,
-  );
   static const _gitCommit = String.fromEnvironment(
     'GIT_COMMIT',
     defaultValue: '',
   );
-  static const _gitCommitMsg = String.fromEnvironment(
-    'GIT_COMMIT_MSG',
-    defaultValue: '',
-  );
+
+  // pretty
+  static final gitCommit = _gitCommit.isNotEmpty
+      ? _gitCommit.substring(0, 7)
+      : '';
 
   static const String commitsLink =
       'https://github.com/wizsk/arabic_lexicons/commit/';
@@ -468,31 +451,6 @@ class BuildInfo {
 
   static const String downloadUpdates =
       'https://github.com/wizsk/arabic_lexicons/releases/latest';
-
-  static late final String gitCommitStr;
-  static late final String buildTimeFormatted;
-  static late final String gitCommitMsgStr;
-
-  static bool _inited = false;
-  static void init(BuildContext context) {
-    if (_inited) return;
-
-    if (_buildUnix != 0) {
-      DateTime buildTimeUtc = DateTime.fromMillisecondsSinceEpoch(
-        _buildUnix * 1000,
-        isUtc: true,
-      );
-      DateTime buildTimeLocal = buildTimeUtc.toLocal();
-      buildTimeFormatted = formatDateTime(context, dt: buildTimeLocal);
-    } else {
-      buildTimeFormatted = 'N/A';
-    }
-
-    gitCommitStr = _gitCommit.isNotEmpty ? _gitCommit : 'N/A';
-    gitCommitMsgStr = _gitCommitMsg.isNotEmpty ? _gitCommitMsg : 'N/A';
-
-    _inited = true;
-  }
 }
 
 enum FilledIconVariant { neutral, primary, secondary, error }

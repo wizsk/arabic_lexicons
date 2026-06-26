@@ -27,11 +27,17 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
+    dependenciesInfo {
+        includeInApk = false
+        // includeInBundle = false
+    }
+
     kotlin {
         compilerOptions {
             jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
         }
     }
+
     defaultConfig {
         applicationId = "io.github.wizsk.arabic_lexicons"
         minSdk = flutter.minSdkVersion
@@ -69,18 +75,6 @@ android {
             }
         }
     }
-
-    // flavorDimensions += "version"
-    // productFlavors {
-    //     create("beta") {
-    //         dimension = "version"
-    //         applicationIdSuffix = ".beta"
-    //         resValue("string", "app_name", "(B) Arabic Lexicons")
-    //         if (hasKeystore) {
-    //             signingConfig = signingConfigs.getByName("release")
-    //         }
-    //     }
-    // }
 }
 
 flutter {

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-REQUIRED_FLUTTER_VERSION="3.44.1"
+REQUIRED_FLUTTER_VERSION="3.44.4"
 
 # Check if flutter exists
 if ! command -v flutter &>/dev/null; then
@@ -69,7 +69,7 @@ flutter build apk \
     --dart-define="APP_STORE=F-Droid"
 
 cp build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk \
-   "$OLDPWD/$OUT_DIR/"
+   "$OLDPWD/$OUT_DIR/froid-v$version-x86_64.apk"
 
 # 2
 flutter build apk \
@@ -81,7 +81,7 @@ flutter build apk \
 
 
 cp build/app/outputs/flutter-apk/app-arm64-v8a-release.apk \
-   "$OLDPWD/$OUT_DIR/"
+   "$OLDPWD/$OUT_DIR/froid-v$version-arm64-v8a.apk"
 
 # 3
 flutter build apk \
@@ -92,6 +92,6 @@ flutter build apk \
     --dart-define="APP_STORE=F-Droid"
 
 cp build/app/outputs/flutter-apk/app-x86_64-release.apk \
-   "$OLDPWD/$OUT_DIR/"
+   "$OLDPWD/$OUT_DIR/froid-v$version-x86_64.apk"
 
 echo "Done: APKs copied to $OLDPWD/$OUT_DIR/"

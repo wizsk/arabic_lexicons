@@ -25,8 +25,8 @@ export ver=$(
 )
 
 # ver=$(grep 'version' pubspec.yaml | sed 's/version: //')
-export gc=$(git rev-parse --short HEAD)
-export gcm=$(git log -1 --pretty='%B' | tr '\n' ' ' | sed 's/^ *//; s/ *$//')
+export gc=$(git rev-parse HEAD)
+# export gcm=$(git log -1 --pretty='%B' | tr '\n' ' ' | sed 's/^ *//; s/ *$//')
 
 if [ -z "$ver" ]; then
   echo "version cannot be empty!!"

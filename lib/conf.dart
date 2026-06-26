@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:ara_dict/change_logs.dart';
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/lex/isolate.dart';
+import 'package:ara_dict/pages/settings.dart';
 import 'package:ara_dict/pages/width_padd.dart';
 import 'package:ara_dict/play_rate.dart';
 import 'package:ara_dict/reader/settings_class.dart';
@@ -13,8 +14,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
-
-const isGPlayVersion = bool.fromEnvironment('GPLAY', defaultValue: false);
 
 enum AppLang { en, ar }
 
@@ -240,7 +239,9 @@ class AppSettingsController extends ChangeNotifier {
 
   bool _playRatingShonOnce = false;
   Future<void> playRating(BuildContext context) async {
-    if (!isGPlayVersion || _playRatingShonOnce || _playRate == -1) return;
+    if (!BuildInfo.isGPlayVersion || _playRatingShonOnce || _playRate == -1) {
+      return;
+    }
     _playRatingShonOnce = true;
 
     final pref = await SharedPreferences.getInstance();

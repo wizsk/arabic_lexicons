@@ -32,5 +32,3 @@ if [ -z "$ver" ]; then
   echo "version cannot be empty!!"
   exit 130
 fi
-
-export pre="$bd/${n}_v$ver"

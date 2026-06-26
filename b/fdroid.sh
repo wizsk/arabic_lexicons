@@ -65,33 +65,37 @@ flutter build apk \
     --release \
     --split-per-abi \
     --target-platform="android-arm" \
-    --dart-define="APP_VERSION=$version" \
-    --dart-define="APP_STORE=F-Droid"
+    --dart-define="APP_VERSION=$version"
 
 cp build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk \
-   "$OLDPWD/$OUT_DIR/froid-v$version-x86_64.apk"
+   "$OLDPWD/$bd/$n-v$version-x86_64.apk"
 
 # 2
 flutter build apk \
     --release \
     --split-per-abi \
     --target-platform="android-arm64" \
-    --dart-define="APP_VERSION=$version" \
-    --dart-define="APP_STORE=F-Droid"
+    --dart-define="APP_VERSION=$version"
 
 
 cp build/app/outputs/flutter-apk/app-arm64-v8a-release.apk \
-   "$OLDPWD/$OUT_DIR/froid-v$version-arm64-v8a.apk"
+   "$OLDPWD/$bd/$n-v$version-arm64-v8a.apk"
 
 # 3
 flutter build apk \
     --release \
     --split-per-abi \
     --target-platform="android-x64" \
-    --dart-define="APP_VERSION=$version" \
-    --dart-define="APP_STORE=F-Droid"
+    --dart-define="APP_VERSION=$version"
 
 cp build/app/outputs/flutter-apk/app-x86_64-release.apk \
-   "$OLDPWD/$OUT_DIR/froid-v$version-x86_64.apk"
+   "$OLDPWD/$bd/$n-v$version-x86_64.apk"
+
+flutter build apk --release \
+  --dart-define=APP_VERSION="$ver" \
+  --dart-define=GIT_COMMIT="$gc"
+
+cp 'build/app/outputs/flutter-apk/app-release.apk' \
+    "$OLDPWD/$bd/$n-v$version-universal.apk"
 
 echo "Done: APKs copied to $OLDPWD/$OUT_DIR/"

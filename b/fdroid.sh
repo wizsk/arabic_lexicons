@@ -70,7 +70,7 @@ flutter build apk \
     --dart-define=GIT_COMMIT="$gc"
 
 cp build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk \
-   "$OLDPWD/$bd/$n-v$version-x86_64.apk"
+   "$OLDPWD/$bd/$n-v$version-armeabi-v7a.apk"
 
 # 2
 flutter build apk \

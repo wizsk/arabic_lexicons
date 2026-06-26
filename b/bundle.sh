@@ -7,9 +7,7 @@ set -ex
 
 flutter build appbundle --release \
   --dart-define=APP_VERSION="$ver" \
-  --dart-define=BUILD_UNIX_TIME=$(date +%s) \
   --dart-define=GIT_COMMIT="$gc" \
-  --dart-define=GIT_COMMIT_MSG="$gcm" \
   --dart-define=GPLAY=true
 
-cp 'build/app/outputs/bundle/release/app-release.aab' "${pre}.aab"
+cp 'build/app/outputs/bundle/release/app-release.aab' "$bd/$n-v$ver.aab"

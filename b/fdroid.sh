@@ -19,6 +19,7 @@ fi
 echo "Flutter $FLUTTER_VERSION found"
 
 source ./b/common.sh
+source ./b/confirm.sh
 
 BUILD_DIR="/tmp/build"
 OUT_DIR="build-fdroid"
@@ -65,7 +66,8 @@ flutter build apk \
     --release \
     --split-per-abi \
     --target-platform="android-arm" \
-    --dart-define="APP_VERSION=$version"
+    --dart-define="APP_VERSION=$version" \
+    --dart-define=GIT_COMMIT="$gc"
 
 cp build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk \
    "$OLDPWD/$bd/$n-v$version-x86_64.apk"
@@ -75,7 +77,8 @@ flutter build apk \
     --release \
     --split-per-abi \
     --target-platform="android-arm64" \
-    --dart-define="APP_VERSION=$version"
+    --dart-define="APP_VERSION=$version" \
+    --dart-define=GIT_COMMIT="$gc"
 
 
 cp build/app/outputs/flutter-apk/app-arm64-v8a-release.apk \
@@ -86,7 +89,8 @@ flutter build apk \
     --release \
     --split-per-abi \
     --target-platform="android-x64" \
-    --dart-define="APP_VERSION=$version"
+    --dart-define="APP_VERSION=$version" \
+    --dart-define=GIT_COMMIT="$gc"
 
 cp build/app/outputs/flutter-apk/app-x86_64-release.apk \
    "$OLDPWD/$bd/$n-v$version-x86_64.apk"

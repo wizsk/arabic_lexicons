@@ -7,7 +7,7 @@
 [![GitHub Release](https://img.shields.io/github/v/release/wizsk/arabic_lexicons?sort=semver&display_name=release)](https://github.com/wizsk/arabic_lexicons/releases/latest)
 [![Github Downloads](https://img.shields.io/github/downloads/wizsk/arabic_lexicons/total?logo=Github)](https://github.com/wizsk/arabic_lexicons/releases)
 
-### A libre Arabic to English dictionary and reader app
+### A libre Arabic dictionary & reader app
 
 [<img src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png"
       alt='Get it on Google Play'

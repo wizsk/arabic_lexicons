@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-REQUIRED_FLUTTER_VERSION="3.44.4"
+REQUIRED_FLUTTER_VERSION="3.44.5"
 
 # Check if flutter exists
 if ! command -v flutter &>/dev/null; then

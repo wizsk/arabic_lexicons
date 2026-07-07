@@ -48,6 +48,9 @@ abstract final class L {
   static Alignment get alignment =>
       isAr ? Alignment.topRight : Alignment.topLeft;
 
+  static Alignment get alignmentCenterLR =>
+      isAr ? Alignment.centerRight : Alignment.centerLeft;
+
   static TextStyle? style(TextStyle? ar, TextStyle? en) => isAr ? ar : en;
 
   static TextStyle? get arStyleIf => isAr ? _uiArTextStyle : null;

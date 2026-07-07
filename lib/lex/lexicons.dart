@@ -342,47 +342,52 @@ class _SearchLexiconsState extends State<SearchLexicons>
                     height: 40.0,
                     child: Directionality(
                       textDirection: L.dir,
-                      child: ListView.separated(
-                        shrinkWrap: true,
-                        key: const PageStorageKey('dict-selector'),
-                        itemCount: allDictsOrd.length,
-                        scrollDirection: Axis.horizontal,
-                        itemBuilder: (_, index) {
-                          final d = allDictsOrd[index];
-                          final selected = d == _datas.selectedDict;
+                      child: Align(
+                        alignment: L.alignmentCenterLR,
+                        child: ListView.separated(
+                          shrinkWrap: true,
+                          key: const PageStorageKey('dict-selector'),
+                          itemCount: allDictsOrd.length,
+                          scrollDirection: Axis.horizontal,
+                          itemBuilder: (_, index) {
+                            final d = allDictsOrd[index];
+                            final selected = d == _datas.selectedDict;
 
-                          return ChoiceChip(
-                            tooltip: d.enLong,
-                            selected: selected,
-                            labelStyle: selected
-                                ? chipTextStyleDict.copyWith(
-                                    color: cs.onPrimary,
-                                  )
-                                : chipTextStyleDict,
-                            selectedColor: cs.primary,
-                            backgroundColor: bg,
-                            side: BorderSide(
-                              color: selected ? cs.primary : cs.outlineVariant,
-                            ),
-                            visualDensity: VisualDensity.compact,
-                            materialTapTargetSize:
-                                MaterialTapTargetSize.shrinkWrap,
-                            showCheckmark: false,
-                            label: Text(
-                              d.name,
-                              textDirection: L.dir,
-                              style: L.arStyleIf,
-                            ),
-                            onSelected: (_) {
-                              _datas.selectedDict = d;
-                              _datas.suggDictSorted.clear();
-                              if (context.mounted) {
-                                _datas.getAndShowResORSugg(context);
-                              }
-                            },
-                          );
-                        },
-                        separatorBuilder: (_, _) => const SizedBox(width: 6),
+                            return ChoiceChip(
+                              tooltip: d.enLong,
+                              selected: selected,
+                              labelStyle: selected
+                                  ? chipTextStyleDict.copyWith(
+                                      color: cs.onPrimary,
+                                    )
+                                  : chipTextStyleDict,
+                              selectedColor: cs.primary,
+                              backgroundColor: bg,
+                              side: BorderSide(
+                                color: selected
+                                    ? cs.primary
+                                    : cs.outlineVariant,
+                              ),
+                              visualDensity: VisualDensity.compact,
+                              materialTapTargetSize:
+                                  MaterialTapTargetSize.shrinkWrap,
+                              showCheckmark: false,
+                              label: Text(
+                                d.name,
+                                textDirection: L.dir,
+                                style: L.arStyleIf,
+                              ),
+                              onSelected: (_) {
+                                _datas.selectedDict = d;
+                                _datas.suggDictSorted.clear();
+                                if (context.mounted) {
+                                  _datas.getAndShowResORSugg(context);
+                                }
+                              },
+                            );
+                          },
+                          separatorBuilder: (_, _) => const SizedBox(width: 6),
+                        ),
                       ),
                     ),
                   ),

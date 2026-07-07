@@ -101,6 +101,7 @@ class _SearchLexiconsState extends State<SearchLexicons>
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
 
+    _scrollableSelectionSc.dispose();
     _controller.dispose();
     _focusNode.dispose();
     _datas.scrollController.dispose();
@@ -279,7 +280,7 @@ class _SearchLexiconsState extends State<SearchLexicons>
                           alignment: AlignmentGeometry.centerRight,
                           child: ListView.separated(
                             shrinkWrap: true,
-                            // key: const PageStorageKey('word-selector'),
+                            key: const PageStorageKey('word-selector'),
                             controller: _scrollableSelectionSc,
                             itemCount: _datas.words.length,
                             scrollDirection: Axis.horizontal,
@@ -407,21 +408,22 @@ class _SearchLexiconsState extends State<SearchLexicons>
                                 !_showingScrollableSelection;
                           });
 
-                          if (_datas.words.length > 1) {
-                            WidgetsBinding.instance.addPostFrameCallback((_) {
-                              if (!_scrollableSelectionSc.hasClients) return;
+                          // it seems like we don't need it, if we use PageStorageKey(...)
+                          // if (_datas.words.length > 1) {
+                          //   WidgetsBinding.instance.addPostFrameCallback((_) {
+                          //     if (!_scrollableSelectionSc.hasClients) return;
 
-                              final index = _datas.words.indexOf(
-                                _datas.selectedWord,
-                              );
-                              if (index < 0) return;
+                          //     final index = _datas.words.indexOf(
+                          //       _datas.selectedWord,
+                          //     );
+                          //     if (index < 0) return;
 
-                              _scrollableSelectionSc.scrollToIndex(
-                                index,
-                                preferPosition: AutoScrollPosition.middle,
-                              );
-                            });
-                          }
+                          //     _scrollableSelectionSc.scrollToIndex(
+                          //       index,
+                          //       preferPosition: AutoScrollPosition.middle,
+                          //     );
+                          //   });
+                          // }
                         },
                       )
                     else

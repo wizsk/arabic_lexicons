@@ -270,7 +270,7 @@ class _SearchLexiconsState extends State<SearchLexicons>
                   padding: EdgeInsetsGeometry.only(
                     left: padd.right,
                     right: padd.right,
-                    top: 8.0,
+                    top: 6.0,
                   ),
                   child: SizedBox(
                     height: 40.0,
@@ -335,7 +335,7 @@ class _SearchLexiconsState extends State<SearchLexicons>
                 padding: EdgeInsetsGeometry.only(
                   left: padd.right,
                   right: padd.right,
-                  top: 8.0,
+                  top: 6.0,
                 ),
                 child: SizedBox(
                   height: 40.0,

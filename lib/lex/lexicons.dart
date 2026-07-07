@@ -152,6 +152,8 @@ class _SearchLexiconsState extends State<SearchLexicons>
     final arTxtTheme = appConf.readerTS(context);
     // final isAr = appSettingsNotifier.useMoreArabic;
 
+    final bg = appConf.readerSurface(context);
+
     final cs = Theme.of(context).colorScheme;
 
     final chipTextStyleDictWord = L.arStyle.copyWith(color: cs.onSurface);
@@ -175,7 +177,7 @@ class _SearchLexiconsState extends State<SearchLexicons>
           ? lexAppBar(context, _datas, _setSate) as AppBar
           : null,
       drawer: _isPopup ? null : buildDrawer(context),
-      backgroundColor: appConf.readerSurface(context),
+      backgroundColor: bg,
       body: SafeArea(
         top: willShowSugg,
         bottom: !appConf.fullScreen,
@@ -297,7 +299,7 @@ class _SearchLexiconsState extends State<SearchLexicons>
                                       )
                                     : chipTextStyleDictWord,
                                 selectedColor: cs.primary,
-                                backgroundColor: Colors.transparent,
+                                backgroundColor: bg,
                                 side: BorderSide(
                                   color: selected
                                       ? cs.primary
@@ -354,7 +356,7 @@ class _SearchLexiconsState extends State<SearchLexicons>
                               ? chipTextStyleDict.copyWith(color: cs.onPrimary)
                               : chipTextStyleDict,
                           selectedColor: cs.primary,
-                          backgroundColor: Colors.transparent,
+                          backgroundColor: bg,
                           side: BorderSide(
                             color: selected ? cs.primary : cs.outlineVariant,
                           ),
@@ -392,6 +394,7 @@ class _SearchLexiconsState extends State<SearchLexicons>
                 children: [
                   if (appConf.scrollLexSelection)
                     IconButton.filled(
+                      tooltip: 'hide/show selections',
                       icon: _showingScrollableSelection
                           ? Icon(Icons.keyboard_arrow_down_rounded)
                           : Icon(Icons.keyboard_arrow_up_rounded),

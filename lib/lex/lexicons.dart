@@ -181,17 +181,16 @@ class _SearchLexiconsState extends State<SearchLexicons>
       body: SafeArea(
         top: willShowSugg,
         bottom: !appConf.fullScreen,
-        child: Column(
-          children: [
-            // FocusManager.instance.primaryFocus?.unfocus();
-            Expanded(
-              child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: () {
-                  if (_focusNode.hasFocus) {
-                    FocusManager.instance.primaryFocus?.unfocus();
-                  }
-                },
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () {
+            if (_focusNode.hasFocus) {
+              FocusManager.instance.primaryFocus?.unfocus();
+            }
+          },
+          child: Column(
+            children: [
+              Expanded(
                 child: Directionality(
                   textDirection: dir,
                   child: CustomScrollView(
@@ -258,15 +257,81 @@ class _SearchLexiconsState extends State<SearchLexicons>
                   ),
                 ),
               ),
-            ),
 
-            Divider(thickness: 0.5, height: 0),
-            if (_showingScrollableSelection && appConf.scrollLexSelection) ...[
-              Visibility(
-                visible: _datas.words.length > 1,
-                maintainState: true,
-                maintainSize: false,
-                child: Padding(
+              Divider(thickness: 0.5, height: 0),
+              if (_showingScrollableSelection &&
+                  appConf.scrollLexSelection) ...[
+                Visibility(
+                  visible: _datas.words.length > 1,
+                  maintainState: true,
+                  maintainSize: false,
+                  child: Padding(
+                    padding: EdgeInsetsGeometry.only(
+                      left: padd.right,
+                      right: padd.right,
+                      top: 6.0,
+                    ),
+                    child: SizedBox(
+                      height: 40.0,
+                      child: Directionality(
+                        textDirection: TextDirection.rtl,
+                        child: Align(
+                          alignment: AlignmentGeometry.centerRight,
+                          child: ListView.separated(
+                            shrinkWrap: true,
+                            // key: const PageStorageKey('word-selector'),
+                            controller: _scrollableSelectionSc,
+                            itemCount: _datas.words.length,
+                            scrollDirection: Axis.horizontal,
+                            itemBuilder: (_, index) {
+                              final w = _datas.words[index];
+                              final selected = w == _datas.selectedWord;
+                              return AutoScrollTag(
+                                key: ValueKey(index),
+                                controller: _scrollableSelectionSc,
+                                index: index,
+                                child: ChoiceChip(
+                                  selected: selected,
+                                  labelStyle: selected
+                                      ? chipTextStyleDictWord.copyWith(
+                                          color: cs.onPrimary,
+                                        )
+                                      : chipTextStyleDictWord,
+                                  selectedColor: cs.primary,
+                                  backgroundColor: bg,
+                                  side: BorderSide(
+                                    color: selected
+                                        ? cs.primary
+                                        : cs.outlineVariant,
+                                  ),
+                                  visualDensity: VisualDensity.compact,
+                                  materialTapTargetSize:
+                                      MaterialTapTargetSize.shrinkWrap,
+                                  showCheckmark: false,
+                                  label: Text(
+                                    w,
+                                    textDirection: TextDirection.rtl,
+                                    style: L.arStyle,
+                                  ),
+                                  onSelected: (_) {
+                                    _datas.selectedWord = w;
+                                    _datas.suggDictSorted.clear();
+                                    if (context.mounted) {
+                                      _datas.getAndShowResORSugg(context);
+                                    }
+                                  },
+                                ),
+                              );
+                            },
+                            separatorBuilder: (_, _) =>
+                                const SizedBox(width: 6),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                Padding(
                   padding: EdgeInsetsGeometry.only(
                     left: padd.right,
                     right: padd.right,
@@ -275,236 +340,175 @@ class _SearchLexiconsState extends State<SearchLexicons>
                   child: SizedBox(
                     height: 40.0,
                     child: Directionality(
-                      textDirection: TextDirection.rtl,
-                      child: Align(
-                        alignment: AlignmentGeometry.centerRight,
-                        child: ListView.separated(
-                          shrinkWrap: true,
-                          // key: const PageStorageKey('word-selector'),
-                          controller: _scrollableSelectionSc,
-                          itemCount: _datas.words.length,
-                          scrollDirection: Axis.horizontal,
-                          itemBuilder: (_, index) {
-                            final w = _datas.words[index];
-                            final selected = w == _datas.selectedWord;
-                            return AutoScrollTag(
-                              key: ValueKey(index),
-                              controller: _scrollableSelectionSc,
-                              index: index,
-                              child: ChoiceChip(
-                                selected: selected,
-                                labelStyle: selected
-                                    ? chipTextStyleDictWord.copyWith(
-                                        color: cs.onPrimary,
-                                      )
-                                    : chipTextStyleDictWord,
-                                selectedColor: cs.primary,
-                                backgroundColor: bg,
-                                side: BorderSide(
-                                  color: selected
-                                      ? cs.primary
-                                      : cs.outlineVariant,
-                                ),
-                                visualDensity: VisualDensity.compact,
-                                materialTapTargetSize:
-                                    MaterialTapTargetSize.shrinkWrap,
-                                showCheckmark: false,
-                                label: Text(
-                                  w,
-                                  textDirection: TextDirection.rtl,
-                                  style: L.arStyle,
-                                ),
-                                onSelected: (_) {
-                                  _datas.selectedWord = w;
-                                  _datas.suggDictSorted.clear();
-                                  if (context.mounted) {
-                                    _datas.getAndShowResORSugg(context);
-                                  }
+                      textDirection: L.dir,
+                      child: ListView.separated(
+                        shrinkWrap: true,
+                        key: const PageStorageKey('dict-selector'),
+                        itemCount: allDictsOrd.length,
+                        scrollDirection: Axis.horizontal,
+                        itemBuilder: (_, index) {
+                          final d = allDictsOrd[index];
+                          final selected = d == _datas.selectedDict;
+
+                          return ChoiceChip(
+                            tooltip: d.enLong,
+                            selected: selected,
+                            labelStyle: selected
+                                ? chipTextStyleDict.copyWith(
+                                    color: cs.onPrimary,
+                                  )
+                                : chipTextStyleDict,
+                            selectedColor: cs.primary,
+                            backgroundColor: bg,
+                            side: BorderSide(
+                              color: selected ? cs.primary : cs.outlineVariant,
+                            ),
+                            visualDensity: VisualDensity.compact,
+                            materialTapTargetSize:
+                                MaterialTapTargetSize.shrinkWrap,
+                            showCheckmark: false,
+                            label: Text(
+                              d.name,
+                              textDirection: L.dir,
+                              style: L.arStyleIf,
+                            ),
+                            onSelected: (_) {
+                              _datas.selectedDict = d;
+                              _datas.suggDictSorted.clear();
+                              if (context.mounted) {
+                                _datas.getAndShowResORSugg(context);
+                              }
+                            },
+                          );
+                        },
+                        separatorBuilder: (_, _) => const SizedBox(width: 6),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+              Padding(
+                padding: EdgeInsetsGeometry.symmetric(
+                  horizontal: padd.right,
+                  vertical: 8,
+                ),
+                child: Row(
+                  textDirection: TextDirection.rtl,
+                  children: [
+                    if (appConf.scrollLexSelection)
+                      IconButton.filled(
+                        tooltip: 'hide/show selections',
+                        icon: _showingScrollableSelection
+                            ? Icon(Icons.keyboard_arrow_down_rounded)
+                            : Icon(Icons.keyboard_arrow_up_rounded),
+                        onPressed: () {
+                          setState(() {
+                            _showingScrollableSelection =
+                                !_showingScrollableSelection;
+                          });
+
+                          if (_datas.words.length > 1) {
+                            WidgetsBinding.instance.addPostFrameCallback((_) {
+                              if (!_scrollableSelectionSc.hasClients) return;
+
+                              final index = _datas.words.indexOf(
+                                _datas.selectedWord,
+                              );
+                              if (index < 0) return;
+
+                              _scrollableSelectionSc.scrollToIndex(
+                                index,
+                                preferPosition: AutoScrollPosition.middle,
+                              );
+                            });
+                          }
+                        },
+                      )
+                    else
+                      IconButton.filled(
+                        icon: Icon(dictWordSelectModalOpenIcon),
+                        onPressed: () async {
+                          FocusManager.instance.primaryFocus?.unfocus();
+
+                          final res = await showWordPickerBottomSheet(
+                            context,
+                            _datas,
+                          );
+
+                          if (res == null) return;
+
+                          if (res.openSettings == true) {
+                            WidgetsBinding.instance.addPostFrameCallback(
+                              (_) => showDictReorderSheet(
+                                context,
+                                after: () {
+                                  if (!context.mounted) return;
+                                  setState(() {
+                                    _datas.suggDictSorted.clear();
+                                  });
                                 },
                               ),
                             );
-                          },
-                          separatorBuilder: (_, _) => const SizedBox(width: 6),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              Padding(
-                padding: EdgeInsetsGeometry.only(
-                  left: padd.right,
-                  right: padd.right,
-                  top: 6.0,
-                ),
-                child: SizedBox(
-                  height: 40.0,
-                  child: Directionality(
-                    textDirection: L.dir,
-                    child: ListView.separated(
-                      shrinkWrap: true,
-                      key: const PageStorageKey('dict-selector'),
-                      itemCount: allDictsOrd.length,
-                      scrollDirection: Axis.horizontal,
-                      itemBuilder: (_, index) {
-                        final d = allDictsOrd[index];
-                        final selected = d == _datas.selectedDict;
+                            return;
+                          }
 
-                        return ChoiceChip(
-                          selected: selected,
-                          labelStyle: selected
-                              ? chipTextStyleDict.copyWith(color: cs.onPrimary)
-                              : chipTextStyleDict,
-                          selectedColor: cs.primary,
-                          backgroundColor: bg,
-                          side: BorderSide(
-                            color: selected ? cs.primary : cs.outlineVariant,
-                          ),
-                          visualDensity: VisualDensity.compact,
-                          materialTapTargetSize:
-                              MaterialTapTargetSize.shrinkWrap,
-                          showCheckmark: false,
-                          label: Text(
-                            d.name,
-                            textDirection: L.dir,
-                            style: L.arStyleIf,
-                          ),
-                          onSelected: (_) {
-                            _datas.selectedDict = d;
+                          if (res.word != null) {
+                            _datas.selectedWord = res.word!;
+                          }
+                          if (res.d != null) {
+                            _datas.selectedDict = res.d!;
                             _datas.suggDictSorted.clear();
-                            if (context.mounted) {
-                              _datas.getAndShowResORSugg(context);
-                            }
-                          },
-                        );
-                      },
-                      separatorBuilder: (_, _) => const SizedBox(width: 6),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-            Padding(
-              padding: EdgeInsetsGeometry.symmetric(
-                horizontal: padd.right,
-                vertical: 8,
-              ),
-              child: Row(
-                textDirection: TextDirection.rtl,
-                children: [
-                  if (appConf.scrollLexSelection)
-                    IconButton.filled(
-                      tooltip: 'hide/show selections',
-                      icon: _showingScrollableSelection
-                          ? Icon(Icons.keyboard_arrow_down_rounded)
-                          : Icon(Icons.keyboard_arrow_up_rounded),
-                      onPressed: () {
-                        setState(() {
-                          _showingScrollableSelection =
-                              !_showingScrollableSelection;
-                        });
-
-                        if (_datas.words.length > 1) {
-                          WidgetsBinding.instance.addPostFrameCallback((_) {
-                            if (!_scrollableSelectionSc.hasClients) return;
-
-                            final index = _datas.words.indexOf(
-                              _datas.selectedWord,
-                            );
-                            if (index < 0) return;
-
-                            _scrollableSelectionSc.scrollToIndex(
-                              index,
-                              preferPosition: AutoScrollPosition.middle,
-                            );
-                          });
-                        }
-                      },
-                    )
-                  else
-                    IconButton.filled(
-                      icon: Icon(dictWordSelectModalOpenIcon),
-                      onPressed: () async {
-                        FocusManager.instance.primaryFocus?.unfocus();
-
-                        final res = await showWordPickerBottomSheet(
-                          context,
-                          _datas,
-                        );
-
-                        if (res == null) return;
-
-                        if (res.openSettings == true) {
-                          WidgetsBinding.instance.addPostFrameCallback(
-                            (_) => showDictReorderSheet(
-                              context,
-                              after: () {
-                                if (!context.mounted) return;
-                                setState(() {
-                                  _datas.suggDictSorted.clear();
-                                });
-                              },
-                            ),
+                          }
+                          if (context.mounted) {
+                            _datas.getAndShowResORSugg(context);
+                          }
+                        },
+                      ),
+                    SizedBox(width: 5),
+                    Expanded(
+                      child: TextField(
+                        onTap: () async {
+                          if (_controller.selection.base.offset !=
+                              _selectionOffsetOld) {
+                            await _onChangeTxt();
+                          }
+                        },
+                        controller: _controller,
+                        focusNode: _focusNode,
+                        textDirection: TextDirection.rtl,
+                        textAlign: TextAlign.start,
+                        onChanged: (_) async {
+                          if (_debouce?.isActive ?? false) _debouce!.cancel();
+                          _debouce = Timer(
+                            const Duration(milliseconds: 200),
+                            () async => await _onChangeTxt(),
                           );
-                          return;
-                        }
-
-                        if (res.word != null) {
-                          _datas.selectedWord = res.word!;
-                        }
-                        if (res.d != null) {
-                          _datas.selectedDict = res.d!;
-                          _datas.suggDictSorted.clear();
-                        }
-                        if (context.mounted) {
-                          _datas.getAndShowResORSugg(context);
-                        }
-                      },
-                    ),
-                  SizedBox(width: 5),
-                  Expanded(
-                    child: TextField(
-                      onTap: () async {
-                        if (_controller.selection.base.offset !=
-                            _selectionOffsetOld) {
-                          await _onChangeTxt();
-                        }
-                      },
-                      controller: _controller,
-                      focusNode: _focusNode,
-                      textDirection: TextDirection.rtl,
-                      textAlign: TextAlign.start,
-                      onChanged: (_) async {
-                        if (_debouce?.isActive ?? false) _debouce!.cancel();
-                        _debouce = Timer(
-                          const Duration(milliseconds: 200),
-                          () async => await _onChangeTxt(),
-                        );
-                      },
-                      // style: arTxtTheme,
-                      style: L.arStyle,
-                      decoration: InputDecoration(
-                        hintText: L.p('Search Words', 'ابحث'),
-                        hintTextDirection: L.dir,
-                        prefixIcon: IconButton(
-                          onPressed: () {
-                            setState(() {
-                              _controller.clear();
-                              _datas.resetAll();
-                            });
-                            // this is when it's focued but keyboard is not oppended
-                            _focusNode.requestFocus();
-                          },
-                          icon: Icon(Icons.clear),
+                        },
+                        // style: arTxtTheme,
+                        style: L.arStyle,
+                        decoration: InputDecoration(
+                          hintText: L.p('Search Words', 'ابحث'),
+                          hintTextDirection: L.dir,
+                          prefixIcon: IconButton(
+                            onPressed: () {
+                              setState(() {
+                                _controller.clear();
+                                _datas.resetAll();
+                              });
+                              // this is when it's focued but keyboard is not oppended
+                              _focusNode.requestFocus();
+                            },
+                            icon: Icon(Icons.clear),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            if (appConf.fullScreen) const SizedBox(height: 10),
-          ],
+              if (appConf.fullScreen) const SizedBox(height: 10),
+            ],
+          ),
         ),
       ),
       // floatingActionButton: FloatingActionButton(

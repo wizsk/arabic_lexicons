@@ -246,7 +246,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
                       /// Suggestions
                       SwitchListTile(
-                        secondary: FilledIcon(Icons.auto_awesome),
+                        secondary: const FilledIcon(Icons.auto_awesome),
                         title: const Text('Search Suggestions'),
                         subtitle: const Text('Show suggestions while typing'),
                         value: appConf.showSearchSugg,
@@ -261,9 +261,11 @@ class _SettingsPageState extends State<SettingsPage> {
                               },
                       ),
                       SwitchListTile(
-                        secondary: const Icon(Icons.view_week_rounded),
+                        secondary: const FilledIcon(Icons.view_week_rounded),
                         title: const Text('Scrollable selectors'),
-                        subtitle: const Text('Browse words and dictionaries without opening the picker'),
+                        subtitle: const Text(
+                          'Browse words and dictionaries without opening the picker',
+                        ),
                         value: appConf.scrollLexSelection,
                         onChanged: (value) async {
                           appConf.saveScrollLexSelection(value);

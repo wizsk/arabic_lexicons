@@ -154,6 +154,9 @@ class _SearchLexiconsState extends State<SearchLexicons>
 
     final cs = Theme.of(context).colorScheme;
 
+    final chipTextStyleDictWord = L.arStyle.copyWith(color: cs.onSurface);
+    final chipTextStyleDict = L.arStyleOrNew.copyWith(color: cs.onSurface);
+
     final willShowSugg = _datas.isShowingSugg && _datas.sugg.isNotEmpty;
 
     final dir = willShowSugg
@@ -281,13 +284,29 @@ class _SearchLexiconsState extends State<SearchLexicons>
                           scrollDirection: Axis.horizontal,
                           itemBuilder: (_, index) {
                             final w = _datas.words[index];
+                            final selected = w == _datas.selectedWord;
                             return AutoScrollTag(
                               key: ValueKey(index),
                               controller: _scrollableSelectionSc,
                               index: index,
                               child: ChoiceChip(
+                                selected: selected,
+                                labelStyle: selected
+                                    ? chipTextStyleDictWord.copyWith(
+                                        color: cs.onPrimary,
+                                      )
+                                    : chipTextStyleDictWord,
+                                selectedColor: cs.primary,
+                                backgroundColor: Colors.transparent,
+                                side: BorderSide(
+                                  color: selected
+                                      ? cs.primary
+                                      : cs.outlineVariant,
+                                ),
+                                visualDensity: VisualDensity.compact,
+                                materialTapTargetSize:
+                                    MaterialTapTargetSize.shrinkWrap,
                                 showCheckmark: false,
-                                selected: w == _datas.selectedWord,
                                 label: Text(
                                   w,
                                   textDirection: TextDirection.rtl,
@@ -327,9 +346,22 @@ class _SearchLexiconsState extends State<SearchLexicons>
                       scrollDirection: Axis.horizontal,
                       itemBuilder: (_, index) {
                         final d = allDictsOrd[index];
+                        final selected = d == _datas.selectedDict;
+
                         return ChoiceChip(
+                          selected: selected,
+                          labelStyle: selected
+                              ? chipTextStyleDict.copyWith(color: cs.onPrimary)
+                              : chipTextStyleDict,
+                          selectedColor: cs.primary,
+                          backgroundColor: Colors.transparent,
+                          side: BorderSide(
+                            color: selected ? cs.primary : cs.outlineVariant,
+                          ),
+                          visualDensity: VisualDensity.compact,
+                          materialTapTargetSize:
+                              MaterialTapTargetSize.shrinkWrap,
                           showCheckmark: false,
-                          selected: d == _datas.selectedDict,
                           label: Text(
                             d.name,
                             textDirection: L.dir,

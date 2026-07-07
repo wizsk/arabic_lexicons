@@ -409,21 +409,21 @@ class _SearchLexiconsState extends State<SearchLexicons>
                           });
 
                           // it seems like we don't need it, if we use PageStorageKey(...)
-                          // if (_datas.words.length > 1) {
-                          //   WidgetsBinding.instance.addPostFrameCallback((_) {
-                          //     if (!_scrollableSelectionSc.hasClients) return;
+                          if (_datas.words.length > 1) {
+                            WidgetsBinding.instance.addPostFrameCallback((_) {
+                              if (!_scrollableSelectionSc.hasClients) return;
 
-                          //     final index = _datas.words.indexOf(
-                          //       _datas.selectedWord,
-                          //     );
-                          //     if (index < 0) return;
+                              final index = _datas.words.indexOf(
+                                _datas.selectedWord,
+                              );
+                              if (index < 0) return;
 
-                          //     _scrollableSelectionSc.scrollToIndex(
-                          //       index,
-                          //       preferPosition: AutoScrollPosition.middle,
-                          //     );
-                          //   });
-                          // }
+                              _scrollableSelectionSc.scrollToIndex(
+                                index,
+                                preferPosition: AutoScrollPosition.middle,
+                              );
+                            });
+                          }
                         },
                       )
                     else

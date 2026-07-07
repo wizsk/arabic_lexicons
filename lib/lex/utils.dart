@@ -60,7 +60,7 @@ Future<void> onTextChanged(
   if (query.isEmpty) {
     return (res, null);
   } else if (query.length == curPos || !query.contains(" ")) {
-    res = ArabicNormalizer.keepOnlyArList(query);
+    res = ArabicNormalizer.keepOnlyArListUnique(query);
     if (res.isNotEmpty) return (res, res.last);
     return (res, null);
   }
@@ -92,6 +92,7 @@ Future<void> onTextChanged(
     final cw = ArabicNormalizer.keepOnlyAr(curWord);
 
     if (cw != "") {
+      res.remove(cw);
       res.add(cw);
       if (word == null && curPos < i) {
         word = cw;

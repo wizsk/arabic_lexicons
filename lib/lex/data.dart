@@ -1,15 +1,16 @@
+import 'package:ara_dict/data.dart';
 import 'package:ara_dict/datas/word_store.dart';
 import 'package:ara_dict/lex/dicts/ar_en/ar_en.dart';
-import 'package:ara_dict/data.dart';
 import 'package:ara_dict/lex/dicts/db.dart';
 import 'package:ara_dict/lex/isolate.dart';
-
 import 'package:ara_dict/lex/sugg/data.dart';
 import 'package:flutter/material.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
 class SearchLexiconsDatas {
   final AutoScrollController scrollController;
+  final AutoScrollController scrollableSelection;
+
   // final FocusNode inputFocusNode;
   final Future<void> Function({String? appendTxt}) onChangeTxt;
   final void Function(void Function()) setState;
@@ -21,6 +22,7 @@ class SearchLexiconsDatas {
     required this.scrollController,
     required this.onChangeTxt,
     required this.setState,
+    required this.scrollableSelection,
   });
 
   Dict selectedDict;
@@ -125,6 +127,11 @@ class SearchLexiconsDatas {
     if (selectedWord.isEmpty) {
       resLoaded = true;
       rebuild();
+
+      // if (appConf.scrollLexSelection && scrollableSelection.hasClients) {
+      //   // reset it
+      //   scrollableSelection.jumpTo(0);
+      // }
       return;
     }
 
@@ -134,6 +141,20 @@ class SearchLexiconsDatas {
     }
 
     rebuild(); // rebuild: show loading animation
+
+    if (appConf.scrollLexSelection) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!scrollableSelection.hasClients) return;
+
+        final index = words.indexOf(selectedWord);
+        if (index < 0) return;
+
+        scrollableSelection.scrollToIndex(
+          index,
+          preferPosition: AutoScrollPosition.middle,
+        );
+      });
+    }
 
     final hasResults = await _loadResults(context);
     if (hasResults) {

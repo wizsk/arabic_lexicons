@@ -1,5 +1,11 @@
 final releases = [
   Release(
+    version: 'v3.2.0',
+    changes: '''
+    Added scrollable word and dictionary selectors directly on the Lexicon page, eliminating the need to open a popup (Enable this feature in Settings → Lexicon)
+    ''',
+  ),
+  Release(
     version: 'v3.1.0',
     changes: '''
     add export and import to foreign word list

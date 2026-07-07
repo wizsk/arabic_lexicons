@@ -260,6 +260,15 @@ class _SettingsPageState extends State<SettingsPage> {
                                 setState(() {});
                               },
                       ),
+                      SwitchListTile(
+                        secondary: const Icon(Icons.view_week_rounded),
+                        title: const Text('Scrollable selectors'),
+                        subtitle: const Text('Browse words and dictionaries without opening the picker'),
+                        value: appConf.scrollLexSelection,
+                        onChanged: (value) async {
+                          appConf.saveScrollLexSelection(value);
+                        },
+                      ),
 
                       /// Direct Results
                       // SwitchListTile(

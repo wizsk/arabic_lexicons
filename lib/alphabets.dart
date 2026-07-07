@@ -71,7 +71,7 @@ class ArabicNormalizer {
         .trim();
   }
 
-  static List<String> keepOnlyArList(String sentence) {
+  static List<String> keepOnlyArListUnique(String sentence) {
     sentence = sentence.trim();
     if (sentence.isEmpty) return [];
 
@@ -79,6 +79,7 @@ class ArabicNormalizer {
     for (final w in sentence.split(RegExp(r'\s+'))) {
       final cw = keepOnlyAr(w);
       if (cw.isEmpty) continue;
+      res.remove(cw);
       res.add(cw);
     }
     return res;

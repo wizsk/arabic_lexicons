@@ -24,8 +24,6 @@ source ./b/confirm.sh
 BUILD_DIR="/tmp/build"
 OUT_DIR="build-fdroid"
 
-version=$ver
-
 echo "Version: $version"
 
 echo "Preparing temp build dir: $BUILD_DIR"

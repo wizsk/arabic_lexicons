@@ -24,6 +24,8 @@ export ver=$(
     | cut -d'+' -f1
 )
 
+export version=$ver
+
 # ver=$(grep 'version' pubspec.yaml | sed 's/version: //')
 export gc=$(git rev-parse HEAD)
 # export gcm=$(git log -1 --pretty='%B' | tr '\n' ' ' | sed 's/^ *//; s/ *$//')

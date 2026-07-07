@@ -5,11 +5,11 @@ source ./b/confirm.sh
 
 set -ex
 
-flutter build apk $* --release --split-per-abi \
-  --dart-define=APP_VERSION="$ver" \
-  --dart-define=BUILD_UNIX_TIME=$(date +%s) \
-  --dart-define=GIT_COMMIT="$gc" \
-  --dart-define=GIT_COMMIT_MSG="$gcm" \
-  --target-platform="android-arm64"
+flutter build apk \
+    --release \
+    --split-per-abi \
+    --target-platform="android-arm64" \
+    --dart-define="APP_VERSION=$version" \
+    --dart-define=GIT_COMMIT="$gc"
 
-cp 'build/app/outputs/flutter-apk/app-arm64-v8a-release.apk' "${pre}_arm64-v8a.apk"
+cp 'build/app/outputs/flutter-apk/app-arm64-v8a-release.apk' "$bd/$n-v$version-arm64-v8a.apk"

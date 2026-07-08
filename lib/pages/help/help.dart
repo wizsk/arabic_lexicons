@@ -288,8 +288,8 @@ class HelpPage extends StatelessWidget {
                           bullets: [
                             _LinkRow(
                               label: null,
-                              value: 'www.hindawi.org',
-                              onTap: () => _openUrl('https://www.hindawi.org/'),
+                              value: 'safahat.org',
+                              onTap: () => _openUrl('https://www.safahat.org/'),
                             ),
                           ],
                         ),

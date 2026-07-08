@@ -130,6 +130,11 @@ class _SearchLexiconsState extends State<SearchLexicons>
 
   void _setSate() => setState(() {});
 
+  void toggleWLSelectionMethod() async {
+    await appConf.saveScrollLexSelection(!appConf.scrollLexSelection);
+    if (context.mounted) setState(() {});
+  }
+
   int? _selectionOffsetOld;
   Timer? _debouce;
   Future<void> _onChangeTxt({String? appendTxt}) async {
@@ -407,6 +412,7 @@ class _SearchLexiconsState extends State<SearchLexicons>
                         icon: _showingScrollableSelection
                             ? Icon(Icons.keyboard_arrow_down_rounded)
                             : Icon(Icons.keyboard_arrow_up_rounded),
+                        onLongPress: toggleWLSelectionMethod,
                         onPressed: () {
                           setState(() {
                             _showingScrollableSelection =
@@ -434,6 +440,7 @@ class _SearchLexiconsState extends State<SearchLexicons>
                     else
                       IconButton.filled(
                         icon: Icon(dictWordSelectModalOpenIcon),
+                        onLongPress: toggleWLSelectionMethod,
                         onPressed: () async {
                           FocusManager.instance.primaryFocus?.unfocus();
 

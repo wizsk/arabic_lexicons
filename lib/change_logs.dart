@@ -2,7 +2,7 @@ final releases = [
   Release(
     version: 'v3.2.0',
     changes: '''
-    Added scrollable word and dictionary selectors directly on the Lexicon page, eliminating the need to open a popup (Enable this feature in Settings → Lexicon)
+    Added scrollable word and dictionary selectors directly to the Lexicon page, eliminating the need for a popup (toggle it by long-pressing the open-popup button or in Settings → Lexicon)
     ''',
   ),
   Release(

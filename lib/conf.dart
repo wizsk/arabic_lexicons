@@ -323,9 +323,9 @@ class AppSettingsController extends ChangeNotifier {
   }
 
   Future<void> saveScrollLexSelection(bool v) async {
-    final prefs = await SharedPreferences.getInstance();
     _scrollLexSelection = v;
     notify();
+    final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_scrollLexSelectionKey, v);
   }
 

@@ -43,6 +43,7 @@ class _SearchLexiconsState extends State<SearchLexicons>
 
   bool _showingScrollableSelection = true;
   final _scrollableSelectionSc = AutoScrollController();
+  final _scrollableSelectionDictSc = AutoScrollController();
 
   @override
   void initState() {
@@ -67,6 +68,7 @@ class _SearchLexiconsState extends State<SearchLexicons>
       onChangeTxt: _onChangeTxt,
       setState: setState,
       scrollableSelection: _scrollableSelectionSc,
+      scrollableSelectionDict: _scrollableSelectionDictSc,
     );
 
     // this is mainly for the appbar
@@ -102,6 +104,7 @@ class _SearchLexiconsState extends State<SearchLexicons>
     WidgetsBinding.instance.removeObserver(this);
 
     _scrollableSelectionSc.dispose();
+    _scrollableSelectionDictSc.dispose();
     _controller.dispose();
     _focusNode.dispose();
     _datas.scrollController.dispose();
@@ -292,6 +295,12 @@ class _SearchLexiconsState extends State<SearchLexicons>
                             itemBuilder: (_, index) {
                               final w = _datas.words[index];
                               final selected = w == _datas.selectedWord;
+
+                              var label = w.replaceAll('_', ' ').trim();
+                              if (label.length > 30) {
+                                label = '${label.substring(0, 30)}…';
+                              }
+
                               return AutoScrollTag(
                                 key: ValueKey(index),
                                 controller: _scrollableSelectionSc,
@@ -315,7 +324,7 @@ class _SearchLexiconsState extends State<SearchLexicons>
                                       MaterialTapTargetSize.shrinkWrap,
                                   showCheckmark: false,
                                   label: Text(
-                                    w,
+                                    label,
                                     textDirection: TextDirection.rtl,
                                     style: L.arStyle,
                                   ),
@@ -351,6 +360,7 @@ class _SearchLexiconsState extends State<SearchLexicons>
                         alignment: L.alignmentCenterLR,
                         child: ListView.separated(
                           shrinkWrap: true,
+                          controller: _scrollableSelectionDictSc,
                           key: const PageStorageKey('dict-selector'),
                           itemCount: allDictsOrd.length,
                           scrollDirection: Axis.horizontal,
@@ -358,37 +368,42 @@ class _SearchLexiconsState extends State<SearchLexicons>
                             final d = allDictsOrd[index];
                             final selected = d == _datas.selectedDict;
 
-                            return ChoiceChip(
-                              tooltip: d.enLong,
-                              selected: selected,
-                              labelStyle: selected
-                                  ? chipTextStyleDict.copyWith(
-                                      color: cs.onPrimary,
-                                    )
-                                  : chipTextStyleDict,
-                              selectedColor: cs.primary,
-                              backgroundColor: bg,
-                              side: BorderSide(
-                                color: selected
-                                    ? cs.primary
-                                    : cs.outlineVariant,
+                            return AutoScrollTag(
+                              key: ValueKey(index),
+                              controller: _scrollableSelectionDictSc,
+                              index: index,
+                              child: ChoiceChip(
+                                tooltip: d.enLong,
+                                selected: selected,
+                                labelStyle: selected
+                                    ? chipTextStyleDict.copyWith(
+                                        color: cs.onPrimary,
+                                      )
+                                    : chipTextStyleDict,
+                                selectedColor: cs.primary,
+                                backgroundColor: bg,
+                                side: BorderSide(
+                                  color: selected
+                                      ? cs.primary
+                                      : cs.outlineVariant,
+                                ),
+                                visualDensity: VisualDensity.compact,
+                                materialTapTargetSize:
+                                    MaterialTapTargetSize.shrinkWrap,
+                                showCheckmark: false,
+                                label: Text(
+                                  d.name,
+                                  textDirection: L.dir,
+                                  style: L.arStyleIf,
+                                ),
+                                onSelected: (_) {
+                                  _datas.selectedDict = d;
+                                  _datas.suggDictSorted.clear();
+                                  if (context.mounted) {
+                                    _datas.getAndShowResORSugg(context);
+                                  }
+                                },
                               ),
-                              visualDensity: VisualDensity.compact,
-                              materialTapTargetSize:
-                                  MaterialTapTargetSize.shrinkWrap,
-                              showCheckmark: false,
-                              label: Text(
-                                d.name,
-                                textDirection: L.dir,
-                                style: L.arStyleIf,
-                              ),
-                              onSelected: (_) {
-                                _datas.selectedDict = d;
-                                _datas.suggDictSorted.clear();
-                                if (context.mounted) {
-                                  _datas.getAndShowResORSugg(context);
-                                }
-                              },
                             );
                           },
                           separatorBuilder: (_, _) => const SizedBox(width: 6),
@@ -420,21 +435,7 @@ class _SearchLexiconsState extends State<SearchLexicons>
                           });
 
                           // it seems like we don't need it, if we use PageStorageKey(...)
-                          if (_datas.words.length > 1) {
-                            WidgetsBinding.instance.addPostFrameCallback((_) {
-                              if (!_scrollableSelectionSc.hasClients) return;
-
-                              final index = _datas.words.indexOf(
-                                _datas.selectedWord,
-                              );
-                              if (index < 0) return;
-
-                              _scrollableSelectionSc.scrollToIndex(
-                                index,
-                                preferPosition: AutoScrollPosition.middle,
-                              );
-                            });
-                          }
+                          _datas.scrollSelectors();
                         },
                       )
                     else

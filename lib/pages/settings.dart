@@ -1,11 +1,9 @@
 import 'package:ara_dict/conf.dart';
 import 'package:ara_dict/data.dart';
-
 import 'package:ara_dict/lex/isolate.dart';
 import 'package:ara_dict/lex/rearrange_dicts.dart';
 import 'package:ara_dict/main_widgets.dart';
 import 'package:ara_dict/pages/width_padd.dart';
-
 import 'package:ara_dict/reader/reader_utils.dart';
 import 'package:ara_dict/theme.dart';
 import 'package:ara_dict/utils.dart';
@@ -260,6 +258,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                 setState(() {});
                               },
                       ),
+
                       SwitchListTile(
                         secondary: const FilledIcon(Icons.view_week_rounded),
                         title: const Text('Scrollable selectors'),
@@ -268,8 +267,23 @@ class _SettingsPageState extends State<SettingsPage> {
                         ),
                         value: appConf.scrollLexSelection,
                         onChanged: (value) async {
-                          appConf.saveScrollLexSelection(value);
+                          await appConf.saveScrollLexSelection(value);
+                          if (context.mounted) setState(() {});
                         },
+                      ),
+                      SwitchListTile(
+                        secondary: const FilledIcon(Icons.horizontal_rule),
+                        title: const Text('Auto-scroll to selection'),
+                        subtitle: const Text(
+                          'Automatically scroll to the selected word or dictionary',
+                        ),
+                        value: appConf.scrollLexSelectionAutoSc,
+                        onChanged: appConf.scrollLexSelection
+                            ? (value) async {
+                                appConf.saveScrollLexSelectionAutoSc(value);
+                                if (context.mounted) setState(() {});
+                              }
+                            : null,
                       ),
 
                       /// Direct Results

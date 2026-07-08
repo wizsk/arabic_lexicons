@@ -10,6 +10,7 @@ import 'package:scroll_to_index/scroll_to_index.dart';
 class SearchLexiconsDatas {
   final AutoScrollController scrollController;
   final AutoScrollController scrollableSelection;
+  final AutoScrollController scrollableSelectionDict;
 
   // final FocusNode inputFocusNode;
   final Future<void> Function({String? appendTxt}) onChangeTxt;
@@ -23,6 +24,7 @@ class SearchLexiconsDatas {
     required this.onChangeTxt,
     required this.setState,
     required this.scrollableSelection,
+    required this.scrollableSelectionDict,
   });
 
   Dict selectedDict;
@@ -116,6 +118,7 @@ class SearchLexiconsDatas {
     BuildContext context, {
     bool forceSugg = false,
     bool forceRes = false,
+    // bool scrollDictSelector = false,
   }) async {
     if (forceSugg && forceRes) {
       throw Exception('Can not have both forceSugg and forceRes == true');
@@ -123,37 +126,17 @@ class SearchLexiconsDatas {
 
     resetLoadedValues();
 
-    // insanity check!
-    if (selectedWord.isEmpty) {
-      resLoaded = true;
-      rebuild();
+    resLoaded = selectedWord.isEmpty;
 
-      // if (appConf.scrollLexSelection && scrollableSelection.hasClients) {
-      //   // reset it
-      //   scrollableSelection.jumpTo(0);
-      // }
-      return;
+    rebuild(); // rebuild: show loading animation
+
+    if (appConf.scrollLexSelection) {
+      scrollSelectors();
     }
 
     if (forceSugg) {
       await _loadSearchSugg();
       return;
-    }
-
-    rebuild(); // rebuild: show loading animation
-
-    if (appConf.scrollLexSelection) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!scrollableSelection.hasClients) return;
-
-        final index = words.indexOf(selectedWord);
-        if (index < 0) return;
-
-        scrollableSelection.scrollToIndex(
-          index,
-          preferPosition: AutoScrollPosition.middle,
-        );
-      });
     }
 
     final hasResults = await _loadResults(context);
@@ -170,6 +153,30 @@ class SearchLexiconsDatas {
     if (Isolates.suggCanBeShown) {
       await _loadSearchSugg();
     }
+  }
+
+  void scrollSelectors() {
+    if (!appConf.scrollLexSelectionAutoSc) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (scrollableSelection.hasClients && words.length > 2) {
+        final index = words.indexOf(selectedWord);
+        if (index > -1) {
+          scrollableSelection.scrollToIndex(
+            index,
+            // preferPosition: AutoScrollPosition.,
+          );
+        }
+      }
+      if (scrollableSelectionDict.hasClients) {
+        final index = allDictsOrd.indexOf(selectedDict);
+        if (index > -1) {
+          scrollableSelectionDict.scrollToIndex(
+            index,
+            // preferPosition: AutoScrollPosition.middle,
+          );
+        }
+      }
+    });
   }
 
   @override

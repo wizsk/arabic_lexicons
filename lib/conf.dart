@@ -88,6 +88,7 @@ class AppSettingsController extends ChangeNotifier {
   static const _paddingKey = 'padd';
   static const _hideAppbarKey = 'happb';
   static const _scrollLexSelectionKey = 'scroll-lex-sel';
+  static const _scrollLexSelectionAutoScKey = 'scroll-lex-sel-auto';
 
   int _playRate = 0;
   int get playRatelastShown => _playRate;
@@ -105,6 +106,9 @@ class AppSettingsController extends ChangeNotifier {
 
   static const bool _scrollLexSelectionDef = false;
   bool _scrollLexSelection = _scrollLexSelectionDef;
+
+  static const bool _scrollLexSelectionAutoScDef = true;
+  bool _scrollLexSelectionAutoSc = _scrollLexSelectionAutoScDef;
 
   static const bool _hideAppbarDef = true;
   bool _hideAppbar = _hideAppbarDef;
@@ -178,6 +182,10 @@ class AppSettingsController extends ChangeNotifier {
 
     _scrollLexSelection =
         prefs.getBool(_scrollLexSelectionKey) ?? _scrollLexSelectionDef;
+
+    _scrollLexSelectionAutoSc =
+        prefs.getBool(_scrollLexSelectionAutoScKey) ??
+        _scrollLexSelectionAutoScDef;
 
     _hideAppbar = prefs.getBool(_hideAppbarKey) ?? _hideAppbarDef;
 
@@ -331,6 +339,17 @@ class AppSettingsController extends ChangeNotifier {
 
   bool get scrollLexSelection {
     return _scrollLexSelection;
+  }
+
+  Future<void> saveScrollLexSelectionAutoSc(bool v) async {
+    _scrollLexSelectionAutoSc = v;
+    notify();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_scrollLexSelectionAutoScKey, v);
+  }
+
+  bool get scrollLexSelectionAutoSc {
+    return _scrollLexSelectionAutoSc;
   }
 
   Future<void> saveHideAppbar(bool v) async {

@@ -45,11 +45,11 @@ class ClickableParagraph extends StatelessWidget {
       onLongPress: () {
         SelectableTextScreen.show(
           context,
-          (start, end) => _peraSelectTxt(peras, rs, start: start, end: end),
-          rs.textAlign,
-          TextDirection.rtl,
-          style,
-          currentIdx: index,
+          fullTextFunc: (b) => _peraSelectTxt(peras, rs, b),
+          textAlign: rs.textAlign,
+          dir: TextDirection.rtl,
+          textStyleBodyMedium: style,
+          start: index,
           length: peras.length,
         );
       },
@@ -107,11 +107,10 @@ class ClickableBayt extends StatelessWidget {
 
     SelectableTextScreen.show(
       ctx,
-      (start, end) => _peraSelectTxt(paras, rs, start: start, end: end),
-      rs.textAlign,
-      TextDirection.rtl,
-      style,
-      currentIdx: index,
+      fullTextFunc: (b) => _peraSelectTxt(paras, rs, b),
+      textAlign: rs.textAlign,
+      dir: TextDirection.rtl,
+      textStyleBodyMedium: style,
       length: paras.length,
       start: start,
       end: end,
@@ -230,19 +229,19 @@ TextSpan _readerWordSpan({
 
 String _peraSelectTxt(
   PeraEntries peras,
-  ReaderPageSettings rs, {
-  int? start,
-  int? end,
-}) {
-  if (start == null || end == null || peras.isEmpty) return '';
+  ReaderPageSettings rs,
+  SelectionBounds bb,
+) {
+  if (peras.isEmpty) return '';
 
-  if (start < 0) start = 0;
-  if (end > peras.length) end = peras.length;
+  final b = bb.copy();
+  if (b.start < 0) b.start = 0;
+  if (b.end > peras.length) b.end = peras.length;
 
-  // print('$start, $end -> ${peras.length}');
+  // // print('$start, $end -> ${peras.length}');
   // int line = 1;
   return peras
-      .getRange(start, end)
+      .getRange(b.start, b.end)
       .map((p) {
         // return '${line++}: ${p.map((w) => rs.isRmTashkil ? w.nTk : w.ar).join(' ')}';
         return p.map((w) => rs.isRmTashkil ? w.nTk : w.ar).join(' ');

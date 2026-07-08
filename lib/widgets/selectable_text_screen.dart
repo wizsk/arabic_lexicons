@@ -7,15 +7,31 @@ import 'package:ara_dict/reader/reader_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-typedef SelectableTextScreenFunc = String Function(int? start, int? end);
+typedef SelectableTextScreenFunc = String Function(SelectionBounds);
+
+class SelectionBounds {
+  int start;
+  int end;
+
+  SelectionBounds(this.start, this.end);
+
+  SelectionBounds copyWith({int? start, int? end}) =>
+      SelectionBounds(start ?? this.start, end ?? this.end);
+
+  SelectionBounds copy() => copyWith();
+
+  int get count => end - start;
+
+  bool eq(SelectionBounds other) => start == other.start && end == other.end;
+}
 
 class SelectableTextScreen extends StatefulWidget {
   final SelectableTextScreenFunc fullTextFunc;
-  final int? currentIdx;
-  final int? start;
+  final int start;
   // exclusive aka upuntil
   final int? end;
-  final int? length;
+  final int length;
+
   final TextAlign textAlign;
   final TextDirection dir;
   final TextStyle textStyleBodyMedium;
@@ -23,24 +39,22 @@ class SelectableTextScreen extends StatefulWidget {
   const SelectableTextScreen({
     super.key,
     required this.fullTextFunc,
-    this.currentIdx,
-    this.start,
+    required this.start,
     this.end,
-    this.length,
+    required this.length,
     required this.textAlign,
     required this.dir,
     required this.textStyleBodyMedium,
   });
 
   static Future<void> show(
-    BuildContext context,
-    SelectableTextScreenFunc fullTextFunc,
-    TextAlign textAlign,
-    TextDirection dir,
-    TextStyle textStyleBodyMedium, {
-    int? currentIdx,
-    int? length,
-    int? start,
+    BuildContext context, {
+    required SelectableTextScreenFunc fullTextFunc,
+    required TextAlign textAlign,
+    required TextDirection dir,
+    required TextStyle textStyleBodyMedium,
+    required int length,
+    required int start,
     int? end,
   }) {
     return Navigator.push(
@@ -51,7 +65,6 @@ class SelectableTextScreen extends StatefulWidget {
           textAlign: textAlign,
           dir: dir,
           textStyleBodyMedium: textStyleBodyMedium,
-          currentIdx: currentIdx,
           length: length,
           start: start,
           end: end,
@@ -66,39 +79,29 @@ class SelectableTextScreen extends StatefulWidget {
 
 class _SelectableTextScreenState extends State<SelectableTextScreen> {
   late String _txt;
-  late final int? _currIdx;
-  late final int? _length;
-  int? _start;
+
+  late final int _length;
+  late final SelectionBounds _def;
 
   /// [_end] is exclusive
   ///
   /// but when we promt user for range we show it as is, cause user sees 1 based index
-  int? _end;
+  late SelectionBounds _curr;
 
   @override
   void initState() {
     super.initState();
-    _currIdx = widget.currentIdx;
+
     _length = widget.length;
+    _def = SelectionBounds(widget.start, widget.end ?? widget.start + 1);
 
-    assert(_currIdx == null || _length != null);
-
-    if (_currIdx != null) {
-      _start = widget.start ?? _currIdx!;
-
-      if (widget.end != null) {
-        assert(_start! < widget.end!);
-      }
-
-      _end = widget.end ?? _currIdx! + 1;
-      // print('$_start, $_end frr');
-    }
+    _curr = _def.copy();
 
     _setTxt();
   }
 
   void _setTxt() {
-    _txt = widget.fullTextFunc.call(_start, _end);
+    _txt = widget.fullTextFunc.call(_curr);
   }
 
   @override
@@ -131,58 +134,34 @@ class _SelectableTextScreenState extends State<SelectableTextScreen> {
               showSnack(context, 'Text copied');
             },
           ),
-          if (_currIdx != null)
+          if (_length > 1)
             IconButton(
               tooltip: 'Select range',
               icon: Icon(Icons.tune),
               onPressed: () async {
-                const range = 5;
-
-                /// all start and end, minLow and maxUp inclusive and 1 indexed
-                final curr = _currIdx! + 1;
-                int start = _start! + 1;
-                int end = _end!;
-
-                int minLow = max(1, curr - range);
-                int maxUp = min(_length!, curr + range - 1);
-
-                final slotsLeft = (range * 2) - (maxUp - minLow);
-
-                if (slotsLeft > 0 && !(minLow == 1 && maxUp == _length)) {
-                  if (maxUp == _length) {
-                    minLow = max(1, curr - (range + slotsLeft));
-                  } else if (minLow == 1) {
-                    maxUp = min(_length, curr + range + slotsLeft - 2);
-                  }
-                }
-
-                // print('ogDiff: $slotsLeft diff: ${maxUp - minLow} -- max:$maxUp   min:$minLow curr:$curr');
-
                 final result = await _ParaRangeDialouge.show(
-                  context: context,
-                  currIdx: curr,
-                  minLow: minLow,
-                  maxUp: maxUp,
-                  lower: start,
-                  upper: end,
+                  context,
+                  curr: _curr,
+                  def: _def,
+                  length: _length,
                 );
 
-                if (result != null) {
-                  _start = result.lower - 1;
-                  _end = result.upper;
+                if (result == null) return;
 
-                  if (!context.mounted) return;
-                  setState(() => _setTxt());
-                  final paraShowCount = 1 + result.upper - result.lower;
-                  showSnack(
-                    context,
-                    paraShowCount == 1
-                        ? 'Showing a single para ${result.lower}'
-                        : 'Showing paras from ${result.lower} to ${result.upper} '
-                              '(total: $paraShowCount)',
-                    duration: const Duration(seconds: 3),
-                  );
-                }
+                if (!context.mounted) return;
+
+                setState(() {
+                  _curr = result;
+                  _setTxt();
+                });
+                showSnack(
+                  context,
+                  result.count == 1
+                      ? 'Showing a single para ${result.start + 1}'
+                      : 'Showing paras from ${result.start + 1} to ${result.end} '
+                            '(total: ${result.count})',
+                  duration: const Duration(seconds: 3),
+                );
               },
             ),
         ],
@@ -230,42 +209,34 @@ class _SelectableTextScreenState extends State<SelectableTextScreen> {
 }
 
 class _ParaRangeDialouge extends StatefulWidget {
-  final int currIdx;
-  final int minLow;
-  final int maxUp;
-  final int lower;
-  final int upper;
+  final SelectionBounds def;
+  final SelectionBounds curr;
+  final int lenght;
   final String title;
 
   const _ParaRangeDialouge({
-    required this.currIdx,
-    required this.minLow,
-    required this.maxUp,
-    required this.lower,
-    required this.upper,
+    required this.def,
+    required this.curr,
+    required this.lenght,
     this.title = 'Show Paras',
   });
 
-  static Future<Bounds?> show({
-    required BuildContext context,
-    required int currIdx,
-    required int minLow,
-    required int maxUp,
-    required int lower,
-    required int upper,
+  static Future<SelectionBounds?> show(
+    BuildContext context, {
+    required SelectionBounds def,
+    required SelectionBounds curr,
+    required int length,
     String title = 'Show Paras',
   }) {
-    assert(minLow <= maxUp);
+    // assert(currStart <= maxUp);
     // print('min: $minLow \t max: $maxUp \t curr: $currIdx');
-    return showDialog<Bounds>(
+    return showDialog<SelectionBounds>(
       context: context,
       builder: (context) {
         return _ParaRangeDialouge(
-          currIdx: currIdx,
-          minLow: minLow,
-          maxUp: maxUp,
-          lower: lower,
-          upper: upper,
+          curr: curr,
+          def: def,
+          lenght: length,
           title: title,
         );
       },
@@ -277,33 +248,25 @@ class _ParaRangeDialouge extends StatefulWidget {
 }
 
 class _ParaRangeDialougeState extends State<_ParaRangeDialouge> {
-  late int _currIdx;
-  late int _minLow;
-  late int _maxUp;
-  late int _lower;
-  late int _upper;
+  late SelectionBounds _mod;
   late final String _title;
 
   @override
   void initState() {
     super.initState();
-    _currIdx = widget.currIdx;
-    _minLow = widget.minLow;
-    _maxUp = widget.maxUp;
-    _lower = widget.lower;
-    _upper = widget.upper;
+    _mod = widget.curr.copy();
     _title = widget.title;
   }
 
-  void changeLower(int delta) {
+  void changeStart(int delta) {
     setState(() {
-      _lower = (_lower + delta).clamp(_minLow, _currIdx);
+      _mod.start = (_mod.start + delta).clamp(0, _mod.end);
     });
   }
 
-  void changeUpper(int delta) {
+  void changeEnd(int delta) {
     setState(() {
-      _upper = (_upper + delta).clamp(_currIdx, _maxUp);
+      _mod.end = (_mod.end + delta).clamp(_mod.start, widget.lenght);
     });
   }
 
@@ -312,7 +275,7 @@ class _ParaRangeDialougeState extends State<_ParaRangeDialouge> {
     return AlertDialog(
       // icon: const Icon(Icons.linear_scale),
       title: Text(
-        '$_title ${(1 + _upper - _lower).toString().padLeft(2, " ")}',
+        '$_title ${_mod.count.toString().padLeft(2, " ")}',
         textAlign: TextAlign.center,
       ),
       scrollable: true,
@@ -326,17 +289,23 @@ class _ParaRangeDialougeState extends State<_ParaRangeDialouge> {
             children: [
               _ValueEditor(
                 label: 'Start',
-                value: _lower,
-                onDecrease: _lower <= _minLow ? null : () => changeLower(-1),
-                onIncrease: _currIdx == _lower ? null : () => changeLower(1),
+                value: _mod.start + 1,
+                onDecrease: _mod.start <= 0 ? null : () => changeStart(-1),
+                onIncrease: _mod.start + 1 >= _mod.end
+                    ? null
+                    : () => changeStart(1),
               ),
               const Icon(Icons.arrow_right_alt_outlined, size: 28),
               _ValueEditor(
                 label: 'End',
-                value: _upper,
-                dash: _currIdx == _upper && _currIdx == _lower,
-                onDecrease: _currIdx == _upper ? null : () => changeUpper(-1),
-                onIncrease: _upper >= _maxUp ? null : () => changeUpper(1),
+                value: _mod.end,
+                dash: _mod.start + 1 == _mod.end,
+                onDecrease: _mod.end <= _mod.start + 1
+                    ? null
+                    : () => changeEnd(-1),
+                onIncrease: _mod.end > widget.lenght
+                    ? null
+                    : () => changeEnd(1),
               ),
             ],
           ),
@@ -345,12 +314,11 @@ class _ParaRangeDialougeState extends State<_ParaRangeDialouge> {
           FilledButton.tonalIcon(
             label: Text('Reset'),
             icon: Icon(Icons.restore),
-            onPressed: _lower == _currIdx && _upper == _currIdx
+            onPressed: widget.def.eq(_mod)
                 ? null
                 : () {
                     setState(() {
-                      _lower = _currIdx;
-                      _upper = _currIdx;
+                      _mod = widget.def.copy();
                     });
                   },
           ),
@@ -363,7 +331,7 @@ class _ParaRangeDialougeState extends State<_ParaRangeDialouge> {
         ),
         FilledButton(
           onPressed: () {
-            Navigator.pop(context, (lower: _lower, upper: _upper));
+            Navigator.pop(context, _mod);
           },
           child: const Text('Done'),
         ),
@@ -371,8 +339,6 @@ class _ParaRangeDialougeState extends State<_ParaRangeDialouge> {
     );
   }
 }
-
-typedef Bounds = ({int lower, int upper});
 
 class _ValueEditor extends StatelessWidget {
   final String label;

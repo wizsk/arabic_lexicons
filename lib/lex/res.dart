@@ -156,15 +156,17 @@ Widget _hansLaneView(
             final cleanTxtBr = htmlToPlainTextWithLineBr(txt);
             SelectableTextScreen.show(
               context,
-              (_, _) => cleanTxtBr,
-              TextAlign.left,
-              TextDirection.ltr,
+              fullTextFunc: (_) => cleanTxtBr,
+              textAlign: TextAlign.left,
+              dir: TextDirection.ltr,
               // ts,
-              ts.copyWith(
+              textStyleBodyMedium: ts.copyWith(
                 fontFamily: fontAmiri,
                 // the html renderer and normal renderer not the same :)
                 height: fontAmiriLineHeight + 0.3,
               ),
+              start: 0,
+              length: 1,
             );
           },
           child: Padding(

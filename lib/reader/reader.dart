@@ -605,18 +605,18 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
                                       subtitle: 'Navigate book',
                                       value: 'inspect',
                                     ),
-                                    ReaderSelectionTile(
-                                      icon: Icons.vertical_align_top,
-                                      title: 'Scroll to top',
-                                      subtitle: 'Jump to the beginning',
-                                      value: 'scroll-top',
-                                    ),
-                                    ReaderSelectionTile(
-                                      icon: Icons.vertical_align_bottom,
-                                      title: 'Scroll to bottom',
-                                      subtitle: 'Jump to the end',
-                                      value: 'scroll-bot',
-                                    ),
+                                    // ReaderSelectionTile(
+                                    //   icon: Icons.vertical_align_top,
+                                    //   title: 'Scroll to top',
+                                    //   subtitle: 'Jump to the beginning',
+                                    //   value: 'scroll-top',
+                                    // ),
+                                    // ReaderSelectionTile(
+                                    //   icon: Icons.vertical_align_bottom,
+                                    //   title: 'Scroll to bottom',
+                                    //   subtitle: 'Jump to the end',
+                                    //   value: 'scroll-bot',
+                                    // ),
                                     ReaderSelectionTile(
                                       icon: Icons.list,
                                       title: 'Foreign & Bookmarked',

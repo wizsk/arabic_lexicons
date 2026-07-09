@@ -107,7 +107,7 @@ cd -
 echo "Done: APKs copied to $OLDPWD/$OUT_DIR/"
 
 
-linux_zip="${n}_${ver}_linux.zip"
+linux_zip="${n}-v${ver}-linux.zip"
 linux_dest="build/linux/x64/release/$linux_zip"
 
 cp assets/icons/icon_rounded.png build/linux/x64/release/bundle/icon.png

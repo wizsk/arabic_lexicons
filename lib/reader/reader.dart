@@ -7,14 +7,15 @@ import 'package:ara_dict/data.dart';
 import 'package:ara_dict/main_widgets.dart';
 import 'package:ara_dict/pages/settings.dart';
 import 'package:ara_dict/reader/data.dart';
-import 'package:ara_dict/reader/word_lists.dart';
 import 'package:ara_dict/reader/input.dart';
 import 'package:ara_dict/reader/inspect.dart';
 import 'package:ara_dict/reader/reader_utils.dart';
 import 'package:ara_dict/reader/reader_widgets.dart';
 import 'package:ara_dict/reader/settings.dart';
 import 'package:ara_dict/reader/settings_class.dart';
+import 'package:ara_dict/reader/word_lists.dart';
 import 'package:ara_dict/utils.dart';
+import 'package:ara_dict/widgets/scroll.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -320,23 +321,8 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
           style: TextStyle(fontFamily: arabicFontStyle.fontFamily),
         ),
         actions: [
-          IconButton(
-            tooltip: 'Open lexicon on a popup-screen',
-            onPressed: () => openDict(context, ''),
-            icon: const Icon(Icons.book),
-          ),
+          ...scrollUpDownBtns(_sc, _paras.length - 1),
         ],
-        //   IconButton(
-        //     tooltip: 'Reader Mode settings',
-        //     onPressed: _settingsDrawer,
-        //     icon: const Icon(Icons.tune),
-        //   ),
-        //   IconButton(
-        //     icon: const Icon(Icons.exit_to_app_outlined),
-        //     tooltip: 'Exit Reader',
-        //     onPressed: () => exitReaderPage(context),
-        //   ),
-        // ],
       ),
     );
   }

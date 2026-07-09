@@ -4,6 +4,7 @@ final releases = [
     changes: '''
     Added scrollable word and dictionary selectors directly to the Lexicon page, eliminating the need for a popup (toggle it by long-pressing the open-popup button or in Settings → Lexicon)
     Remove limit of number of paragraph can be shown in selection-screen
+    Add page up/down to reader
     ''',
   ),
   Release(

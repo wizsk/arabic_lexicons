@@ -137,7 +137,7 @@ enum Dict {
   hanswehr(
     table: "hanswehr",
     ar: "هانز",
-    en: "Hanswehr",
+    en: "Hans",
     enLong: "Hans Wehr Dictionary",
     description:
         "Modern Arabic–English dictionary compiled by Hans Wehr. "
@@ -148,7 +148,7 @@ enum Dict {
   laneLexicon(
     table: "lanelexcon",
     ar: "لين",
-    en: "Lanes",
+    en: "Lane",
     enLong: "Lane’s Arabic-English Lexicon",
     description:
         "Comprehensive 19th-century Arabic-English lexicon by Edward William Lane, "
@@ -191,7 +191,7 @@ enum Dict {
 
   mujamulMuashiroh(
     table: "mujamul_muashiroh",
-    ar: "المعاصرة",
+    ar: "معاصرة",
     en: "Muasiroh",
     enLong: "Al-Muʿjam al-Muʿasirah",
     description:
@@ -200,7 +200,7 @@ enum Dict {
 
   mujamulWasith(
     table: "mujamul_wasith",
-    ar: "الوسيط",
+    ar: "وسيط",
     en: "Wasit",
     enLong: "Al-Muʿjam al-Wasit",
     description:
@@ -210,7 +210,7 @@ enum Dict {
 
   mujamulMuhith(
     table: "mujamul_muhith",
-    ar: "المحيط",
+    ar: "محيط",
     en: "Muhit",
     enLong: "Al-Qamus al-Muhit",
     description:

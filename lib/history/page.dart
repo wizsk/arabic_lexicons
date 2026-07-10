@@ -148,6 +148,7 @@ class _HistPageState extends State<HistPage> {
 
                         return SelectableWordListTitle(
                           word: itm.word,
+                          dict: itm.dict,
                           selection: _selection,
                           setState: setState,
                           contentPadding: const EdgeInsets.symmetric(
@@ -156,9 +157,8 @@ class _HistPageState extends State<HistPage> {
                           ),
                           subtitle: Text(
                             itm.dict.name,
-                            style: Theme.of(
-                              context,
-                            ).textTheme.bodySmall?.ar.copyWith(color: cs.secondary.withAlpha(230)),
+                            style: Theme.of(context).textTheme.bodySmall?.ar
+                                .copyWith(color: cs.secondary.withAlpha(230)),
                             textAlign: TextAlign.right,
                           ),
                           remove: () async => await WordStore.rmHistItem(itm),

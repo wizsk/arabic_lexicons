@@ -1,4 +1,5 @@
 import 'package:ara_dict/conf.dart';
+import 'package:ara_dict/data.dart';
 import 'package:ara_dict/datas/word_store.dart';
 import 'package:ara_dict/main_widgets.dart';
 import 'package:ara_dict/multi_selection.dart';
@@ -12,6 +13,7 @@ class SelectableWordListTitle extends StatelessWidget {
   final EdgeInsetsGeometry contentPadding;
   final Widget? subtitle;
   final Future<void> Function()? remove;
+  final Dict? dict;
 
   const SelectableWordListTitle({
     super.key,
@@ -24,6 +26,7 @@ class SelectableWordListTitle extends StatelessWidget {
     ),
     this.subtitle,
     required this.remove,
+    this.dict,
   });
 
   @override
@@ -59,7 +62,7 @@ class SelectableWordListTitle extends StatelessWidget {
           if (selection.hasSelection) {
             selection.toggle(word);
           } else {
-            openDict(context, word).then((_) => setState(() {}));
+            openDict(context, word, dict: dict).then((_) => setState(() {}));
           }
         },
         leading: IconButton(

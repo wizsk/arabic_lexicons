@@ -2,7 +2,6 @@ import 'dart:math';
 
 import 'package:ara_dict/conf.dart';
 import 'package:ara_dict/data.dart';
-import 'package:ara_dict/pages/width_padd.dart';
 import 'package:ara_dict/reader/reader_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';

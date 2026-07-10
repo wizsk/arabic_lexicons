@@ -380,7 +380,7 @@ class _WordDictPickerSheet extends StatelessWidget {
                       ],
                     ),
                   ),
-                  IconButton.filledTonal(
+                  IconButton.outlined(
                     onPressed: () {
                       Navigator.pop(
                         context,

@@ -139,7 +139,7 @@ class _DictReorderSheetState extends State<DictReorderSheet> {
                       //   child: Text('Reset'),
                       //   // icon: const Icon(Icons.restore_rounded),
                       // ),
-                      IconButton.filledTonal(
+                      IconButton.outlined(
                         tooltip: 'Toggle English/Arabic UI',
                         onPressed: () => _setShowEnglishNames(context),
                         icon: L.pr(
@@ -147,7 +147,7 @@ class _DictReorderSheetState extends State<DictReorderSheet> {
                           Icon(Icons.translate_rounded),
                         ),
                       ),
-                      IconButton.filledTonal(
+                      IconButton.outlined(
                         tooltip: 'Reset order',
                         onPressed: _resetOrder,
                         icon: const Icon(Icons.restore_rounded),

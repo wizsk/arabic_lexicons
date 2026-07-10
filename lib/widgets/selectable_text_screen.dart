@@ -311,7 +311,7 @@ class _ParaRangeDialougeState extends State<_ParaRangeDialouge> {
           ),
 
           const SizedBox(height: 20),
-          FilledButton.tonalIcon(
+          OutlinedButton.icon(
             label: Text('Reset'),
             icon: Icon(Icons.restore),
             onPressed: widget.def.eq(_mod)
@@ -362,7 +362,7 @@ class _ValueEditor extends StatelessWidget {
       spacing: 18,
       children: [
         // Text(label, style: Theme.of(context).textTheme.titleMedium),
-        IconButton.filledTonal(
+        IconButton.outlined(
           visualDensity: VisualDensity.compact,
           onPressed: onDecrease,
           icon: const Icon(Icons.remove),
@@ -376,7 +376,7 @@ class _ValueEditor extends StatelessWidget {
           ),
         ),
 
-        IconButton.filledTonal(
+        IconButton.outlined(
           visualDensity: VisualDensity.compact,
           onPressed: onIncrease,
           icon: const Icon(Icons.add),

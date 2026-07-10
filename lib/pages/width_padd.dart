@@ -618,7 +618,7 @@ class _Changer extends StatelessWidget {
                     runSpacing: 12,
                     alignment: WrapAlignment.center,
                     children: [
-                      IconButton.filledTonal(
+                      IconButton.filled(
                         icon: const Icon(Icons.remove),
                         onPressed: disabled || current <= minV
                             ? null
@@ -638,7 +638,7 @@ class _Changer extends StatelessWidget {
                           ),
                           onPressed: touggleDisable,
                         ),
-                      IconButton.filledTonal(
+                      IconButton.filled(
                         icon: const Icon(Icons.add),
                         onPressed: disabled || current >= maxV
                             ? null

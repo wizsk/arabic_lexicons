@@ -3,6 +3,6 @@ Name=Arabic Lexicons
 Exec=/home/user/.local/arabic_lexicons/arabic_lexicons
 Icon=/home/user/.local/arabic_lexicons/icon.png
 Type=Application
-Categories=Dictionary;
+Categories=Education;Dictionary
 Terminal=false
 StartupWMClass=io.github.wizsk.arabic_lexicons

@@ -118,11 +118,12 @@ class _ReaderScrollSettingsBottomSheetState
                 ),
               ),
 
-              IconButton.filledTonal(
-                icon: Icon(Icons.restore),
+              OutlinedButton.icon(
                 onPressed: _value != _def
                     ? () => setState(() => _value = _def)
                     : null,
+                label: const Text('Reset'),
+                icon: Icon(Icons.restore),
               ),
             ],
           ),

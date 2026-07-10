@@ -8,6 +8,7 @@ import 'package:ara_dict/reader/reader_utils.dart';
 import 'package:ara_dict/theme.dart';
 import 'package:ara_dict/utils.dart';
 import 'package:ara_dict/widgets/change_logs_widget.dart';
+import 'package:ara_dict/widgets/scroll.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -336,6 +337,19 @@ class _SettingsPageState extends State<SettingsPage> {
                             if (!context.mounted) return;
                             setState(() {});
                           });
+                        },
+                      ),
+
+                      ListTile(
+                        title: const Text('Reader Scroll'),
+                        subtitle: Text(
+                          'Scrolls ${appConf.readerScrollPersent}% of the screen height each time you tap the scroll button.',
+                        ),
+                        leading: const FilledIcon(Icons.swap_vert),
+                        trailing: const Icon(Icons.chevron_right),
+                        onTap: () async {
+                          await ReaderScrollSettingsBottomSheet.show(context);
+                          if (context.mounted) setState(() {});
                         },
                       ),
                     ],

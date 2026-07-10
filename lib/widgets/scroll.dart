@@ -1,3 +1,5 @@
+import 'package:ara_dict/conf.dart';
+import 'package:ara_dict/data.dart';
 import 'package:flutter/material.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
@@ -21,7 +23,7 @@ void scrollReaderUpmost(
 }
 
 void scrollReader(AutoScrollController sc, {bool scrollup = false}) {
-  const double pageScrollFraction = 0.65;
+  double pageScrollFraction = appConf.readerScrollPersent / 100.00;
 
   final pos = sc.position;
   final delta = pos.viewportDimension * pageScrollFraction;
@@ -49,4 +51,100 @@ List<Widget> scrollUpDownBtns(AutoScrollController sc, int lastItemIndex) {
       onLongPress: () => scrollReaderUpmost(sc, index: lastItemIndex),
     ),
   ];
+}
+
+class ReaderScrollSettingsBottomSheet extends StatefulWidget {
+  const ReaderScrollSettingsBottomSheet({super.key});
+
+  static Future<void> show(BuildContext context) async {
+    await showModalBottomSheet<double>(
+      context: context,
+      showDragHandle: true,
+      useSafeArea: true,
+      isScrollControlled: true,
+      constraints: const BoxConstraints(maxWidth: 600),
+      builder: (context) {
+        return const ReaderScrollSettingsBottomSheet();
+      },
+    );
+  }
+
+  @override
+  State<ReaderScrollSettingsBottomSheet> createState() =>
+      _ReaderScrollSettingsBottomSheetState();
+}
+
+class _ReaderScrollSettingsBottomSheetState
+    extends State<ReaderScrollSettingsBottomSheet> {
+  double _value = appConf.readerScrollPersent.toDouble();
+  final _def = AppSettingsController.readerScrollPersentDef.toDouble();
+
+  @override
+  Widget build(BuildContext context) {
+    // TODO: implement build
+    return SingleChildScrollView(
+      padding: scrollPaddingBottmSheet(context),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            'Scroll: ${_value.round()}%',
+            style: Theme.of(context).textTheme.headlineMedium,
+          ),
+          const SizedBox(height: 16),
+          Slider(
+            min: 40,
+            max: 90,
+            divisions: 10,
+            value: _value,
+            label: '${_value.round()}%',
+            onChanged: (v) {
+              setState(() => _value = v);
+            },
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            alignment: WrapAlignment.center,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            runSpacing: 8.0,
+            spacing: 8.0,
+            children: [
+              ...(const [60, 65, 70, 75, 80]).map(
+                (v) => OutlinedButton(
+                  child: Text('$v%'),
+                  onPressed: () {
+                    setState(() => _value = v.toDouble());
+                  },
+                ),
+              ),
+
+              IconButton.filledTonal(
+                icon: Icon(Icons.restore),
+                onPressed: _value != _def
+                    ? () => setState(() => _value = _def)
+                    : null,
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 16),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: SizedBox(
+              width: double.infinity,
+              child: FilledButton.icon(
+                onPressed: () async {
+                  await appConf.saveReaderScrollPersent(_value.round());
+                  if (context.mounted) Navigator.pop(context);
+                },
+
+                icon: const Icon(Icons.check),
+                label: const Text('Save'),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }

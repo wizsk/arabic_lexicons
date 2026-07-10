@@ -89,6 +89,7 @@ class AppSettingsController extends ChangeNotifier {
   static const _hideAppbarKey = 'happb';
   static const _scrollLexSelectionKey = 'scroll-lex-sel';
   static const _scrollLexSelectionAutoScKey = 'scroll-lex-sel-auto';
+  static const _readerScrollPersentKey = 'reader-sc-p';
 
   int _playRate = 0;
   int get playRatelastShown => _playRate;
@@ -103,6 +104,9 @@ class AppSettingsController extends ChangeNotifier {
 
   static const bool _hideStatusbarDef = false;
   bool _hideStatusbar = _hideStatusbarDef;
+
+  static const int readerScrollPersentDef = 65;
+  int _readerScrollPersent = readerScrollPersentDef;
 
   static const bool _scrollLexSelectionDef = false;
   bool _scrollLexSelection = _scrollLexSelectionDef;
@@ -171,6 +175,9 @@ class AppSettingsController extends ChangeNotifier {
     _seedColor = seedColorInt == null ? _seedColorDef : Color(seedColorInt);
 
     _playRate = prefs.getInt(_playRateKey) ?? 0;
+
+    _readerScrollPersent =
+        prefs.getInt(_readerScrollPersentKey) ?? readerScrollPersentDef;
 
     _appVersion = prefs.getString(_appVersionKey) ?? '';
 
@@ -304,6 +311,18 @@ class AppSettingsController extends ChangeNotifier {
     await pref.setString(_appVersionKey, _currentVersion);
 
     return true;
+  }
+
+  Future<void> saveReaderScrollPersent(int p) async {
+    if (_readerScrollPersent == p) return;
+    _readerScrollPersent = p;
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_readerScrollPersentKey, p);
+  }
+
+  int get readerScrollPersent {
+    return _readerScrollPersent;
   }
 
   Future<void> saveFullScreen(bool v) async {

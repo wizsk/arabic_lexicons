@@ -158,7 +158,7 @@ enum Dict {
 
   mujamulGhoni(
     table: "mujamul_ghoni",
-    ar: "الغني",
+    ar: "غني",
     en: "Ghani",
     enLong: "Al-Muʿjam al-Ghani",
     description:
@@ -167,7 +167,7 @@ enum Dict {
 
   mujamulShihah(
     table: "mujamul_shihah",
-    ar: "الصحاح",
+    ar: "صحاح",
     en: "Sihah",
     enLong: "Al-Sihah (al-Jawhari)",
     description:

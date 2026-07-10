@@ -109,11 +109,7 @@ class _SelectableTextScreenState extends State<SelectableTextScreen> {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
 
-    final readerPadd = readerPadding(
-      context,
-      maxWidth: appConf.maxWidth,
-      sidePadd: appConf.padding,
-    );
+    final readerPadd = appConf.readerPadd(context);
 
     final sidePadd = max(24.0, readerPadd.right);
 

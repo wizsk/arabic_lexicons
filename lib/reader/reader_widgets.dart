@@ -11,8 +11,14 @@ import 'package:ara_dict/widgets/selectable_text_screen.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
-const paraSpacerStart = WidgetSpan(child: SizedBox(width: 20));
-const paraSpaceInbetween = EdgeInsets.symmetric(vertical: 8);
+// const paraSpacerStart = WidgetSpan(child: SizedBox(width: 20));
+// const paraSpaceInbetween = EdgeInsets.symmetric(vertical: 8);
+
+InlineSpan paraSpacerStart(double fontSize) =>
+    WidgetSpan(child: SizedBox(width: (fontSize * 24) / 18));
+
+EdgeInsets paraSpaceInbetween(double fontSize) =>
+    EdgeInsets.symmetric(vertical: (8 * fontSize) / 18);
 
 class ClickableParagraph extends StatelessWidget {
   final int index;
@@ -64,7 +70,7 @@ class ClickableParagraph extends StatelessWidget {
   List<TextSpan> _buildSpans(BuildContext context) {
     final spans = <TextSpan>[];
 
-    spans.add(TextSpan(children: [paraSpacerStart]));
+    spans.add(TextSpan(children: [paraSpacerStart(rs.fontSize)]));
     for (final word in peras[index]) {
       spans.add(
         _readerWordSpan(

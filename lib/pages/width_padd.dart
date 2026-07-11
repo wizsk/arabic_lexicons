@@ -101,8 +101,8 @@ class ReaderAdjustData {
   }
 }
 
-const double minReaderFontSize = 14;
-const double maxReaderFontSize = 30;
+const double minReaderFontSize = 14.00;
+const double maxReaderFontSize = 36.00;
 
 class ReaderAdjustPage extends StatefulWidget {
   final ReaderAdjustData data;
@@ -371,11 +371,11 @@ class _ReaderAdjustPageState extends State<ReaderAdjustPage> {
                         childCount: _paras.length,
                         (context, index) {
                           return Padding(
-                            padding: paraSpaceInbetween,
+                            padding: paraSpaceInbetween(_data.fontSize),
                             child: Text.rich(
                               TextSpan(
                                 children: [
-                                  paraSpacerStart,
+                                  paraSpacerStart(_data.fontSize),
                                   TextSpan(text: _paras[index]),
                                 ],
                               ),

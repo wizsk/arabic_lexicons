@@ -320,9 +320,7 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
           textDirection: TextDirection.rtl,
           style: TextStyle(fontFamily: arabicFontStyle.fontFamily),
         ),
-        actions: [
-          ...scrollUpDownBtns(_sc, _paras.length - 1),
-        ],
+        actions: [...scrollUpDownBtns(_sc, _paras.length - 1)],
       ),
     );
   }
@@ -343,7 +341,7 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
           key: _keys[index],
           index: index,
           child: Padding(
-            padding: paraSpaceInbetween,
+            padding: paraSpaceInbetween(_rs.fontSize),
             child: ClickableBayt(
               index: index,
               rs: _rs,
@@ -378,7 +376,7 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
           key: _keys[index],
           index: index,
           child: Padding(
-            padding: paraSpaceInbetween,
+            padding: paraSpaceInbetween(_rs.fontSize),
             child: first != null && first.cl.isEmpty
                 ? Center(
                     child: Text(

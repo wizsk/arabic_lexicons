@@ -110,6 +110,10 @@ echo "Done: APKs copied to $OLDPWD/$OUT_DIR/"
 linux_zip="${n}-v${ver}-linux.zip"
 linux_dest="build/linux/x64/release/$linux_zip"
 
+flutter build linux --release \
+  --dart-define=APP_VERSION="$ver" \
+  --dart-define=GIT_COMMIT="$gc"
+
 cp assets/icons/icon_rounded.png build/linux/x64/release/bundle/icon.png
 cp arabic_lexicons.desktop build/linux/x64/release/bundle/
 

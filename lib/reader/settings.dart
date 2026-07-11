@@ -56,7 +56,7 @@ class _ReaderModeSettingsSheetState extends State<ReaderModeSettingsSheet> {
       appBar: AppBar(title: Text('Reader Settings')),
       body: SafeArea(
         child: ListView(
-          padding: scrollPadding,
+          padding: appConf.readerPadd(context),
           children: [
             // GLOBAL
             const SettingsSectionTitle(title: 'Global Settings'),

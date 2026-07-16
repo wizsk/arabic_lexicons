@@ -1,5 +1,11 @@
 final releases = [
   Release(
+    version: 'v3.3.0',
+    changes: '''
+    Set the font size for Arabic input fields and UI elements.
+    ''',
+  ),
+  Release(
     version: 'v3.2.0',
     changes: '''
     Added scrollable word and dictionary selectors directly to the Lexicon page, eliminating the need for a popup (toggle it by long-pressing the open-popup button or in Settings → Lexicon)

@@ -34,10 +34,14 @@ Widget showSearchSugg(
   List<Widget> resList = [];
 
   final word = datas.selectedWord;
-  final choiceChipTxtStyle = L.arStyle;
+  final choiceChipTxtStyle = L.arStyleSized;
   final highColor = cs.error;
+
   final choiceChipTxtStyleHigh = choiceChipTxtStyle.copyWith(color: highColor);
-  final titleStyle = L.arStyleOrNew.copyWith(fontWeight: FontWeight.w500);
+
+  final titleStyle = L.isAr
+      ? choiceChipTxtStyle.copyWith(color: cs.onSurface)
+      : TextStyle(color: cs.onSurface);
 
   resList.add(const SizedBox(height: 120));
 

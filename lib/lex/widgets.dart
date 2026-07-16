@@ -334,9 +334,11 @@ class _WordDictPickerSheet extends StatelessWidget {
     final th = theme.textTheme;
 
     // used for words
-    final chipTextStyle = L.arStyle.copyWith(color: cs.onSurface);
+    final chipTextStyle = L.arStyleSized.copyWith(color: cs.onSurface);
 
-    final chipTextStyleDict = L.arStyleOrNew.copyWith(color: cs.onSurface);
+    final chipTextStyleDict = L.isAr
+        ? chipTextStyle
+        : TextStyle(color: cs.onSurface);
 
     return SingleChildScrollView(
       padding: scrollPaddingBottmSheet(context),

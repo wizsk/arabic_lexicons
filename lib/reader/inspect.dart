@@ -222,9 +222,10 @@ class _PeraPickerSheetState extends State<_PeraPickerSheet>
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final arFont = Theme.of(
-      context,
-    ).textTheme.titleMedium!.ar.copyWith(fontWeight: FontWeight.normal);
+    final arFont = Theme.of(context).textTheme.titleMedium!.ar.copyWith(
+      fontWeight: FontWeight.normal,
+      fontSize: L.fontSize,
+    );
 
     return Material(
       color: cs.surface,
@@ -277,7 +278,7 @@ class _PeraPickerSheetState extends State<_PeraPickerSheet>
                               textAlign: TextAlign.start,
                               controller: _searchController,
                               onChanged: _onSearchChanged,
-                              style: L.arStyle,
+                              style: L.arStyleSized,
                               decoration: InputDecoration(
                                 hintText: L.pr(
                                   'ابحث عن النص…',

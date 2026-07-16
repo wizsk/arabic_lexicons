@@ -1,5 +1,6 @@
 import 'package:ara_dict/conf.dart';
 import 'package:ara_dict/data.dart';
+import 'package:ara_dict/font_size.dart';
 import 'package:ara_dict/lex/isolate.dart';
 import 'package:ara_dict/lex/rearrange_dicts.dart';
 import 'package:ara_dict/main_widgets.dart';
@@ -161,13 +162,7 @@ class _SettingsPageState extends State<SettingsPage> {
                           }
                         },
                       ),
-                    ],
-                  ),
 
-                  const SizedBox(height: 12),
-                  const SettingsSectionTitle(title: 'System'),
-                  SettingsSectionSurface(
-                    children: [
                       SwitchListTile(
                         secondary: const FilledIcon(Icons.translate),
                         title: Text('Use More Arabic'),
@@ -178,7 +173,28 @@ class _SettingsPageState extends State<SettingsPage> {
                           setState(() {});
                         },
                       ),
+                      ListTile(
+                        leading: const FilledIcon(Icons.format_size),
+                        title: Text(
+                          'UI font size: ${L.fontSize?.toStringAsFixed(0) ?? 'System'}',
+                        ),
+                        subtitle: const Text(
+                          'Set the font size for Arabic input fields and UI elements.',
+                        ),
+                        trailing: const Icon(Icons.chevron_right),
+                        onTap: () async {
+                          showUiFontSizeBottomSheet(context).then((_) {
+                            if (context.mounted) setState(() {});
+                          });
+                        },
+                      ),
+                    ],
+                  ),
 
+                  const SizedBox(height: 12),
+                  const SettingsSectionTitle(title: 'System'),
+                  SettingsSectionSurface(
+                    children: [
                       /// Keep Screen On
                       SwitchListTile(
                         secondary: FilledIcon(Icons.screen_lock_portrait),

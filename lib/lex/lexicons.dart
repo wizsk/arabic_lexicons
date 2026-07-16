@@ -165,8 +165,19 @@ class _SearchLexiconsState extends State<SearchLexicons>
 
     final cs = Theme.of(context).colorScheme;
 
-    final chipTextStyleDictWord = L.arStyle.copyWith(color: cs.onSurface);
-    final chipTextStyleDict = L.arStyleOrNew.copyWith(color: cs.onSurface);
+    final chipTextStyleDictWord = L.arStyle.copyWith(
+      color: cs.onSurface,
+      fontSize: L.fontSize,
+    );
+
+    const chipContainerMainHeight = 38.00;
+    final chipContainerHeight = L.fontSize == null
+        ? chipContainerMainHeight
+        : (chipContainerMainHeight * L.fontSize!) / 14;
+
+    final chipTextStyleDict = L.isAr
+        ? chipTextStyleDictWord
+        : TextStyle(color: cs.onSurface);
 
     final willShowSugg = _datas.isShowingSugg && _datas.sugg.isNotEmpty;
 
@@ -281,7 +292,7 @@ class _SearchLexiconsState extends State<SearchLexicons>
                       top: 6.0,
                     ),
                     child: SizedBox(
-                      height: 40.0,
+                      height: chipContainerHeight,
                       child: Directionality(
                         textDirection: TextDirection.rtl,
                         child: Align(
@@ -353,7 +364,7 @@ class _SearchLexiconsState extends State<SearchLexicons>
                     top: 6.0,
                   ),
                   child: SizedBox(
-                    height: 40.0,
+                    height: chipContainerHeight,
                     child: Directionality(
                       textDirection: L.dir,
                       child: Align(
@@ -500,7 +511,7 @@ class _SearchLexiconsState extends State<SearchLexicons>
                           );
                         },
                         // style: arTxtTheme,
-                        style: L.arStyle,
+                        style: L.arStyleSized,
                         decoration: InputDecoration(
                           hintText: L.p('Search Words', 'ابحث'),
                           hintTextDirection: L.dir,

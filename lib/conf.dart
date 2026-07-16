@@ -19,18 +19,22 @@ enum AppLang { en, ar }
 
 // app lang
 abstract final class L {
+  static double? _fontSize;
+
+  static double? get fontSize => _fontSize;
+
   static const _arUiFont = fontNotoSansArabic;
 
   static const _uiArTextStyle = TextStyle(fontFamily: _arUiFont);
 
   static TextStyle get arStyle => _uiArTextStyle;
 
-  // static AppLang _current = AppLang.en;
+  static TextStyle get arStyleSized =>
+      TextStyle(fontFamily: _arUiFont, fontSize: fontSize);
 
   static bool _isAr = false;
 
   static void set(AppLang l) {
-    // _current = l;
     _isAr = l == AppLang.ar; // slight optimization
   }
 
@@ -90,6 +94,7 @@ class AppSettingsController extends ChangeNotifier {
   static const _scrollLexSelectionKey = 'scroll-lex-sel';
   static const _scrollLexSelectionAutoScKey = 'scroll-lex-sel-auto';
   static const _readerScrollPersentKey = 'reader-sc-p';
+  static const _arUiFontSizeKey = 'aruif';
 
   int _playRate = 0;
   int get playRatelastShown => _playRate;
@@ -101,6 +106,8 @@ class AppSettingsController extends ChangeNotifier {
 
   static const bool _fullScreenDef = true;
   bool _fullScreen = _fullScreenDef;
+
+  double? _arUiFontSize;
 
   static const bool _hideStatusbarDef = false;
   bool _hideStatusbar = _hideStatusbarDef;
@@ -215,6 +222,9 @@ class AppSettingsController extends ChangeNotifier {
     _showSearchSugg = prefs.getBool(_showSearchSuggKey) ?? _showSearchSuggDef;
 
     _luwColored = prefs.getBool(_luwColoredKey) ?? _luwColoredDef;
+
+    _arUiFontSize = prefs.getDouble(_arUiFontSizeKey);
+    L._fontSize = _arUiFontSize;
 
     _useMoreArabic = prefs.getBool(_useMoreArabicKey) ?? _useMoreArabic;
     L.set(_useMoreArabic ? AppLang.ar : AppLang.en);
@@ -486,6 +496,21 @@ class AppSettingsController extends ChangeNotifier {
     }
 
     notify();
+  }
+
+  Future<void> setArUiFontSize(double? size) async {
+    if (_arUiFontSize == size) return;
+    _arUiFontSize = size;
+    L._fontSize = size;
+
+    notifyListeners();
+
+    final prefs = await SharedPreferences.getInstance();
+    if (size != null) {
+      await prefs.setDouble(_arUiFontSizeKey, size);
+    } else {
+      await prefs.remove(_arUiFontSizeKey);
+    }
   }
 
   Future<void> setReaderFont(String font) async {

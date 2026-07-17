@@ -39,6 +39,14 @@ Future<void> showWhatsNewSheet(BuildContext context) async {
                       ),
                     ),
                     const SizedBox(height: 12),
+                    Text(
+                      "Email sakibul706@gmail.com if you have any questions or encounter any problems",
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
                   ],
                 );
               }

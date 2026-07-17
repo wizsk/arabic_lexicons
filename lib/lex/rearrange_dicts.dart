@@ -295,7 +295,7 @@ Future<void> saveDictOrd() async {
     }
   }
 
-  print(sameOrder);
+  // print(sameOrder);
   try {
     final file = File(await dictOrdFilePath());
     if (sameOrder) {

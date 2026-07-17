@@ -2,7 +2,8 @@ final releases = [
   Release(
     version: 'v3.3.0',
     changes: '''
-    Set the font size for Arabic input fields and UI elements.
+    Set the font size for Arabic input fields and UI elements
+    Apply reader page settings immediately after changes
     ''',
   ),
   Release(

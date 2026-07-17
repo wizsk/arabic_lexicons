@@ -18,12 +18,12 @@ class ReaderModeSettingsSheet extends StatefulWidget {
     required this.paras,
   });
 
-  static Future<ReaderSettingsRes?> show(
+  static Future<void> show(
     BuildContext context, {
     required ReaderPageSettings settings,
     required PeraEntries paras,
   }) async {
-    return Navigator.push(
+    await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (_) =>
@@ -38,19 +38,23 @@ class ReaderModeSettingsSheet extends StatefulWidget {
 }
 
 class _ReaderModeSettingsSheetState extends State<ReaderModeSettingsSheet> {
-  late ReaderPageSettings rs;
+  late final ReaderPageSettings _rs;
 
   @override
   void initState() {
     super.initState();
-    rs = widget.original.copyWith();
+
+    _rs = widget.original;
   }
 
-  bool get hasChanged => !widget.original.isEqual(rs);
+  Future<void> _save() async {
+    await _rs.saveToFile();
+    if (context.mounted) setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    // final cs = Theme.of(context).colorScheme;
 
     return Scaffold(
       appBar: AppBar(title: Text('Reader Settings')),
@@ -94,35 +98,44 @@ class _ReaderModeSettingsSheetState extends State<ReaderModeSettingsSheet> {
                   title: const Text('Qasidah mode'),
                   subtitle: const Text('Poem layout'),
                   secondary: const FilledIcon(Icons.notes),
-                  value: rs.isQasidah,
-                  onChanged: (v) => setState(() => rs.isQasidah = v),
+                  value: _rs.isQasidah,
+                  onChanged: (v) {
+                    _rs.isQasidah = v;
+                    _save();
+                  },
                 ),
 
-                if (rs.isQasidah) ...[
+                if (_rs.isQasidah) ...[
                   SwitchListTile(
                     title: const Text('Center bayt'),
                     subtitle: const Text('Align poem to the center'),
                     secondary: const FilledIcon(Icons.format_align_center),
-                    value: rs.isQasidahCentered,
-                    onChanged: (v) => setState(() => rs.isQasidahCentered = v),
+                    value: _rs.isQasidahCentered,
+                    onChanged: (v) {
+                      _rs.isQasidahCentered = v;
+                      _save();
+                    },
                   ),
 
                   SwitchListTile(
                     title: const Text('Line numbers'),
                     subtitle: const Text('Show poem line numbers'),
                     secondary: const FilledIcon(Icons.list),
-                    value: rs.qasidahLineNum,
-                    onChanged: (v) => setState(() => rs.qasidahLineNum = v),
+                    value: _rs.qasidahLineNum,
+                    onChanged: (v) {
+                      _rs.qasidahLineNum = v;
+                      _save();
+                    },
                   ),
                 ] else ...[
                   SwitchListTile(
                     title: const Text('Right-aligned text'),
                     subtitle: const Text('Align text towards right'),
                     secondary: const FilledIcon(Icons.format_align_right),
-                    value: rs.textAlign == TextAlign.right,
+                    value: _rs.textAlign == TextAlign.right,
                     onChanged: (v) {
                       setState(() {
-                        rs.textAlign = v ? TextAlign.right : TextAlign.justify;
+                        _rs.textAlign = v ? TextAlign.right : TextAlign.justify;
                       });
                     },
                   ),
@@ -132,9 +145,12 @@ class _ReaderModeSettingsSheetState extends State<ReaderModeSettingsSheet> {
                   title: const Text('Resume reading'),
                   subtitle: const Text('Open from your last read paragraph'),
                   secondary: const FilledIcon(Icons.history),
-                  value: rs.saveLastPeraIdx && rs.bookHash.isNotEmpty,
-                  onChanged: rs.bookHash.isNotEmpty
-                      ? (v) => setState(() => rs.saveLastPeraIdx = v)
+                  value: _rs.saveLastPeraIdx && _rs.bookHash.isNotEmpty,
+                  onChanged: _rs.bookHash.isNotEmpty
+                      ? (v) {
+                          _rs.saveLastPeraIdx = v;
+                          _save();
+                        }
                       : null,
                 ),
               ],
@@ -153,7 +169,7 @@ class _ReaderModeSettingsSheetState extends State<ReaderModeSettingsSheet> {
                   ),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () async {
-                    final old = ReaderAdjustData.fromReaderPageSettings(rs);
+                    final old = ReaderAdjustData.fromReaderPageSettings(_rs);
 
                     final parasInput = widget.paras
                         .map((e) => e.map((f) => f.ar).join(" "))
@@ -169,12 +185,13 @@ class _ReaderModeSettingsSheetState extends State<ReaderModeSettingsSheet> {
                       return;
                     }
 
-                    setState(() => rs.applyRAD(res));
+                    _rs.applyRAD(res);
+                    await _save();
 
                     if (context.mounted) {
                       showSnack(
                         context,
-                        'Apply settings to save new Reader style',
+                        'New Reader style saved',
                         duration: Duration(seconds: 4),
                       );
                     }
@@ -185,49 +202,48 @@ class _ReaderModeSettingsSheetState extends State<ReaderModeSettingsSheet> {
                   title: const Text('Remove tashkil'),
                   subtitle: const Text('Remove Arabic harakat'),
                   secondary: const FilledIcon(Icons.do_not_disturb),
-                  value: rs.isRmTashkil,
-                  onChanged: (v) => setState(() => rs.isRmTashkil = v),
+                  value: _rs.isRmTashkil,
+                  onChanged: (v) {
+                    _rs.isRmTashkil = v;
+                    _save();
+                  },
                 ),
 
                 SwitchListTile(
                   title: const Text('Colored bookmarks'),
                   subtitle: const Text('Highlight bookmarked words'),
                   secondary: const FilledIcon(Icons.bookmark),
-                  value: rs.isBmColored,
-                  onChanged: (v) => setState(() => rs.isBmColored = v),
+                  value: _rs.isBmColored,
+                  onChanged: (v) {
+                    _rs.isBmColored = v;
+                    _save();
+                  },
                 ),
 
                 SwitchListTile(
                   title: const Text('Foreign'),
                   subtitle: const Text('Add looked up words to foreing'),
                   secondary: const FilledIcon(Icons.g_translate),
-                  value: rs.foreignAdd,
-                  onChanged: (v) => setState(() => rs.foreignAdd = v),
+                  value: _rs.foreignAdd,
+                  onChanged: (v) {
+                    _rs.foreignAdd = v;
+                    _save();
+                  },
                 ),
                 SwitchListTile(
                   title: const Text('Foreign Words'),
                   subtitle: const Text('Highlight looked-up words'),
                   secondary: const FilledIcon(Icons.highlight),
-                  value: rs.foreignColored,
-                  onChanged: (v) => setState(() => rs.foreignColored = v),
+                  value: _rs.foreignColored,
+                  onChanged: (v) {
+                    _rs.foreignColored = v;
+                    _save();
+                  },
                 ),
               ],
             ),
           ],
         ),
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: hasChanged ? () => Navigator.of(context).pop(RPS(rs)) : null,
-
-        backgroundColor: hasChanged ? null : cs.surfaceContainerHighest,
-        foregroundColor: hasChanged
-            ? null
-            : cs.onSurface.withValues(alpha: 0.38),
-
-        tooltip: 'Apply to current book',
-        // icon: const Icon(Icons.save),
-        label: const Text('Apply'),
-        icon: const Icon(Icons.save),
       ),
     );
   }

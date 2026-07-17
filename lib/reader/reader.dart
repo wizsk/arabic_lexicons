@@ -276,33 +276,7 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
   }
 
   Future<void> _settingsPage(BuildContext context) async {
-    final resutl = await ReaderModeSettingsSheet.show(
-      context,
-      settings: _rs,
-      paras: _paras,
-    );
-
-    if (resutl == null) return;
-
-    switch (resutl) {
-      case RPS(:final res):
-        if (_rs.isEqual(res)) return;
-
-        if (_rs.isRmTashkil != res.isRmTashkil) {
-          _title = _paras.readerAppbarTitle(res.isRmTashkil);
-        }
-
-        setState(() {
-          _rs = res;
-        });
-
-        if (context.mounted) {
-          showSnack(context, 'Settings applied to the current book');
-        }
-
-        _rs.saveToFile();
-        break;
-    }
+    await ReaderModeSettingsSheet.show(context, settings: _rs, paras: _paras);
   }
 
   Widget _buildSliverAppBar(BuildContext context, TextStyle arabicFontStyle) {

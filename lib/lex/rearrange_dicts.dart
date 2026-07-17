@@ -62,7 +62,7 @@ class _DictReorderSheetState extends State<DictReorderSheet> {
 
   void _reorder(int oldIndex, int newIndex) {
     setState(() {
-      if (newIndex > oldIndex) newIndex -= 1;
+      // if (newIndex > oldIndex) newIndex -= 1;
       final item = _dicts.removeAt(oldIndex);
       _dicts.insert(newIndex, item);
     });
@@ -254,10 +254,10 @@ class _DictReorderSheetState extends State<DictReorderSheet> {
                       Expanded(
                         flex: 2,
                         child: FilledButton.icon(
-                          onPressed: () {
+                          onPressed: () async {
                             allDictsOrd = _dicts;
-                            saveDictOrd();
-                            Navigator.pop(context);
+                            await saveDictOrd();
+                            if (context.mounted) Navigator.pop(context);
                           },
                           icon: const Icon(Icons.check_rounded),
                           style: FilledButton.styleFrom(
@@ -285,21 +285,23 @@ Future<String> dictOrdFilePath() async {
 }
 
 Future<void> saveDictOrd() async {
-  final str = allDictsOrd.map((d) => '${d.en}:${d.ar}').join('\n');
   // assert(allDicts.length == allDictsOrd.length);
   bool sameOrder = true;
   for (int i = 0; i < allDictsOrd.length; i++) {
+    // print('${allDicts[i]} != ${allDictsOrd[i]}}');
     if (allDicts[i] != allDictsOrd[i]) {
       sameOrder = false;
       break;
     }
   }
 
+  print(sameOrder);
   try {
     final file = File(await dictOrdFilePath());
     if (sameOrder) {
       await file.delete();
     } else {
+      final str = allDictsOrd.map((d) => '${d.en}:${d.ar}').join('\n');
       await file.writeAsString(str);
     }
   } catch (_) {}

@@ -301,7 +301,7 @@ Future<void> saveDictOrd() async {
     if (sameOrder) {
       await file.delete();
     } else {
-      final str = allDictsOrd.map((d) => '${d.en}:${d.ar}').join('\n');
+      final str = allDictsOrd.map((d) => d.table).join('\n');
       await file.writeAsString(str);
     }
   } catch (_) {}
@@ -312,26 +312,24 @@ Future<void> setDictOrdFromFile() async {
   try {
     final file = await dictOrdFilePath();
     lines = await File(file).readAsLines();
+
+    final set = <Dict>{};
+
+    for (var l in lines) {
+      l = l.trim();
+      if (l.isEmpty) continue;
+
+      final idx = allDicts.indexWhere((d) => d.table == l);
+      if (idx < 0) continue;
+
+      set.add(allDicts[idx]);
+    }
+
+    set.addAll(allDicts);
+
+    allDictsOrd = List.from(set);
   } catch (_) {
     allDictsOrd = allDicts;
     return;
   }
-
-  final set = <Dict>{};
-
-  for (var l in lines) {
-    l = l.trim();
-    final parts = l.split(':');
-    if (parts.length != 2) continue;
-    final en = parts[0];
-    final ar = parts[1];
-
-    final idx = allDicts.indexWhere((d) => d.en == en && d.ar == ar);
-    if (parts.length != 2) continue;
-    set.add(allDicts[idx]);
-  }
-
-  set.addAll(allDicts);
-
-  allDictsOrd = List.from(set);
 }

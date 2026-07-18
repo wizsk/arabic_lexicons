@@ -4,7 +4,7 @@ final releases = [
     changes: '''
     Set the font size for Arabic input fields and UI elements
     Apply reader page settings immediately after changes
-    Fix lexcion reordering bug
+    Fix lexcion reordering bug + crash
     ''',
   ),
   Release(

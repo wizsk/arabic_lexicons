@@ -1,11 +1,11 @@
-import 'package:ara_dict/conf.dart';
-import 'package:ara_dict/data.dart';
-import 'package:ara_dict/datas/word_store.dart';
-import 'package:ara_dict/main_widgets.dart';
-import 'package:ara_dict/reader/data.dart';
-import 'package:ara_dict/reader/reader_utils.dart';
-import 'package:ara_dict/reader/settings_class.dart';
-import 'package:ara_dict/utils.dart';
+import 'package:arabic_lexicons/conf.dart';
+import 'package:arabic_lexicons/data.dart';
+import 'package:arabic_lexicons/datas/word_store.dart';
+import 'package:arabic_lexicons/main_widgets.dart';
+import 'package:arabic_lexicons/reader/data.dart';
+import 'package:arabic_lexicons/reader/reader_utils.dart';
+import 'package:arabic_lexicons/reader/settings_class.dart';
+import 'package:arabic_lexicons/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 

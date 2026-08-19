@@ -1,4 +1,4 @@
-import 'package:ara_dict/data.dart';
+import 'package:arabic_lexicons/data.dart';
 import 'package:flutter/material.dart';
 // import 'package:in_app_review/in_app_review.dart';
 import 'package:url_launcher/url_launcher.dart';

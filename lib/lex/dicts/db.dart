@@ -1,6 +1,6 @@
 import 'dart:io';
-import 'package:ara_dict/data.dart';
-import 'package:ara_dict/utils.dart';
+import 'package:arabic_lexicons/data.dart';
+import 'package:arabic_lexicons/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:path/path.dart';

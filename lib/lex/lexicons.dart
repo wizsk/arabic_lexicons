@@ -1,17 +1,17 @@
 import 'dart:async';
 
-import 'package:ara_dict/conf.dart';
-import 'package:ara_dict/data.dart';
-import 'package:ara_dict/first_run.dart';
-import 'package:ara_dict/lex/data.dart';
-import 'package:ara_dict/lex/isolate.dart';
-import 'package:ara_dict/lex/rearrange_dicts.dart';
-import 'package:ara_dict/lex/res.dart';
-import 'package:ara_dict/lex/sugg/widgets.dart';
-import 'package:ara_dict/lex/utils.dart';
-import 'package:ara_dict/lex/widgets.dart';
-import 'package:ara_dict/main_widgets.dart';
-import 'package:ara_dict/utils.dart';
+import 'package:arabic_lexicons/conf.dart';
+import 'package:arabic_lexicons/data.dart';
+import 'package:arabic_lexicons/first_run.dart';
+import 'package:arabic_lexicons/lex/data.dart';
+import 'package:arabic_lexicons/lex/isolate.dart';
+import 'package:arabic_lexicons/lex/rearrange_dicts.dart';
+import 'package:arabic_lexicons/lex/res.dart';
+import 'package:arabic_lexicons/lex/sugg/widgets.dart';
+import 'package:arabic_lexicons/lex/utils.dart';
+import 'package:arabic_lexicons/lex/widgets.dart';
+import 'package:arabic_lexicons/main_widgets.dart';
+import 'package:arabic_lexicons/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 

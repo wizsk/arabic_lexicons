@@ -1,6 +1,6 @@
 {
-    "name": "ara_dict",
-    "short_name": "ara_dict",
+    "name": "arabic_lexicons",
+    "short_name": "arabic_lexicons",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

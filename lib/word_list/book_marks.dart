@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:ara_dict/datas/word_store.dart';
+import 'package:arabic_lexicons/datas/word_store.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 

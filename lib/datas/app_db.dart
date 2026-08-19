@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:ara_dict/datas/word_store.dart';
+import 'package:arabic_lexicons/datas/word_store.dart';
 import 'package:path/path.dart' as path;
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 

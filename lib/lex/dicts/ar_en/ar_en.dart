@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:isolate';
 import 'dart:typed_data';
 
-import 'package:ara_dict/lex/dicts/ar_en/ar_en_utils.dart';
+import 'package:arabic_lexicons/lex/dicts/ar_en/ar_en_utils.dart';
 
 class ArEnEntry {
   final String root;

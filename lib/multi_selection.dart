@@ -1,4 +1,4 @@
-import 'package:ara_dict/main_widgets.dart';
+import 'package:arabic_lexicons/main_widgets.dart';
 import 'package:flutter/material.dart';
 
 class SelectionController<T> {

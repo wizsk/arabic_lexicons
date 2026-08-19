@@ -1,6 +1,6 @@
-import 'package:ara_dict/conf.dart';
-import 'package:ara_dict/data.dart';
-import 'package:ara_dict/theme.dart';
+import 'package:arabic_lexicons/conf.dart';
+import 'package:arabic_lexicons/data.dart';
+import 'package:arabic_lexicons/theme.dart';
 import 'package:flutter/material.dart';
 
 /// if [fontSize] is provided

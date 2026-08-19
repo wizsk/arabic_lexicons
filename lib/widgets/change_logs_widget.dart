@@ -1,7 +1,7 @@
-import 'package:ara_dict/change_logs.dart';
-import 'package:ara_dict/data.dart';
-import 'package:ara_dict/pages/help/help.dart';
-import 'package:ara_dict/play_rate.dart';
+import 'package:arabic_lexicons/change_logs.dart';
+import 'package:arabic_lexicons/data.dart';
+import 'package:arabic_lexicons/pages/help/help.dart';
+import 'package:arabic_lexicons/play_rate.dart';
 import 'package:flutter/material.dart';
 
 Future<void> showWhatsNewSheet(BuildContext context) async {

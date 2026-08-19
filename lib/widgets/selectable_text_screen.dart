@@ -1,8 +1,8 @@
 import 'dart:math';
 
-import 'package:ara_dict/conf.dart';
-import 'package:ara_dict/data.dart';
-import 'package:ara_dict/reader/reader_utils.dart';
+import 'package:arabic_lexicons/conf.dart';
+import 'package:arabic_lexicons/data.dart';
+import 'package:arabic_lexicons/reader/reader_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 

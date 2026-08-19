@@ -1,9 +1,9 @@
-import 'package:ara_dict/conf.dart';
-import 'package:ara_dict/data.dart';
-import 'package:ara_dict/lex/data.dart';
-import 'package:ara_dict/lex/res.dart';
-import 'package:ara_dict/lex/sugg/data.dart';
-import 'package:ara_dict/utils.dart';
+import 'package:arabic_lexicons/conf.dart';
+import 'package:arabic_lexicons/data.dart';
+import 'package:arabic_lexicons/lex/data.dart';
+import 'package:arabic_lexicons/lex/res.dart';
+import 'package:arabic_lexicons/lex/sugg/data.dart';
+import 'package:arabic_lexicons/utils.dart';
 import 'package:flutter/material.dart';
 
 Widget showSearchSugg(

@@ -1,3 +1,7 @@
+key.properties
+build
+.kotlin
+
 gradle-wrapper.jar
 /.gradle
 /captures/

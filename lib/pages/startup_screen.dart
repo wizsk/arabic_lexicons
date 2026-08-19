@@ -1,9 +1,9 @@
-import 'package:ara_dict/data.dart';
-import 'package:ara_dict/datas/app_db.dart';
-import 'package:ara_dict/lex/dicts/db.dart';
-import 'package:ara_dict/lex/isolate.dart';
-import 'package:ara_dict/lex/rearrange_dicts.dart';
-import 'package:ara_dict/main_widgets.dart';
+import 'package:arabic_lexicons/data.dart';
+import 'package:arabic_lexicons/datas/app_db.dart';
+import 'package:arabic_lexicons/lex/dicts/db.dart';
+import 'package:arabic_lexicons/lex/isolate.dart';
+import 'package:arabic_lexicons/lex/rearrange_dicts.dart';
+import 'package:arabic_lexicons/main_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 

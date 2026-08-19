@@ -1,11 +1,11 @@
 import 'dart:io';
 
-import 'package:ara_dict/data.dart';
-import 'package:ara_dict/datas/app_db.dart';
-import 'package:ara_dict/history/history.dart';
-import 'package:ara_dict/reader/input.dart';
-import 'package:ara_dict/reader/settings_class.dart';
-import 'package:ara_dict/word_list/book_marks.dart';
+import 'package:arabic_lexicons/data.dart';
+import 'package:arabic_lexicons/datas/app_db.dart';
+import 'package:arabic_lexicons/history/history.dart';
+import 'package:arabic_lexicons/reader/input.dart';
+import 'package:arabic_lexicons/reader/settings_class.dart';
+import 'package:arabic_lexicons/word_list/book_marks.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:path/path.dart' as path;

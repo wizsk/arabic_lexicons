@@ -3,9 +3,9 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
 
-import 'package:ara_dict/data.dart';
-import 'package:ara_dict/lex/dicts/db.dart';
-import 'package:ara_dict/lex/sugg/data.dart';
+import 'package:arabic_lexicons/data.dart';
+import 'package:arabic_lexicons/lex/dicts/db.dart';
+import 'package:arabic_lexicons/lex/sugg/data.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';

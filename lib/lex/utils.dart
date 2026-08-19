@@ -1,6 +1,6 @@
-import 'package:ara_dict/alphabets.dart';
-import 'package:ara_dict/lex/data.dart';
-import 'package:ara_dict/reader/reader_utils.dart';
+import 'package:arabic_lexicons/alphabets.dart';
+import 'package:arabic_lexicons/lex/data.dart';
+import 'package:arabic_lexicons/reader/reader_utils.dart';
 import 'package:flutter/material.dart';
 
 const int _maxTextSize = 500;

@@ -1,5 +1,5 @@
-import 'package:ara_dict/conf.dart';
-import 'package:ara_dict/main_widgets.dart';
+import 'package:arabic_lexicons/conf.dart';
+import 'package:arabic_lexicons/main_widgets.dart';
 import 'package:flutter/cupertino.dart';
 
 class ArabicNormalizer {

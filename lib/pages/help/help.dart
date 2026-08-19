@@ -1,11 +1,11 @@
-import 'package:ara_dict/pages/width_padd.dart';
-import 'package:ara_dict/play_rate.dart';
-import 'package:ara_dict/utils.dart';
+import 'package:arabic_lexicons/pages/width_padd.dart';
+import 'package:arabic_lexicons/play_rate.dart';
+import 'package:arabic_lexicons/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import 'package:ara_dict/data.dart';
-import 'package:ara_dict/pages/help/help_utils.dart';
+import 'package:arabic_lexicons/data.dart';
+import 'package:arabic_lexicons/pages/help/help_utils.dart';
 
 class HelpPage extends StatelessWidget {
   const HelpPage({super.key});

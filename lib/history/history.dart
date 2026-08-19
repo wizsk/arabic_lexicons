@@ -1,4 +1,4 @@
-import 'package:ara_dict/data.dart';
+import 'package:arabic_lexicons/data.dart';
 
 class SearchHistItem {
   final String word;

@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:ara_dict/data.dart';
-import 'package:ara_dict/pages/width_padd.dart';
+import 'package:arabic_lexicons/data.dart';
+import 'package:arabic_lexicons/pages/width_padd.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart';

@@ -1,8 +1,8 @@
 import 'dart:convert';
 
-import 'package:ara_dict/data.dart';
-import 'package:ara_dict/lex/dicts/db.dart';
-import 'package:ara_dict/lex/sugg/sugg.dart';
+import 'package:arabic_lexicons/data.dart';
+import 'package:arabic_lexicons/lex/dicts/db.dart';
+import 'package:arabic_lexicons/lex/sugg/sugg.dart';
 
 class SuggDatas {
   final Map<String, SuggestionMeta> suggMap;

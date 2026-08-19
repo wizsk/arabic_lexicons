@@ -22,20 +22,13 @@ android {
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
+    buildFeatures {
+        resValues = true
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
-    }
-
-    dependenciesInfo {
-        includeInApk = false
-        // includeInBundle = false
-    }
-
-    kotlin {
-        compilerOptions {
-            jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
-        }
     }
 
     defaultConfig {
@@ -57,8 +50,8 @@ android {
         }
     }
 
-    buildTypes {
 
+    buildTypes {
         debug {
             applicationIdSuffix = ".debug"
 
@@ -74,6 +67,12 @@ android {
                 signingConfig = signingConfigs.getByName("release")
             }
         }
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
     }
 }
 

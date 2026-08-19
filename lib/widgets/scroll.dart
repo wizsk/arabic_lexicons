@@ -1,5 +1,5 @@
-import 'package:ara_dict/conf.dart';
-import 'package:ara_dict/data.dart';
+import 'package:arabic_lexicons/conf.dart';
+import 'package:arabic_lexicons/data.dart';
 import 'package:flutter/material.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 

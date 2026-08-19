@@ -1,15 +1,15 @@
 import 'dart:async';
 
-import 'package:ara_dict/change_logs.dart';
-import 'package:ara_dict/data.dart';
-import 'package:ara_dict/lex/isolate.dart';
-import 'package:ara_dict/pages/settings.dart';
-import 'package:ara_dict/pages/width_padd.dart';
-import 'package:ara_dict/play_rate.dart';
-import 'package:ara_dict/reader/settings_class.dart';
-import 'package:ara_dict/theme.dart';
-import 'package:ara_dict/utils.dart';
-import 'package:ara_dict/widgets/change_logs_widget.dart';
+import 'package:arabic_lexicons/change_logs.dart';
+import 'package:arabic_lexicons/data.dart';
+import 'package:arabic_lexicons/lex/isolate.dart';
+import 'package:arabic_lexicons/pages/settings.dart';
+import 'package:arabic_lexicons/pages/width_padd.dart';
+import 'package:arabic_lexicons/play_rate.dart';
+import 'package:arabic_lexicons/reader/settings_class.dart';
+import 'package:arabic_lexicons/theme.dart';
+import 'package:arabic_lexicons/utils.dart';
+import 'package:arabic_lexicons/widgets/change_logs_widget.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';

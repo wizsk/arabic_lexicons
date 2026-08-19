@@ -1,9 +1,9 @@
 import 'dart:io';
 
-import 'package:ara_dict/conf.dart';
-import 'package:ara_dict/data.dart';
-import 'package:ara_dict/main_widgets.dart';
-import 'package:ara_dict/utils.dart';
+import 'package:arabic_lexicons/conf.dart';
+import 'package:arabic_lexicons/data.dart';
+import 'package:arabic_lexicons/main_widgets.dart';
+import 'package:arabic_lexicons/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';

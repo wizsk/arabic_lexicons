@@ -1,13 +1,13 @@
 import 'dart:math' as math;
 
-import 'package:ara_dict/conf.dart';
-import 'package:ara_dict/data.dart';
-import 'package:ara_dict/pages/data.dart';
-import 'package:ara_dict/reader/reader_utils.dart';
-import 'package:ara_dict/reader/reader_widgets.dart';
-import 'package:ara_dict/reader/settings_class.dart';
-import 'package:ara_dict/theme.dart';
-import 'package:ara_dict/utils.dart';
+import 'package:arabic_lexicons/conf.dart';
+import 'package:arabic_lexicons/data.dart';
+import 'package:arabic_lexicons/pages/data.dart';
+import 'package:arabic_lexicons/reader/reader_utils.dart';
+import 'package:arabic_lexicons/reader/reader_widgets.dart';
+import 'package:arabic_lexicons/reader/settings_class.dart';
+import 'package:arabic_lexicons/theme.dart';
+import 'package:arabic_lexicons/utils.dart';
 import 'package:flutter/material.dart';
 
 EdgeInsets readerPadding(

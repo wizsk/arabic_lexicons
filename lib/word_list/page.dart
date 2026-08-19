@@ -1,10 +1,10 @@
-import 'package:ara_dict/data.dart';
-import 'package:ara_dict/datas/word_store.dart';
-import 'package:ara_dict/multi_selection.dart';
-import 'package:ara_dict/pages/utils.dart';
-import 'package:ara_dict/reader/word_lists.dart';
-import 'package:ara_dict/utils.dart';
-import 'package:ara_dict/word_list/utils.dart';
+import 'package:arabic_lexicons/data.dart';
+import 'package:arabic_lexicons/datas/word_store.dart';
+import 'package:arabic_lexicons/multi_selection.dart';
+import 'package:arabic_lexicons/pages/utils.dart';
+import 'package:arabic_lexicons/reader/word_lists.dart';
+import 'package:arabic_lexicons/utils.dart';
+import 'package:arabic_lexicons/word_list/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 

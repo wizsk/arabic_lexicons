@@ -1,4 +1,4 @@
-name: ara_dict
+name: arabic_lexicons
 description: "Arabic Lexicons"
 publish_to: "none"
 version: 3.4.0+304000

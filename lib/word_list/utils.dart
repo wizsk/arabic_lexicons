@@ -1,12 +1,12 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:ara_dict/alphabets.dart';
-import 'package:ara_dict/data.dart';
-import 'package:ara_dict/helper_widgets.dart';
-import 'package:ara_dict/lex/isolate.dart';
-import 'package:ara_dict/main_widgets.dart';
-import 'package:ara_dict/reader/reader_utils.dart';
+import 'package:arabic_lexicons/alphabets.dart';
+import 'package:arabic_lexicons/data.dart';
+import 'package:arabic_lexicons/helper_widgets.dart';
+import 'package:arabic_lexicons/lex/isolate.dart';
+import 'package:arabic_lexicons/main_widgets.dart';
+import 'package:arabic_lexicons/reader/reader_utils.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';

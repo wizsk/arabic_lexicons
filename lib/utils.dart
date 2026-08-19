@@ -1,5 +1,5 @@
-import 'package:ara_dict/data.dart';
-import 'package:ara_dict/lex/lexicons.dart';
+import 'package:arabic_lexicons/data.dart';
+import 'package:arabic_lexicons/lex/lexicons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:html/parser.dart' as html_parser;

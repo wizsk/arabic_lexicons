@@ -1,11 +1,11 @@
 import 'dart:isolate';
 
-import 'package:ara_dict/lex/dicts/ar_en/ar_en.dart';
-import 'package:ara_dict/lex/dicts/ar_en/ar_en_utils.dart';
-import 'package:ara_dict/data.dart';
-import 'package:ara_dict/lex/sugg/data.dart';
-import 'package:ara_dict/lex/sugg/sugg.dart';
-import 'package:ara_dict/utils.dart';
+import 'package:arabic_lexicons/lex/dicts/ar_en/ar_en.dart';
+import 'package:arabic_lexicons/lex/dicts/ar_en/ar_en_utils.dart';
+import 'package:arabic_lexicons/data.dart';
+import 'package:arabic_lexicons/lex/sugg/data.dart';
+import 'package:arabic_lexicons/lex/sugg/sugg.dart';
+import 'package:arabic_lexicons/utils.dart';
 import 'package:path_provider/path_provider.dart';
 
 class Isolates {

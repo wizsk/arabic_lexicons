@@ -2,10 +2,10 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:ara_dict/alphabets.dart';
-import 'package:ara_dict/conf.dart';
-import 'package:ara_dict/pages/settings.dart';
-import 'package:ara_dict/reader/data.dart';
+import 'package:arabic_lexicons/alphabets.dart';
+import 'package:arabic_lexicons/conf.dart';
+import 'package:arabic_lexicons/pages/settings.dart';
+import 'package:arabic_lexicons/reader/data.dart';
 import 'package:archive/archive.dart';
 import 'package:flutter/material.dart';
 

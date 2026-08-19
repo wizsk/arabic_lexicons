@@ -267,6 +267,8 @@ class _ParaRangeDialougeState extends State<_ParaRangeDialouge> {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
     return AlertDialog(
       // icon: const Icon(Icons.linear_scale),
       title: Text(
@@ -290,7 +292,11 @@ class _ParaRangeDialougeState extends State<_ParaRangeDialouge> {
                     ? null
                     : () => changeStart(1),
               ),
-              const Icon(Icons.arrow_right_alt_outlined, size: 28),
+              Icon(
+                Icons.arrow_right_alt_outlined,
+                size: 28,
+                color: cs.secondary.withAlpha(200),
+              ),
               _ValueEditor(
                 label: 'End',
                 value: _mod.end,
@@ -298,7 +304,7 @@ class _ParaRangeDialougeState extends State<_ParaRangeDialouge> {
                 onDecrease: _mod.end <= _mod.start + 1
                     ? null
                     : () => changeEnd(-1),
-                onIncrease: _mod.end > widget.lenght
+                onIncrease: _mod.end >= widget.lenght
                     ? null
                     : () => changeEnd(1),
               ),

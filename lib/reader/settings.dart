@@ -231,8 +231,8 @@ class _ReaderModeSettingsSheetState extends State<ReaderModeSettingsSheet> {
                   },
                 ),
                 SwitchListTile(
-                  title: const Text('Foreign Words'),
-                  subtitle: const Text('Highlight looked-up words'),
+                  title: const Text('Colored Foreign'),
+                  subtitle: const Text('Highlight foreign words'),
                   secondary: const FilledIcon(Icons.highlight),
                   value: _rs.foreignColored,
                   onChanged: (v) {

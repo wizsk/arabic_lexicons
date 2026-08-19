@@ -236,7 +236,7 @@ Widget _hansLaneView(
               dir: TextDirection.ltr,
               // ts,
               textStyleBodyMedium: ts.copyWith(
-                fontFamily: fontAmiri,
+                fontFamily: fontFam,
                 // the html renderer and normal renderer not the same :)
                 height: appConf.useHansLaneDefRDStyle
                     ? htmlFontHeight + 0.3

@@ -157,7 +157,15 @@ Widget _showArEnRes(
                       await Clipboard.setData(ClipboardData(text: e.def));
 
                       if (!context.mounted) return;
-                      showSnack(context, 'Definition copied');
+                      showSnack(
+                        context,
+                        '',
+                        messageWidget: Text(
+                          'Copied: ${e.def}',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      );
                     },
                     onLongPress: () {
                       if (!context.mounted) return;

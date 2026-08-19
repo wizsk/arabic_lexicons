@@ -1,6 +1,6 @@
 name: arabic_lexicons
+publish_to: none
 description: "Arabic Lexicons"
-publish_to: "none"
 version: 3.4.0+304000
 
 environment:

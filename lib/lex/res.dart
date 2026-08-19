@@ -2,11 +2,9 @@ import 'package:ara_dict/alphabets.dart';
 import 'package:ara_dict/conf.dart';
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/lex/data.dart';
-import 'package:ara_dict/reader/reader_utils.dart';
 import 'package:ara_dict/utils.dart';
 import 'package:ara_dict/widgets/selectable_text_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
@@ -107,10 +105,16 @@ Widget _showArEnRes(
                 DataCell(
                   Text(e.def),
                   onTap: () async {
-                    await Clipboard.setData(ClipboardData(text: e.def));
-
                     if (!context.mounted) return;
-                    showSnack(context, 'Definition copied');
+                    SelectableTextScreen.show(
+                      context,
+                      dir: TextDirection.ltr,
+                      textAlign: TextAlign.center,
+                      fullTextFunc: (_) => e.def,
+                      start: 0,
+                      length: 1,
+                      textStyleBodyMedium: ts,
+                    );
                   },
                 ),
                 // DataCell(SelectableText(e.def, style: ts, maxLines: 1, scrollPhysics: const NeverScrollableScrollPhysics())),

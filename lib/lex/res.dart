@@ -84,6 +84,7 @@ Widget _showArEnRes(
   TextStyle tsOg,
   SearchLexiconsDatas datas,
 ) {
+  final cs = Theme.of(context).colorScheme;
   final ts = tsOg.copyWith(height: defArabicFontHeihgt);
   const tp = EdgeInsets.symmetric(horizontal: 8, vertical: 4);
 
@@ -92,10 +93,7 @@ Widget _showArEnRes(
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: Table(
-          border: TableBorder.all(
-            color: Theme.of(context).colorScheme.outline,
-            width: 0.5,
-          ),
+          border: TableBorder.all(color: cs.outlineVariant, width: 0.5),
           columnWidths: const {
             0: IntrinsicColumnWidth(),
             1: IntrinsicColumnWidth(),
@@ -105,9 +103,7 @@ Widget _showArEnRes(
           children: [
             // Header
             TableRow(
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceContainerHighest,
-              ),
+              decoration: BoxDecoration(color: cs.surfaceContainerLow),
               children: [
                 Padding(
                   padding: tp,
@@ -146,7 +142,7 @@ Widget _showArEnRes(
                 decoration: BoxDecoration(
                   color: a.$1.isEven
                       ? null
-                      : Theme.of(context).colorScheme.surfaceContainerLow,
+                      : cs.surfaceContainerLow.withAlpha(150),
                 ),
                 children: [
                   Padding(
@@ -154,7 +150,7 @@ Widget _showArEnRes(
                     child: Center(child: Text(e.word, style: ts)),
                   ),
 
-                  InkWell(
+                  GestureDetector(
                     onTap: () {
                       if (!context.mounted) return;
 
@@ -174,7 +170,7 @@ Widget _showArEnRes(
                     ),
                   ),
 
-                  InkWell(
+                  GestureDetector(
                     onTap: e.root.isEmpty
                         ? null
                         : () {

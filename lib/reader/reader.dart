@@ -390,6 +390,7 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
                 fontFamily: _rs.fontFam,
                 fontSize: _rs.fontSize,
                 fontFamilyFallback: [fontKitab],
+                height: _rs.fontHeight,
               );
 
     final isFabVisable = appConf.hideAppbar ? _isFabVisable : true;

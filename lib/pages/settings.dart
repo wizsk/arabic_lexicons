@@ -169,8 +169,9 @@ class _SettingsPageState extends State<SettingsPage> {
                         subtitle: Text('Display Various Things in Arabic'),
                         value: L.isAr,
                         onChanged: (value) {
-                          notifier.saveUseMoreArabic(value);
-                          setState(() {});
+                          notifier.saveUseMoreArabic(value).then((_) {
+                            if (context.mounted) setState(() {});
+                          });
                         },
                       ),
                       ListTile(

@@ -50,6 +50,7 @@ class ReaderPageSettings {
   TextAlign textAlign;
   String fontFam;
   double fontSize;
+  double fontHeight;
   double maxWidth;
   double padding;
 
@@ -64,6 +65,7 @@ class ReaderPageSettings {
     required this.fontFam,
     required this.textAlign,
     required this.fontSize,
+    required this.fontHeight,
     required this.foreignAdd,
     required this.foreignColored,
     required this.maxWidth,
@@ -81,6 +83,7 @@ class ReaderPageSettings {
         saveLastPeraIdx: true,
         fontFam: appConf.readerFont,
         fontSize: appConf.readerFontSize,
+        fontHeight: appConf.readerFontHeight,
         textAlign: TextAlign.justify,
         foreignAdd: true,
         foreignColored: appConf.luwColored,
@@ -101,6 +104,7 @@ class ReaderPageSettings {
         foreignColored == rs.foreignColored &&
         maxWidth == rs.maxWidth &&
         padding == rs.padding &&
+        fontHeight == rs.fontHeight &&
         fontSize == rs.fontSize;
   }
 
@@ -109,6 +113,7 @@ class ReaderPageSettings {
     padding = d.padding;
     fontFam = d.fontFam;
     fontSize = d.fontSize;
+    fontHeight = d.fontHeight;
   }
 
   ReaderPageSettings copyWith({
@@ -123,6 +128,7 @@ class ReaderPageSettings {
     String? fontFam,
     TextAlign? textAlign,
     double? fontSize,
+    double? fontHeight,
     bool? foreignAdd,
     bool? foreignColored,
     double? padding,
@@ -139,6 +145,7 @@ class ReaderPageSettings {
       fontFam: fontFam ?? this.fontFam,
       textAlign: textAlign ?? this.textAlign,
       fontSize: fontSize ?? this.fontSize,
+      fontHeight: fontHeight ?? this.fontHeight,
       foreignAdd: foreignAdd ?? this.foreignAdd,
       foreignColored: foreignColored ?? this.foreignColored,
       maxWidth: maxWidth ?? this.maxWidth,
@@ -157,6 +164,7 @@ class ReaderPageSettings {
       'textAlign': textAlign.name,
       'saveLastPeraIdx': saveLastPeraIdx,
       'fontSize': fontSize,
+      'fontHeight': fontHeight,
       'luwAdd': foreignAdd,
       'luwColored': foreignColored,
       'maxWidth': maxWidth,
@@ -173,6 +181,7 @@ class ReaderPageSettings {
     final isBmColored = map['isBmColored'] as bool?;
     final saveLastPeraIdx = map['saveLastPeraIdx'] as bool?;
     final fontSize = map['fontSize'] as double?;
+    final fontHeight = map['fontHeight'] as double?;
     final luwAdd = map['luwAdd'] as bool?;
     final luwColored = map['luwColored'] as bool?;
     final maxWidth = map['maxWidth'] as double?;
@@ -199,6 +208,7 @@ class ReaderPageSettings {
       textAlign: textAlign,
       saveLastPeraIdx: saveLastPeraIdx,
       fontSize: fontSize,
+      fontHeight: fontHeight,
       foreignAdd: luwAdd,
       foreignColored: luwColored,
       padding: padding,

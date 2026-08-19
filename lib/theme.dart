@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 const double mediumFontSize = 18;
 const double defaultReaderArabicFontSize = 18;
 const String defaultReaderArabicFont = fontKitab;
-const double arabicFontHeihgt = 2;
+const double defArabicFontHeihgt = 2.00;
 
 const Color uiSeedColorDefualt = Color(0xFF673AB7);
 const uiSeedColors = [

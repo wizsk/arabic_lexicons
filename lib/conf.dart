@@ -79,6 +79,7 @@ class AppSettingsController extends ChangeNotifier {
   static const _themeKey = 'theme_mode';
   static const _readerFontKey = 'ar_font_fam';
   static const _readerFontSizeKey = 'ar_font_size';
+  static const _readerFontHeightKey = 'ar_font_hi';
   static const _seedColorKey = 'seedc';
   static const _lastRouteKey = 'route';
   static const _lastBookKey = 'book';
@@ -135,6 +136,8 @@ class AppSettingsController extends ChangeNotifier {
 
   static const double _readerFontSizeDef = defaultReaderArabicFontSize;
   double _readerFontSize = _readerFontSizeDef;
+
+  double _readerFontHeight = defArabicFontHeihgt;
 
   static const bool _luwColoredDef = true;
   bool _luwColored = _luwColoredDef;
@@ -209,6 +212,8 @@ class AppSettingsController extends ChangeNotifier {
     }
 
     _readerFontSize = prefs.getDouble(_readerFontSizeKey) ?? _readerFontSizeDef;
+    _readerFontHeight =
+        prefs.getDouble(_readerFontHeightKey) ?? defArabicFontHeihgt;
     _maxWidth = prefs.getDouble(_maxWidthKey) ?? ReaderPageSettings.maxWidthDef;
     _padding = prefs.getDouble(_paddingKey) ?? ReaderPageSettings.paddingDef;
 
@@ -485,6 +490,11 @@ class AppSettingsController extends ChangeNotifier {
       pref.setDouble(_readerFontSizeKey, _readerFontSize);
     }
 
+    if (_readerFontHeight != d.fontHeight) {
+      _readerFontHeight = d.fontHeight;
+      pref.setDouble(_readerFontHeightKey, _readerFontHeight);
+    }
+
     if (_maxWidth != d.maxWidth) {
       _maxWidth = d.maxWidth;
       pref.setDouble(_maxWidthKey, _maxWidth);
@@ -569,6 +579,10 @@ class AppSettingsController extends ChangeNotifier {
     return _readerFontSize;
   }
 
+  double get readerFontHeight {
+    return _readerFontHeight;
+  }
+
   ThemeMode get theme {
     return _theme;
   }
@@ -580,7 +594,7 @@ class AppSettingsController extends ChangeNotifier {
   TextStyle readerTS(BuildContext context) => TextStyle(
     fontFamily: _readerFont,
     fontSize: _readerFontSize,
-    height: arabicFontHeihgt,
+    height: _readerFontHeight,
     color: Theme.of(context).brightness == Brightness.light
         ? readerColorsLight.onSurface
         : readerColorsDark.onSurface,

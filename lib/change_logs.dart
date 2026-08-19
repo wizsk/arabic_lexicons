@@ -1,5 +1,12 @@
 final releases = [
   Release(
+    version: 'v3.4.0',
+    changes: '''
+    Added the ability to adjust line height
+    Fixed minor bugs
+    ''',
+  ),
+  Release(
     version: 'v3.3.0',
     changes: '''
     Set the font size for Arabic input fields and UI elements

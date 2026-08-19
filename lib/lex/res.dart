@@ -2,6 +2,7 @@ import 'package:ara_dict/alphabets.dart';
 import 'package:ara_dict/conf.dart';
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/lex/data.dart';
+import 'package:ara_dict/theme.dart';
 import 'package:ara_dict/utils.dart';
 import 'package:ara_dict/widgets/selectable_text_screen.dart';
 import 'package:flutter/material.dart';
@@ -80,56 +81,120 @@ Widget noResUniversal(
 
 Widget _showArEnRes(
   BuildContext context,
-  TextStyle ts,
+  TextStyle tsOg,
   SearchLexiconsDatas datas,
 ) {
+  final ts = tsOg.copyWith(height: defArabicFontHeihgt);
+  const tp = EdgeInsets.symmetric(horizontal: 8, vertical: 4);
+
   return SliverToBoxAdapter(
     child: Center(
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
-        // padding: scrollPadding,
-        child: DataTable(
-          dataTextStyle: ts,
-          // dividerThickness: 0.5,
-          columnSpacing: 18.0,
-          headingTextStyle: ts.copyWith(fontWeight: FontWeight.bold),
-          columns: const [
-            DataColumn(label: Text('Word')),
-            DataColumn(label: Text('Meanings')),
-            DataColumn(label: Text('Root')),
-          ],
-          rows: datas.arEnRes.map((e) {
-            return DataRow(
-              cells: [
-                DataCell(Text(e.word)),
-                DataCell(
-                  Text(e.def),
-                  onTap: () async {
-                    if (!context.mounted) return;
-                    SelectableTextScreen.show(
-                      context,
-                      dir: TextDirection.ltr,
-                      textAlign: TextAlign.center,
-                      fullTextFunc: (_) => e.def,
-                      start: 0,
-                      length: 1,
-                      textStyleBodyMedium: ts,
-                    );
-                  },
+        child: Table(
+          border: TableBorder.all(
+            color: Theme.of(context).colorScheme.outline,
+            width: 0.5,
+          ),
+          columnWidths: const {
+            0: IntrinsicColumnWidth(),
+            1: IntrinsicColumnWidth(),
+            // 1: FlexColumnWidth(),
+            2: IntrinsicColumnWidth(),
+          },
+          children: [
+            // Header
+            TableRow(
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
+              ),
+              children: [
+                Padding(
+                  padding: tp,
+                  child: Center(
+                    child: Text(
+                      'Word',
+                      style: ts.copyWith(fontWeight: FontWeight.bold),
+                    ),
+                  ),
                 ),
-                // DataCell(SelectableText(e.def, style: ts, maxLines: 1, scrollPhysics: const NeverScrollableScrollPhysics())),
-                // DataCell(Text(e.root)),
-                DataCell(
-                  Text(e.root),
-                  onTap: () {
-                    final t = ArabicNormalizer.keepOnlyAr(e.root.split('/')[0]);
-                    if (t.isEmpty) return;
-                    datas.onChangeTxt(appendTxt: t);
-                  },
+                Padding(
+                  padding: tp,
+                  child: Center(
+                    child: Text(
+                      'Meanings',
+                      style: ts.copyWith(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: tp,
+                  child: Center(
+                    child: Text(
+                      'Root',
+                      style: ts.copyWith(fontWeight: FontWeight.bold),
+                    ),
+                  ),
                 ),
               ],
-            );
-          }).toList(),
+            ),
+
+            ...datas.arEnRes.indexed.map((a) {
+              final e = a.$2;
+
+              return TableRow(
+                decoration: BoxDecoration(
+                  color: a.$1.isEven
+                      ? null
+                      : Theme.of(context).colorScheme.surfaceContainerLow,
+                ),
+                children: [
+                  Padding(
+                    padding: tp,
+                    child: Center(child: Text(e.word, style: ts)),
+                  ),
+
+                  InkWell(
+                    onTap: () {
+                      if (!context.mounted) return;
+
+                      SelectableTextScreen.show(
+                        context,
+                        dir: TextDirection.ltr,
+                        textAlign: TextAlign.center,
+                        fullTextFunc: (_) => e.def,
+                        start: 0,
+                        length: 1,
+                        textStyleBodyMedium: ts,
+                      );
+                    },
+                    child: Padding(
+                      padding: tp,
+                      child: Text(e.def, style: ts),
+                    ),
+                  ),
+
+                  InkWell(
+                    onTap: e.root.isEmpty
+                        ? null
+                        : () {
+                            final s = e.root.split('/');
+                            if (s.isEmpty) return;
+
+                            final t = ArabicNormalizer.keepOnlyAr(s[0]);
+                            if (t.isEmpty) return;
+
+                            datas.onChangeTxt(appendTxt: t);
+                          },
+                    child: Padding(
+                      padding: tp,
+                      child: Center(child: Text(e.root, style: ts)),
+                    ),
+                  ),
+                ],
+              );
+            }),
+          ],
         ),
       ),
     ),

@@ -13,7 +13,7 @@ const fontPlayPen = 'Playpen';
 // const fontUthman = 'Uthman';
 // const fontTajawal = 'Tajawal';
 
-const double fontAmiriLineHeight = 1.7;
+const double htmlFontHeight = 1.7;
 
 const arabicFonts = [
   fontKitab,

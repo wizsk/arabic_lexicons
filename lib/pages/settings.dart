@@ -162,7 +162,13 @@ class _SettingsPageState extends State<SettingsPage> {
                           }
                         },
                       ),
+                    ],
+                  ),
 
+                  const SizedBox(height: 12),
+                  const SettingsSectionTitle(title: 'Style'),
+                  SettingsSectionSurface(
+                    children: [
                       SwitchListTile(
                         secondary: const FilledIcon(Icons.translate),
                         title: Text('Use More Arabic'),
@@ -185,6 +191,19 @@ class _SettingsPageState extends State<SettingsPage> {
                         trailing: const Icon(Icons.chevron_right),
                         onTap: () async {
                           showUiFontSizeBottomSheet(context).then((_) {
+                            if (context.mounted) setState(() {});
+                          });
+                        },
+                      ),
+                      SwitchListTile(
+                        secondary: const FilledIcon(Icons.format_align_left),
+                        title: Text('Hans & Lane Style'),
+                        subtitle: Text(
+                          'Use the default reader style for Hans Wehr and Lane’s Lexicon',
+                        ),
+                        value: appConf.useHansLaneDefRDStyle,
+                        onChanged: (value) {
+                          notifier.saveUseHansLaneDefStyle(value).then((_) {
                             if (context.mounted) setState(() {});
                           });
                         },

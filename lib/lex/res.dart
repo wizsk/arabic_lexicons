@@ -207,6 +207,16 @@ Widget _hansLaneView(
   SearchLexiconsDatas datas,
   ColorScheme cs,
 ) {
+  final fontFam = appConf.useHansLaneDefRDStyle
+      ? appConf.readerFont
+      : fontAmiri;
+
+  final fontSize = appConf.readerFontSize;
+  // final fontHeight = appConf.useHansLaneDefRDStyle
+  //     ? appConf.readerFontHeight
+  //     : fontAmiriLineHeight;
+
+  final fontHeight = htmlFontHeight;
   return SliverList.separated(
     itemCount: datas.dbRes.length,
     separatorBuilder: (context, index) =>
@@ -232,7 +242,9 @@ Widget _hansLaneView(
               textStyleBodyMedium: ts.copyWith(
                 fontFamily: fontAmiri,
                 // the html renderer and normal renderer not the same :)
-                height: fontAmiriLineHeight + 0.3,
+                height: appConf.useHansLaneDefRDStyle
+                    ? htmlFontHeight + 0.3
+                    : fontHeight,
               ),
               start: 0,
               length: 1,
@@ -240,7 +252,14 @@ Widget _hansLaneView(
           },
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 8),
-            child: _engMeaningView(txt, ts.fontSize!, cs, row.isHi),
+            child: _engMeaningView(
+              txt,
+              fontSize,
+              fontHeight,
+              fontFam,
+              cs,
+              row.isHi,
+            ),
           ),
         ),
       );
@@ -283,7 +302,9 @@ Widget _arMeaningView(String txt, TextStyle ts) {
 Widget _engMeaningView(
   String html,
   // String fontFam,
-  double fsz,
+  double fontSize,
+  double fontHeihgt,
+  String fontFam,
   ColorScheme cs,
   bool isHighResult,
 ) {
@@ -291,11 +312,11 @@ Widget _engMeaningView(
     data: html,
     style: {
       'body': Style(
-        fontFamily: fontAmiri,
-        lineHeight: LineHeight.number(fontAmiriLineHeight),
+        fontFamily: fontFam,
+        lineHeight: LineHeight.number(fontHeihgt),
         direction: TextDirection.ltr,
         textAlign: TextAlign.left,
-        fontSize: FontSize(fsz),
+        fontSize: FontSize(fontSize),
         color: isHighResult ? cs.primary : null,
       ),
       'strong': Style(fontWeight: FontWeight.bold),

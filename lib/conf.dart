@@ -77,6 +77,7 @@ class AppSettingsController extends ChangeNotifier {
   static const _appVersionKey = 'version';
   static const _firstRunKey = 'firstRun';
   static const _themeKey = 'theme_mode';
+  static const _useHansLaneDefStyleKey = 'hl-style';
   static const _readerFontKey = 'ar_font_fam';
   static const _readerFontSizeKey = 'ar_font_size';
   static const _readerFontHeightKey = 'ar_font_hi';
@@ -101,6 +102,9 @@ class AppSettingsController extends ChangeNotifier {
   int get playRatelastShown => _playRate;
 
   String _appVersion = '';
+
+  static const bool _useHansLaneDefStyleDef = false;
+  bool _useHansLaneDefStyle = _useHansLaneDefStyleDef;
 
   static const bool _firstRunDef = true;
   bool _firstRun = _firstRunDef;
@@ -185,6 +189,9 @@ class AppSettingsController extends ChangeNotifier {
     _seedColor = seedColorInt == null ? _seedColorDef : Color(seedColorInt);
 
     _playRate = prefs.getInt(_playRateKey) ?? 0;
+
+    _useHansLaneDefStyle =
+        prefs.getBool(_useHansLaneDefStyleKey) ?? _useHansLaneDefStyleDef;
 
     _readerScrollPersent =
         prefs.getInt(_readerScrollPersentKey) ?? readerScrollPersentDef;
@@ -326,6 +333,16 @@ class AppSettingsController extends ChangeNotifier {
     await pref.setString(_appVersionKey, _currentVersion);
 
     return true;
+  }
+
+  Future<void> saveUseHansLaneDefStyle(bool v) async {
+    final prefs = await SharedPreferences.getInstance();
+    _useHansLaneDefStyle = v;
+    await prefs.setBool(_useHansLaneDefStyleKey, v);
+  }
+
+  bool get useHansLaneDefRDStyle {
+    return _useHansLaneDefStyle;
   }
 
   Future<void> saveReaderScrollPersent(int p) async {

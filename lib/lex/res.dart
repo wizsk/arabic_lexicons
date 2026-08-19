@@ -94,6 +94,7 @@ Widget _showArEnRes(
     child: Center(
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.only(top: 8),
         child: Table(
           border: TableBorder.all(color: cs.outlineVariant, width: 0.5),
           columnWidths: const {

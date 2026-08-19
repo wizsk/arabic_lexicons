@@ -2,10 +2,12 @@ import 'package:arabic_lexicons/alphabets.dart';
 import 'package:arabic_lexicons/conf.dart';
 import 'package:arabic_lexicons/data.dart';
 import 'package:arabic_lexicons/lex/data.dart';
+import 'package:arabic_lexicons/reader/reader_utils.dart';
 import 'package:arabic_lexicons/theme.dart';
 import 'package:arabic_lexicons/utils.dart';
 import 'package:arabic_lexicons/widgets/selectable_text_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
@@ -151,7 +153,13 @@ Widget _showArEnRes(
                   ),
 
                   GestureDetector(
-                    onTap: () {
+                    onTap: () async {
+                      await Clipboard.setData(ClipboardData(text: e.def));
+
+                      if (!context.mounted) return;
+                      showSnack(context, 'Definition copied');
+                    },
+                    onLongPress: () {
                       if (!context.mounted) return;
 
                       SelectableTextScreen.show(

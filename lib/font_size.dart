@@ -183,6 +183,7 @@ Future<void> showUiFontSizeBottomSheet(BuildContext context) async {
       // final cs = Theme.of(context).colorScheme;
       const dt = 'كلمات التي تبحث عنها';
       final tc = TextEditingController(text: dt);
+      var selectedDict = allDicts.first;
 
       return StatefulBuilder(
         builder: (context, setState) {
@@ -216,7 +217,7 @@ Future<void> showUiFontSizeBottomSheet(BuildContext context) async {
                     alignment: WrapAlignment.center,
                     textDirection: TextDirection.rtl,
                     children: allDicts.take(4).map((d) {
-                      final selected = d == Dict.arEn;
+                      final selected = d == selectedDict;
                       return ChoiceChip(
                         tooltip: d.ar,
                         selected: selected,
@@ -231,11 +232,13 @@ Future<void> showUiFontSizeBottomSheet(BuildContext context) async {
                         materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                         showCheckmark: false,
                         label: Text(
-                          d.name,
+                          d.ar,
                           textDirection: TextDirection.rtl,
                           style: arabicFontStyle,
                         ),
-                        onSelected: (_) {},
+                        onSelected: (_) {
+                          setState(() => selectedDict = d);
+                        },
                       );
                     }).toList(),
                   ),
@@ -251,7 +254,7 @@ Future<void> showUiFontSizeBottomSheet(BuildContext context) async {
                         controller: tc,
                         decoration: InputDecoration(
                           hintText: 'اكتب هنا',
-                          hintTextDirection: L.dir,
+                          hintTextDirection: TextDirection.rtl,
                           prefixIcon: IconButton(
                             onPressed: () {
                               setState(() {

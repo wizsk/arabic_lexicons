@@ -6,6 +6,7 @@ final releases = [
     Fixed minor bugs
     Add demo text to the reader-input page
     Add Aref-Ruqaa font
+    Make app launch blazingly fast
     ''',
   ),
   Release(

@@ -4,6 +4,7 @@ final releases = [
     changes: '''
     Added the ability to adjust line height
     Fixed minor bugs
+    Add demo text to the reader-input page
     ''',
   ),
   Release(

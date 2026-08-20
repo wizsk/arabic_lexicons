@@ -900,6 +900,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                                   ],
                                 ),
                               ),
+                              const PopupMenuDivider(),
                               PopupMenuItem(
                                 value: 'open-demo',
                                 child: Row(

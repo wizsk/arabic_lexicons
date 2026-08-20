@@ -182,6 +182,153 @@ class _ReaderAdjustPageState extends State<ReaderAdjustPage> {
     Navigator.of(context).pop(_data);
   }
 
+  Widget _appbar() {
+    return SliverAppBar(
+      title: const Text('Reader Style'),
+      centerTitle: false,
+      floating: true,
+      snap: appConf.hideAppbar,
+      pinned: !appConf.hideAppbar,
+      actions: [
+        FilledButton.icon(
+          onPressed: _hasChanges ? _save : null,
+          label: const Text('Save'),
+          icon: Icon(Icons.save),
+        ),
+        const SizedBox(width: 8),
+        PopupMenuButton<String>(
+          icon: const Icon(Icons.more_vert),
+          onSelected: (value) async {
+            switch (value) {
+              case 'reset':
+                final old = _data.copy();
+                final n = ReaderAdjustData.def();
+                if (old.isEq(n)) {
+                  showSnack(context, 'Already using the default style');
+                  break;
+                }
+
+                setState(() {
+                  _data = n;
+                });
+
+                showSnack(
+                  context,
+                  'Style reset',
+                  forceCloseAfter: Duration(seconds: 6),
+                  action: SnackBarAction(
+                    label: 'Undo',
+                    onPressed: () {
+                      if (!context.mounted) return;
+                      setState(() {
+                        _data = old;
+                      });
+                    },
+                  ),
+                );
+                break;
+
+              case 'visible':
+                setState(() {
+                  _hidden = !_hidden;
+                });
+                showSnack(
+                  context,
+                  'Pro tip: Tap the currently selected bottom icon to toggle its popup',
+                  duration: const Duration(seconds: 5),
+                  showCloseIcon: true,
+                );
+                break;
+
+              case 'demo-txt':
+                setState(() {
+                  if (_showingDemoTxt) {
+                    _paras = widget.paras ?? stories[_demoTxtIdx];
+                    _showingDemoTxt = false;
+                  } else {
+                    _showingDemoTxt = true;
+                    _paras = stories[_demoTxtIdx];
+                  }
+                });
+                break;
+
+              case 'demo-cng':
+                setState(() {
+                  _demoTxtIdx++;
+                  if (_demoTxtIdx >= stories.length) {
+                    _demoTxtIdx = 0;
+                  }
+                  _paras = stories[_demoTxtIdx];
+                });
+                break;
+            }
+          },
+          itemBuilder: (context) => [
+            PopupMenuItem(
+              value: 'reset',
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.restore),
+                  const SizedBox(width: 10),
+                  Text('Reset All'),
+                ],
+              ),
+            ),
+            // const PopupMenuDivider(height: 0,),
+            PopupMenuItem(
+              value: 'visible',
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: _hidden
+                    ? const [
+                        Icon(Icons.visibility_outlined),
+                        SizedBox(width: 10),
+                        Text('Show Popup'),
+                      ]
+                    : const [
+                        Icon(Icons.visibility_off_outlined),
+                        SizedBox(width: 10),
+                        Text('Hide Popup'),
+                      ],
+              ),
+            ),
+            if (_hasProvidedDemoTxt)
+              PopupMenuItem(
+                value: 'demo-txt',
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: _showingDemoTxt
+                      ? const [
+                          Icon(Icons.menu_book_outlined),
+                          SizedBox(width: 10),
+                          Text('Reader Text'),
+                        ]
+                      : const [
+                          Icon(Icons.play_circle_outline),
+                          SizedBox(width: 10),
+                          Text('Demo Text'),
+                        ],
+                ),
+              ),
+            if (_showingDemoTxt)
+              PopupMenuItem(
+                value: 'demo-cng',
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: const [
+                    Icon(Icons.swap_horiz_outlined),
+                    SizedBox(width: 10),
+                    Text('Change Text'),
+                  ],
+                ),
+              ),
+          ],
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -202,147 +349,6 @@ class _ReaderAdjustPageState extends State<ReaderAdjustPage> {
     );
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Reader Style'),
-        centerTitle: false,
-        actions: [
-          FilledButton.icon(
-            onPressed: _hasChanges ? _save : null,
-            label: const Text('Save'),
-            icon: Icon(Icons.save),
-          ),
-          const SizedBox(width: 8),
-          PopupMenuButton<String>(
-            icon: const Icon(Icons.more_vert),
-            onSelected: (value) async {
-              switch (value) {
-                case 'reset':
-                  final old = _data.copy();
-                  final n = ReaderAdjustData.def();
-                  if (old.isEq(n)) {
-                    showSnack(context, 'Already using the default style');
-                    break;
-                  }
-
-                  setState(() {
-                    _data = n;
-                  });
-
-                  showSnack(
-                    context,
-                    'Style reset',
-                    forceCloseAfter: Duration(seconds: 6),
-                    action: SnackBarAction(
-                      label: 'Undo',
-                      onPressed: () {
-                        if (!context.mounted) return;
-                        setState(() {
-                          _data = old;
-                        });
-                      },
-                    ),
-                  );
-                  break;
-
-                case 'visible':
-                  setState(() {
-                    _hidden = !_hidden;
-                  });
-                  showSnack(
-                    context,
-                    'Pro tip: Tap the currently selected bottom icon to toggle its popup',
-                    duration: const Duration(seconds: 5),
-                    showCloseIcon: true,
-                  );
-                  break;
-
-                case 'demo-txt':
-                  setState(() {
-                    if (_showingDemoTxt) {
-                      _paras = widget.paras ?? stories[_demoTxtIdx];
-                      _showingDemoTxt = false;
-                    } else {
-                      _showingDemoTxt = true;
-                      _paras = stories[_demoTxtIdx];
-                    }
-                  });
-                  break;
-
-                case 'demo-cng':
-                  setState(() {
-                    _demoTxtIdx++;
-                    if (_demoTxtIdx >= stories.length) {
-                      _demoTxtIdx = 0;
-                    }
-                    _paras = stories[_demoTxtIdx];
-                  });
-                  break;
-              }
-            },
-            itemBuilder: (context) => [
-              PopupMenuItem(
-                value: 'reset',
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.restore),
-                    const SizedBox(width: 10),
-                    Text('Reset All'),
-                  ],
-                ),
-              ),
-              // const PopupMenuDivider(height: 0,),
-              PopupMenuItem(
-                value: 'visible',
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: _hidden
-                      ? const [
-                          Icon(Icons.visibility_outlined),
-                          SizedBox(width: 10),
-                          Text('Show Popup'),
-                        ]
-                      : const [
-                          Icon(Icons.visibility_off_outlined),
-                          SizedBox(width: 10),
-                          Text('Hide Popup'),
-                        ],
-                ),
-              ),
-              if (_hasProvidedDemoTxt)
-                PopupMenuItem(
-                  value: 'demo-txt',
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: _showingDemoTxt
-                        ? const [
-                            Icon(Icons.menu_book_outlined),
-                            SizedBox(width: 10),
-                            Text('Reader Text'),
-                          ]
-                        : const [
-                            Icon(Icons.play_circle_outline),
-                            SizedBox(width: 10),
-                            Text('Demo Text'),
-                          ],
-                  ),
-                ),
-              if (_showingDemoTxt)
-                PopupMenuItem(
-                  value: 'demo-cng',
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: const [
-                      Icon(Icons.swap_horiz_outlined),
-                      SizedBox(width: 10),
-                      Text('Change Text'),
-                    ],
-                  ),
-                ),
-            ],
-          ),
-        ],
-      ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _currentTab,
         onDestinationSelected: (i) => setState(() {
@@ -385,8 +391,12 @@ class _ReaderAdjustPageState extends State<ReaderAdjustPage> {
             Directionality(
               textDirection: TextDirection.rtl,
               child: CustomScrollView(
-                key: ValueKey(_showingDemoTxt),
+                key: ValueKey((_showingDemoTxt, _demoTxtIdx)),
                 slivers: [
+                  Directionality(
+                    textDirection: TextDirection.ltr,
+                    child: _appbar(),
+                  ),
                   SliverPadding(
                     padding: EdgeInsetsGeometry.only(bottom: 12),
                     sliver: SliverToBoxAdapter(

@@ -19,7 +19,7 @@ FLUTTER_VERSION=$(flutter --version 2>/dev/null | awk 'NR==1 {print $2}')
 echo "Flutter $FLUTTER_VERSION found"
 
 source ./b/common.sh
-source ./b/confirm.sh
+source ./b/confirm.sh "$@"
 
 version=$ver
 

@@ -1,7 +1,7 @@
 #!/bin/sh
 
 source ./b/common.sh
-source ./b/confirm.sh
+source ./b/confirm.sh "$@"
 
 set -ex
 

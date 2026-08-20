@@ -138,7 +138,7 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
       if (_rs.bookHash.isEmpty) {
         showSnack(
           context,
-          "This book entry and its associated data won't be saved",
+          "This book entry won't be saved",
           duration: Duration(seconds: 6),
         );
         return;

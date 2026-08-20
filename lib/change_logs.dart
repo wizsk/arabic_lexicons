@@ -5,6 +5,7 @@ final releases = [
     Added the ability to adjust line height
     Fixed minor bugs
     Add demo text to the reader-input page
+    Add Aref-Ruqaa font
     ''',
   ),
   Release(

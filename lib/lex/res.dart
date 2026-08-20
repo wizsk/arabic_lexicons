@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:arabic_lexicons/alphabets.dart';
 import 'package:arabic_lexicons/conf.dart';
 import 'package:arabic_lexicons/data.dart';
@@ -90,6 +92,17 @@ Widget _showArEnRes(
   final ts = tsOg.copyWith(height: defArabicFontHeihgt);
   const tp = EdgeInsets.symmetric(horizontal: 8, vertical: 4);
 
+  final tblHDec = BoxDecoration(
+    color: Theme.of(context).brightness == Brightness.light
+        ? cs.surfaceContainerLow.withAlpha(120)
+        : cs.surfaceContainerLow.withAlpha(240),
+  );
+
+  final tiSplashColor = cs.onSurface.withAlpha(80);
+  final tiHighlightColor = cs.onSurface.withAlpha(50);
+  final tiHoverColor = cs.onSurface.withAlpha(35);
+  final tiFocusColor = cs.onSurface.withAlpha(30);
+
   return SliverToBoxAdapter(
     child: Center(
       child: SingleChildScrollView(
@@ -140,70 +153,96 @@ Widget _showArEnRes(
 
             ...datas.arEnRes.indexed.map((a) {
               final e = a.$2;
+              final isHi = a.$1.isOdd;
+
+              Future<void> onTab() async {
+                await Clipboard.setData(ClipboardData(text: e.def));
+
+                if (context.mounted) {
+                  showSnack(
+                    context,
+                    '',
+                    messageWidget: Text(
+                      'Copied: ${e.def}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  );
+                }
+              }
+
+              void onLongPress() {
+                if (context.mounted) {
+                  SelectableTextScreen.show(
+                    context,
+                    dir: TextDirection.ltr,
+                    textAlign: TextAlign.center,
+                    fullTextFunc: (_) => e.def,
+                    start: 0,
+                    length: 1,
+                    textStyleBodyMedium: ts,
+                  );
+                }
+              }
+
+              final defW = Padding(
+                padding: tp,
+                child: Text(e.def, style: ts),
+              );
+
+              final rootOnTap = e.root.isEmpty
+                  ? null
+                  : () {
+                      final s = e.root.split('/');
+                      if (s.isEmpty) return;
+
+                      final t = ArabicNormalizer.keepOnlyAr(s[0]);
+                      if (t.isEmpty) return;
+
+                      datas.onChangeTxt(appendTxt: t);
+                    };
+
+              final rootW = Padding(
+                padding: tp,
+                child: Center(child: Text(e.root, style: ts)),
+              );
 
               return TableRow(
-                decoration: BoxDecoration(
-                  color: a.$1.isEven
-                      ? null
-                      : cs.surfaceContainerLow.withAlpha(150),
-                ),
+                decoration: isHi ? tblHDec : null,
                 children: [
                   Padding(
                     padding: tp,
                     child: Center(child: Text(e.word, style: ts)),
                   ),
 
-                  GestureDetector(
-                    onTap: () async {
-                      await Clipboard.setData(ClipboardData(text: e.def));
-
-                      if (!context.mounted) return;
-                      showSnack(
-                        context,
-                        '',
-                        messageWidget: Text(
-                          'Copied: ${e.def}',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      );
-                    },
-                    onLongPress: () {
-                      if (!context.mounted) return;
-
-                      SelectableTextScreen.show(
-                        context,
-                        dir: TextDirection.ltr,
-                        textAlign: TextAlign.center,
-                        fullTextFunc: (_) => e.def,
-                        start: 0,
-                        length: 1,
-                        textStyleBodyMedium: ts,
-                      );
-                    },
-                    child: Padding(
-                      padding: tp,
-                      child: Text(e.def, style: ts),
+                  if (isHi)
+                    InkWell(
+                      splashColor: tiSplashColor,
+                      highlightColor: tiHighlightColor,
+                      hoverColor: tiHoverColor,
+                      focusColor: tiFocusColor,
+                      onTap: onTab,
+                      onLongPress: onLongPress,
+                      child: defW,
+                    )
+                  else
+                    InkWell(
+                      onTap: onTab,
+                      onLongPress: onLongPress,
+                      child: defW,
                     ),
-                  ),
 
-                  GestureDetector(
-                    onTap: e.root.isEmpty
-                        ? null
-                        : () {
-                            final s = e.root.split('/');
-                            if (s.isEmpty) return;
-
-                            final t = ArabicNormalizer.keepOnlyAr(s[0]);
-                            if (t.isEmpty) return;
-
-                            datas.onChangeTxt(appendTxt: t);
-                          },
-                    child: Padding(
-                      padding: tp,
-                      child: Center(child: Text(e.root, style: ts)),
-                    ),
-                  ),
+                  if (isHi)
+                    InkWell(
+                      splashColor: tiSplashColor,
+                      highlightColor: tiHighlightColor,
+                      hoverColor: tiHoverColor,
+                      focusColor: tiFocusColor,
+                      onTap: rootOnTap,
+                      child: rootW,
+                    )
+                  else
+                    InkWell(onTap: rootOnTap, child: rootW),
                 ],
               );
             }),

@@ -8,10 +8,12 @@ import 'package:arabic_lexicons/first_run.dart';
 import 'package:arabic_lexicons/helper_widgets.dart';
 import 'package:arabic_lexicons/main_widgets.dart';
 import 'package:arabic_lexicons/multi_selection.dart';
+import 'package:arabic_lexicons/pages/data.dart';
 import 'package:arabic_lexicons/reader/data.dart';
 import 'package:arabic_lexicons/reader/reader.dart';
 import 'package:arabic_lexicons/reader/reader_utils.dart';
 import 'package:arabic_lexicons/reader/settings_class.dart';
+import 'package:arabic_lexicons/stories.dart';
 import 'package:arabic_lexicons/utils.dart';
 import 'package:archive/archive.dart';
 import 'package:crypto/crypto.dart';
@@ -231,8 +233,8 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
     return sha1.convert(bytes).toString();
   }
 
-  Future<void> _showText(BuildContext context) async {
-    final text = _controller.text.trim();
+  Future<void> _showText(BuildContext context, {String? initialTxt}) async {
+    final text = initialTxt ?? _controller.text;
     final paras = cleanReaderInputAndPrepare(text);
 
     if (text.isEmpty || paras.isEmpty) {
@@ -840,6 +842,20 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                                   _selection.clear();
                                   await _importBooks(context);
                                   break;
+
+                                case 'open-demo':
+                                  final idx = await showStoryPicker(context);
+                                  if (idx != null &&
+                                      idx >= 0 &&
+                                      idx < stories.length &&
+                                      context.mounted) {
+                                    _isTempMode = true;
+                                    _showText(
+                                      context,
+                                      initialTxt: stories.first.join('\n'),
+                                    );
+                                  }
+                                  break;
                               }
                             },
                             itemBuilder: (context) => [
@@ -881,6 +897,16 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                                     const Icon(Icons.delete),
                                     const SizedBox(width: 10),
                                     Text(L.p('Delete Selected', 'حذف المحدد')),
+                                  ],
+                                ),
+                              ),
+                              PopupMenuItem(
+                                value: 'open-demo',
+                                child: Row(
+                                  children: [
+                                    const Icon(Icons.text_snippet_outlined),
+                                    const SizedBox(width: 10),
+                                    Text(L.p('Demo Text', 'نص تجريبي')),
                                   ],
                                 ),
                               ),

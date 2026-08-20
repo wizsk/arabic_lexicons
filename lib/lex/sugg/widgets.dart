@@ -182,8 +182,6 @@ Widget showSearchSugg(
                                 datas.suggDictSorted.clear();
                               }
 
-                              datas.isShowingSugg = false;
-
                               datas.getAndShowResORSugg(
                                 context,
                                 forceRes: true,

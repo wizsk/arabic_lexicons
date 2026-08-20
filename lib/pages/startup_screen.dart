@@ -23,18 +23,30 @@ class _StartupScreenState extends State<StartupScreen> {
 
   Future<void> _init() async {
     try {
+      // final s = Stopwatch()..start();
       await Future.wait([
         appConf.load(),
         setDictOrdFromFile(),
         DbService.init(),
         AppDb.init(),
-        Isolates.spawn(),
       ]);
 
-      await Isolates.initArEn();
-      Isolates.initSugg();
+      Isolates.spawn().then((_) {
+        Isolates.initArEn();
+        Isolates.initSugg();
+      });
+
+      // s.stop();
 
       appConf.notify();
+
+      // if (!mounted) return;
+      // await showInfoDialog(
+      //   context,
+      //   'All took',
+      //   message: '${s.elapsedMilliseconds}ms',
+      // );
+
       if (!mounted) return;
       Navigator.pushReplacementNamed(context, appConf.lastRoute);
     } catch (e) {

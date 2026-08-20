@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:isolate';
 
 import 'package:arabic_lexicons/lex/dicts/ar_en/ar_en.dart';
@@ -20,7 +21,8 @@ class Isolates {
 
   static bool _arEnIniting = false;
   static bool _arEnInited = false;
-  static bool get arEnInited => _arEnInited;
+  // static bool get arEnInited => _arEnInited;
+  static final Completer<void> _arEnInitCompleter = Completer<void>();
 
   static Future<void> initArEn() async {
     if (_arEnInited || _arEnIniting) return;
@@ -41,10 +43,13 @@ class Isolates {
     reply.close();
     _arEnIniting = false;
     _arEnInited = true;
+
+    _arEnInitCompleter.complete();
   }
 
   static bool _suggIniting = false;
   static bool _suggInited = false;
+  static final Completer<void> suggInitCompleter = Completer<void>();
   static bool get suggInited => _suggInited;
 
   static Future<void> initSugg() async {
@@ -59,12 +64,15 @@ class Isolates {
 
     _suggInited = true;
     _suggIniting = false;
+    suggInitCompleter.complete();
   }
 
   static final _arEnCache = LruCache<String, List<ArEnEntry>>(200);
 
   static Future<List<ArEnEntry>> arEnSearch(String? query) async {
-    if (!_arEnInited) return [];
+    if (!_arEnInited) {
+      await _arEnInitCompleter.future;
+    }
 
     if (query == null || query.isEmpty) return [];
     final c = _arEnCache.get(query);
@@ -81,10 +89,13 @@ class Isolates {
 
   static final _suggCache = LruCache<String, SuggestionEntries>(100);
 
-  static bool get suggCanBeShown => _suggInited && appConf.showSearchSugg;
+  // static bool get suggCanBeShown => _suggInited && appConf.showSearchSugg;
 
   static Future<SuggestionEntries> getSugg(String query) async {
-    if (!_suggInited) return {};
+    // await Future.delayed(Duration(seconds: 4));
+    if (!_suggInited) {
+      await suggInitCompleter.future;
+    }
 
     final c = _suggCache.get(query);
     if (c != null) return c;

@@ -7,6 +7,24 @@ import 'package:arabic_lexicons/lex/sugg/data.dart';
 import 'package:flutter/material.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
+/// lexicon result type
+enum LexRT {
+  empty,
+
+  /// used when both res and sugg are emtpy
+  emptyTotally,
+
+  quering,
+  res,
+  sug;
+
+  bool get isSug => this == sug;
+  bool get isQuering => this == quering;
+  bool get isRes => this == res;
+  bool get isEmpty => this == empty;
+  // bool get isEmptyTotally => this == emptyTotally;
+}
+
 class SearchLexiconsDatas {
   final AutoScrollController scrollController;
   final AutoScrollController scrollableSelection;
@@ -14,7 +32,7 @@ class SearchLexiconsDatas {
 
   // final FocusNode inputFocusNode;
   final Future<void> Function({String? appendTxt}) onChangeTxt;
-  final void Function(void Function()) setState;
+  final VoidCallback setState;
 
   bool appbarReaderBg = true;
 
@@ -31,7 +49,8 @@ class SearchLexiconsDatas {
 
   String preQuery = '';
 
-  bool isShowingSugg = false;
+  LexRT state = LexRT.empty;
+
   SuggestionEntries sugg = {};
   List<Dict> suggDictSorted = [];
 
@@ -40,29 +59,22 @@ class SearchLexiconsDatas {
 
   List<DbRow> dbRes = [];
   List<ArEnEntry> arEnRes = [];
-  bool resLoaded = false;
-
-  void resetLoadedValues() {
-    appbarReaderBg = true;
-
-    sugg = {};
-    isShowingSugg = false;
-
-    resLoaded = false;
-    dbRes = [];
-    arEnRes = [];
-  }
-
-  void resetWords() {
-    words.clear();
-    selectedWord = "";
-
-    appbarReaderBg = true;
-  }
 
   void resetAll() {
-    resetLoadedValues();
-    resetWords();
+    words.clear();
+    selectedWord = '';
+
+    _resetLoadedValues();
+  }
+
+  void _resetLoadedValues() {
+    appbarReaderBg = true;
+    state = LexRT.empty;
+
+    /// don't clear because they are cached if u clear the cached version is cleared also!
+    sugg = {};
+    dbRes = [];
+    arEnRes = [];
   }
 
   bool get isSelectedWordEmpty {
@@ -75,23 +87,32 @@ class SearchLexiconsDatas {
 
   bool get resultsAreEmpty => (dbRes.isEmpty) && (arEnRes.isEmpty);
 
-  void rebuild() => setState(() {});
+  void rebuild() => setState();
 
-  Future<void> _loadSearchSugg() async {
+  Future<void> _loadSearchSugg({bool forced = false}) async {
     sugg = await Isolates.getSugg(selectedWord);
-    isShowingSugg = true;
+    if (forced) {
+      state = LexRT.sug;
+    } else {
+      state = sugg.isEmpty ? LexRT.emptyTotally : LexRT.sug;
+    }
     rebuild();
   }
 
-  Future<bool> _loadResults(BuildContext context) async {
+  Future<bool> _loadResults(BuildContext context, {bool forced = false}) async {
     if (selectedDict == Dict.arEn) {
       arEnRes = await Isolates.arEnSearch(selectedWord);
     } else {
       dbRes = await DbService.search(selectedDict, selectedWord);
     }
 
-    resLoaded = true;
-    if (resultsAreEmpty) return false;
+    final empty = resultsAreEmpty;
+
+    // we will still be on query mode
+    if (empty && !forced) return false;
+
+    state = LexRT.res;
+
     rebuild();
 
     if (dbRes.isNotEmpty &&
@@ -110,6 +131,11 @@ class SearchLexiconsDatas {
         }
       }
     }
+
+    if (!empty) {
+      WordStore.histAdd(selectedDict, selectedWord);
+    }
+
     return true;
   }
 
@@ -124,9 +150,9 @@ class SearchLexiconsDatas {
       throw Exception('Can not have both forceSugg and forceRes == true');
     }
 
-    resetLoadedValues();
+    _resetLoadedValues();
 
-    resLoaded = selectedWord.isEmpty;
+    state = selectedWord.isEmpty ? LexRT.empty : LexRT.quering;
 
     rebuild(); // rebuild: show loading animation
 
@@ -134,23 +160,19 @@ class SearchLexiconsDatas {
       scrollSelectors();
     }
 
+    if (selectedWord.isEmpty) return;
+
     if (forceSugg) {
-      await _loadSearchSugg();
+      await _loadSearchSugg(forced: forceSugg);
       return;
     }
 
-    final hasResults = await _loadResults(context);
-    if (hasResults) {
-      WordStore.histAdd(selectedDict, selectedWord);
+    final hasRes = await _loadResults(context, forced: forceRes);
+    if (hasRes || forceRes) {
       return;
     }
 
-    if (forceRes) {
-      rebuild();
-      return;
-    }
-
-    if (Isolates.suggCanBeShown) {
+    if (appConf.showSearchSugg) {
       await _loadSearchSugg();
     }
   }
@@ -177,19 +199,5 @@ class SearchLexiconsDatas {
         }
       }
     });
-  }
-
-  @override
-  String toString() {
-    return '''
-SearchLexiconsDatas(
-  selectedDict: $selectedDict,
-  words: $words,
-  selectedWord: $selectedWord,
-  dbRes length: ${dbRes.length},
-  arEnRes length: ${arEnRes.length},
-  resLoaded: $resLoaded
-)
-''';
   }
 }

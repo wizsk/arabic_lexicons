@@ -66,7 +66,9 @@ class _SearchLexiconsState extends State<SearchLexicons>
       selectedDict: widget.initialDict ?? allDictsOrd.first,
       scrollController: sc,
       onChangeTxt: _onChangeTxt,
-      setState: setState,
+      setState: () {
+        if (mounted) setState(() {});
+      },
       scrollableSelection: _scrollableSelectionSc,
       scrollableSelectionDict: _scrollableSelectionDictSc,
     );
@@ -97,6 +99,12 @@ class _SearchLexiconsState extends State<SearchLexicons>
 
     // after initing
     if (widget.initialText.isNotEmpty) _onChangeTxt();
+
+    if (appConf.showSearchSugg && !Isolates.suggInited) {
+      Isolates.suggInitCompleter.future.then((_) {
+        if (mounted) setState(() {});
+      });
+    }
   }
 
   @override
@@ -156,6 +164,37 @@ class _SearchLexiconsState extends State<SearchLexicons>
     await onTextChanged(context, _controller, _datas, _setSate);
   }
 
+  Widget _mainDict(BuildContext context, ColorScheme cs, TextStyle arTxtTheme) {
+    if (_datas.state.isEmpty) {
+      return noRes(context, currWord: _datas.selectedWord);
+    }
+
+    if (_datas.state.isQuering) {
+      return const SliverFillRemaining(
+        hasScrollBody: false,
+        child: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (_datas.state.isRes) {
+      if (_datas.resultsAreEmpty) {
+        return noRes(context, currWord: _datas.selectedWord);
+      }
+      return showRes(context, arTxtTheme, _datas, cs);
+    }
+
+    if (_datas.state.isSug) {
+      return showSearchSugg(context, _controller, arTxtTheme, _datas, cs);
+    }
+
+    return noRes(
+      context,
+      currWord: _datas.selectedWord,
+      noResAr: 'لا توجد نتائج أو اقتراحات لـ',
+      noResEn: 'No Results or Suggestions for',
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final arTxtTheme = appConf.readerTS(context);
@@ -179,7 +218,7 @@ class _SearchLexiconsState extends State<SearchLexicons>
         ? chipTextStyleDictWord
         : TextStyle(color: cs.onSurface);
 
-    final willShowSugg = _datas.isShowingSugg && _datas.sugg.isNotEmpty;
+    final willShowSugg = _datas.state.isSug;
 
     final dir = willShowSugg
         ? TextDirection.rtl
@@ -217,7 +256,7 @@ class _SearchLexiconsState extends State<SearchLexicons>
                     key: ValueKey((
                       _datas.selectedDict,
                       _datas.selectedWord,
-                      _datas.isShowingSugg,
+                      _datas.state,
                     )),
                     keyboardDismissBehavior:
                         ScrollViewKeyboardDismissBehavior.onDrag,
@@ -233,45 +272,7 @@ class _SearchLexiconsState extends State<SearchLexicons>
                             : willShowSugg
                             ? padd.copyWith(bottom: 0)
                             : padd,
-                        sliver: _datas.isSelectedWordEmpty
-                            ? noRes(context)
-                            : !willShowSugg &&
-                                  _datas.resLoaded &&
-                                  _datas.resultsAreEmpty
-                            ? (Isolates.suggCanBeShown
-                                  ? noRes(
-                                      context,
-                                      currWord: _datas.selectedWord,
-                                      noResAr: 'لا توجد نتائج أو اقتراحات لـ',
-                                      noResEn: 'No Results or Suggestions for',
-                                    )
-                                  : noRes(
-                                      context,
-                                      currWord: _datas.selectedWord,
-                                    ))
-                            : _datas.isShowingSugg
-                            ? (willShowSugg
-                                  ? showSearchSugg(
-                                      context,
-                                      _controller,
-                                      arTxtTheme,
-                                      _datas,
-                                      cs,
-                                    )
-                                  : noRes(
-                                      context,
-                                      currWord: _datas.selectedWord,
-                                      noResAr: "لا توجد اقتراحات لـ",
-                                      noResEn: "No Suggestions for",
-                                    ))
-                            : _datas.resLoaded
-                            ? showRes(context, arTxtTheme, _datas, cs)
-                            : const SliverFillRemaining(
-                                hasScrollBody: false,
-                                child: Center(
-                                  child: CircularProgressIndicator(),
-                                ),
-                              ),
+                        sliver: _mainDict(context, cs, arTxtTheme),
                       ),
                     ],
                   ),

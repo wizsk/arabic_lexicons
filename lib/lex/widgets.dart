@@ -2,8 +2,6 @@ import 'package:arabic_lexicons/conf.dart';
 import 'package:arabic_lexicons/data.dart';
 import 'package:arabic_lexicons/datas/word_store.dart';
 import 'package:arabic_lexicons/lex/data.dart';
-import 'package:arabic_lexicons/lex/isolate.dart';
-
 import 'package:arabic_lexicons/main_widgets.dart';
 import 'package:flutter/material.dart';
 
@@ -42,13 +40,16 @@ Widget lexAppBar(
 
   final actions = <Widget>[
     IconButton(
-      icon: datas.isShowingSugg
+      icon: datas.state.isSug
           ? const Icon(Icons.directions)
           : const Icon(Icons.auto_awesome),
       tooltip: 'Toggle search suggestions',
-      onPressed: datas.selectedWord.isNotEmpty && Isolates.suggCanBeShown
+      onPressed:
+          datas.selectedWord.isNotEmpty &&
+              appConf.showSearchSugg &&
+              !datas.state.isQuering
           ? () async {
-              final ss = datas.isShowingSugg;
+              final ss = datas.state.isSug;
               await datas.getAndShowResORSugg(
                 context,
                 forceSugg: !ss,
@@ -62,7 +63,7 @@ Widget lexAppBar(
           ? Icon(Icons.bookmark, color: cs.error)
           : Icon(Icons.bookmark_border),
       tooltip: bm ? 'Unbookmark' : 'BookMark',
-      onPressed: datas.selectedWord.isEmpty || datas.isShowingSugg
+      onPressed: datas.selectedWord.isEmpty
           ? null
           : () async {
               if (bm) {
@@ -85,7 +86,7 @@ Widget lexAppBar(
 
   final bg = datas.appbarReaderBg ? appConf.readerSurface(context) : null;
 
-  return datas.isShowingSugg && datas.sugg.isNotEmpty
+  return datas.state.isSug
       ? AppBar(
           title: title,
           forceMaterialTransparency: true,

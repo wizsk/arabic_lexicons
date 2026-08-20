@@ -89,7 +89,12 @@ flutter:
           weight: 600
         - asset: assets/fonts/noto-sans-arabic/NotoSansArabic-Bold.ttf
           weight: 700
-
+    - family: ArefRuqaa
+      fonts:
+        - asset: assets/fonts/ArefRuqaa/ArefRuqaa-Bold.ttf
+          weight: 400
+        - asset: assets/fonts/ArefRuqaa/ArefRuqaa-Regular.ttf
+          weight: 700
     # - family: Rubik
     #   fonts:
     #     - asset: assets/fonts/rubik/Rubik-Regular.ttf

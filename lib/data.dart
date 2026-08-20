@@ -9,6 +9,7 @@ const fontAmiri = 'Amiri';
 const fontKitab = 'Kitab';
 const fontNotoSansArabic = 'NotoSansArabic';
 const fontPlayPen = 'Playpen';
+const fontRuqaa = 'ArefRuqaa';
 // const fontRubik = 'Rubik';
 // const fontUthman = 'Uthman';
 // const fontTajawal = 'Tajawal';
@@ -20,6 +21,7 @@ const arabicFonts = [
   fontAmiri,
   fontNotoSansArabic,
   fontPlayPen,
+  fontRuqaa,
   // fontRubik,
   // fontTajawal,
 ];

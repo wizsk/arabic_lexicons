@@ -140,17 +140,21 @@ class DbService {
     return entries;
   }
 
-  static Future<List<DbRow>> _getByWordHans(String? word) async {
-    if (word == null || word.trim().isEmpty) {
+  static Future<List<DbRow>> _getByWordHans(String? wordArg) async {
+    wordArg = wordArg?.trim();
+    if (wordArg == null || wordArg.isEmpty) {
       return const [];
     }
 
+    final secondary = wordArg.replaceAll("أ", "ا");
+    final words = [wordArg, if (wordArg != secondary) secondary];
+
     final db = database;
-    var query = word.trim();
     final results = <DbRow>[];
 
-    var res = await db.rawQuery(
-      '''
+    for (var query in words) {
+      var res = await db.rawQuery(
+        '''
       SELECT word, meanings, is_root
       FROM hanswehr
       WHERE parent_id IN (
@@ -158,25 +162,25 @@ class DbService {
       )
       ORDER BY id
     ''',
-      [query],
-    );
+        [query],
+      );
 
-    if (res.isNotEmpty) {
-      for (final r in res) {
-        results.add(
-          DbRow(
-            word: r['word'] as String? ?? "",
-            meanings: r['meanings'] as String? ?? "",
-            isRoot: (r['is_root'] as int? ?? 0) == 1,
-          ),
-        );
+      if (res.isNotEmpty) {
+        for (final r in res) {
+          results.add(
+            DbRow(
+              word: r['word'] as String? ?? "",
+              meanings: r['meanings'] as String? ?? "",
+              isRoot: (r['is_root'] as int? ?? 0) == 1,
+            ),
+          );
+        }
+        return results;
       }
-      return results;
-    }
 
-    if (res.isEmpty) {
-      res = await db.rawQuery(
-        '''
+      if (res.isEmpty) {
+        res = await db.rawQuery(
+          '''
       SELECT word, meanings, is_root
       FROM hanswehr
       WHERE parent_id IN (
@@ -184,55 +188,56 @@ class DbService {
       )
       ORDER BY id
     ''',
-        [query],
-      );
-    }
-
-    if (res.isNotEmpty) {
-      for (final r in res) {
-        final w = r['word'] as String? ?? "";
-        results.add(
-          DbRow(
-            word: w,
-            meanings: r['meanings'] as String? ?? "",
-            isRoot: (r['is_root'] as int? ?? 0) == 1,
-            isHi: word == w,
-          ),
+          [query],
         );
       }
-      return results;
-    }
 
-    if (query.length >= 3) {
-      query = query.replaceAll("_", " ");
-      res = await db.rawQuery(
-        '''
+      if (res.isNotEmpty) {
+        for (final r in res) {
+          final w = r['word'] as String? ?? "";
+          results.add(
+            DbRow(
+              word: w,
+              meanings: r['meanings'] as String? ?? "",
+              isRoot: (r['is_root'] as int? ?? 0) == 1,
+              isHi: query == w,
+            ),
+          );
+        }
+        return results;
+      }
+
+      if (query.length >= 3) {
+        query = query.replaceAll("_", " ");
+        res = await db.rawQuery(
+          '''
         SELECT word, meanings, is_root
         FROM hanswehr
         WHERE meanings LIKE ?
         LIMIT 40
       ''',
-        ['%$query%'],
-      );
-      for (final row in res) {
-        final w = row['word'] as String? ?? '';
-        var m = row['meanings'] as String? ?? '';
-
-        // Highlight query inside meanings
-        final highlighted = m.replaceAll(
-          query,
-          '<span class="high">$query</span>',
+          ['%$query%'],
         );
+        for (final row in res) {
+          final w = row['word'] as String? ?? '';
+          var m = row['meanings'] as String? ?? '';
 
-        results.add(
-          DbRow(
-            word: w,
-            meanings: highlighted,
-            isRoot: (row['is_root'] as int? ?? 0) == 1,
-          ),
-        );
+          // Highlight query inside meanings
+          final highlighted = m.replaceAll(
+            query,
+            '<span class="high">$query</span>',
+          );
+
+          results.add(
+            DbRow(
+              word: w,
+              meanings: highlighted,
+              isRoot: (row['is_root'] as int? ?? 0) == 1,
+            ),
+          );
+        }
+        return results;
       }
-      return results;
     }
 
     return results;

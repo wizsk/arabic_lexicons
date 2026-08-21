@@ -7,6 +7,7 @@ final releases = [
     Add demo text to the reader-input page
     Add Aref-Ruqaa font
     Enhance direct dictionary table style
+    Improve Hanswehr and Lane Lexicon search
     Fixed minor bugs & improvements
     ''',
   ),

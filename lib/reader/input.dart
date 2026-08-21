@@ -992,32 +992,41 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  OutlinedButton.icon(
-                                    onPressed: () async {
-                                      final txt = await getClipboardText();
-                                      if (txt != null) {
-                                        _controller.text =
-                                            _controller.text + txt;
-                                      }
-                                    },
-                                    icon: const Icon(Icons.paste),
-                                    label: Text(L.p('Paste', 'لصق')),
+                                  SizedBox(
+                                    height: 38,
+                                    child: OutlinedButton.icon(
+                                      onPressed: () async {
+                                        final txt = await getClipboardText();
+                                        if (txt != null) {
+                                          _controller.text =
+                                              _controller.text + txt;
+                                        }
+                                      },
+                                      icon: const Icon(Icons.paste),
+                                      label: Text(L.p('Paste', 'لصق')),
+                                    ),
                                   ),
                                   const SizedBox(width: 8),
-                                  OutlinedButton.icon(
-                                    onPressed: () async {
-                                      if (_controller.text.isEmpty) return;
+                                  SizedBox(
+                                    height: 38,
+                                    child: OutlinedButton.icon(
+                                      onPressed: () async {
+                                        if (_controller.text.isEmpty) return;
 
-                                      final res = await showConfirmDialog(
-                                        context,
-                                        L.p('Clear all text?', 'مسح كل النص؟'),
-                                        confirmText: L.p('Clear', 'مسح'),
-                                        useLClass: true,
-                                      );
-                                      if (res == true) _controller.clear();
-                                    },
-                                    icon: const Icon(Icons.clear),
-                                    label: Text(L.p('Clear', 'مسح')),
+                                        final res = await showConfirmDialog(
+                                          context,
+                                          L.p(
+                                            'Clear all text?',
+                                            'مسح كل النص؟',
+                                          ),
+                                          confirmText: L.p('Clear', 'مسح'),
+                                          useLClass: true,
+                                        );
+                                        if (res == true) _controller.clear();
+                                      },
+                                      icon: const Icon(Icons.clear),
+                                      label: Text(L.p('Clear', 'مسح')),
+                                    ),
                                   ),
                                 ],
                               ),
@@ -1071,15 +1080,21 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                                     ),
                                   ),
                                   const SizedBox(height: 22),
-                                  OutlinedButton.icon(
-                                    icon: const Icon(
-                                      Icons.text_snippet_outlined,
+                                  SizedBox(
+                                    height: 42,
+                                    child: FilledButton.icon(
+                                      icon: const Icon(
+                                        Icons.text_snippet_outlined,
+                                      ),
+                                      label: Text(
+                                        L.p(
+                                          'Open Demo Text',
+                                          'افتح نصا تجريبيا',
+                                        ),
+                                        style: L.arStyleIf,
+                                      ),
+                                      onPressed: () => _openDemoTxt(context),
                                     ),
-                                    label: Text(
-                                      L.p('Open Demo Text', 'افتح نصا تجريبيا'),
-                                      style: L.arStyleIf,
-                                    ),
-                                    onPressed: () => _openDemoTxt(context),
                                   ),
                                 ],
                               ),

@@ -6,6 +6,7 @@ import 'package:arabic_lexicons/pages/data.dart';
 import 'package:arabic_lexicons/reader/reader_utils.dart';
 import 'package:arabic_lexicons/reader/reader_widgets.dart';
 import 'package:arabic_lexicons/reader/settings_class.dart';
+import 'package:arabic_lexicons/stories.dart';
 import 'package:arabic_lexicons/theme.dart';
 import 'package:arabic_lexicons/utils.dart';
 import 'package:flutter/material.dart';
@@ -253,13 +254,16 @@ class _ReaderAdjustPageState extends State<ReaderAdjustPage> {
                 break;
 
               case 'demo-cng':
-                setState(() {
-                  _demoTxtIdx++;
-                  if (_demoTxtIdx >= stories.length) {
-                    _demoTxtIdx = 0;
-                  }
-                  _paras = stories[_demoTxtIdx];
-                });
+                final idx = await showStoryPicker(context);
+                if (idx != null &&
+                    idx >= 0 &&
+                    idx < stories.length &&
+                    context.mounted) {
+                  setState(() {
+                    _demoTxtIdx = idx;
+                    _paras = stories[_demoTxtIdx];
+                  });
+                }
                 break;
             }
           },

@@ -2,11 +2,11 @@ final releases = [
   Release(
     version: 'v3.4.0',
     changes: '''
+    Make app launch blazingly fast
     Added the ability to adjust line height
-    Fixed minor bugs
     Add demo text to the reader-input page
     Add Aref-Ruqaa font
-    Make app launch blazingly fast
+    Fixed minor bugs
     ''',
   ),
   Release(

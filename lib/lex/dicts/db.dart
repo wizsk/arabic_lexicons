@@ -248,37 +248,45 @@ class DbService {
     return results;
   }
 
-  static Future<List<DbRow>> _getByWordLane(String? word) async {
-    if (word == null || word.isEmpty) {
+  static Future<List<DbRow>> _getByWordLane(String? wordArg) async {
+    wordArg = wordArg?.trim();
+    if (wordArg == null || wordArg.isEmpty) {
       return const [];
     }
-    var q = '''SELECT word, meanings, is_root FROM lanelexcon
-	WHERE parent_id IN (SELECT parent_id FROM lanelexcon WHERE is_root AND WORD = ?)
-	ORDER BY id''';
 
     final db = database;
-    var res = await db.rawQuery(q, [word]);
     final results = <DbRow>[];
 
-    if (res.isNotEmpty) {
-      for (final r in res) {
-        results.add(
-          DbRow(
-            word: r['word'] as String? ?? "",
-            meanings: r['meanings'] as String? ?? "",
-            isRoot: (r['is_root'] as int? ?? 0) == 1,
-          ),
-        );
-      }
-      return results;
-    }
+    final secondary = wordArg.replaceAll(ArabicNormalizer.hamzaAlifs, "ا");
 
-    q = '''SELECT word, meanings, is_root FROM lanelexcon
+    final words = [wordArg, if (wordArg != secondary) secondary];
+
+    for (final word in words) {
+      var q = '''SELECT word, meanings, is_root FROM lanelexcon
+	WHERE parent_id IN (SELECT parent_id FROM lanelexcon WHERE is_root AND WORD = ?)
+	ORDER BY id''';
+      var res = await db.rawQuery(q, [word]);
+
+      if (res.isNotEmpty) {
+        for (final r in res) {
+          results.add(
+            DbRow(
+              word: r['word'] as String? ?? "",
+              meanings: r['meanings'] as String? ?? "",
+              isRoot: (r['is_root'] as int? ?? 0) == 1,
+            ),
+          );
+        }
+        return results;
+      }
+
+      q = '''SELECT word, meanings, is_root FROM lanelexcon
        WHERE parent_id IN (SELECT parent_id FROM lanelexcon WHERE WORD = ?)
        ORDER BY id''';
-    res = await db.rawQuery(q, [word]);
+      res = await db.rawQuery(q, [word]);
 
-    if (res.isNotEmpty) {
+      if (res.isEmpty) continue;
+
       for (final r in res) {
         final w = r['word'] as String? ?? "";
         results.add(

@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:arabic_lexicons/alphabets.dart';
 import 'package:arabic_lexicons/conf.dart';
 import 'package:arabic_lexicons/data.dart';
@@ -45,42 +43,80 @@ Widget noRes(
   return SliverFillRemaining(
     hasScrollBody: false,
     child: Center(
-      child: noResUniversal(
+      child: _noResUniversal(
+        context,
+        currWord,
         noWordAr: noWordAr,
         noWordEn: noWordEn,
         noResAr: noResAr,
         noResEn: noResEn,
-        currWord,
       ),
     ),
   );
 }
 
-Widget noResUniversal(
+Widget _noResUniversal(
+  BuildContext context,
   String? currWord, {
   String noWordAr = 'ابجث عن كلمة',
   String noWordEn = 'Search for a word',
   String noResAr = "لا توجد نتائج لـ",
   String noResEn = "No resuts for",
 }) {
-  Widget w;
+  final ic = Theme.of(context).colorScheme.secondary;
+  // final ts = Theme.of(context).textTheme.bodyLarge;
+
   if (currWord == null || currWord.isEmpty) {
-    w = Text(L.p(noWordEn, noWordAr), textDirection: L.dir, style: L.arStyleIf);
-  } else {
-    w = Column(
-      spacing: 6,
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text(L.p(noResEn, noResAr), style: L.arStyleIf, textDirection: L.dir),
-        Text(currWord, style: L.arStyle),
-      ],
+    final l = Text(
+      L.p(noWordEn, noWordAr),
+      textDirection: L.dir,
+      style: L.arStyleIf,
+    );
+
+    return Directionality(
+      textDirection: L.dir,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        spacing: 6,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.search, color: ic, size: 18,),
+              const SizedBox(width: 4),
+              Flexible(child: l),
+            ],
+          ),
+          const SizedBox(height: 14),
+          SizedBox(
+            height: 48,
+            child: FilledButton.tonalIcon(
+              label: Text(
+                L.p('Open Reader', 'افتح القارئ'),
+                style: L.arStyleIf,
+              ),
+              icon: Icon(Icons.menu_book_rounded),
+              onPressed: () {
+                Navigator.pushReplacementNamed(context, Routes.readerInput);
+              },
+            ),
+          ),
+        ],
+      ),
     );
   }
 
-  // style: L.arStyleIf,
-  // textDirection: L.dir,
-
-  return w;
+  return Column(
+    spacing: 6,
+    mainAxisAlignment: MainAxisAlignment.center,
+    children: [
+      Icon(Icons.search_off, size: 32.00, color: ic),
+      Text(L.p(noResEn, noResAr), style: L.arStyleIf, textDirection: L.dir, textAlign: TextAlign.center,),
+      Text(currWord, style: L.arStyle),
+    ],
+  );
 }
 
 Widget _showArEnRes(

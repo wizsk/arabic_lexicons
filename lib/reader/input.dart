@@ -228,6 +228,14 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
     touggleFullScreen();
   }
 
+  Future<void> _openDemoTxt(BuildContext context) async {
+    final idx = await showStoryPicker(context);
+    if (idx != null && idx >= 0 && idx < stories.length && context.mounted) {
+      _isTempMode = true;
+      _showText(context, initialTxt: stories[idx].join('\n'));
+    }
+  }
+
   String _hashText(String text) {
     final bytes = utf8.encode(text);
     return sha1.convert(bytes).toString();
@@ -844,17 +852,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                                   break;
 
                                 case 'open-demo':
-                                  final idx = await showStoryPicker(context);
-                                  if (idx != null &&
-                                      idx >= 0 &&
-                                      idx < stories.length &&
-                                      context.mounted) {
-                                    _isTempMode = true;
-                                    _showText(
-                                      context,
-                                      initialTxt: stories.first.join('\n'),
-                                    );
-                                  }
+                                  await _openDemoTxt(context);
                                   break;
                               }
                             },
@@ -950,6 +948,8 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                                 textDirection: TextDirection.ltr,
                                 child: Wrap(
                                   spacing: 8,
+                                  alignment: WrapAlignment.center,
+                                  runAlignment: WrapAlignment.center,
                                   runSpacing: 6,
                                   children: [
                                     FilterChip(
@@ -1039,7 +1039,56 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                         ),
                       ),
                     ),
-                    if (ReaderInputPageData.books.isNotEmpty) ...[
+                    if (ReaderInputPageData.books.isEmpty)
+                      Directionality(
+                        textDirection: L.dir,
+                        child: SliverPadding(
+                          padding: padd.copyWith(top: 10),
+                          sliver: SliverToBoxAdapter(
+                            child: Container(
+                              text
+                              padding: const EdgeInsets.all(18.0),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(12.00),
+                                color: cs.surfaceContainer,
+                              ),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 10.0,
+                                    ),
+                                    child: Text(
+                                      L.p(
+                                        'There are no book entries.\n'
+                                            'Open demo text to check out the reader',
+                                        'لا توجد كتب. افتح نصا تجريبيا لتجربة القارئ',
+                                      ),
+                                      style: th.bodyMedium
+                                          ?.copyWith(color: cs.secondary)
+                                          .arIf,
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 22),
+                                  OutlinedButton.icon(
+                                    icon: const Icon(
+                                      Icons.text_snippet_outlined,
+                                    ),
+                                    label: Text(
+                                      L.p('Open Demo Text', 'افتح نصا تجريبيا'),
+                                      style: L.arStyleIf,
+                                    ),
+                                    onPressed: () => _openDemoTxt(context),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      )
+                    else ...[
                       SliverPadding(
                         padding: padd.copyWith(top: 10, bottom: 8),
                         sliver: SliverToBoxAdapter(

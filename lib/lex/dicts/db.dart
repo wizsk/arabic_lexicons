@@ -362,8 +362,8 @@ class DbService {
 
   static Future<List<DbRow>> search(Dict d, String word) async {
     final key = '${d.table}_$word';
-    // final c = _cache.get(key);
-    // if (c != null) return c;
+    final c = _cache.get(key);
+    if (c != null) return c;
 
     List<DbRow> dbRes;
 

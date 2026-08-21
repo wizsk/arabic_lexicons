@@ -105,7 +105,9 @@ Widget _noResUniversal(
             borderRadius: BorderRadius.circular(14.00),
             clipBehavior: Clip.antiAlias,
             child: InkWell(
-              onLongPress: () {},
+              onTap: () {
+                Navigator.pushReplacementNamed(context, Routes.readerInput);
+              },
               child: Padding(
                 padding: const EdgeInsets.symmetric(
                   vertical: 16.00,

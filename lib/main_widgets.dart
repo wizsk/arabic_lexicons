@@ -44,7 +44,9 @@ Widget buildDrawer(BuildContext context) {
           break;
 
         case 1:
-          Navigator.pushReplacementNamed(context, Routes.readerInput);
+          if (currRoute != Routes.readerInput) {
+            Navigator.pushReplacementNamed(context, Routes.readerInput);
+          }
           // appConf.saveRoute(Routes.readerInput);
           break;
 

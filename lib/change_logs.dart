@@ -6,7 +6,8 @@ final releases = [
     Added the ability to adjust line height
     Add demo text to the reader-input page
     Add Aref-Ruqaa font
-    Fixed minor bugs
+    Enhance direct dictionary table style
+    Fixed minor bugs & improvements
     ''',
   ),
   Release(

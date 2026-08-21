@@ -234,8 +234,10 @@ class HelpPage extends StatelessWidget {
                         ),
                         const SizedBox(height: 20),
                         Container(
+                          constraints: const BoxConstraints(maxWidth: 250),
                           padding: EdgeInsets.symmetric(horizontal: 8.0),
                           width: double.infinity,
+                          height: 52,
                           child: FilledButton.icon(
                             icon: Icon(Icons.star_rounded),
                             label: const Text("Sure, I'll rate it"),
@@ -430,6 +432,7 @@ class _LinkRow extends BulletBase {
         padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
             if (label != null) ...[
               Text(
@@ -445,23 +448,15 @@ class _LinkRow extends BulletBase {
                 style: theme.textTheme.bodyMedium!.copyWith(color: cs.primary),
               ),
 
-            Expanded(
-              child: Text.rich(
-                TextSpan(
-                  children: [
-                    TextSpan(text: '$value '),
-                    WidgetSpan(
-                      child: Icon(
-                        Icons.open_in_new,
-                        size: 12,
-                        color: cs.primary,
-                      ),
-                    ),
-                  ],
-                ),
+            Flexible(
+              child: Text(
+                value,
                 style: theme.textTheme.bodyMedium!.copyWith(color: cs.primary),
               ),
             ),
+
+            // const SizedBox(width: 4),
+            // Icon(Icons.open_in_new, size: 14, color: cs.primary),
           ],
         ),
       ),

@@ -119,14 +119,21 @@ Future<RatePromptResult?> showRatePromptBottomSheet(BuildContext context) {
   );
 }
 
-Widget elevatedIcon(ColorScheme cs, IconData iconData) {
+Widget elevatedIcon(
+  ColorScheme cs,
+  IconData iconData, {
+  final double iconSize = 38.00,
+  final double diemtion = 72.00,
+  Color? fg,
+  Color? bg,
+}) {
+  fg = fg ?? cs.onPrimaryContainer;
+  bg = bg ?? cs.primaryContainer;
+
   return Container(
-    width: 72,
-    height: 72,
-    decoration: BoxDecoration(
-      color: cs.primaryContainer,
-      shape: BoxShape.circle,
-    ),
-    child: Icon(iconData, size: 38, color: cs.onPrimaryContainer),
+    width: diemtion,
+    height: diemtion,
+    decoration: BoxDecoration(color: bg, shape: BoxShape.circle),
+    child: Icon(iconData, size: iconSize, color: fg),
   );
 }

@@ -39,6 +39,7 @@ Widget noRes(
   String noWordEn = 'Search for a word',
   String noResAr = "لا توجد نتائج لـ",
   String noResEn = "No resuts for",
+  bool showOpenReaderBtn = false,
 }) {
   return SliverFillRemaining(
     hasScrollBody: false,
@@ -50,6 +51,7 @@ Widget noRes(
         noWordEn: noWordEn,
         noResAr: noResAr,
         noResEn: noResEn,
+        showOpenReaderBtn: showOpenReaderBtn,
       ),
     ),
   );
@@ -62,45 +64,72 @@ Widget _noResUniversal(
   String noWordEn = 'Search for a word',
   String noResAr = "لا توجد نتائج لـ",
   String noResEn = "No resuts for",
+  bool showOpenReaderBtn = false,
 }) {
-  final ic = Theme.of(context).colorScheme.secondary;
+  final cs = Theme.of(context).colorScheme;
+  final ic = cs.secondary;
   // final ts = Theme.of(context).textTheme.bodyLarge;
 
   if (currWord == null || currWord.isEmpty) {
-    final l = Text(
-      L.p(noWordEn, noWordAr),
-      textDirection: L.dir,
-      style: L.arStyleIf,
+    final l = Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(Icons.search, color: ic, size: 18),
+        const SizedBox(width: 4),
+        Flexible(
+          child: Text(
+            L.p(noWordEn, noWordAr),
+            textDirection: L.dir,
+            style: L.arStyleIf,
+          ),
+        ),
+      ],
     );
+
+    if (!showOpenReaderBtn) return l;
 
     return Directionality(
       textDirection: L.dir,
       child: Column(
         mainAxisSize: MainAxisSize.min,
-        spacing: 6,
+        spacing: 8.00,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.search, color: ic, size: 18,),
-              const SizedBox(width: 4),
-              Flexible(child: l),
-            ],
-          ),
-          const SizedBox(height: 14),
-          SizedBox(
-            height: 48,
-            child: FilledButton.tonalIcon(
-              label: Text(
-                L.p('Open Reader', 'افتح القارئ'),
-                style: L.arStyleIf,
+          l,
+          Text(L.p('or', 'أو'), textDirection: L.dir, style: L.arStyleIf),
+
+          // const SizedBox(height: 8.00),
+          Material(
+            color: cs.surfaceContainerHigh,
+            borderRadius: BorderRadius.circular(14.00),
+            clipBehavior: Clip.antiAlias,
+            child: InkWell(
+              onLongPress: () {},
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  vertical: 16.00,
+                  horizontal: 18.00,
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  textDirection: L.dir,
+                  children: [
+                    Icon(Icons.menu_book_rounded, color: cs.primary),
+                    SizedBox(width: 8),
+                    Text(
+                      // L.p('Open Reader', 'افتح القارئ'),
+                      L.p('Go to Reader', 'اذهب إلى القارئ'),
+                      style: L.arStyleOrNew.copyWith(
+                        fontWeight: FontWeight.w500,
+                        color: cs.primary,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              icon: Icon(Icons.menu_book_rounded),
-              onPressed: () {
-                Navigator.pushReplacementNamed(context, Routes.readerInput);
-              },
             ),
           ),
         ],
@@ -113,7 +142,12 @@ Widget _noResUniversal(
     mainAxisAlignment: MainAxisAlignment.center,
     children: [
       Icon(Icons.search_off, size: 32.00, color: ic),
-      Text(L.p(noResEn, noResAr), style: L.arStyleIf, textDirection: L.dir, textAlign: TextAlign.center,),
+      Text(
+        L.p(noResEn, noResAr),
+        style: L.arStyleIf,
+        textDirection: L.dir,
+        textAlign: TextAlign.center,
+      ),
       Text(currWord, style: L.arStyle),
     ],
   );

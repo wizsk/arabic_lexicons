@@ -166,7 +166,11 @@ class _SearchLexiconsState extends State<SearchLexicons>
 
   Widget _mainDict(BuildContext context, ColorScheme cs, TextStyle arTxtTheme) {
     if (_datas.state.isEmpty) {
-      return noRes(context, currWord: _datas.selectedWord);
+      return noRes(
+        context,
+        currWord: _datas.selectedWord,
+        showOpenReaderBtn: !_isPopup,
+      );
     }
 
     if (_datas.state.isQuering) {

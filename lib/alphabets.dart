@@ -37,6 +37,8 @@ class ArabicNormalizer {
   static final RegExp _multiUnderscore = RegExp(r'_{2,}');
   static final RegExp _edgeUnderscore = RegExp(r'^_+|_+$');
 
+  static final hamzaAlifs = RegExp(r'أإ');
+
   ///  Keep only Arabic letters.
   /// - Removes tashkīl
   /// - Removes symbols, numbers, spaces expect '_'

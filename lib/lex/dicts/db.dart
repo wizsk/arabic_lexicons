@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:arabic_lexicons/alphabets.dart';
 import 'package:arabic_lexicons/data.dart';
 import 'package:arabic_lexicons/utils.dart';
 import 'package:flutter/foundation.dart';
@@ -146,7 +147,7 @@ class DbService {
       return const [];
     }
 
-    final secondary = wordArg.replaceAll("أ", "ا");
+    final secondary = wordArg.replaceAll(ArabicNormalizer.hamzaAlifs, "ا");
     final words = [wordArg, if (wordArg != secondary) secondary];
 
     final db = database;

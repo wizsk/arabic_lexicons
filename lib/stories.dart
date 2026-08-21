@@ -99,6 +99,7 @@ Future<int?> showStoryPicker(BuildContext context) {
                               s.first,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
+                              textDirection: TextDirection.rtl,
                               style: Theme.of(context).textTheme.titleMedium
                                   ?.copyWith(
                                     fontFamily: L.arFont,
@@ -110,7 +111,7 @@ Future<int?> showStoryPicker(BuildContext context) {
                           const SizedBox(width: 8),
 
                           Icon(
-                            Icons.chevron_right_rounded,
+                            Icons.chevron_left_rounded,
                             color: cs.onSurfaceVariant,
                           ),
                         ],

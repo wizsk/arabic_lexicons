@@ -1046,7 +1046,6 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                           padding: padd.copyWith(top: 10),
                           sliver: SliverToBoxAdapter(
                             child: Container(
-                              text
                               padding: const EdgeInsets.all(18.0),
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(12.00),

@@ -10,6 +10,7 @@ import 'package:arabic_lexicons/theme.dart';
 import 'package:arabic_lexicons/utils.dart';
 import 'package:arabic_lexicons/widgets/change_logs_widget.dart';
 import 'package:arabic_lexicons/widgets/scroll.dart';
+import 'package:arabic_lexicons/widgets/startup_times.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -483,6 +484,15 @@ class _SettingsPageState extends State<SettingsPage> {
                         trailing: Icon(Icons.chevron_right),
                         onTap: () {
                           showWhatsNewSheet(context);
+                        },
+                      ),
+                      ListTile(
+                        leading: const FilledIcon(Icons.speed_rounded),
+                        title: Text('Launch Times'),
+                        subtitle: Text('Show app launch times'),
+                        trailing: Icon(Icons.chevron_right),
+                        onTap: () {
+                          showStartupTimesBottomSheet(context);
                         },
                       ),
                     ],

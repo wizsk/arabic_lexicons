@@ -2,7 +2,7 @@ final releases = [
   Release(
     version: 'v3.4.0',
     changes: '''
-    Make app launch blazingly fast
+    Make app launch faster
     Added the ability to adjust line height
     Add demo text to the reader-input page
     Add Aref-Ruqaa font

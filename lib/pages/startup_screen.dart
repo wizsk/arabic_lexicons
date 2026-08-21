@@ -4,6 +4,7 @@ import 'package:arabic_lexicons/lex/dicts/db.dart';
 import 'package:arabic_lexicons/lex/isolate.dart';
 import 'package:arabic_lexicons/lex/rearrange_dicts.dart';
 import 'package:arabic_lexicons/main_widgets.dart';
+import 'package:arabic_lexicons/widgets/startup_times.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -23,7 +24,7 @@ class _StartupScreenState extends State<StartupScreen> {
 
   Future<void> _init() async {
     try {
-      // final s = Stopwatch()..start();
+      final s = Stopwatch()..start();
       await Future.wait([
         appConf.load(),
         setDictOrdFromFile(),
@@ -36,7 +37,7 @@ class _StartupScreenState extends State<StartupScreen> {
         Isolates.initSugg();
       });
 
-      // s.stop();
+      s.stop();
 
       appConf.notify();
 
@@ -49,6 +50,15 @@ class _StartupScreenState extends State<StartupScreen> {
 
       if (!mounted) return;
       Navigator.pushReplacementNamed(context, appConf.lastRoute);
+
+      final timeStamp = DateTime.now();
+      Future.delayed(const Duration(seconds: 4), () async {
+        final took = s.elapsedMilliseconds;
+        StartupTimeData.loadAndSave(
+          took,
+          timeStamp.toUtc().millisecondsSinceEpoch,
+        );
+      });
     } catch (e) {
       if (mounted) {
         await showInfoDialog(

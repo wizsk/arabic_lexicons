@@ -1,6 +1,6 @@
 import 'package:arabic_lexicons/conf.dart';
 import 'package:arabic_lexicons/data.dart';
-import 'package:arabic_lexicons/pages/data.dart';
+import 'package:arabic_lexicons/datas/stories_txts.dart';
 import 'package:arabic_lexicons/utils.dart';
 import 'package:flutter/material.dart';
 

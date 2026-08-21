@@ -8,7 +8,7 @@ import 'package:arabic_lexicons/first_run.dart';
 import 'package:arabic_lexicons/helper_widgets.dart';
 import 'package:arabic_lexicons/main_widgets.dart';
 import 'package:arabic_lexicons/multi_selection.dart';
-import 'package:arabic_lexicons/pages/data.dart';
+import 'package:arabic_lexicons/datas/stories_txts.dart';
 import 'package:arabic_lexicons/reader/data.dart';
 import 'package:arabic_lexicons/reader/reader.dart';
 import 'package:arabic_lexicons/reader/reader_utils.dart';

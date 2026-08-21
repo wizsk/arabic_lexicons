@@ -2,7 +2,7 @@ import 'dart:math' as math;
 
 import 'package:arabic_lexicons/conf.dart';
 import 'package:arabic_lexicons/data.dart';
-import 'package:arabic_lexicons/pages/data.dart';
+import 'package:arabic_lexicons/datas/stories_txts.dart';
 import 'package:arabic_lexicons/reader/reader_utils.dart';
 import 'package:arabic_lexicons/reader/reader_widgets.dart';
 import 'package:arabic_lexicons/reader/settings_class.dart';

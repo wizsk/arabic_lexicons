@@ -1,6 +1,8 @@
 if [ -d "$bd" ]; then
   if [ "$1" = "yy" ]; then
     p="y"
+  elif [ "$1" = "nn" ]; then
+    p="n"
   else
     printf "Delete $bd [y/N] "
     read -r p

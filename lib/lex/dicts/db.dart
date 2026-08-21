@@ -148,6 +148,7 @@ class DbService {
     }
 
     final secondary = wordArg.replaceAll(ArabicNormalizer.hamzaAlifs, "ا");
+
     final words = [wordArg, if (wordArg != secondary) secondary];
 
     final db = database;
@@ -219,6 +220,9 @@ class DbService {
       ''',
           ['%$query%'],
         );
+
+        if (res.isEmpty) continue;
+
         for (final row in res) {
           final w = row['word'] as String? ?? '';
           var m = row['meanings'] as String? ?? '';
@@ -358,8 +362,8 @@ class DbService {
 
   static Future<List<DbRow>> search(Dict d, String word) async {
     final key = '${d.table}_$word';
-    final c = _cache.get(key);
-    if (c != null) return c;
+    // final c = _cache.get(key);
+    // if (c != null) return c;
 
     List<DbRow> dbRes;
 

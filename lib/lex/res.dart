@@ -233,12 +233,7 @@ Widget _showArEnRes(
                 if (context.mounted) {
                   showSnack(
                     context,
-                    '',
-                    messageWidget: Text(
-                      'Copied: ${e.def}',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                    'Definition copied. Long-press to select text',
                   );
                 }
               }

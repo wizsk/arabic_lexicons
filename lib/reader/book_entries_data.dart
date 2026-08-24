@@ -5,6 +5,7 @@ import 'package:arabic_lexicons/alphabets.dart';
 import 'package:arabic_lexicons/datas/app_db.dart';
 import 'package:arabic_lexicons/reader/settings_class.dart';
 import 'package:arabic_lexicons/utils.dart';
+import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqlite_api.dart';
@@ -68,30 +69,31 @@ abstract final class ReaderInputPageData {
 
     final dir = await getApplicationDocumentsDirectory();
     final booksDir = Directory(path.join(dir.path, 'books'));
-    final indexFile = File(path.join(booksDir.path, booksIndexName));
 
     booksDirPath = booksDir.path;
     confDirPath = path.join(booksDirPath, 'conf');
 
-    // TODO: Remove in the future version: added at v3.4.0
-    final oldConfDir = Directory(path.join(dir.path, readerConfDirNameOld));
-    try {
-      if (await oldConfDir.exists()) {
-        await oldConfDir.rename(confDirPath);
-      }
-    } catch (_) {
-      oldConfDir.delete();
-    }
-
     booksDir.create();
     Directory(confDirPath).create();
 
+    // TODO: Remove in the future version: added at v3.4.0
+    final indexFile = File(path.join(booksDir.path, booksIndexName));
     if (await indexFile.exists()) {
       final l = await indexFile.readAsLines();
       bookEntries = parseBooks(l);
       _insertAllBookEntriesToDB(bookEntries).then((_) {
         indexFile.delete();
       });
+
+      final oldConfDir = Directory(path.join(dir.path, readerConfDirNameOld));
+      try {
+        if (await oldConfDir.exists()) {
+          await oldConfDir.rename(confDirPath);
+          oldConfDir.delete(recursive: true);
+        }
+      } catch (_) {}
+
+      if (kDebugMode) debugPrint('Books data migrated!');
     } else {
       await _loadBooks();
       booksDir.create();

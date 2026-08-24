@@ -238,6 +238,10 @@ class ReaderPageSettings {
     return p;
   }
 
+  static Future<void> createConfDir() async {
+    Directory(await _confDir).create(recursive: true);
+  }
+
   static Future<File> lurFile(String bookHash) async {
     final dir = await _confDir;
     return File(join(dir, '${bookHash}_visited.txt'));
@@ -269,10 +273,17 @@ class ReaderPageSettings {
     if (bookHash.isEmpty) return;
 
     final parent = Directory(await _confDir);
-    await parent.create(recursive: true); // ensures parent dirs exist
 
     final file = File(join(parent.path, '$bookHash.json'));
     await file.writeAsString(toJson());
+  }
+
+  static Future<void> deleteAllAndCreateConfDir() async {
+    final d = Directory(await _confDir);
+    try {
+      d.delete();
+    } catch (_) {}
+    d.create(recursive: true);
   }
 
   static Future<void> delete(String bookHash) async {

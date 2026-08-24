@@ -6,8 +6,8 @@ import 'package:arabic_lexicons/conf.dart';
 import 'package:arabic_lexicons/data.dart';
 import 'package:arabic_lexicons/main_widgets.dart';
 import 'package:arabic_lexicons/pages/settings.dart';
+import 'package:arabic_lexicons/reader/book_entries_data.dart';
 import 'package:arabic_lexicons/reader/data.dart';
-import 'package:arabic_lexicons/reader/input.dart';
 import 'package:arabic_lexicons/reader/inspect.dart';
 import 'package:arabic_lexicons/reader/reader_utils.dart';
 import 'package:arabic_lexicons/reader/reader_widgets.dart';
@@ -86,17 +86,21 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
           }
           bookHash = appConf.lastBook;
           await ReaderInputPageData.init();
-          if (!ReaderInputPageData.isInited) {
+          if (!ReaderInputPageData.inited) {
             throw Exception('cound not init readerinputpage data');
           }
 
-          if (ReaderInputPageData.books.indexWhere((b) => b.hash == bookHash) ==
+          if (ReaderInputPageData.bookEnsUnord.indexWhere(
+                (b) => b.sha == bookHash,
+              ) ==
               -1) {
             throw Exception('cound not find book in the book entries');
           }
         }
 
-        final data = await File(bookPath(bookHash)).readAsString();
+        final data = await File(
+          ReaderInputPageData.bookDataDest(bookHash),
+        ).readAsString();
         _paras = cleanReaderInputAndPrepare(data);
       }
 

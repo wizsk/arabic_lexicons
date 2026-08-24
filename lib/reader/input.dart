@@ -1,18 +1,17 @@
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:arabic_lexicons/alphabets.dart';
 import 'package:arabic_lexicons/conf.dart';
 import 'package:arabic_lexicons/data.dart';
+import 'package:arabic_lexicons/datas/stories_txts.dart';
 import 'package:arabic_lexicons/first_run.dart';
 import 'package:arabic_lexicons/helper_widgets.dart';
 import 'package:arabic_lexicons/main_widgets.dart';
 import 'package:arabic_lexicons/multi_selection.dart';
-import 'package:arabic_lexicons/datas/stories_txts.dart';
+import 'package:arabic_lexicons/reader/book_entries_data.dart';
 import 'package:arabic_lexicons/reader/data.dart';
 import 'package:arabic_lexicons/reader/reader.dart';
 import 'package:arabic_lexicons/reader/reader_utils.dart';
-import 'package:arabic_lexicons/reader/settings_class.dart';
 import 'package:arabic_lexicons/stories.dart';
 import 'package:arabic_lexicons/utils.dart';
 import 'package:archive/archive.dart';
@@ -22,153 +21,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
-
-class BookEntry {
-  final String hash;
-  final String name;
-  final String nameCl;
-  final bool pinned;
-
-  const BookEntry({
-    required this.hash,
-    required this.name,
-    required this.nameCl,
-    required this.pinned,
-  });
-
-  BookEntry copyWith({
-    String? hash,
-    String? name,
-    String? nameCl,
-    bool? pinned,
-    bool? selected,
-  }) {
-    return BookEntry(
-      hash: hash ?? this.hash,
-      name: name ?? this.name,
-      nameCl: nameCl ?? this.nameCl,
-      pinned: pinned ?? this.pinned,
-    );
-  }
-}
-
-String bookPath(String bookHash) =>
-    path.join(ReaderInputPageData.booksDir!.path, '$bookHash.txt');
-
-class ReaderInputPageData {
-  static bool isInited = false;
-  static Directory? booksDir;
-  static File? indexFile;
-  static File? tmpIndexFile;
-  static List<BookEntry> books = [];
-  static List<BookEntry> booksUnord = [];
-  static const booksIndexName = 'books.txt';
-
-  static Future<void> init() async {
-    if (isInited) {
-      setBookUnord();
-      return;
-    }
-
-    try {
-      final dir = await getApplicationDocumentsDirectory();
-      booksDir = Directory(path.join(dir.path, 'books'));
-      if (!await booksDir!.exists()) {
-        await booksDir!.create(recursive: true);
-      }
-      indexFile = File(path.join(booksDir!.path, booksIndexName));
-      tmpIndexFile = File(path.join(booksDir!.path, 'books_tmp.txt'));
-      isInited = true;
-    } catch (e) {
-      debugPrint('err while initing booksdir: $e');
-      isInited = false;
-      return;
-    }
-
-    if (!await indexFile!.exists()) return;
-    final lines = await indexFile!.readAsLines();
-
-    books.clear();
-    books = parseBooks(lines);
-    setBookUnord();
-  }
-
-  static List<BookEntry> parseBooks(Iterable<String> lines) {
-    return lines
-        .map((line) {
-          final parts = line.split(':');
-          if (parts.length == 3) {
-            final pinned = parts[0] == '1';
-            final hash = parts[1];
-            final name = parts.sublist(2).join(':');
-            return BookEntry(
-              hash: hash,
-              name: name,
-              nameCl: ArabicNormalizer.cleanLineForSearch(name),
-              pinned: pinned,
-            );
-          }
-
-          // legacy
-          if (parts.length == 2) {
-            final hash = parts[0];
-            final name = parts.sublist(1).join(':');
-            return BookEntry(
-              hash: hash,
-              name: name,
-              nameCl: ArabicNormalizer.cleanLineForSearch(name),
-              pinned: false,
-            );
-          }
-
-          return null;
-        })
-        .whereType<BookEntry>()
-        .toList();
-  }
-
-  static void setBookUnord({String match = "", bool newToOld = true}) {
-    final source = newToOld ? books.reversed : books;
-
-    final List<({int idx, BookEntry book})> indexed = [];
-
-    for (final (idx, bk) in source.indexed) {
-      indexed.add((idx: idx, book: bk));
-    }
-
-    // source.asMap().entries.map((e) {
-    //   return (idx: e.key, book: e.value);
-    // }).toList();
-
-    indexed.sort((a, b) {
-      final pinA = a.book.pinned ? 0 : 1;
-      final pinB = b.book.pinned ? 0 : 1;
-      if (pinA != pinB) return pinA.compareTo(pinB);
-      return a.idx.compareTo(b.idx);
-    });
-
-    if (match.isEmpty) {
-      booksUnord = indexed.map((e) => e.book).toList(growable: false);
-      return;
-    }
-
-    final List<({int idx, int matchIdx})> matchIndexs = [];
-
-    for (int i = 0; i < indexed.length; i++) {
-      final idx = indexed[i].book.nameCl.indexOf(match);
-      if (idx > -1) matchIndexs.add((idx: i, matchIdx: idx));
-    }
-
-    matchIndexs.sort((a, b) => a.matchIdx.compareTo(b.matchIdx));
-
-    final List<BookEntry> matches = [];
-
-    for (final idx in matchIndexs) {
-      matches.add(indexed[idx.idx].book);
-    }
-    booksUnord = matches;
-  }
-}
 
 class ReaderInputPage extends StatefulWidget {
   const ReaderInputPage({super.key});
@@ -228,6 +80,18 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
     touggleFullScreen();
   }
 
+  void _sortBooks() {
+    ReaderInputPageData.setBookUnord(
+      match: _searchText,
+      newToOld: _isShowEntrieNewToOld,
+    );
+  }
+
+  void _sortBooksRebuild() {
+    _sortBooks();
+    if (mounted) setState(() {});
+  }
+
   Future<void> _openDemoTxt(BuildContext context) async {
     final idx = await showStoryPicker(context);
     if (idx != null && idx >= 0 && idx < stories.length && context.mounted) {
@@ -255,10 +119,9 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
     }
 
     String? bookHash;
-    bool fresh = true;
 
     if (!_isTempMode) {
-      (bookHash, fresh) = await _saveBookTxt(paras);
+      bookHash = await _saveBookTxt(paras);
       if (bookHash.isEmpty) {
         if (context.mounted) {
           showSnackL(context, en: 'Could not save book', ar: 'تعذر حفظ الكتاب');
@@ -267,131 +130,43 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
       }
     }
 
-    // final rs = fresh
-    //     ? ReaderPageSettings.def(hash: bookHash, isQasidah: _isQasidahMode)
-    //     : await ReaderPageSettings.loadFromFile(
-    //         bookHash,
-    //         isQasidah: _isQasidahMode,
-    //       );
-
     if (context.mounted) {
       _openReaderPage(
         context,
         paras: paras,
         bookHash: bookHash,
-        isQasidah: fresh ? _isQasidahMode : null,
+        isQasidah: _isQasidahMode,
       );
     }
   }
 
-  Future<(String, bool)> _saveBookTxt(PeraEntries peras) async {
-    if (!ReaderInputPageData.isInited || peras.isEmpty) return ("", false);
+  Future<String> _saveBookTxt(PeraEntries peras) async {
+    if (!ReaderInputPageData.inited || peras.isEmpty) return '';
 
-    String displayName = peras.first.map((w) => w.ar).join(" ").trim();
-    if (displayName.length > 100) {
-      displayName = displayName.substring(0, 100);
+    String title = peras.first.map((w) => w.ar).join(" ").trim();
+    if (title.length > 100) {
+      title = title.substring(0, 100);
     }
+    final titleCl = ArabicNormalizer.cleanLineForSearch(title);
 
     final content = peras.map((p) => p.map((w) => w.ar).join(" ")).join("\n");
     final hash = _hashText(content);
 
-    final exists = ReaderInputPageData.books.indexWhere((b) => b.hash == hash);
-    if (exists > -1) {
-      final rd = ReaderInputPageData.books[exists];
-      if (rd.pinned != _isPinned) {
-        ReaderInputPageData.books[exists] = rd.copyWith(pinned: _isPinned);
-        await _saveBookEntriesFile();
-      }
-      return (hash, false);
-    }
-
-    final file = File(
-      path.join(ReaderInputPageData.booksDir!.path, '$hash.txt'),
+    ReaderInputPageData.add(
+      BookEntry(sha: hash, title: title, titleCl: titleCl, pinned: _isPinned),
+      content,
     );
-    try {
-      await file.writeAsString(content, flush: true);
-      ReaderInputPageData.books.add(
-        BookEntry(
-          hash: hash,
-          name: displayName,
-          nameCl: ArabicNormalizer.keepOnlyArWithSpace(displayName),
-          pinned: _isPinned,
-        ),
-      );
-      await _saveBookEntriesFile();
-    } catch (e) {
-      if (kDebugMode) {
-        debugPrint('save book failed: $e');
-      }
-      return ("", false);
-    }
-
-    return (hash, true);
-  }
-
-  Future<void> _saveBookEntriesFile() async {
-    if (!ReaderInputPageData.isInited) return;
-    if (ReaderInputPageData.indexFile == null ||
-        ReaderInputPageData.tmpIndexFile == null) {
-      return;
-    }
-
-    final txt = ReaderInputPageData.books
-        .map((be) => '${be.pinned ? "1" : "0"}:${be.hash}:${be.name}')
-        .join("\n");
-
-    try {
-      await ReaderInputPageData.tmpIndexFile!.writeAsString(txt, flush: true);
-
-      // if (await ReaderInputPageData.indexFile!.exists()) {
-      //   await ReaderInputPageData.indexFile!.delete();
-      //
-
-      await ReaderInputPageData.tmpIndexFile!.rename(
-        ReaderInputPageData.indexFile!.path,
-      );
-    } catch (e) {
-      if (kDebugMode) {
-        debugPrint('save books index failed: $e');
-      }
-    }
-
-    ReaderInputPageData.setBookUnord(
-      match: _searchText,
-      newToOld: _isShowEntrieNewToOld,
-    );
-    if (mounted) setState(() {});
+    return hash;
   }
 
   Future<void> _deleteFile(BookEntry en) async {
-    final index = ReaderInputPageData.books.indexWhere(
-      (e) => e.hash == en.hash,
-    );
-    if (index < 0) return;
-
-    final file = File(
-      path.join(ReaderInputPageData.booksDir!.path, '${en.hash}.txt'),
-    );
-
-    try {
-      if (await file.exists()) {
-        await file.delete();
-      }
-    } catch (e) {
-      if (kDebugMode) {
-        debugPrint('delete book file failed: $e');
-      }
-      return;
-    }
-
-    final be = ReaderInputPageData.books.removeAt(index);
-    await _saveBookEntriesFile();
-    ReaderPageSettings.delete(be.hash);
+    await ReaderInputPageData.delete(en.sha);
+    _sortBooksRebuild();
   }
 
   Future<void> _openBook(BuildContext context, BookEntry entry) async {
     if (context.mounted) {
-      _openReaderPage(context, bookHash: entry.hash);
+      _openReaderPage(context, bookHash: entry.sha);
     }
   }
 
@@ -440,33 +215,24 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
       );
     }
 
-    int deleted = 0;
+    int deleted = _selection.selected.length;
     int failed = 0;
-    final d = ReaderInputPageData.booksDir!.path;
 
     try {
+      final List<String> booksTobeDeleted = [];
       for (final i in _selection.selected) {
-        final b = ReaderInputPageData.booksUnord[i];
-
-        final file = File(path.join(d, '${b.hash}.txt'));
-        try {
-          if (await file.exists()) {
-            await file.delete();
-          }
-          ReaderInputPageData.books.removeWhere((bb) => bb.hash == b.hash);
-          ReaderPageSettings.delete(b.hash);
-          deleted++;
-        } catch (_) {
-          failed++;
-        }
+        booksTobeDeleted.add(ReaderInputPageData.bookEnsUnord[i].sha);
       }
 
-      await _saveBookEntriesFile();
+      for (final b in booksTobeDeleted) {
+        await ReaderInputPageData.delete(b);
+      }
     } finally {
       _selection.clear();
       stopSpinner?.call();
     }
 
+    _sortBooksRebuild();
     if (context.mounted) {
       showSnackL(
         context,
@@ -481,7 +247,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
   }
 
   Future<void> _deleteAllBooks(BuildContext context) async {
-    if (ReaderInputPageData.books.isEmpty) return;
+    if (ReaderInputPageData.bookEntries.isEmpty) return;
 
     final confirm = await showConfirmDialog(
       context,
@@ -505,27 +271,11 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
       );
     }
 
-    int deleted = 0;
-    int failed = 0;
-    final d = ReaderInputPageData.booksDir!.path;
-    final books = List<BookEntry>.from(ReaderInputPageData.books);
+    int deleted = ReaderInputPageData.bookEntries.length;
+    const int failed = 0;
 
     try {
-      for (final b in books) {
-        final file = File(path.join(d, '${b.hash}.txt'));
-        try {
-          if (await file.exists()) {
-            await file.delete();
-          }
-          ReaderPageSettings.delete(b.hash);
-          deleted++;
-        } catch (_) {
-          failed++;
-        }
-      }
-
-      ReaderInputPageData.books.clear();
-      await _saveBookEntriesFile();
+      ReaderInputPageData.deleteAll();
     } finally {
       stopSpinner?.call();
       _selection.clear();
@@ -545,7 +295,8 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
   }
 
   Future<void> _exportBooks(BuildContext context) async {
-    if (!ReaderInputPageData.isInited || ReaderInputPageData.books.isEmpty) {
+    if (!ReaderInputPageData.inited ||
+        ReaderInputPageData.bookEntries.isEmpty) {
       if (context.mounted) {
         showSnackL(
           context,
@@ -582,7 +333,6 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
       );
     }
 
-    final d = ReaderInputPageData.booksDir!.path;
     const fileName = 'Arabic_Lexicons_books.zip';
     final zipFileOut = path.join(
       (await getTemporaryDirectory()).path,
@@ -591,13 +341,13 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
 
     final List<String> names = [ReaderInputPageData.booksIndexName];
     final List<String> sourcefiles = [
-      path.join(d, ReaderInputPageData.booksIndexName),
+      await ReaderInputPageData.saveBookEntriesToTmpFile(),
     ];
 
-    for (final b in ReaderInputPageData.books) {
-      final name = '${b.hash}.txt';
+    for (final b in ReaderInputPageData.bookEntries) {
+      final name = '${b.sha}.txt';
       names.add(name);
-      sourcefiles.add(path.join(d, name));
+      ReaderInputPageData.bookDataDest(name);
     }
 
     List<int> zippedData;
@@ -691,11 +441,10 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
 
       int added = 0;
       int skipped = 0;
-      final d = ReaderInputPageData.booksDir!.path;
 
       for (final b in books) {
-        final exists = ReaderInputPageData.books.indexWhere(
-          (bb) => b.hash == bb.hash,
+        final exists = ReaderInputPageData.bookEntries.indexWhere(
+          (bb) => b.sha == bb.sha,
         );
         if (exists > -1) {
           skipped++;
@@ -703,7 +452,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
         }
 
         final fileEntry = archiveData.files
-            .where((a) => a.name == '${b.hash}.txt')
+            .where((a) => a.name == '${b.sha}.txt')
             .firstOrNull;
 
         if (fileEntry == null) {
@@ -717,21 +466,16 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
           continue;
         }
 
-        final outFile = File(path.join(d, '${b.hash}.txt'));
-
         try {
-          await outFile.writeAsString(
-            utf8.decode(fileBytes, allowMalformed: true),
-            flush: true,
-          );
-          ReaderInputPageData.books.add(b);
+          final data = utf8.decode(fileBytes, allowMalformed: false);
+          ReaderInputPageData.add(b, data, replace: false);
           added++;
         } catch (_) {
           skipped++;
         }
       }
 
-      await _saveBookEntriesFile();
+      _sortBooksRebuild();
 
       if (context.mounted) {
         showSnackL(
@@ -805,7 +549,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                               all: () => [
                                 for (
                                   int i = 0;
-                                  i < ReaderInputPageData.books.length;
+                                  i < ReaderInputPageData.bookEntries.length;
                                   i++
                                 )
                                   i,
@@ -1048,7 +792,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                         ),
                       ),
                     ),
-                    if (ReaderInputPageData.books.isEmpty)
+                    if (ReaderInputPageData.bookEntries.isEmpty)
                       Directionality(
                         textDirection: L.dir,
                         child: SliverPadding(
@@ -1113,8 +857,8 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                               children: [
                                 Text(
                                   L.p(
-                                    'Books [${ReaderInputPageData.books.length}]',
-                                    'الكتب [${enToArNum(ReaderInputPageData.books.length)}]',
+                                    'Books [${ReaderInputPageData.bookEntries.length}]',
+                                    'الكتب [${enToArNum(ReaderInputPageData.bookEntries.length)}]',
                                   ),
                                   style: th.titleLarge?.arIf?.copyWith(
                                     fontWeight: FontWeight.bold,
@@ -1218,7 +962,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                         textDirection: TextDirection.rtl,
                         child: SliverPadding(
                           padding: padd.copyWith(bottom: 30, top: 0),
-                          sliver: ReaderInputPageData.booksUnord.isEmpty
+                          sliver: ReaderInputPageData.bookEnsUnord.isEmpty
                               ? SliverToBoxAdapter(
                                   child: Padding(
                                     padding: const EdgeInsets.only(top: 24.0),
@@ -1247,14 +991,14 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                               : SliverList(
                                   delegate: SliverChildBuilderDelegate(
                                     (context, index) {
-                                      final en =
-                                          ReaderInputPageData.booksUnord[index];
+                                      final en = ReaderInputPageData
+                                          .bookEnsUnord[index];
                                       final style = th.titleMedium!.ar;
 
                                       Widget txt;
                                       if (_searchText.isEmpty) {
                                         txt = Text(
-                                          en.name,
+                                          en.title,
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
                                           textDirection: TextDirection.rtl,
@@ -1262,7 +1006,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                                           style: style,
                                         );
                                       } else {
-                                        final (:pre, :suf) = en.nameCl
+                                        final (:pre, :suf) = en.titleCl
                                             .splitOnce(_searchText);
 
                                         txt = Text.rich(
@@ -1362,8 +1106,8 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                                                                 'إلغاء تثبيت كتاب',
                                                               ),
                                                               message: L.p(
-                                                                'Unpin: ${en.name}',
-                                                                'إلغاء التثبيت: ${en.name}',
+                                                                'Unpin: ${en.title}',
+                                                                'إلغاء التثبيت: ${en.title}',
                                                               ),
                                                               confirmText: L.p(
                                                                 'Unpin',
@@ -1373,7 +1117,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                                                               useLClass: true,
                                                               constraints:
                                                                   en
-                                                                      .name
+                                                                      .title
                                                                       .length >
                                                                   50,
                                                             );
@@ -1385,8 +1129,9 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
 
                                                           final pinned =
                                                               await _tglPinBookEntries(
-                                                                en.hash,
-                                                              );
+                                                                en.sha,
+                                                              ) ??
+                                                              false;
                                                           if (context.mounted) {
                                                             final p = pinned
                                                                 ? L.p(
@@ -1399,7 +1144,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                                                                   );
                                                             showSnack(
                                                               context,
-                                                              '$p: ${en.name}',
+                                                              '$p: ${en.title}',
                                                               textStyle:
                                                                   L.arStyleIf,
                                                               textDir: L.dir,
@@ -1424,8 +1169,8 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                                                                   'حذف كتاب',
                                                                 ),
                                                                 message: L.p(
-                                                                  'Delete: ${en.name}',
-                                                                  'حذف: ${en.name}',
+                                                                  'Delete: ${en.title}',
+                                                                  'حذف: ${en.title}',
                                                                 ),
                                                                 confirmText: L
                                                                     .p(
@@ -1436,7 +1181,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                                                                     true,
                                                                 constraints:
                                                                     en
-                                                                        .name
+                                                                        .title
                                                                         .length >
                                                                     50,
                                                                 useLClass: true,
@@ -1449,8 +1194,8 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                                                           if (context.mounted) {
                                                             showSnackL(
                                                               context,
-                                                              en: 'Deleted: ${en.name}',
-                                                              ar: 'تم الحذف: ${en.name}',
+                                                              en: 'Deleted: ${en.title}',
+                                                              ar: 'تم الحذف: ${en.title}',
                                                             );
                                                           }
                                                         },
@@ -1474,7 +1219,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                                       );
                                     },
                                     childCount:
-                                        ReaderInputPageData.booksUnord.length,
+                                        ReaderInputPageData.bookEnsUnord.length,
                                   ),
                                 ),
                         ),
@@ -1491,14 +1236,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
     );
   }
 
-  Future<bool> _tglPinBookEntries(String hash) async {
-    final idx = ReaderInputPageData.books.indexWhere((b) => b.hash == hash);
-    if (idx < 0) return false;
-
-    final en = ReaderInputPageData.books[idx];
-    final nEn = en.copyWith(pinned: !en.pinned);
-    ReaderInputPageData.books[idx] = nEn;
-    await _saveBookEntriesFile();
-    return nEn.pinned;
+  Future<bool?> _tglPinBookEntries(String hash) async {
+    return await ReaderInputPageData.togglePinned(hash);
   }
 }

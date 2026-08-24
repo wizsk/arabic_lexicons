@@ -14,6 +14,10 @@ enum InitState {
   bool get isIniting => this == initing;
 }
 
+void postFrame(void Function(Duration) callb) {
+  WidgetsBinding.instance.addPostFrameCallback(callb);
+}
+
 Future<void> openDict(BuildContext context, String word, {Dict? dict}) async {
   await Navigator.push(
     context,
@@ -59,6 +63,20 @@ String formatDateTime(BuildContext context, {DateTime? dt}) {
 
     return '$hourStr:$minute $period $day/$month/$year';
   }
+}
+
+String formatDateTimeForFileName({DateTime? dt}) {
+  dt ??= DateTime.now();
+  final local = dt.toLocal();
+
+  final year = local.year.toString();
+  final month = local.month.toString().padLeft(2, '0');
+  final day = local.day.toString().padLeft(2, '0');
+  final hour = local.hour.toString().padLeft(2, '0');
+  final minute = local.minute.toString().padLeft(2, '0');
+  final second = local.second.toString().padLeft(2, '0');
+
+  return '$year-$month-${day}_$hour-$minute-$second';
 }
 
 /// Capitalize the 1st char only 'fo' -> 'Fo'; '_fo' -> '_fo'

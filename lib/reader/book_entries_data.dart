@@ -50,7 +50,10 @@ abstract final class ReaderInputPageData {
   static const booksIndexName = 'books.txt';
 
   static late final String booksDirPath;
-  static String bookDataDest(String sha) => path.join(booksDirPath, sha);
+  static String bookTextDest(String sha) =>
+      '${path.join(booksDirPath, sha)}.txt';
+
+  static late final String confDirPath;
 
   static Future<void> init() async {
     if (_initState.isIniting) {
@@ -65,12 +68,23 @@ abstract final class ReaderInputPageData {
 
     final dir = await getApplicationDocumentsDirectory();
     final booksDir = Directory(path.join(dir.path, 'books'));
-    booksDirPath = booksDir.path;
     final indexFile = File(path.join(booksDir.path, booksIndexName));
 
-    booksDir.create();
-    ReaderPageSettings.createConfDir();
+    booksDirPath = booksDir.path;
+    confDirPath = path.join(booksDirPath, 'conf');
 
+    // TODO: Remove in the future version: added at v3.4.0
+    final oldConfDir = Directory(path.join(dir.path, readerConfDirNameOld));
+    try {
+      if (await oldConfDir.exists()) {
+        await oldConfDir.rename(confDirPath);
+      }
+    } catch (_) {
+      oldConfDir.delete();
+    }
+
+    booksDir.create();
+    Directory(confDirPath).create();
 
     if (await indexFile.exists()) {
       final l = await indexFile.readAsLines();
@@ -143,7 +157,7 @@ abstract final class ReaderInputPageData {
     });
 
     if (match.isEmpty) {
-      bookEnsUnord = indexed.map((e) => e.book).toList(growable: false);
+      bookEnsUnord = indexed.map((e) => e.book).toList();
       return;
     }
 
@@ -185,7 +199,7 @@ abstract final class ReaderInputPageData {
           : ConflictAlgorithm.ignore,
     );
 
-    await File(bookDataDest(book.sha)).writeAsString(data);
+    await File(bookTextDest(book.sha)).writeAsString(data);
 
     final sha = book.sha;
     if (replace) {
@@ -227,10 +241,9 @@ abstract final class ReaderInputPageData {
     await db.delete('book_entries', where: 'sha = ?', whereArgs: [sha]);
     bookEntries.removeWhere((e) => e.sha == sha);
     try {
-      await File(bookDataDest(sha)).delete();
+      await File(bookTextDest(sha)).delete();
       ReaderPageSettings.delete(sha);
     } catch (_) {}
-    ;
   }
 
   /// this should only be used for migration
@@ -258,16 +271,17 @@ abstract final class ReaderInputPageData {
   }
 
   static Future<void> deleteAll() async {
+    await db.delete('book_entries');
+
     final bd = Directory(booksDirPath);
     try {
-      await bd.delete();
-      await ReaderPageSettings.deleteAllAndCreateConfDir();
+      if (await bd.exists()) await bd.delete(recursive: true);
+      await bd.create();
+      await Directory(confDirPath).create();
     } catch (_) {}
 
-    await db.delete('book_entries');
     bookEntries.clear();
     bookEnsUnord.clear();
-    await bd.create();
   }
 
   static Future<void> _loadBooks() async {

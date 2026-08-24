@@ -99,7 +99,7 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
         }
 
         final data = await File(
-          ReaderInputPageData.bookDataDest(bookHash),
+          ReaderInputPageData.bookTextDest(bookHash),
         ).readAsString();
         _paras = cleanReaderInputAndPrepare(data);
       }

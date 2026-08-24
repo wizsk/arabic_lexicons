@@ -275,22 +275,25 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
     const int failed = 0;
 
     try {
-      ReaderInputPageData.deleteAll();
+      await ReaderInputPageData.deleteAll();
     } finally {
       stopSpinner?.call();
       _selection.clear();
     }
 
     if (context.mounted) {
-      showSnackL(
-        context,
-        en: failed > 0
-            ? 'Deleted: $deleted, Failed: $failed'
-            : 'Deleted: $deleted',
-        ar: failed > 0
-            ? 'تم الحذف: ${enToArNum(deleted)}، فشل: ${enToArNum(failed)}'
-            : 'تم الحذف: ${enToArNum(deleted)}',
-      );
+      setState(() {});
+      postFrame((_) {
+        showSnackL(
+          context,
+          en: failed > 0
+              ? 'Deleted: $deleted, Failed: $failed'
+              : 'Deleted: $deleted',
+          ar: failed > 0
+              ? 'تم الحذف: ${enToArNum(deleted)}، فشل: ${enToArNum(failed)}'
+              : 'تم الحذف: ${enToArNum(deleted)}',
+        );
+      });
     }
   }
 
@@ -326,14 +329,14 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
     if (confirmed != true) return;
 
     VoidCallback? stopSpinner;
-    if (context.mounted) {
-      stopSpinner = showSpinningDialog(
-        context,
-        L.p('Exporting...', 'جارٍ التصدير...'),
-      );
-    }
+    if (!context.mounted) return;
+    stopSpinner = showSpinningDialog(
+      context,
+      L.p('Exporting...', 'جارٍ التصدير...'),
+    );
 
-    const fileName = 'Arabic_Lexicons_books.zip';
+    final fileName = 'Arabic_Lexicons_books-${formatDateTimeForFileName()}.zip';
+
     final zipFileOut = path.join(
       (await getTemporaryDirectory()).path,
       fileName,
@@ -345,9 +348,8 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
     ];
 
     for (final b in ReaderInputPageData.bookEntries) {
-      final name = '${b.sha}.txt';
-      names.add(name);
-      ReaderInputPageData.bookDataDest(name);
+      names.add('${b.sha}.txt');
+      sourcefiles.add(ReaderInputPageData.bookTextDest(b.sha));
     }
 
     List<int> zippedData;
@@ -358,7 +360,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
         debugPrint('$e');
       }
 
-      stopSpinner?.call();
+      stopSpinner.call();
       if (context.mounted) {
         showSnackL(
           context,
@@ -369,7 +371,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
       return;
     }
 
-    stopSpinner?.call();
+    stopSpinner.call();
     if (context.mounted) {
       showBackupOptionsButtomSheet(
         context,
@@ -468,7 +470,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
 
         try {
           final data = utf8.decode(fileBytes, allowMalformed: false);
-          ReaderInputPageData.add(b, data, replace: false);
+          await ReaderInputPageData.add(b, data, replace: false);
           added++;
         } catch (_) {
           skipped++;

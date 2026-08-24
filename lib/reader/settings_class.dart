@@ -3,12 +3,12 @@ import 'dart:io';
 
 import 'package:arabic_lexicons/data.dart';
 import 'package:arabic_lexicons/pages/width_padd.dart';
+import 'package:arabic_lexicons/reader/book_entries_data.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart';
-import 'package:path_provider/path_provider.dart';
 
-const readerConfDirName = 'reader_conf';
+const readerConfDirNameOld = 'reader_conf';
 
 sealed class ReaderSettingsRes {}
 
@@ -228,22 +228,10 @@ class ReaderPageSettings {
   EdgeInsets readerPadd(BuildContext context) =>
       readerPadding(context, maxWidth: maxWidth, sidePadd: padding);
 
-  static String? _confDirPath;
-  static Future<String> get _confDir async {
-    if (_confDirPath != null) return _confDirPath!;
-
-    final dir = await getApplicationDocumentsDirectory();
-    final p = join(dir.path, readerConfDirName);
-    _confDirPath = p;
-    return p;
-  }
-
-  static Future<void> createConfDir() async {
-    Directory(await _confDir).create(recursive: true);
-  }
+  static String get _confDir => ReaderInputPageData.confDirPath;
 
   static Future<File> lurFile(String bookHash) async {
-    final dir = await _confDir;
+    final dir = _confDir;
     return File(join(dir, '${bookHash}_visited.txt'));
   }
 
@@ -254,7 +242,7 @@ class ReaderPageSettings {
     if (hash.isEmpty) return def(isQasidah: isQasidah);
 
     try {
-      final file = File(join(await _confDir, '$hash.json'));
+      final file = File(join(_confDir, '$hash.json'));
       if (!await file.exists()) return def(hash: hash, isQasidah: isQasidah);
 
       final content = await file.readAsString();
@@ -272,24 +260,16 @@ class ReaderPageSettings {
   Future<void> saveToFile() async {
     if (bookHash.isEmpty) return;
 
-    final parent = Directory(await _confDir);
+    final parent = _confDir;
 
-    final file = File(join(parent.path, '$bookHash.json'));
+    final file = File(join(parent, '$bookHash.json'));
     await file.writeAsString(toJson());
-  }
-
-  static Future<void> deleteAllAndCreateConfDir() async {
-    final d = Directory(await _confDir);
-    try {
-      d.delete();
-    } catch (_) {}
-    d.create(recursive: true);
   }
 
   static Future<void> delete(String bookHash) async {
     try {
       if (bookHash.isEmpty) return;
-      var f = File(join(await _confDir, '$bookHash.json'));
+      var f = File(join(_confDir, '$bookHash.json'));
       await f.delete();
       await (await lastReadPosFile(bookHash))?.delete();
     } catch (_) {}
@@ -298,6 +278,6 @@ class ReaderPageSettings {
   static Future<File?> lastReadPosFile(String? bookHash) async {
     if (bookHash == null || bookHash.isEmpty) return null;
 
-    return File(join(await _confDir, '${bookHash}_scrollIdx.txt'));
+    return File(join(_confDir, '${bookHash}_scrollIdx.txt'));
   }
 }

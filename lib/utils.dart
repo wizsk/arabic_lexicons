@@ -4,6 +4,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:html/parser.dart' as html_parser;
 
+enum InitState {
+  not,
+  initing,
+  done;
+
+  bool get isInited => this == done;
+  bool get isNotInited => this == not;
+  bool get isIniting => this == initing;
+}
+
 Future<void> openDict(BuildContext context, String word, {Dict? dict}) async {
   await Navigator.push(
     context,

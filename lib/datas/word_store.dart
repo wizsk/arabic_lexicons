@@ -1,14 +1,7 @@
-import 'dart:io';
-
 import 'package:arabic_lexicons/data.dart';
 import 'package:arabic_lexicons/datas/app_db.dart';
 import 'package:arabic_lexicons/history/history.dart';
-import 'package:arabic_lexicons/reader/input.dart';
-import 'package:arabic_lexicons/reader/settings_class.dart';
-import 'package:arabic_lexicons/word_list/book_marks.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
-import 'package:path/path.dart' as path;
 
 abstract final class WordStore {
   static const int histMaxSize = 200;
@@ -34,12 +27,7 @@ abstract final class WordStore {
   static bool _inited = false;
   static Future<void> init() async {
     if (_inited) return;
-
     await _loadCache();
-
-    if (bookmarkedWords.isEmpty) await BookMarks.migrateOld();
-    if (foreignEmpty) await _migrateForeigns();
-
     _inited = true;
   }
 
@@ -332,31 +320,4 @@ abstract final class WordStore {
     searchHist.clear();
     await _db.delete('search_history');
   }
-}
-
-Future<void> _migrateForeigns() async {
-  final migratedFileInicator = File(
-    path.join(
-      (await getApplicationCacheDirectory()).path,
-      '___foreign_migrated',
-    ),
-  );
-  if (await migratedFileInicator.exists()) return;
-
-  if (!ReaderInputPageData.isInited) {
-    await ReaderInputPageData.init();
-    if (!ReaderInputPageData.isInited) return;
-  }
-
-  for (final b in ReaderInputPageData.books) {
-    final f = await ReaderPageSettings.lurFile(b.hash);
-    try {
-      WordStore.addForeigns(await f.readAsLines());
-      if (WordStore._inited) await f.delete();
-    } catch (_) {}
-  }
-
-  try {
-    await migratedFileInicator.create();
-  } catch (_) {}
 }

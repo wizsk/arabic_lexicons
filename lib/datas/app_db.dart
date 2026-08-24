@@ -37,10 +37,21 @@ abstract final class AppDb {
         created_at INTEGER NOT NULL
         )
         ''');
+
       await txn.execute('''
         CREATE TABLE IF NOT EXISTS search_history (
         word TEXT PRIMARY KEY,
         dict INTEGER NOT NULL,
+        created_at INTEGER NOT NULL
+        );
+        ''');
+
+      await txn.execute('''
+        CREATE TABLE IF NOT EXISTS book_entries (
+        sha TEXT PRIMARY KEY,
+        title TEXT NOT NULL,
+        pinned INTEGER NOT NULL,
+        author TEXT NOT NULL,
         created_at INTEGER NOT NULL
         );
         ''');

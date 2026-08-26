@@ -1,7 +1,7 @@
 name: arabic_lexicons
 publish_to: none
 description: "Arabic Lexicons"
-version: 3.4.0+304000
+version: 3.4.1+304010
 
 environment:
   sdk: ^3.10.8

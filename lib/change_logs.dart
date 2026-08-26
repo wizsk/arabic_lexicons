@@ -1,5 +1,11 @@
 final releases = [
   Release(
+    version: 'v3.4.1',
+    changes: '''
+    - Minor padding isue into reader style changer page
+    '''
+  ),
+  Release(
     version: 'v3.4.0',
     changes: '''
     Make app launch blazingly fast

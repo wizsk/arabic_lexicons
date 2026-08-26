@@ -389,143 +389,147 @@ class _ReaderAdjustPageState extends State<ReaderAdjustPage> {
           ),
         ],
       ),
-      body: Stack(
-        children: [
-          Directionality(
-            textDirection: TextDirection.rtl,
-            child: CustomScrollView(
-              key: ValueKey((_showingDemoTxt, _demoTxtIdx)),
-              slivers: [
-                Directionality(
-                  textDirection: TextDirection.ltr,
-                  child: _appbar(),
-                ),
-                SliverPadding(
-                  padding: EdgeInsetsGeometry.only(bottom: 12),
-                  sliver: SliverToBoxAdapter(
-                    child: Center(
-                      child: Text(
-                        'Preview',
-                        style: th.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w700,
-                       ),
+      body: SafeArea(
+        top: false,
+        bottom: false,
+        child: Stack(
+          children: [
+            Directionality(
+              textDirection: TextDirection.rtl,
+              child: CustomScrollView(
+                key: ValueKey((_showingDemoTxt, _demoTxtIdx)),
+                slivers: [
+                  Directionality(
+                    textDirection: TextDirection.ltr,
+                    child: _appbar(),
+                  ),
+                  SliverPadding(
+                    padding: EdgeInsetsGeometry.only(bottom: 12),
+                    sliver: SliverToBoxAdapter(
+                      child: Center(
+                        child: Text(
+                          'Preview',
+                          style: th.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
                       ),
                     ),
                   ),
-                ),
-                SliverPadding(
-                  padding: readerPadding(
-                    context,
-                    maxWidth: _data.maxWidth,
-                    sidePadd: _data.padding,
-                  ),
-                  sliver: SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      childCount: _paras.length,
-                      (context, index) {
-                        return Padding(
-                          padding: paraSpaceInbetween(_data.fontSize),
-                          child: Text.rich(
-                            TextSpan(
-                              children: [
-                                paraSpacerStart(_data.fontSize),
-                                TextSpan(text: _paras[index]),
-                              ],
+                  SliverPadding(
+                    padding: readerPadding(
+                      context,
+                      maxWidth: _data.maxWidth,
+                      sidePadd: _data.padding,
+                    ),
+                    sliver: SliverList(
+                      delegate: SliverChildBuilderDelegate(
+                        childCount: _paras.length,
+                        (context, index) {
+                          return Padding(
+                            padding: paraSpaceInbetween(_data.fontSize),
+                            child: Text.rich(
+                              TextSpan(
+                                children: [
+                                  paraSpacerStart(_data.fontSize),
+                                  TextSpan(text: _paras[index]),
+                                ],
+                              ),
+                              textAlign: TextAlign.justify,
+                              textDirection: TextDirection.rtl,
+                              style: previewStyle,
                             ),
-                            textAlign: TextAlign.justify,
-                            textDirection: TextDirection.rtl,
-                            style: previewStyle,
-                          ),
-                        );
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (!_hidden)
+              Align(
+                alignment: AlignmentGeometry.bottomCenter,
+                child: SingleChildScrollView(
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(maxWidth: 600),
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                      child: switch (_currentTab) {
+                        0 => _Changer(
+                          key: const ValueKey('fontSize'),
+                          title: 'Font size',
+                          subTitle: 'Make the text smaller or larger.',
+                          current: _data.fontSize,
+                          minV: minReaderFontSize,
+                          maxV: maxReaderFontSize,
+                          def: defaultReaderArabicFontSize,
+                          step: 1,
+                          setVal: (v) => setState(() => _data.fontSize = v),
+                        ),
+                        1 => _Changer(
+                          key: const ValueKey('fontHeight'),
+                          title: 'Font height',
+                          subTitle: 'Make the font height smaller or larger.',
+                          valName: '%',
+                          current: _data.fontHeight * 100,
+                          minV: 40,
+                          maxV: 400,
+                          def: defArabicFontHeihgt * 100,
+                          step: 20,
+                          setVal: (v) =>
+                              setState(() => _data.fontHeight = v / 100),
+                        ),
+                        2 => _FontPicker(
+                          key: const ValueKey('font'),
+                          fonts: arabicFonts,
+                          selectedFont: _data.fontFam,
+                          titleStyle: titleStyle,
+                          onSelect: (font) =>
+                              setState(() => _data.fontFam = font),
+                        ),
+                        3 => _Changer(
+                          key: const ValueKey('padding'),
+                          title: 'Side Margin',
+                          subTitle:
+                              'Minimum padding on small screens like phones',
+                          current: _data.padding,
+                          minV: 0,
+                          maxV: 50,
+                          def: ReaderPageSettings.paddingDef,
+                          step: 5,
+                          setVal: (v) => setState(() => _data.padding = v),
+                        ),
+                        4 => _Changer(
+                          key: const ValueKey('width'),
+                          title: 'Max Paragraph Width',
+                          subTitle:
+                              'Limits line length on wide screens like tablets',
+                          current: _data.maxWidth,
+                          minV: 400,
+                          maxV: 1200,
+                          def: ReaderPageSettings.maxWidthDef,
+                          step: 20,
+                          setVal: (v) => setState(() => _data.maxWidth = v),
+                          touggleDisable: () {
+                            setState(() {
+                              if (_data.maxWidth > 0) {
+                                _data.maxWidth = -1;
+                              } else {
+                                _data.maxWidth = ReaderPageSettings.maxWidthDef;
+                              }
+                            });
+                          },
+                          disabled: _data.maxWidth < 0,
+                        ),
+                        _ => const SizedBox.shrink(),
                       },
                     ),
                   ),
                 ),
-              ],
-            ),
-          ),
-          if (!_hidden)
-            Align(
-              alignment: AlignmentGeometry.bottomCenter,
-              child: SingleChildScrollView(
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(maxWidth: 600),
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                    child: switch (_currentTab) {
-                      0 => _Changer(
-                        key: const ValueKey('fontSize'),
-                        title: 'Font size',
-                        subTitle: 'Make the text smaller or larger.',
-                        current: _data.fontSize,
-                        minV: minReaderFontSize,
-                        maxV: maxReaderFontSize,
-                        def: defaultReaderArabicFontSize,
-                        step: 1,
-                        setVal: (v) => setState(() => _data.fontSize = v),
-                      ),
-                      1 => _Changer(
-                        key: const ValueKey('fontHeight'),
-                        title: 'Font height',
-                        subTitle: 'Make the font height smaller or larger.',
-                        valName: '%',
-                        current: _data.fontHeight * 100,
-                        minV: 40,
-                        maxV: 400,
-                        def: defArabicFontHeihgt * 100,
-                        step: 20,
-                        setVal: (v) =>
-                            setState(() => _data.fontHeight = v / 100),
-                      ),
-                      2 => _FontPicker(
-                        key: const ValueKey('font'),
-                        fonts: arabicFonts,
-                        selectedFont: _data.fontFam,
-                        titleStyle: titleStyle,
-                        onSelect: (font) =>
-                            setState(() => _data.fontFam = font),
-                      ),
-                      3 => _Changer(
-                        key: const ValueKey('padding'),
-                        title: 'Side Margin',
-                        subTitle:
-                            'Minimum padding on small screens like phones',
-                        current: _data.padding,
-                        minV: 0,
-                        maxV: 50,
-                        def: ReaderPageSettings.paddingDef,
-                        step: 5,
-                        setVal: (v) => setState(() => _data.padding = v),
-                      ),
-                      4 => _Changer(
-                        key: const ValueKey('width'),
-                        title: 'Max Paragraph Width',
-                        subTitle:
-                            'Limits line length on wide screens like tablets',
-                        current: _data.maxWidth,
-                        minV: 400,
-                        maxV: 1200,
-                        def: ReaderPageSettings.maxWidthDef,
-                        step: 20,
-                        setVal: (v) => setState(() => _data.maxWidth = v),
-                        touggleDisable: () {
-                          setState(() {
-                            if (_data.maxWidth > 0) {
-                              _data.maxWidth = -1;
-                            } else {
-                              _data.maxWidth = ReaderPageSettings.maxWidthDef;
-                            }
-                          });
-                        },
-                        disabled: _data.maxWidth < 0,
-                      ),
-                      _ => const SizedBox.shrink(),
-                    },
-                  ),
-                ),
               ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }

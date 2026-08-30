@@ -72,6 +72,7 @@ Widget _noResUniversal(
 
   if (currWord == null || currWord.isEmpty) {
     final l = Row(
+      textDirection: L.dir,
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisSize: MainAxisSize.min,
@@ -90,9 +91,14 @@ Widget _noResUniversal(
 
     if (!showOpenReaderBtn) return l;
 
-    return Directionality(
-      textDirection: L.dir,
+    return Container(
+      padding: EdgeInsets.all(16.00),
+      decoration: BoxDecoration(
+        color: cs.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(14.00),
+      ),
       child: Column(
+        textDirection: L.dir,
         mainAxisSize: MainAxisSize.min,
         spacing: 8.00,
         children: [
@@ -101,7 +107,7 @@ Widget _noResUniversal(
 
           // const SizedBox(height: 8.00),
           Material(
-            color: cs.surfaceContainerHigh,
+            color: cs.primaryContainer,
             borderRadius: BorderRadius.circular(14.00),
             clipBehavior: Clip.antiAlias,
             child: InkWell(
@@ -119,14 +125,14 @@ Widget _noResUniversal(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   textDirection: L.dir,
                   children: [
-                    Icon(Icons.menu_book_rounded, color: cs.primary),
+                    Icon(Icons.menu_book_rounded, color: cs.onPrimaryContainer),
                     SizedBox(width: 8),
                     Text(
                       // L.p('Open Reader', 'افتح القارئ'),
                       L.p('Go to Reader', 'اذهب إلى القارئ'),
                       style: L.arStyleOrNew.copyWith(
                         fontWeight: FontWeight.w500,
-                        color: cs.primary,
+                        color: cs.onPrimaryContainer,
                       ),
                     ),
                   ],

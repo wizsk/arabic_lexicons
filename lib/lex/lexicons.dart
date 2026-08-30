@@ -146,11 +146,10 @@ class _SearchLexiconsState extends State<SearchLexicons>
 
   void toggleWLSelectionMethod() async {
     await appConf.saveScrollLexSelection(!appConf.scrollLexSelection);
-    if (context.mounted) {
-      setState(() {});
-      if (appConf.scrollLexSelection) {
-        _datas.scrollSelectors();
-      }
+    if (!context.mounted) return;
+    setState(() {});
+    if (appConf.scrollLexSelection) {
+      _datas.scrollSelectors();
     }
   }
 

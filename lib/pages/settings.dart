@@ -308,20 +308,52 @@ class _SettingsPageState extends State<SettingsPage> {
                           if (context.mounted) setState(() {});
                         },
                       ),
-                      SwitchListTile(
-                        secondary: const FilledIcon(Icons.horizontal_rule),
-                        title: const Text('Auto-scroll to selection'),
-                        subtitle: const Text(
-                          'Automatically scroll to the selected word or dictionary',
+
+                      if (appConf.scrollLexSelection) ...[
+                        SwitchListTile(
+                          secondary: const FilledIcon(Icons.horizontal_rule),
+                          title: const Text('Auto-scroll to selection'),
+                          subtitle: const Text(
+                            'Automatically scroll to the selected word or dictionary',
+                          ),
+                          value: appConf.scrollLexSelectionAutoSc,
+                          onChanged: appConf.scrollLexSelection
+                              ? (value) async {
+                                  appConf.saveScrollLexSelectionAutoSc(value);
+                                  if (context.mounted) setState(() {});
+                                }
+                              : null,
                         ),
-                        value: appConf.scrollLexSelectionAutoSc,
-                        onChanged: appConf.scrollLexSelection
-                            ? (value) async {
-                                appConf.saveScrollLexSelectionAutoSc(value);
-                                if (context.mounted) setState(() {});
-                              }
-                            : null,
-                      ),
+
+                        SwitchListTile(
+                          secondary: const FilledIcon(
+                            Icons.delete_outline_rounded,
+                          ),
+                          title: const Text('Show Delete Icon'),
+                          subtitle: const Text(
+                            'Show a delete icon on lexicon word selections',
+                          ),
+                          value: appConf.lexWordRmIcon,
+                          onChanged: (value) async {
+                            await appConf.saveLexWordRmIcon(value);
+                            if (context.mounted) setState(() {});
+                          },
+                        ),
+                        SwitchListTile(
+                          secondary: const FilledIcon(
+                            Icons.warning_amber_rounded,
+                          ),
+                          title: const Text('Confirm Before Removing'),
+                          subtitle: const Text(
+                            'Show a confirmation dialog before removing a word from lexicon selections',
+                          ),
+                          value: appConf.lexWordDelConfirm,
+                          onChanged: (value) async {
+                            await appConf.saveLexWordDelConfirm(value);
+                            if (context.mounted) setState(() {});
+                          },
+                        ),
+                      ],
 
                       /// Direct Results
                       // SwitchListTile(

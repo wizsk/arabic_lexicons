@@ -94,6 +94,8 @@ class AppSettingsController extends ChangeNotifier {
   static const _paddingKey = 'padd';
   static const _hideAppbarKey = 'happb';
   static const _scrollLexSelectionKey = 'scroll-lex-sel';
+  static const _lexWordRmIconKey = 'lex-delIcon';
+  static const _lexWordDelConfirmKey = 'lex-word-conf';
   static const _scrollLexSelectionAutoScKey = 'scroll-lex-sel-auto';
   static const _readerScrollPersentKey = 'reader-sc-p';
   static const _arUiFontSizeKey = 'aruif';
@@ -125,6 +127,12 @@ class AppSettingsController extends ChangeNotifier {
 
   static const bool _scrollLexSelectionAutoScDef = true;
   bool _scrollLexSelectionAutoSc = _scrollLexSelectionAutoScDef;
+
+  static const bool _lexWordRmIconDef = true;
+  bool _lexWordRmIcon = _lexWordRmIconDef;
+
+  static const bool _lexWordDelConfirmDef = true;
+  bool _lexWordDelConfirm = _lexWordDelConfirmDef;
 
   static const bool _hideAppbarDef = true;
   bool _hideAppbar = _hideAppbarDef;
@@ -210,6 +218,11 @@ class AppSettingsController extends ChangeNotifier {
     _scrollLexSelectionAutoSc =
         prefs.getBool(_scrollLexSelectionAutoScKey) ??
         _scrollLexSelectionAutoScDef;
+
+    _lexWordRmIcon = prefs.getBool(_lexWordRmIconKey) ?? _lexWordRmIconDef;
+
+    _lexWordDelConfirm =
+        prefs.getBool(_lexWordDelConfirmKey) ?? _lexWordDelConfirmDef;
 
     _hideAppbar = prefs.getBool(_hideAppbarKey) ?? _hideAppbarDef;
 
@@ -343,6 +356,32 @@ class AppSettingsController extends ChangeNotifier {
 
   bool get useHansLaneDefRDStyle {
     return _useHansLaneDefStyle;
+  }
+
+  Future<void> saveLexWordRmIcon(bool v) async {
+    if (v == _lexWordRmIcon) return;
+
+    _lexWordRmIcon = v;
+    notify();
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_lexWordRmIconKey, v);
+  }
+
+  bool get lexWordRmIcon {
+    return _lexWordRmIcon;
+  }
+
+  Future<void> saveLexWordDelConfirm(bool v) async {
+    if (v == _lexWordDelConfirm) return;
+
+    _lexWordDelConfirm = v;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_lexWordDelConfirmKey, v);
+  }
+
+  bool get lexWordDelConfirm {
+    return _lexWordDelConfirm;
   }
 
   Future<void> saveReaderScrollPersent(int p) async {

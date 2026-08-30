@@ -11,7 +11,10 @@ import 'package:arabic_lexicons/lex/sugg/widgets.dart';
 import 'package:arabic_lexicons/lex/utils.dart';
 import 'package:arabic_lexicons/lex/widgets.dart';
 import 'package:arabic_lexicons/main_widgets.dart';
+import 'package:arabic_lexicons/reader/reader_utils.dart';
 import 'package:arabic_lexicons/utils.dart';
+import 'package:arabic_lexicons/widgets/choise_chip.dart';
+import 'package:arabic_lexicons/widgets/lex_word_confirm.dart';
 import 'package:flutter/material.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
@@ -199,6 +202,165 @@ class _SearchLexiconsState extends State<SearchLexicons>
     );
   }
 
+  static const _chipContainerMainHeight = 38.00;
+  List<Widget> _scrolabeSelectors(EdgeInsets padd) {
+    final chipContainerHeight = L.fontSize == null
+        ? _chipContainerMainHeight
+        : (_chipContainerMainHeight * L.fontSize!) / 14;
+
+    return [
+      Visibility(
+        visible: _datas.words.length > 1,
+        maintainState: true,
+        maintainSize: false,
+        child: Padding(
+          padding: EdgeInsetsGeometry.only(
+            left: padd.right,
+            right: padd.right,
+            top: 6.0,
+          ),
+          child: SizedBox(
+            height: chipContainerHeight,
+            child: Directionality(
+              textDirection: TextDirection.rtl,
+              child: Align(
+                alignment: AlignmentGeometry.centerRight,
+                child: ListView.separated(
+                  shrinkWrap: true,
+                  key: const PageStorageKey('word-selector'),
+                  controller: _scrollableSelectionSc,
+                  itemCount: _datas.words.length,
+                  scrollDirection: Axis.horizontal,
+                  itemBuilder: (_, index) {
+                    final w = _datas.words[index];
+                    final selected = w == _datas.selectedWord;
+
+                    var label = w.replaceAll('_', ' ').trim();
+                    if (label.length > 30) {
+                      label = '${label.substring(0, 30)}…';
+                    }
+
+                    return AutoScrollTag(
+                      key: ValueKey(index),
+                      controller: _scrollableSelectionSc,
+                      index: index,
+                      child: Selection(
+                        label,
+                        selected: selected,
+                        onTab: () {
+                          _datas.selectedWord = w;
+                          _datas.suggDictSorted.clear();
+                          if (context.mounted) {
+                            _datas.getAndShowResORSugg(context);
+                          }
+                        },
+                        onDelete: !appConf.lexWordRmIcon
+                            ? null
+                            : () async {
+                                bool showTipAboutConfrim = false;
+
+                                if (appConf.lexWordDelConfirm) {
+                                  final res = await showLexWordDelConfirm(
+                                    context,
+                                    label,
+                                  );
+                                  if (res != true) return;
+                                  showTipAboutConfrim =
+                                      !appConf.lexWordDelConfirm;
+                                }
+
+                                void showMsg() {
+                                  if (!showTipAboutConfrim) return;
+                                  postFrame((_) {
+                                    showSnack(
+                                      context,
+                                      'Re-enable confirmation dialogs in the settings',
+                                    );
+                                  });
+                                }
+
+                                _datas.words.removeAt(index);
+                                _controller.text = _datas.words.join(' ');
+                                if (_datas.words.isEmpty) {
+                                  _datas.selectedWord = '';
+                                  _datas.resetAll();
+                                  if (context.mounted) {
+                                    setState(() {});
+                                    showMsg();
+                                  }
+                                  return;
+                                }
+
+                                if (selected) {
+                                  final next = index == 0 ? 0 : index - 1;
+                                  _datas.selectedWord = _datas.words[next];
+                                }
+
+                                if (context.mounted) {
+                                  _datas.getAndShowResORSugg(context);
+                                  showMsg();
+                                }
+                              },
+                      ),
+                    );
+                  },
+                  separatorBuilder: (_, _) => const SizedBox(width: 6),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+      Padding(
+        padding: EdgeInsetsGeometry.only(
+          left: padd.right,
+          right: padd.right,
+          top: 6.0,
+        ),
+        child: SizedBox(
+          height: chipContainerHeight,
+          child: Directionality(
+            textDirection: L.dir,
+            child: Align(
+              alignment: L.alignmentCenterLR,
+              child: ListView.separated(
+                shrinkWrap: true,
+                controller: _scrollableSelectionDictSc,
+                key: const PageStorageKey('dict-selector'),
+                itemCount: allDictsOrd.length,
+                scrollDirection: Axis.horizontal,
+                itemBuilder: (_, index) {
+                  final d = allDictsOrd[index];
+                  final selected = d == _datas.selectedDict;
+
+                  return AutoScrollTag(
+                    key: ValueKey(index),
+                    controller: _scrollableSelectionDictSc,
+                    index: index,
+                    child: Selection(
+                      d.name,
+                      tooltip: d.enLong,
+                      onTab: () {
+                        _datas.selectedDict = d;
+                        _datas.suggDictSorted.clear();
+                        if (context.mounted) {
+                          _datas.getAndShowResORSugg(context);
+                        }
+                      },
+                      selected: selected,
+                      isAr: L.isAr,
+                    ),
+                  );
+                },
+                separatorBuilder: (_, _) => const SizedBox(width: 6),
+              ),
+            ),
+          ),
+        ),
+      ),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     final arTxtTheme = appConf.readerTS(context);
@@ -207,20 +369,6 @@ class _SearchLexiconsState extends State<SearchLexicons>
     final bg = appConf.readerSurface(context);
 
     final cs = Theme.of(context).colorScheme;
-
-    final chipTextStyleDictWord = L.arStyle.copyWith(
-      color: cs.onSurface,
-      fontSize: L.fontSize,
-    );
-
-    const chipContainerMainHeight = 38.00;
-    final chipContainerHeight = L.fontSize == null
-        ? chipContainerMainHeight
-        : (chipContainerMainHeight * L.fontSize!) / 14;
-
-    final chipTextStyleDict = L.isAr
-        ? chipTextStyleDictWord
-        : TextStyle(color: cs.onSurface);
 
     final willShowSugg = _datas.state.isSug;
 
@@ -284,151 +432,8 @@ class _SearchLexiconsState extends State<SearchLexicons>
               ),
 
               Divider(thickness: 0.5, height: 0),
-              if (_showingScrollableSelection &&
-                  appConf.scrollLexSelection) ...[
-                Visibility(
-                  visible: _datas.words.length > 1,
-                  maintainState: true,
-                  maintainSize: false,
-                  child: Padding(
-                    padding: EdgeInsetsGeometry.only(
-                      left: padd.right,
-                      right: padd.right,
-                      top: 6.0,
-                    ),
-                    child: SizedBox(
-                      height: chipContainerHeight,
-                      child: Directionality(
-                        textDirection: TextDirection.rtl,
-                        child: Align(
-                          alignment: AlignmentGeometry.centerRight,
-                          child: ListView.separated(
-                            shrinkWrap: true,
-                            key: const PageStorageKey('word-selector'),
-                            controller: _scrollableSelectionSc,
-                            itemCount: _datas.words.length,
-                            scrollDirection: Axis.horizontal,
-                            itemBuilder: (_, index) {
-                              final w = _datas.words[index];
-                              final selected = w == _datas.selectedWord;
-
-                              var label = w.replaceAll('_', ' ').trim();
-                              if (label.length > 30) {
-                                label = '${label.substring(0, 30)}…';
-                              }
-
-                              return AutoScrollTag(
-                                key: ValueKey(index),
-                                controller: _scrollableSelectionSc,
-                                index: index,
-                                child: ChoiceChip(
-                                  selected: selected,
-                                  labelStyle: selected
-                                      ? chipTextStyleDictWord.copyWith(
-                                          color: cs.onPrimary,
-                                        )
-                                      : chipTextStyleDictWord,
-                                  selectedColor: cs.primary,
-                                  backgroundColor: bg,
-                                  side: BorderSide(
-                                    color: selected
-                                        ? cs.primary
-                                        : cs.outlineVariant,
-                                  ),
-                                  visualDensity: VisualDensity.compact,
-                                  materialTapTargetSize:
-                                      MaterialTapTargetSize.shrinkWrap,
-                                  showCheckmark: false,
-                                  label: Text(
-                                    label,
-                                    textDirection: TextDirection.rtl,
-                                    style: L.arStyle,
-                                  ),
-                                  onSelected: (_) {
-                                    _datas.selectedWord = w;
-                                    _datas.suggDictSorted.clear();
-                                    if (context.mounted) {
-                                      _datas.getAndShowResORSugg(context);
-                                    }
-                                  },
-                                ),
-                              );
-                            },
-                            separatorBuilder: (_, _) =>
-                                const SizedBox(width: 6),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: EdgeInsetsGeometry.only(
-                    left: padd.right,
-                    right: padd.right,
-                    top: 6.0,
-                  ),
-                  child: SizedBox(
-                    height: chipContainerHeight,
-                    child: Directionality(
-                      textDirection: L.dir,
-                      child: Align(
-                        alignment: L.alignmentCenterLR,
-                        child: ListView.separated(
-                          shrinkWrap: true,
-                          controller: _scrollableSelectionDictSc,
-                          key: const PageStorageKey('dict-selector'),
-                          itemCount: allDictsOrd.length,
-                          scrollDirection: Axis.horizontal,
-                          itemBuilder: (_, index) {
-                            final d = allDictsOrd[index];
-                            final selected = d == _datas.selectedDict;
-
-                            return AutoScrollTag(
-                              key: ValueKey(index),
-                              controller: _scrollableSelectionDictSc,
-                              index: index,
-                              child: ChoiceChip(
-                                tooltip: d.enLong,
-                                selected: selected,
-                                labelStyle: selected
-                                    ? chipTextStyleDict.copyWith(
-                                        color: cs.onPrimary,
-                                      )
-                                    : chipTextStyleDict,
-                                selectedColor: cs.primary,
-                                backgroundColor: bg,
-                                side: BorderSide(
-                                  color: selected
-                                      ? cs.primary
-                                      : cs.outlineVariant,
-                                ),
-                                visualDensity: VisualDensity.compact,
-                                materialTapTargetSize:
-                                    MaterialTapTargetSize.shrinkWrap,
-                                showCheckmark: false,
-                                label: Text(
-                                  d.name,
-                                  textDirection: L.dir,
-                                  style: L.arStyleIf,
-                                ),
-                                onSelected: (_) {
-                                  _datas.selectedDict = d;
-                                  _datas.suggDictSorted.clear();
-                                  if (context.mounted) {
-                                    _datas.getAndShowResORSugg(context);
-                                  }
-                                },
-                              ),
-                            );
-                          },
-                          separatorBuilder: (_, _) => const SizedBox(width: 6),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+              if (_showingScrollableSelection && appConf.scrollLexSelection)
+                ..._scrolabeSelectors(padd),
               Padding(
                 padding: EdgeInsetsGeometry.symmetric(
                   horizontal: padd.right,

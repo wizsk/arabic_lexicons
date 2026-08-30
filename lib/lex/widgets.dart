@@ -3,6 +3,7 @@ import 'package:arabic_lexicons/data.dart';
 import 'package:arabic_lexicons/datas/word_store.dart';
 import 'package:arabic_lexicons/lex/data.dart';
 import 'package:arabic_lexicons/main_widgets.dart';
+import 'package:arabic_lexicons/widgets/choise_chip.dart';
 import 'package:flutter/material.dart';
 
 Widget lexAppBar(
@@ -334,13 +335,6 @@ class _WordDictPickerSheet extends StatelessWidget {
     final cs = theme.colorScheme;
     final th = theme.textTheme;
 
-    // used for words
-    final chipTextStyle = L.arStyleSized.copyWith(color: cs.onSurface);
-
-    final chipTextStyleDict = L.isAr
-        ? chipTextStyle
-        : TextStyle(color: cs.onSurface);
-
     return SingleChildScrollView(
       padding: scrollPaddingBottmSheet(context),
       child: Column(
@@ -419,21 +413,10 @@ class _WordDictPickerSheet extends StatelessWidget {
                       label = '${label.substring(0, 30)}…';
                     }
 
-                    return ChoiceChip(
-                      showCheckmark: false,
+                    return Selection(
+                      label,
                       selected: selected,
-                      label: Text(label, textDirection: TextDirection.rtl),
-                      labelStyle: selected
-                          ? chipTextStyle.copyWith(color: cs.onPrimary)
-                          : chipTextStyle,
-                      selectedColor: cs.primary,
-                      backgroundColor: cs.surfaceContainerHighest,
-                      side: BorderSide(
-                        color: selected ? cs.primary : cs.outlineVariant,
-                      ),
-                      visualDensity: VisualDensity.compact,
-                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      onSelected: (_) {
+                      onTab: () {
                         if (selected) {
                           Navigator.pop(context);
                           return;
@@ -467,22 +450,12 @@ class _WordDictPickerSheet extends StatelessWidget {
                 children: allDictsOrd.map((dict) {
                   final selected = datas.selectedDict == dict;
 
-                  return ChoiceChip(
-                    showCheckmark: false,
+                  return Selection(
+                    dict.name,
+                    isAr: L.isAr,
                     selected: selected,
-                    label: Text(dict.name),
                     tooltip: dict.enLong,
-                    labelStyle: selected
-                        ? chipTextStyleDict.copyWith(color: cs.onPrimary)
-                        : chipTextStyleDict,
-                    selectedColor: cs.primary,
-                    backgroundColor: cs.surfaceContainerHighest,
-                    side: BorderSide(
-                      color: selected ? cs.primary : cs.outlineVariant,
-                    ),
-                    visualDensity: VisualDensity.compact,
-                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    onSelected: (_) {
+                    onTab: () {
                       if (selected) {
                         Navigator.pop(context);
                         return;

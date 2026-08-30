@@ -1,4 +1,5 @@
 import 'dart:io';
+
 import 'package:arabic_lexicons/alphabets.dart';
 import 'package:arabic_lexicons/data.dart';
 import 'package:arabic_lexicons/utils.dart';
@@ -27,22 +28,35 @@ class DbRow {
 
 class DbService {
   static const _assetDbPath = 'assets/data/db/db.sqlite';
-  static const _oldDbFileNames = ['db.sqlite', 'db_v2.sqlite'];
+  static const _oldDbFileNames = [];
 
   static Database? _db;
 
-  static Future<Database> _openDb({String? parent}) async {
-    final dbPath = await _copyDbFromAssetsIfNeeded(parent: parent);
+  static Future<Database> _openDb(
+    String dbDir, {
+    final bool copy = false,
+  }) async {
+    final dbPath = join(dbDir, dbFileName);
+    if (copy) {
+      await _copyDbFromAssetsIfNeeded(dbPath, dbDir);
+    }
+
     return openDatabase(dbPath, readOnly: true);
   }
 
-  static Future<String> _copyDbFromAssetsIfNeeded({String? parent}) async {
-    final dbDir = parent ?? (await getApplicationCacheDirectory()).path;
-    final dbPath = join(dbDir, dbFileName);
-
+  static Future<void> _copyDbFromAssetsIfNeeded(
+    String dbPath,
+    String dbDir,
+  ) async {
     if (await File(dbPath).exists()) {
-      return dbPath;
+      return;
     }
+
+    // TODO: v4.5.0 remove in future version
+    final cacheDir = (await getApplicationCacheDirectory()).path;
+    try {
+      File(join(cacheDir, dbFileName)).delete();
+    } catch (_) {}
 
     // delete old files
     for (final n in _oldDbFileNames) {
@@ -66,19 +80,20 @@ class DbService {
       data.lengthInBytes,
     );
 
-    await File(dbPath).create(recursive: true);
-    await File(dbPath).writeAsBytes(bytes, flush: true);
-
-    return dbPath;
+    final tmp = File('$dbPath.tmp');
+    await tmp.writeAsBytes(bytes, flush: true);
+    await tmp.rename(dbPath);
   }
 
-  /// Must be called once (Linux requirement)
-  static Future<void> init({String? path}) async {
+  static Future<void> init({String? path, final bool copy = false}) async {
+    path = path ?? (await getApplicationDocumentsDirectory()).path;
+
+    /// Must be called once (Linux requirement)
     if (Platform.isLinux || Platform.isWindows) {
       sqfliteFfiInit();
       databaseFactory = databaseFactoryFfi;
     }
-    _db = await _openDb(parent: path);
+    _db = await _openDb(path, copy: copy);
   }
 
   static Database get database {

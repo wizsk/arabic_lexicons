@@ -4,6 +4,7 @@ final releases = [
     changes: '''
     Add a delete icon to the scrollable lexicon word selector
     Make the scrollable word and lexicon selectors the default on the Lexicons screen
+    Save lexicon databe to data directory
     ''',
   ),
   Release(

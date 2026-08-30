@@ -20,8 +20,9 @@ sealed class SuggMessage {
 
 class InitSuggMessage extends SuggMessage {
   final String cacheDir;
+  final String dataDir;
   final SendPort replyPort;
-  const InitSuggMessage(this.cacheDir, this.replyPort);
+  const InitSuggMessage(this.cacheDir, this.dataDir, this.replyPort);
 }
 
 class SuggSearch extends SuggMessage {
@@ -46,7 +47,7 @@ class SearchSuggestions {
   //   return _initialized && appSettingsNotifier.showSearchSugg;
   // }
 
-  Future<void> init(String cacheDirPath) async {
+  Future<void> init(String cacheDirPath, String dataDir) async {
     if (_initialized) return;
 
     _initialized = await _loadCache(cacheDirPath);
@@ -55,7 +56,7 @@ class SearchSuggestions {
     try {
       sqfliteFfiInit();
       databaseFactory = databaseFactoryFfi;
-      await DbService.init(path: cacheDirPath);
+      await DbService.init(path: dataDir, copy: false);
     } catch (e) {
       if (kDebugMode) debugPrint('err: $e');
       return;
@@ -275,52 +276,4 @@ class SuggestionMeta {
   final Set<Dict> dicts;
 
   SuggestionMeta(this.isRoot, this.dicts);
-}
-
-Future<void> _isolateSugg(SendPort mainSendPort) async {
-  final receivePort = ReceivePort();
-  mainSendPort.send(receivePort.sendPort); // handshake
-
-  final engine = SearchSuggestions();
-
-  receivePort.listen((message) async {
-    if (message is InitSuggMessage) {
-      await engine.init(message.cacheDir);
-      message.replyPort.send(true); // ack
-    } else if (message is SuggSearch) {
-      final results = engine.getSuggestions(message.query);
-      message.replyPort.send(SuggResult(results));
-    }
-  });
-}
-
-// Public-facing handle (used from main isolate)
-class SuggIsolate {
-  late final Isolate _isolate;
-  late final SendPort _sendPort;
-
-  Future<void> spwan() async {
-    final ready = ReceivePort();
-    _isolate = await Isolate.spawn(_isolateSugg, ready.sendPort);
-    _sendPort = await ready.first;
-  }
-
-  Future<void> init(String cacheDir) async {
-    final reply = ReceivePort();
-    _sendPort.send(InitSuggMessage(cacheDir, reply.sendPort));
-    await reply.first; // wait for ack
-    reply.close();
-  }
-
-  Future<SuggResult> search(String query) async {
-    final reply = ReceivePort();
-    _sendPort.send(SuggSearch(query, reply.sendPort));
-    final result = await reply.first as SuggResult;
-    reply.close();
-    return result;
-  }
-
-  void dispose() {
-    _isolate.kill(priority: Isolate.immediate);
-  }
 }

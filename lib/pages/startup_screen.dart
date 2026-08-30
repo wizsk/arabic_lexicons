@@ -27,7 +27,7 @@ class _StartupScreenState extends State<StartupScreen> {
       await Future.wait([
         appConf.load(),
         setDictOrdFromFile(),
-        DbService.init(),
+        DbService.init(copy: true),
         AppDb.init(),
       ]);
 

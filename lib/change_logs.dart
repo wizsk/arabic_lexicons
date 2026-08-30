@@ -2,14 +2,15 @@ final releases = [
   Release(
     version: 'v3.5.0',
     changes: '''
-    Add delete icon to the scrollable lexcion word selectos
-    '''
+    Add a delete icon to the scrollable lexicon word selector
+    Make the scrollable word and lexicon selectors the default on the Lexicons screen
+    ''',
   ),
   Release(
     version: 'v3.4.1',
     changes: '''
     Minor padding issue into reader style changer page
-    '''
+    ''',
   ),
   Release(
     version: 'v3.4.0',

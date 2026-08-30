@@ -122,7 +122,7 @@ class AppSettingsController extends ChangeNotifier {
   static const int readerScrollPersentDef = 65;
   int _readerScrollPersent = readerScrollPersentDef;
 
-  static const bool _scrollLexSelectionDef = false;
+  static const bool _scrollLexSelectionDef = true;
   bool _scrollLexSelection = _scrollLexSelectionDef;
 
   static const bool _scrollLexSelectionAutoScDef = true;

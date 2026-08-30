@@ -13,7 +13,7 @@ import 'package:arabic_lexicons/lex/widgets.dart';
 import 'package:arabic_lexicons/lex/word_dict_picker.dart';
 import 'package:arabic_lexicons/main_widgets.dart';
 import 'package:arabic_lexicons/utils.dart';
-import 'package:arabic_lexicons/widgets/choise_chip.dart';
+import 'package:arabic_lexicons/widgets/selection_chip.dart';
 import 'package:arabic_lexicons/widgets/lex_word_confirm.dart';
 import 'package:flutter/material.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';

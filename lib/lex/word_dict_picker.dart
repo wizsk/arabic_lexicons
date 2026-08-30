@@ -1,7 +1,7 @@
 import 'package:arabic_lexicons/conf.dart';
 import 'package:arabic_lexicons/data.dart';
 import 'package:arabic_lexicons/lex/data.dart';
-import 'package:arabic_lexicons/widgets/choise_chip.dart';
+import 'package:arabic_lexicons/widgets/selection_chip.dart';
 import 'package:arabic_lexicons/widgets/lex_word_confirm.dart';
 import 'package:flutter/material.dart';
 

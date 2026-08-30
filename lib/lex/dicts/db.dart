@@ -52,21 +52,29 @@ class DbService {
       return;
     }
 
-    // TODO: v4.5.0 remove in future version
-    final cacheDir = (await getApplicationCacheDirectory()).path;
     try {
-      File(join(cacheDir, dbFileName)).delete();
-    } catch (_) {}
-
-    // delete old files
-    for (final n in _oldDbFileNames) {
-      final f = File(join(dbDir, n));
-      f.exists().then((ok) {
-        if (ok) f.delete();
+      // TODO: v4.5.0 remove in future version
+      final cacheDir = (await getApplicationCacheDirectory()).path;
+      final old = File(join(cacheDir, dbFileName));
+      old.exists().then((ok) {
+        if (ok) old.delete();
       });
 
+      // delete old files
+      for (final n in _oldDbFileNames) {
+        final f = File(join(dbDir, n));
+        f.exists().then((ok) {
+          if (!ok) return;
+          f.delete();
+
+          if (kDebugMode) {
+            debugPrint('Deleted: ${f.path}');
+          }
+        });
+      }
+    } catch (err) {
       if (kDebugMode) {
-        debugPrint('Deleted: ${f.path}');
+        debugPrint('while deleting old db files: $err');
       }
     }
 

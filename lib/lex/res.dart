@@ -94,7 +94,7 @@ Widget _noResUniversal(
     return Container(
       padding: EdgeInsets.all(16.00),
       decoration: BoxDecoration(
-        color: cs.surfaceContainerLow,
+        color: cs.surfaceContainer,
         borderRadius: BorderRadius.circular(14.00),
       ),
       child: Column(

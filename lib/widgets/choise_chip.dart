@@ -25,6 +25,7 @@ class Selection extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return RawChip(
+      key: ValueKey(label),
       tooltip: tooltip,
       label: Text(
         label,

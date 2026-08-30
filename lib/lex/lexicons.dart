@@ -10,8 +10,8 @@ import 'package:arabic_lexicons/lex/res.dart';
 import 'package:arabic_lexicons/lex/sugg/widgets.dart';
 import 'package:arabic_lexicons/lex/utils.dart';
 import 'package:arabic_lexicons/lex/widgets.dart';
+import 'package:arabic_lexicons/lex/word_dict_picker.dart';
 import 'package:arabic_lexicons/main_widgets.dart';
-import 'package:arabic_lexicons/reader/reader_utils.dart';
 import 'package:arabic_lexicons/utils.dart';
 import 'package:arabic_lexicons/widgets/choise_chip.dart';
 import 'package:arabic_lexicons/widgets/lex_word_confirm.dart';
@@ -261,48 +261,27 @@ class _SearchLexiconsState extends State<SearchLexicons>
                         onDelete: !appConf.lexWordRmIcon
                             ? null
                             : () async {
-                                bool showTipAboutConfrim = false;
-
                                 if (appConf.lexWordDelConfirm) {
                                   final res = await showLexWordDelConfirm(
                                     context,
                                     label,
                                   );
                                   if (res != true) return;
-                                  showTipAboutConfrim =
-                                      !appConf.lexWordDelConfirm;
-                                }
-
-                                void showMsg() {
-                                  if (!showTipAboutConfrim) return;
-                                  postFrame((_) {
-                                    showSnack(
-                                      context,
-                                      'Re-enable confirmation dialogs in the settings',
-                                    );
-                                  });
                                 }
 
                                 _datas.words.removeAt(index);
                                 _controller.text = _datas.words.join(' ');
-                                if (_datas.words.isEmpty) {
-                                  _datas.selectedWord = '';
-                                  _datas.resetAll();
-                                  if (context.mounted) {
-                                    setState(() {});
-                                    showMsg();
-                                  }
-                                  return;
-                                }
+
+                                // _datas.words.isEmpty will never be true because we won't even show
+                                // word picker if there is less than 2 words!
 
                                 if (selected) {
                                   final next = index == 0 ? 0 : index - 1;
                                   _datas.selectedWord = _datas.words[next];
                                 }
 
-                                if (context.mounted) {
+                                if (mounted) {
                                   _datas.getAndShowResORSugg(context);
-                                  showMsg();
                                 }
                               },
                       ),
@@ -470,15 +449,17 @@ class _SearchLexiconsState extends State<SearchLexicons>
                         onPressed: () async {
                           FocusManager.instance.primaryFocus?.unfocus();
 
+                          final previousWordListSize = _datas.words.length;
+                          final previousWord = _datas.selectedWord;
+                          final previousDict = _datas.selectedDict;
+
                           final res = await showWordPickerBottomSheet(
                             context,
                             _datas,
                           );
 
-                          if (res == null) return;
-
-                          if (res.openSettings == true) {
-                            WidgetsBinding.instance.addPostFrameCallback(
+                          if (res != null && res.openSettings == true) {
+                            postFrame(
                               (_) => showDictReorderSheet(
                                 context,
                                 after: () {
@@ -489,18 +470,22 @@ class _SearchLexiconsState extends State<SearchLexicons>
                                 },
                               ),
                             );
-                            return;
                           }
 
-                          if (res.word != null) {
-                            _datas.selectedWord = res.word!;
+                          if (previousWordListSize != _datas.words.length) {
+                            _controller.text = _datas.words.join(' ');
                           }
-                          if (res.d != null) {
-                            _datas.selectedDict = res.d!;
-                            _datas.suggDictSorted.clear();
-                          }
-                          if (context.mounted) {
+
+                          final newWord =
+                              previousWord != _datas.selectedWord &&
+                              _datas.selectedWord.isNotEmpty;
+
+                          if ((newWord ||
+                                  previousDict != _datas.selectedDict) &&
+                              context.mounted) {
                             _datas.getAndShowResORSugg(context);
+                          } else if (context.mounted) {
+                            setState(() {});
                           }
                         },
                       ),

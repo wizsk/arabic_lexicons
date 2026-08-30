@@ -174,6 +174,9 @@ class SearchLexiconsDatas {
 
     if (appConf.showSearchSugg) {
       await _loadSearchSugg();
+    } else {
+      state = LexRT.empty;
+      rebuild();
     }
   }
 

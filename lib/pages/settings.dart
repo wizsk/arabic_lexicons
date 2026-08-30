@@ -309,7 +309,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         },
                       ),
 
-                      if (appConf.scrollLexSelection) ...[
+                      if (appConf.scrollLexSelection)
                         SwitchListTile(
                           secondary: const FilledIcon(Icons.horizontal_rule),
                           title: const Text('Auto-scroll to selection'),
@@ -325,20 +325,21 @@ class _SettingsPageState extends State<SettingsPage> {
                               : null,
                         ),
 
-                        SwitchListTile(
-                          secondary: const FilledIcon(
-                            Icons.delete_outline_rounded,
-                          ),
-                          title: const Text('Show Delete Icon'),
-                          subtitle: const Text(
-                            'Show a delete icon on lexicon word selections',
-                          ),
-                          value: appConf.lexWordRmIcon,
-                          onChanged: (value) async {
-                            await appConf.saveLexWordRmIcon(value);
-                            if (context.mounted) setState(() {});
-                          },
+                      SwitchListTile(
+                        secondary: const FilledIcon(
+                          Icons.delete_outline_rounded,
                         ),
+                        title: const Text('Show Delete Icon'),
+                        subtitle: const Text(
+                          'Show a delete icon on lexicon word selections',
+                        ),
+                        value: appConf.lexWordRmIcon,
+                        onChanged: (value) async {
+                          await appConf.saveLexWordRmIcon(value);
+                          if (context.mounted) setState(() {});
+                        },
+                      ),
+                      if (appConf.lexWordRmIcon)
                         SwitchListTile(
                           secondary: const FilledIcon(
                             Icons.warning_amber_rounded,
@@ -353,26 +354,6 @@ class _SettingsPageState extends State<SettingsPage> {
                             if (context.mounted) setState(() {});
                           },
                         ),
-                      ],
-
-                      /// Direct Results
-                      // SwitchListTile(
-                      //   secondary: FilledIcon(Icons.directions),
-                      //   title: const Text('Direct Results'),
-                      //   subtitle: Text(
-                      //     // 'Open results immediately while typing, if an exact match is found'
-                      //     // ' (but always direct in ${Dict.arEn.name})',
-                      //     'Open results immediately while typing if an exact match is found'
-                      //     '(no suggestions shown ${Dict.arEn.name}, which always opens directly)',
-                      //   ),
-                      //   value: appConf.showResutlsDirecly,
-                      //   onChanged: Isolates.suggCanBeShown
-                      //       ? (value) {
-                      //           notifier.saveShowResutlsDirecly(value);
-                      //           setState(() {});
-                      //         }
-                      //       : null,
-                      // ),
                     ],
                   ),
 

@@ -1,5 +1,11 @@
 final releases = [
   Release(
+    version: 'v3.5.0',
+    changes: '''
+    Add delete icon to the scrollable lexcion word selectos
+    '''
+  ),
+  Release(
     version: 'v3.4.1',
     changes: '''
     Minor padding issue into reader style changer page

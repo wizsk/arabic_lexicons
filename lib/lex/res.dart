@@ -91,74 +91,72 @@ Widget _noResUniversal(
 
     if (!showOpenReaderBtn) return l;
 
-    return Padding(
-      padding: const EdgeInsets.all(12.0),
-      child: Container(
-        padding: EdgeInsets.all(8.0),
-        width: double.infinity,
-        height: double.infinity,
-        constraints: const BoxConstraints(maxWidth: 260, maxHeight: 200),
-        alignment: AlignmentGeometry.center,
-        decoration: BoxDecoration(
-          color: cs.surfaceContainer,
-          borderRadius: BorderRadius.circular(14.00),
-        ),
-        child: Column(
-          textDirection: L.dir,
-          mainAxisSize: MainAxisSize.min,
-          spacing: 8.00,
-          children: [
-            l,
-            Text(L.p('or', 'أو'), textDirection: L.dir, style: L.arStyleIf),
+    // return Padding(
+    //   padding: const EdgeInsets.all(12.0),
+    //   child: Container(
+    //     padding: EdgeInsets.all(8.0),
+    //     width: double.infinity,
+    //     height: double.infinity,
+    //     constraints: const BoxConstraints(maxWidth: 260, maxHeight: 200),
+    //     alignment: AlignmentGeometry.center,
+    //     decoration: BoxDecoration(
+    //       color: cs.surfaceContainer,
+    //       borderRadius: BorderRadius.circular(14.00),
+    //     ),
+    // child:
+    return Column(
+      textDirection: L.dir,
+      mainAxisSize: MainAxisSize.min,
+      spacing: 8.00,
+      children: [
+        l,
+        Text(L.p('or', 'أو'), textDirection: L.dir, style: L.arStyleIf),
 
-            // const SizedBox(height: 8.00),
-            Material(
-              color: cs.primary,
-              borderRadius: BorderRadius.circular(14),
-              // shape: RoundedRectangleBorder(
-              //   borderRadius: BorderRadius.circular(14),
-              //   side: BorderSide(
-              //     color: cs.outlineVariant,
-              //     width: 1.2,
-              //   ),
-              // ),
-              clipBehavior: Clip.antiAlias,
-              child: InkWell(
-                onTap: () {
-                  Navigator.pushReplacementNamed(context, Routes.readerInput);
-                },
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 16.00,
-                    horizontal: 18.00,
+        // const SizedBox(height: 8.00),
+        Material(
+          color: cs.primary,
+          borderRadius: BorderRadius.circular(14),
+          // shape: RoundedRectangleBorder(
+          //   borderRadius: BorderRadius.circular(14),
+          //   side: BorderSide(
+          //     color: cs.outlineVariant,
+          //     width: 1.2,
+          //   ),
+          // ),
+          clipBehavior: Clip.antiAlias,
+          child: InkWell(
+            onTap: () {
+              Navigator.pushReplacementNamed(context, Routes.readerInput);
+            },
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                vertical: 16.00,
+                horizontal: 18.00,
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                textDirection: L.dir,
+                children: [
+                  Icon(Icons.menu_book_rounded, color: cs.onPrimary),
+                  SizedBox(width: 8),
+                  Text(
+                    // L.p('Open Reader', 'افتح القارئ'),
+                    L.p('Go to Reader', 'اذهب إلى القارئ'),
+                    style: L.arStyleOrNew.copyWith(
+                      fontWeight: FontWeight.w500,
+                      color: cs.onPrimary,
+                    ),
                   ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    textDirection: L.dir,
-                    children: [
-                      Icon(
-                        Icons.menu_book_rounded,
-                        color: cs.onPrimary,
-                      ),
-                      SizedBox(width: 8),
-                      Text(
-                        // L.p('Open Reader', 'افتح القارئ'),
-                        L.p('Go to Reader', 'اذهب إلى القارئ'),
-                        style: L.arStyleOrNew.copyWith(
-                          fontWeight: FontWeight.w500,
-                        color: cs.onPrimary,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                ],
               ),
             ),
-          ],
+          ),
         ),
-      ),
+      ],
+      //   ),
+      // ),
     );
   }
 

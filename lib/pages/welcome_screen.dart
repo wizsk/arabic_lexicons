@@ -31,72 +31,71 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                     padding: appConf.readerPadd(context),
                     sliver: SliverList(
                       delegate: SliverChildListDelegate([
-                        // ─────────────────────────────
-                        // Welcome
-                        // ─────────────────────────────
                         const SizedBox(height: 30),
-                        Center(
-                          child: Column(
-                            children: [
-                              elevatedIcon(
-                                cs,
-                                Icons.menu_book_rounded,
-                                diemtion: 110,
-                                iconSize: 54,
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            elevatedIcon(
+                              cs,
+                              Icons.menu_book_rounded,
+                              diemtion: 110,
+                              iconSize: 54,
+                            ),
+
+                            const SizedBox(height: 12),
+
+                            Text(
+                              'Welcome!',
+                              style: theme.textTheme.displaySmall?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: cs.onSurface,
                               ),
+                            ),
 
-                              const SizedBox(height: 12),
+                            const SizedBox(height: 8),
 
-                              Text(
-                                'Welcome!',
-                                style: theme.textTheme.displaySmall?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: cs.onSurface,
-                                ),
+                            Text(
+                              'Thanks for installing the app.',
+                              textAlign: TextAlign.center,
+                              style: theme.textTheme.bodyLarge?.copyWith(
+                                color: cs.onSurfaceVariant,
                               ),
+                            ),
 
-                              const SizedBox(height: 8),
+                            const SizedBox(height: 8),
 
-                              Text(
-                                'Thanks for installing the app.',
-                                textAlign: TextAlign.center,
-                                style: theme.textTheme.bodyLarge?.copyWith(
-                                  color: cs.onSurfaceVariant,
-                                ),
+                            Text(
+                              'We hope it helps you along your Arabic-learning journey',
+                              textAlign: TextAlign.center,
+                              style: theme.textTheme.bodyLarge?.copyWith(
+                                color: cs.onSurfaceVariant,
                               ),
+                            ),
 
-                              const SizedBox(height: 8),
+                            // const SizedBox(height: 8),
 
-                              Text(
-                                'We hope it helps you along your Arabic-learning journey',
-                                textAlign: TextAlign.center,
-                                style: theme.textTheme.bodyLarge?.copyWith(
-                                  color: cs.onSurfaceVariant,
-                                ),
-                              ),
-
-                              // const SizedBox(height: 8),
-
-                              // Text(
-                              //   ' If you encounter any issues, please email us at: $emailAddr',
-                              //   textAlign: TextAlign.center,
-                              //   style: theme.textTheme.bodyLarge?.copyWith(
-                              //     color: cs.onSurfaceVariant,
-                              //   ),
-                              // ),
-                            ],
-                          ),
+                            // Text(
+                            //   ' If you encounter any issues, please email us at: $emailAddr',
+                            //   textAlign: TextAlign.center,
+                            //   style: theme.textTheme.bodyLarge?.copyWith(
+                            //     color: cs.onSurfaceVariant,
+                            //   ),
+                            // ),
+                          ],
                         ),
 
-                        const SizedBox(height: 28),
-                        // Text(
-                        //   'Make the app yours',
-                        //   style: theme.textTheme.titleMedium?.copyWith(
-                        //     fontWeight: FontWeight.bold,
-                        //     color: cs.onSurfaceVariant,
-                        //   ),
-                        // ),
-                        // const SizedBox(height: 12),
+                        const SizedBox(height: 34),
+                        Center(
+                          child: Text(
+                            'Make the app yours',
+                            textAlign: TextAlign.center,
+                            style: th.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: cs.primary,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
 
                         SettingsSectionSurface(
                           children: themeColorFontSettings(context),

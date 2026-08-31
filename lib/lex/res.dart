@@ -113,14 +113,15 @@ Widget _noResUniversal(
 
             // const SizedBox(height: 8.00),
             Material(
-              color: cs.primaryContainer,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14),
-                side: BorderSide(
-                  color: cs.outlineVariant,
-                  width: 1.2,
-                ),
-              ),
+              color: cs.primary,
+              borderRadius: BorderRadius.circular(14),
+              // shape: RoundedRectangleBorder(
+              //   borderRadius: BorderRadius.circular(14),
+              //   side: BorderSide(
+              //     color: cs.outlineVariant,
+              //     width: 1.2,
+              //   ),
+              // ),
               clipBehavior: Clip.antiAlias,
               child: InkWell(
                 onTap: () {
@@ -139,7 +140,7 @@ Widget _noResUniversal(
                     children: [
                       Icon(
                         Icons.menu_book_rounded,
-                        color: cs.onPrimaryContainer,
+                        color: cs.onPrimary,
                       ),
                       SizedBox(width: 8),
                       Text(
@@ -147,7 +148,7 @@ Widget _noResUniversal(
                         L.p('Go to Reader', 'اذهب إلى القارئ'),
                         style: L.arStyleOrNew.copyWith(
                           fontWeight: FontWeight.w500,
-                          color: cs.onPrimaryContainer,
+                        color: cs.onPrimary,
                         ),
                       ),
                     ],

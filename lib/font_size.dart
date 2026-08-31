@@ -1,6 +1,7 @@
 import 'package:arabic_lexicons/conf.dart';
 import 'package:arabic_lexicons/data.dart';
 import 'package:arabic_lexicons/theme.dart';
+import 'package:arabic_lexicons/widgets/selection_chip.dart';
 import 'package:flutter/material.dart';
 
 /// if [fontSize] is provided
@@ -192,7 +193,7 @@ Future<void> showUiFontSizeBottomSheet(BuildContext context) async {
             fontSize: tempSize,
           );
 
-          final cs = Theme.of(context).colorScheme;
+          // final cs = Theme.of(context).colorScheme;
 
           return Padding(
             padding: EdgeInsets.symmetric(
@@ -218,25 +219,12 @@ Future<void> showUiFontSizeBottomSheet(BuildContext context) async {
                     textDirection: TextDirection.rtl,
                     children: allDicts.take(4).map((d) {
                       final selected = d == selectedDict;
-                      return ChoiceChip(
-                        tooltip: d.ar,
+                      return Selection(
+                        d.ar,
+                        tooltip: d.enLong,
                         selected: selected,
-                        labelStyle: selected
-                            ? arabicFontStyle.copyWith(color: cs.onPrimary)
-                            : arabicFontStyle,
-                        selectedColor: cs.primary,
-                        side: BorderSide(
-                          color: selected ? cs.primary : cs.outlineVariant,
-                        ),
-                        visualDensity: VisualDensity.compact,
-                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        showCheckmark: false,
-                        label: Text(
-                          d.ar,
-                          textDirection: TextDirection.rtl,
-                          style: arabicFontStyle,
-                        ),
-                        onSelected: (_) {
+                        arFontSize: tempSize,
+                        onTab: () {
                           setState(() => selectedDict = d);
                         },
                       );

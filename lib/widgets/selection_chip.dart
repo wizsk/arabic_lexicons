@@ -9,6 +9,7 @@ class Selection extends StatelessWidget {
   final VoidCallback? onDelete;
   final String? tooltip;
   final String deleteButtonTooltipMessage;
+  final double? arFontSize;
 
   const Selection(
     this.label, {
@@ -19,6 +20,7 @@ class Selection extends StatelessWidget {
     this.onDelete,
     this.tooltip,
     this.deleteButtonTooltipMessage = 'Remove',
+    this.arFontSize,
   });
 
   @override
@@ -31,7 +33,10 @@ class Selection extends StatelessWidget {
         label,
         textDirection: isAr ? TextDirection.rtl : TextDirection.ltr,
         style: isAr
-            ? L.arStyleSized.copyWith(color: selected ? cs.onPrimary : null)
+            ? L.arStyleSized.copyWith(
+                color: selected ? cs.onPrimary : null,
+                fontSize: arFontSize,
+              )
             : TextStyle(color: selected ? cs.onPrimary : null),
       ),
       selected: selected,

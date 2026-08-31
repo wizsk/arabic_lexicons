@@ -22,13 +22,16 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
 
     return Scaffold(
       body: SafeArea(
+        top: false,
         child: Column(
           children: [
             Expanded(
               child: CustomScrollView(
                 slivers: [
                   SliverPadding(
-                    padding: appConf.readerPadd(context),
+                    padding: appConf
+                        .readerPadd(context)
+                        .copyWith(top: MediaQuery.paddingOf(context).top),
                     sliver: SliverList(
                       delegate: SliverChildListDelegate([
                         const SizedBox(height: 30),
@@ -169,9 +172,6 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
               ),
             ),
 
-            // ─────────────────────────────────────────
-            // Sticky bottom button
-            // ─────────────────────────────────────────
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
               child: Container(

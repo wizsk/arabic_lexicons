@@ -114,7 +114,13 @@ Widget _noResUniversal(
             // const SizedBox(height: 8.00),
             Material(
               color: cs.primaryContainer,
-              borderRadius: BorderRadius.circular(14.00),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+                side: BorderSide(
+                  color: cs.outlineVariant,
+                  width: 1.2,
+                ),
+              ),
               clipBehavior: Clip.antiAlias,
               child: InkWell(
                 onTap: () {

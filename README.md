@@ -98,7 +98,7 @@ flutter run # flutter build apk
 
 This project is fully open source and released under the **GPL-3.0 License**.
 
-# Acknowledgements
+## Regards
 
 - Thanks to [HansWehrDictionary](https://play.google.com/store/apps/details?id=com.muslimtechnet.lanelexicon) by [GibreelAbdullah](https://github.com/GibreelAbdullah/)
 - Thanks to [LaneLexicon](https://play.google.com/store/apps/details?id=com.muslimtechnet.hanswehr) by [GibreelAbdullah](https://github.com/GibreelAbdullah/)

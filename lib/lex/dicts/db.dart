@@ -28,7 +28,7 @@ class DbRow {
 
 class DbService {
   static const _assetDbPath = 'assets/data/db/db.sqlite';
-  static const _oldDbFileNames = [ 'db_v3.sqlite'];
+  static const _oldDbFileNames = ['db_v3.sqlite'];
 
   static Database? _db;
 

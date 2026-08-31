@@ -207,7 +207,8 @@ class _SearchLexiconsState extends State<SearchLexicons>
   }
 
   static const _chipContainerMainHeight = 38.00;
-  List<Widget> _scrolabeSelectors(EdgeInsets padd) {
+
+  List<Widget> _scrolabeSelectors(final EdgeInsets padd, final Color bg) {
     final chipContainerHeight = L.fontSize == null
         ? _chipContainerMainHeight
         : (_chipContainerMainHeight * L.fontSize!) / 14;
@@ -251,6 +252,7 @@ class _SearchLexiconsState extends State<SearchLexicons>
                       child: Selection(
                         label,
                         selected: selected,
+                        backgroundColor: bg,
                         onTab: () {
                           _datas.selectedWord = w;
                           _datas.suggDictSorted.clear();
@@ -331,6 +333,7 @@ class _SearchLexiconsState extends State<SearchLexicons>
                         }
                       },
                       selected: selected,
+                      backgroundColor: bg,
                       isAr: L.isAr,
                     ),
                   );
@@ -416,7 +419,7 @@ class _SearchLexiconsState extends State<SearchLexicons>
 
               Divider(thickness: 0.5, height: 0),
               if (_showingScrollableSelection && appConf.scrollLexSelection)
-                ..._scrolabeSelectors(padd),
+                ..._scrolabeSelectors(padd, bg),
               Padding(
                 padding: EdgeInsetsGeometry.symmetric(
                   horizontal: padd.right,

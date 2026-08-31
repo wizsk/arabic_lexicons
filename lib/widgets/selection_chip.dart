@@ -10,6 +10,7 @@ class Selection extends StatelessWidget {
   final String? tooltip;
   final String deleteButtonTooltipMessage;
   final double? arFontSize;
+  final Color ?backgroundColor;
 
   const Selection(
     this.label, {
@@ -21,6 +22,7 @@ class Selection extends StatelessWidget {
     this.tooltip,
     this.deleteButtonTooltipMessage = 'Remove',
     this.arFontSize,
+    this.backgroundColor,
   });
 
   @override
@@ -41,6 +43,7 @@ class Selection extends StatelessWidget {
       ),
       selected: selected,
       selectedColor: cs.primary,
+      backgroundColor: backgroundColor,
       visualDensity: VisualDensity.compact,
       side: BorderSide(color: selected ? cs.primary : cs.outlineVariant),
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,

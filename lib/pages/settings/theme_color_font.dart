@@ -16,13 +16,13 @@ const double themeColorGap =
 class _ThemeModeButton extends StatelessWidget {
   const _ThemeModeButton({
     required this.icon,
-    required this.tooltip,
+    required this.label,
     required this.selected,
     required this.onTap,
   });
 
   final IconData icon;
-  final String tooltip;
+  final String label;
   final bool selected;
   final VoidCallback onTap;
 
@@ -31,7 +31,7 @@ class _ThemeModeButton extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
 
     return Tooltip(
-      message: tooltip,
+      message: label,
       child: Material(
         color: selected ? cs.primary : Colors.transparent,
         borderRadius: BorderRadius.circular(12),
@@ -39,8 +39,8 @@ class _ThemeModeButton extends StatelessWidget {
           onTap: onTap,
           borderRadius: BorderRadius.circular(12),
           child: SizedBox(
-            width: 68,
-            height: 60,
+            width: 70,
+            height: 70,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -52,7 +52,7 @@ class _ThemeModeButton extends StatelessWidget {
                   color: selected ? cs.onPrimary : cs.onSurfaceVariant,
                 ),
                 Text(
-                  tooltip,
+                  label,
                   style: TextStyle(
                     color: selected ? cs.onPrimary : cs.onSurfaceVariant,
                     fontWeight: FontWeight.w600,
@@ -89,7 +89,7 @@ class _ThemeSwicherState extends State<ThemeSwicher> {
         children: [
           _ThemeModeButton(
             icon: Icons.settings_suggest_rounded,
-            tooltip: 'System',
+            label: 'System',
             selected: appConf.theme == ThemeMode.system,
             onTap: () async {
               await appConf.saveTheme(ThemeMode.system);
@@ -98,7 +98,7 @@ class _ThemeSwicherState extends State<ThemeSwicher> {
           ),
           _ThemeModeButton(
             icon: Icons.light_mode_rounded,
-            tooltip: 'Light',
+            label: 'Light',
             selected: appConf.theme == ThemeMode.light,
             onTap: () async {
               await appConf.saveTheme(ThemeMode.light);
@@ -107,7 +107,7 @@ class _ThemeSwicherState extends State<ThemeSwicher> {
           ),
           _ThemeModeButton(
             icon: Icons.dark_mode_rounded,
-            tooltip: 'Dark',
+            label: 'Dark',
             selected: appConf.theme == ThemeMode.dark,
             onTap: () async {
               await appConf.saveTheme(ThemeMode.dark);

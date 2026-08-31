@@ -44,7 +44,7 @@ class Selection extends StatelessWidget {
       visualDensity: VisualDensity.compact,
       side: BorderSide(color: selected ? cs.primary : cs.outlineVariant),
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-      deleteIconColor: (selected ? cs.onPrimary : cs.secondary).withAlpha(120),
+      deleteIconColor: (selected ? cs.onPrimary : cs.secondary).withAlpha(150),
       showCheckmark: false,
       onDeleted: onDelete,
       onPressed: onTab,

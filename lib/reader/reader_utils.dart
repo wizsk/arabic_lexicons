@@ -54,7 +54,7 @@ class ReaderSelectionTile extends StatelessWidget {
     required this.subtitle,
     required this.value,
     this.trailing = Icons.chevron_right,
-    this.variant = FilledIconVariant.secondary,
+    this.variant = FilledIconVariant.primary,
   });
 
   @override

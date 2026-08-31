@@ -68,13 +68,13 @@ abstract final class ReaderInputPageData {
     }
 
     final dir = await getApplicationDocumentsDirectory();
-    final booksDir = Directory(path.join(dir.path, 'books'));
-
-    booksDirPath = booksDir.path;
+    booksDirPath = path.join(dir.path, 'books');
     confDirPath = path.join(booksDirPath, 'conf');
 
-    booksDir.create();
-    Directory(confDirPath).create();
+    final booksDir = Directory(booksDirPath);
+
+    await booksDir.create();
+    await Directory(confDirPath).create();
 
     // TODO: Remove in the future version: added at v3.4.0
     final indexFile = File(path.join(booksDir.path, booksIndexName));
@@ -96,7 +96,7 @@ abstract final class ReaderInputPageData {
       if (kDebugMode) debugPrint('Books data migrated!');
     } else {
       await _loadBooks();
-      booksDir.create();
+      await booksDir.create();
     }
 
     setBookUnord();

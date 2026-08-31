@@ -184,8 +184,6 @@ class AppSettingsController extends ChangeNotifier {
 
   /// Load saved theme & font size from memory
   Future<void> load() async {
-    WakelockController.load();
-
     final prefs = await SharedPreferences.getInstance();
 
     _theme = ThemeMode.values.firstWhere(

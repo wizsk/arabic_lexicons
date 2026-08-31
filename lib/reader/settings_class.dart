@@ -5,6 +5,7 @@ import 'package:arabic_lexicons/data.dart';
 import 'package:arabic_lexicons/pages/width_padd.dart';
 import 'package:arabic_lexicons/reader/book_entries_data.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart';
 
@@ -262,8 +263,12 @@ class ReaderPageSettings {
 
     final parent = _confDir;
 
-    final file = File(join(parent, '$bookHash.json'));
-    await file.writeAsString(toJson());
+    try {
+      final file = File(join(parent, '$bookHash.json'));
+      await file.writeAsString(toJson());
+    } catch (err) {
+      if (kDebugMode) debugPrint('while saving book conf: $err');
+    }
   }
 
   static Future<void> delete(String bookHash) async {
@@ -272,7 +277,9 @@ class ReaderPageSettings {
       var f = File(join(_confDir, '$bookHash.json'));
       await f.delete();
       await (await lastReadPosFile(bookHash))?.delete();
-    } catch (_) {}
+    } catch (err) {
+      if (kDebugMode) debugPrint('while deleting book conf: $err');
+    }
   }
 
   static Future<File?> lastReadPosFile(String? bookHash) async {

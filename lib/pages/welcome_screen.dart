@@ -180,7 +180,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 constraints: BoxConstraints(maxWidth: appConf.maxWidth),
                 child: FilledButton.icon(
                   onPressed: () {
-                    Navigator.pushReplacementNamed(context, Routes.dictionary);
+                    Navigator.pushReplacementNamed(context, appConf.lastRoute);
                     appConf.saveFirstRun(false);
                   },
                   icon: Icon(Icons.check_rounded, color: cs.onPrimary),

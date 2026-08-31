@@ -4,21 +4,12 @@ import 'package:arabic_lexicons/font_size.dart';
 import 'package:arabic_lexicons/lex/isolate.dart';
 import 'package:arabic_lexicons/lex/rearrange_dicts.dart';
 import 'package:arabic_lexicons/main_widgets.dart';
-import 'package:arabic_lexicons/pages/width_padd.dart';
-import 'package:arabic_lexicons/reader/reader_utils.dart';
-import 'package:arabic_lexicons/theme.dart';
+import 'package:arabic_lexicons/pages/settings/theme_color_font.dart';
 import 'package:arabic_lexicons/utils.dart';
 import 'package:arabic_lexicons/widgets/change_logs_widget.dart';
 import 'package:arabic_lexicons/widgets/scroll.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
-
-/// Color Picker
-const double _outer = 40;
-const double _inner = 30;
-const double _ringWidth = 3;
-const double _gap =
-    (_outer - _inner) / 1.8 - _ringWidth; // padding between ring and fill
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -61,106 +52,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   // const SizedBox(height: 12),
                   const SettingsSectionTitle(title: 'Appearance'),
                   SettingsSectionSurface(
-                    children: [
-                      Center(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 24,
-                          ),
-                          child: Column(
-                            // crossAxisAlignment: CrossAxisAlignment.center,
-                            spacing: 20,
-                            children: [
-                              SegmentedButton<ThemeMode>(
-                                showSelectedIcon: false,
-                                segments: const [
-                                  ButtonSegment(
-                                    value: ThemeMode.system,
-                                    icon: Icon(Icons.settings_suggest),
-                                    label: Text('System'),
-                                    tooltip: 'System',
-                                  ),
-                                  ButtonSegment(
-                                    value: ThemeMode.light,
-                                    icon: Icon(Icons.light_mode),
-                                    label: Text('Light'),
-                                    tooltip: 'Light',
-                                  ),
-                                  ButtonSegment(
-                                    value: ThemeMode.dark,
-                                    icon: Icon(Icons.dark_mode),
-                                    label: Text('Dark'),
-                                    tooltip: 'Dark',
-                                  ),
-                                ],
-                                selected: {appConf.theme},
-                                onSelectionChanged: (selection) {
-                                  final selectedMode = selection.first;
-                                  appConf.saveTheme(selectedMode);
-                                  // setState(() {}); // if using StatefulWidget
-                                },
-                              ),
-                              Wrap(
-                                spacing: 8,
-                                runSpacing: 8,
-                                children: uiSeedColors.map((c) {
-                                  final selected = c == appConf.seedColor;
-                                  return GestureDetector(
-                                    onTap: () => appConf.setSeedColor(c),
-                                    child: Container(
-                                      width: _outer,
-                                      height: _outer,
-                                      padding: const EdgeInsets.all(_gap),
-                                      decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        border: Border.all(
-                                          color: selected
-                                              ? c
-                                              : Colors.transparent,
-                                          width: _ringWidth,
-                                        ),
-                                      ),
-                                      child: DecoratedBox(
-                                        decoration: BoxDecoration(
-                                          color: c,
-                                          shape: BoxShape.circle,
-                                        ),
-                                      ),
-                                    ),
-                                  );
-                                }).toList(),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      ListTile(
-                        leading: const FilledIcon(Icons.auto_stories),
-                        title: const Text('Reader Style'),
-                        subtitle: const Text(
-                          "Set the default reader style for lexicons and new reader entries",
-                        ),
-                        trailing: const Icon(Icons.chevron_right),
-                        onTap: () async {
-                          final old = ReaderAdjustData.fromConf(appConf);
-                          final res = await ReaderAdjustPage.open(
-                            context,
-                            data: old,
-                          );
-                          if (res == null || old.isEq(res)) {
-                            return;
-                          }
-                          await appConf.setReaderAdjustments(res);
-                          if (context.mounted) {
-                            showSnack(
-                              context,
-                              'Default reader style applied and saved',
-                            );
-                          }
-                        },
-                      ),
-                    ],
+                    children: themeColorFontSettings(context),
                   ),
 
                   const SizedBox(height: 12),
@@ -539,7 +431,7 @@ abstract final class BuildInfo {
       'https://github.com/wizsk/arabic_lexicons/releases/latest';
 }
 
-enum FilledIconVariant { neutral, primary, secondary, error }
+enum FilledIconVariant { /* neutral, */ primary, secondary, error }
 
 class FilledIcon extends StatelessWidget {
   final IconData icon;
@@ -550,9 +442,9 @@ class FilledIcon extends StatelessWidget {
   const FilledIcon(
     this.icon, {
     super.key,
-    this.variant = FilledIconVariant.secondary,
+    this.variant = FilledIconVariant.primary,
     this.size = 20,
-    this.outlined = true,
+    this.outlined = false,
   });
 
   @override
@@ -560,16 +452,13 @@ class FilledIcon extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
 
     final (bg, fg) = switch (variant) {
-      FilledIconVariant.primary => (cs.primaryContainer, cs.onPrimaryContainer),
-      FilledIconVariant.secondary => (
-        cs.secondaryContainer,
-        cs.onSecondaryContainer,
-      ),
-      FilledIconVariant.error => (cs.errorContainer, cs.onErrorContainer),
-      FilledIconVariant.neutral => (
-        cs.surfaceContainerHighest,
-        cs.onSurfaceVariant,
-      ),
+      FilledIconVariant.primary => (cs.primary, cs.onPrimary),
+      FilledIconVariant.secondary => (cs.secondary, cs.onSecondary),
+      FilledIconVariant.error => (cs.error, cs.onError),
+      // FilledIconVariant.neutral => (
+      //   cs.surfaceContainerHighest,
+      //   cs.onSurfaceVariant,
+      // ),
     };
 
     return Container(

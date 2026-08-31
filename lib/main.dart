@@ -4,8 +4,9 @@ import 'package:arabic_lexicons/history/page.dart';
 import 'package:arabic_lexicons/lex/lexicons.dart';
 import 'package:arabic_lexicons/pages/fams/fams.dart';
 import 'package:arabic_lexicons/pages/help/help.dart';
-import 'package:arabic_lexicons/pages/settings.dart';
+import 'package:arabic_lexicons/pages/settings/settings.dart';
 import 'package:arabic_lexicons/pages/startup_screen.dart';
+import 'package:arabic_lexicons/pages/welcome_screen.dart';
 import 'package:arabic_lexicons/reader/input.dart';
 import 'package:arabic_lexicons/reader/reader.dart';
 import 'package:arabic_lexicons/theme.dart';
@@ -44,6 +45,8 @@ class MyApp extends StatelessWidget {
             initialRoute: Routes.startupscreen,
             routes: {
               Routes.startupscreen: (_) => const StartupScreen(),
+              Routes.welcome: (_) => const WelcomeScreen(),
+
               Routes.dictionary: (_) => const SearchLexicons(),
               Routes.readerInput: (_) => const ReaderInputPage(),
               Routes.readerPage: (_) => const ReaderPage(bookHash: null),

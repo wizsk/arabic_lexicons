@@ -48,7 +48,9 @@ class _StartupScreenState extends State<StartupScreen> {
       // );
 
       if (!mounted) return;
-      Navigator.pushReplacementNamed(context, appConf.lastRoute);
+
+      final r = appConf.firstRun ? Routes.welcome : appConf.lastRoute;
+      Navigator.pushReplacementNamed(context, r);
     } catch (e) {
       if (mounted) {
         await showInfoDialog(

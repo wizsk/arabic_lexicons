@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:arabic_lexicons/change_logs.dart';
 import 'package:arabic_lexicons/data.dart';
 import 'package:arabic_lexicons/lex/isolate.dart';
-import 'package:arabic_lexicons/pages/settings.dart';
+import 'package:arabic_lexicons/pages/settings/settings.dart';
 import 'package:arabic_lexicons/pages/width_padd.dart';
 import 'package:arabic_lexicons/play_rate.dart';
 import 'package:arabic_lexicons/reader/settings_class.dart';
@@ -258,7 +258,6 @@ class AppSettingsController extends ChangeNotifier {
   }
 
   Future<void> reset() async {
-    final firstRunPopupState = _firstRun;
     final appVersion = _appVersion;
     final prefs = await SharedPreferences.getInstance();
     await prefs.clear();
@@ -266,7 +265,7 @@ class AppSettingsController extends ChangeNotifier {
     // don't want it to be shown again; if already shown
     _appVersion = appVersion;
     await prefs.setString(_appVersionKey, appVersion);
-    await saveFirstRun(firstRunPopupState);
+    await saveFirstRun(false);
 
     await load();
     await WakelockController.load();

@@ -141,8 +141,8 @@ String htmlToPlainTextWithLineBr(String html) {
 }
 
 @pragma("vm:prefer-inline")
-void touggleFullScreen() {
-  if (appConf.fullScreen) {
+void touggleFullScreen({final bool forceNonFs = false}) {
+  if (!forceNonFs && appConf.fullScreen) {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
   } else if (appConf.hideStatusbar) {
     SystemChrome.setEnabledSystemUIMode(

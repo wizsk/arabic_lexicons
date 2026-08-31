@@ -5,7 +5,7 @@ import 'package:arabic_lexicons/alphabets.dart';
 import 'package:arabic_lexicons/conf.dart';
 import 'package:arabic_lexicons/data.dart';
 import 'package:arabic_lexicons/main_widgets.dart';
-import 'package:arabic_lexicons/pages/settings.dart';
+import 'package:arabic_lexicons/pages/settings/settings.dart';
 import 'package:arabic_lexicons/reader/book_entries_data.dart';
 import 'package:arabic_lexicons/reader/data.dart';
 import 'package:arabic_lexicons/reader/inspect.dart';

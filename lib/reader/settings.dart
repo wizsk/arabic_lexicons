@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:arabic_lexicons/data.dart';
-import 'package:arabic_lexicons/pages/settings.dart';
+import 'package:arabic_lexicons/pages/settings/settings.dart';
 import 'package:arabic_lexicons/pages/width_padd.dart';
 import 'package:arabic_lexicons/reader/data.dart';
 import 'package:arabic_lexicons/reader/reader_utils.dart';

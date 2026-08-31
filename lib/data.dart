@@ -5,6 +5,8 @@ final appConf = AppSettingsController();
 
 const appName = 'Arabic Lexcions';
 
+const emailAddr = 'sakibul706@gmail.com';
+
 const fontAmiri = 'Amiri';
 const fontKitab = 'Kitab';
 const fontNotoSansArabic = 'NotoSansArabic';
@@ -72,6 +74,7 @@ BorderRadius roundedBottm(double round) => BorderRadius.only(
 
 abstract final class Routes {
   static const startupscreen = '/startupscreen';
+  static const welcome = '/welcome';
 
   static const dictionary = '/dictionary';
   static const readerInput = '/readerInput';

@@ -4,7 +4,7 @@ import 'package:arabic_lexicons/history/page.dart';
 import 'package:arabic_lexicons/pages/fams/fams.dart';
 import 'package:arabic_lexicons/pages/foreings_all.dart';
 import 'package:arabic_lexicons/pages/help/help.dart';
-import 'package:arabic_lexicons/pages/settings.dart';
+import 'package:arabic_lexicons/pages/settings/settings.dart';
 import 'package:arabic_lexicons/utils.dart';
 import 'package:flutter/material.dart';
 

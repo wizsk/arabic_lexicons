@@ -44,8 +44,6 @@ class _SettingsPageState extends State<SettingsPage> {
 
   @override
   Widget build(BuildContext context) {
-    final notifier = appConf;
-
     return Scaffold(
       body: GestureStack(
         child: CustomScrollView(
@@ -96,10 +94,10 @@ class _SettingsPageState extends State<SettingsPage> {
                                     tooltip: 'Dark',
                                   ),
                                 ],
-                                selected: {notifier.theme},
+                                selected: {appConf.theme},
                                 onSelectionChanged: (selection) {
                                   final selectedMode = selection.first;
-                                  notifier.saveTheme(selectedMode);
+                                  appConf.saveTheme(selectedMode);
                                   // setState(() {}); // if using StatefulWidget
                                 },
                               ),
@@ -175,7 +173,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         subtitle: Text('Display Various Things in Arabic'),
                         value: L.isAr,
                         onChanged: (value) {
-                          notifier.saveUseMoreArabic(value).then((_) {
+                          appConf.saveUseMoreArabic(value).then((_) {
                             if (context.mounted) setState(() {});
                           });
                         },
@@ -203,7 +201,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         ),
                         value: appConf.useHansLaneDefRDStyle,
                         onChanged: (value) {
-                          notifier.saveUseHansLaneDefStyle(value).then((_) {
+                          appConf.saveUseHansLaneDefStyle(value).then((_) {
                             if (context.mounted) setState(() {});
                           });
                         },
@@ -238,7 +236,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         ),
                         value: appConf.hideAppbar,
                         onChanged: (value) {
-                          notifier.saveHideAppbar(value);
+                          appConf.saveHideAppbar(value);
                         },
                       ),
 
@@ -248,7 +246,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         subtitle: Text('Hides status bar and navigation bar'),
                         value: appConf.fullScreen,
                         onChanged: (value) {
-                          notifier.saveFullScreen(value);
+                          appConf.saveFullScreen(value);
                         },
                       ),
                       SwitchListTile(
@@ -259,7 +257,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         onChanged: appConf.fullScreen
                             ? null
                             : (value) {
-                                notifier.saveHideStatusBar(value);
+                                appConf.saveHideStatusBar(value);
                               },
                       ),
                     ],
@@ -434,7 +432,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                 if (ok != null && ok) {
                                   _isReseting = true;
                                   setState(() {});
-                                  await notifier.reset();
+                                  await appConf.reset();
                                   _isReseting = false;
                                   setState(() {});
                                 }

@@ -18,7 +18,7 @@ class DbRow {
   final bool isRoot;
   final bool isHi;
 
-  DbRow({
+  const DbRow({
     required this.word,
     required this.meanings,
     this.isRoot = false,

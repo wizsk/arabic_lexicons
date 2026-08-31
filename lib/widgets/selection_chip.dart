@@ -10,7 +10,7 @@ class Selection extends StatelessWidget {
   final String? tooltip;
   final String deleteButtonTooltipMessage;
   final double? arFontSize;
-  final Color ?backgroundColor;
+  final Color? backgroundColor;
 
   const Selection(
     this.label, {

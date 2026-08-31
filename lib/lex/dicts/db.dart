@@ -10,7 +10,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 /// db is saved in cache directory
-const String dbFileName = 'db_v3.sqlite';
+const String dbFileName = 'arabic_lexicons_db_v3.sqlite';
 
 class DbRow {
   final String word;
@@ -28,7 +28,7 @@ class DbRow {
 
 class DbService {
   static const _assetDbPath = 'assets/data/db/db.sqlite';
-  static const _oldDbFileNames = [];
+  static const _oldDbFileNames = [ 'db_v3.sqlite'];
 
   static Database? _db;
 

@@ -15,7 +15,6 @@ import 'package:arabic_lexicons/reader/reader_utils.dart';
 import 'package:arabic_lexicons/stories.dart';
 import 'package:arabic_lexicons/utils.dart';
 import 'package:archive/archive.dart';
-import 'package:crypto/crypto.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -102,11 +101,6 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
     }
   }
 
-  String _hashText(String text) {
-    final bytes = utf8.encode(text);
-    return sha1.convert(bytes).toString();
-  }
-
   Future<void> _showText(BuildContext context, {String? initialTxt}) async {
     final text = initialTxt ?? _controller.text;
     final paras = cleanReaderInputAndPrepare(text);
@@ -123,7 +117,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
     String? bookHash;
 
     if (!_isTempMode) {
-      bookHash = await _saveBookTxt(paras);
+      bookHash = await ReaderInputPageData.saveBookEntryWithData(paras);
       if (bookHash.isEmpty) {
         if (context.mounted) {
           showSnackL(context, en: 'Could not save book', ar: 'تعذر حفظ الكتاب');
@@ -140,25 +134,6 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
         isQasidah: _isQasidahMode,
       );
     }
-  }
-
-  Future<String> _saveBookTxt(PeraEntries peras) async {
-    if (!ReaderInputPageData.inited || peras.isEmpty) return '';
-
-    String title = peras.first.map((w) => w.ar).join(" ").trim();
-    if (title.length > 100) {
-      title = title.substring(0, 100);
-    }
-    final titleCl = ArabicNormalizer.cleanLineForSearch(title);
-
-    final content = peras.map((p) => p.map((w) => w.ar).join(" ")).join("\n");
-    final hash = _hashText(content);
-
-    ReaderInputPageData.add(
-      BookEntry(sha: hash, title: title, titleCl: titleCl, pinned: _isPinned),
-      content,
-    );
-    return hash;
   }
 
   Future<void> _deleteFile(BookEntry en) async {
@@ -472,6 +447,8 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
 
         try {
           final data = utf8.decode(fileBytes, allowMalformed: false);
+          if (data.isEmpty) throw Exception('empty');
+
           await ReaderInputPageData.add(b, data, replace: false);
           added++;
         } catch (_) {

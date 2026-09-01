@@ -272,17 +272,22 @@ class ReaderPageSettings {
   }
 
   static Future<void> delete(String bookHash) async {
+    if (bookHash.isEmpty) {
+      throw Exception('Cannot delete book without its hash');
+    }
+
     try {
-      if (bookHash.isEmpty) return;
       var f = File(join(_confDir, '$bookHash.json'));
-      await f.delete();
-      await (await lastReadPosFile(bookHash))?.delete();
+      if (await f.exists()) await f.delete();
+
+      final l = lastReadPosFile(bookHash)!;
+      if (await l.exists()) await l.delete();
     } catch (err) {
       if (kDebugMode) debugPrint('while deleting book conf: $err');
     }
   }
 
-  static Future<File?> lastReadPosFile(String? bookHash) async {
+  static File? lastReadPosFile(String? bookHash) {
     if (bookHash == null || bookHash.isEmpty) return null;
 
     return File(join(_confDir, '${bookHash}_scrollIdx.txt'));

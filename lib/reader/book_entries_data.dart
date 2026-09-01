@@ -1,10 +1,13 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:arabic_lexicons/alphabets.dart';
 import 'package:arabic_lexicons/datas/app_db.dart';
+import 'package:arabic_lexicons/reader/data.dart';
 import 'package:arabic_lexicons/reader/settings_class.dart';
 import 'package:arabic_lexicons/utils.dart';
+import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
@@ -182,11 +185,42 @@ abstract final class ReaderInputPageData {
 
   static Database get db => AppDb.db;
 
+  static Future<String> saveBookEntryWithData(
+    PeraEntries peras, {
+    final bool pinned = false,
+  }) async {
+    if (!inited || peras.isEmpty) {
+      throw 'inited: $inited || paras empty: ${peras.isEmpty}';
+    }
+
+    String title = peras.first.map((w) => w.ar).join(" ").takeMax(100);
+    final titleCl = ArabicNormalizer.cleanLineForSearch(title);
+
+    final content = peras.map((p) => p.map((w) => w.ar).join(" ")).join("\n");
+    final sha = sha1.convert(utf8.encode(content)).toString();
+
+    await add(
+      BookEntry(sha: sha, title: title, titleCl: titleCl, pinned: pinned),
+      content,
+    );
+
+    return sha;
+  }
+
   static Future<bool> add(
     BookEntry book,
     String data, {
     final replace = true,
   }) async {
+    if (book.sha.isEmpty) {
+      throw Exception('Cannot save book without its hash');
+    }
+
+    final dest = bookTextDest(book.sha);
+    final tmp = File('$dest.tmp');
+    await tmp.writeAsString(data);
+    await tmp.rename(dest);
+
     await db.insert(
       'book_entries',
       {
@@ -200,8 +234,6 @@ abstract final class ReaderInputPageData {
           ? ConflictAlgorithm.replace
           : ConflictAlgorithm.ignore,
     );
-
-    await File(bookTextDest(book.sha)).writeAsString(data);
 
     final sha = book.sha;
     if (replace) {
@@ -240,6 +272,9 @@ abstract final class ReaderInputPageData {
   }
 
   static Future<void> delete(String sha) async {
+    if (sha.isEmpty) {
+      throw Exception('Cannot delete book without its hash');
+    }
     await db.delete('book_entries', where: 'sha = ?', whereArgs: [sha]);
     bookEntries.removeWhere((e) => e.sha == sha);
     try {

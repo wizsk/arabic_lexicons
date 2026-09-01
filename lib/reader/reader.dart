@@ -148,7 +148,7 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
         return;
       }
 
-      _peraIndexSave = await ReaderPageSettings.lastReadPosFile(_rs.bookHash);
+      _peraIndexSave = ReaderPageSettings.lastReadPosFile(_rs.bookHash);
 
       // inilization done, now check if we need to scroll
       if (!_rs.saveLastPeraIdx) return;
@@ -270,13 +270,15 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
         // }
         if (_currPeraIndex == bestIndex) return;
         _currPeraIndex = bestIndex;
-        if (_rs.bookHash.isNotEmpty) {
-          try {
-            await _peraIndexSave?.writeAsString('$bestIndex');
-          } catch (_) {}
-        }
+        await _saveIdx();
       }
     });
+  }
+
+  Future<void> _saveIdx() async {
+    try {
+      await _peraIndexSave?.writeAsString('$_currPeraIndex');
+    } catch (_) {}
   }
 
   Future<void> _settingsPage(BuildContext context) async {
@@ -607,7 +609,7 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
                                 const SizedBox(height: 12),
 
                                 /// Main actions
-                                const SettingsSectionSurface(
+                                SettingsSectionSurface(
                                   children: [
                                     ReaderSelectionTile(
                                       icon: Icons.settings,
@@ -621,6 +623,21 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
                                       subtitle: 'Copy original content',
                                       value: 'copy-txt',
                                     ),
+                                    if (_rs.bookHash.isEmpty)
+                                      ReaderSelectionTile(
+                                        icon: Icons.save,
+                                        title: 'Save Book Entry',
+                                        subtitle: "It's in temporary mode now",
+                                        value: 'save',
+                                      )
+                                    else
+                                      ReaderSelectionTile(
+                                        icon: Icons.delete,
+                                        title: 'Delete Book Entry',
+                                        subtitle:
+                                            'This action cannot be undone',
+                                        value: 'delete',
+                                      ),
                                   ],
                                 ),
 
@@ -628,30 +645,13 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
 
                                 /// Exit (destructive)
                                 SettingsSectionSurface(
-                                  mode: SettingsSectionSurfaceMode.alert,
+                                  // mode: SettingsSectionSurfaceMode.alert,
                                   children: [
-                                    ListTile(
-                                      leading: const FilledIcon(
-                                        Icons.logout,
-                                        variant: FilledIconVariant.error,
-                                        // outlined: false,
-                                      ),
-                                      title: Text(
-                                        'Exit Reader',
-                                        style: TextStyle(
-                                          color: cs.onErrorContainer,
-                                        ),
-                                      ),
-                                      subtitle: Text(
-                                        'Return to input screen',
-                                        style: TextStyle(
-                                          color: cs.onErrorContainer.withAlpha(
-                                            200,
-                                          ),
-                                        ),
-                                      ),
-                                      onTap: () =>
-                                          Navigator.pop(context, 'exit'),
+                                    ReaderSelectionTile(
+                                      icon: Icons.logout,
+                                      title: 'Exit Reader',
+                                      subtitle: 'Return to input screen',
+                                      value: 'exit',
                                     ),
                                   ],
                                 ),
@@ -723,6 +723,65 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
                                 duration: const Duration(milliseconds: 100),
                               );
                             });
+                          }
+                          break;
+
+                        case 'save':
+                          final sha =
+                              await ReaderInputPageData.saveBookEntryWithData(
+                                _paras,
+                              );
+
+                          _rs = _rs.copyWith(bookHash: sha);
+                          _rs.saveToFile();
+
+                          _peraIndexSave = ReaderPageSettings.lastReadPosFile(
+                            sha,
+                          );
+                          _saveIdx();
+
+                          if (!context.mounted) return;
+                          setState(() {});
+                          postFrame(
+                            (_) => showSnack(context, 'BookEnry saved'),
+                          );
+                          break;
+
+                        case 'delete':
+                          final res = await showConfirmDialog(
+                            context,
+                            'Delete Book Entry?',
+                            message:
+                                'Do you really want to delete this book entry? This action cannot be undone',
+                            constraints: true,
+                            destructive: true,
+                            confirmText: 'Delete',
+                          );
+                          if (res != true) return;
+                          await ReaderInputPageData.delete(_rs.bookHash);
+
+                          if (!context.mounted) return;
+
+                          final yes = await showConfirmDialog(
+                            context,
+                            'Keep Reading?',
+                            message:
+                                'Do you want to keep reading this book? It will be placed in temporary mode.',
+                            constraints: true,
+                            confirmText: 'Yes',
+                            cancelText: 'No, Exit',
+                          );
+
+                          if (!context.mounted) return;
+                          postFrame(
+                            (_) => showSnack(context, 'BookEnry Deleted'),
+                          );
+                          if (yes == null || yes == true) {
+                            _rs = _rs.copyWith(bookHash: '');
+                            _peraIndexSave = null;
+                            setState(() {});
+                          } else {
+                            Navigator.pushNamed(context, Routes.readerInput);
                           }
                           break;
                       }

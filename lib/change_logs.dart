@@ -6,6 +6,7 @@ final releases = [
     Make the scrollable word and lexicon selectors the default on the Lexicons screen
     Store the lexicon database in the data directory instead of the cache directory
     Add Welcome screen
+    Add Save/Delete options to the reader screen
     ''',
   ),
   Release(

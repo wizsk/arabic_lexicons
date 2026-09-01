@@ -196,14 +196,9 @@ Widget _showArEnRes(
 
   final tblHDec = BoxDecoration(
     color: Theme.of(context).brightness == Brightness.light
-        ? cs.surfaceContainerLow.withAlpha(120)
-        : cs.surfaceContainerLow.withAlpha(240),
+        ? oddRowLight
+        : oddRowDark,
   );
-
-  final tiSplashColor = cs.onSurface.withAlpha(80);
-  final tiHighlightColor = cs.onSurface.withAlpha(50);
-  final tiHoverColor = cs.onSurface.withAlpha(35);
-  final tiFocusColor = cs.onSurface.withAlpha(30);
 
   return SliverToBoxAdapter(
     child: Center(
@@ -221,7 +216,7 @@ Widget _showArEnRes(
           children: [
             // Header
             TableRow(
-              decoration: BoxDecoration(color: cs.surfaceContainerLow),
+              decoration: tblHDec,
               children: [
                 Padding(
                   padding: tp,
@@ -312,34 +307,9 @@ Widget _showArEnRes(
                     child: Center(child: Text(e.word, style: ts)),
                   ),
 
-                  if (isHi)
-                    InkWell(
-                      splashColor: tiSplashColor,
-                      highlightColor: tiHighlightColor,
-                      hoverColor: tiHoverColor,
-                      focusColor: tiFocusColor,
-                      onTap: onTab,
-                      onLongPress: onLongPress,
-                      child: defW,
-                    )
-                  else
-                    InkWell(
-                      onTap: onTab,
-                      onLongPress: onLongPress,
-                      child: defW,
-                    ),
+                  InkWell(onTap: onTab, onLongPress: onLongPress, child: defW),
 
-                  if (isHi)
-                    InkWell(
-                      splashColor: tiSplashColor,
-                      highlightColor: tiHighlightColor,
-                      hoverColor: tiHoverColor,
-                      focusColor: tiFocusColor,
-                      onTap: rootOnTap,
-                      child: rootW,
-                    )
-                  else
-                    InkWell(onTap: rootOnTap, child: rootW),
+                  InkWell(onTap: rootOnTap, child: rootW),
                 ],
               );
             }),

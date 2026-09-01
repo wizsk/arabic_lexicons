@@ -33,6 +33,14 @@ const readerColorsDark = ReaderColors(
   onSurface: Color(0xFFEAEAEA),
 );
 
+// Borders
+final readerBorderLight = readerColorsLight.onSurface.withAlpha(31); // ~0.12
+final readerBorderDark = readerColorsDark.onSurface.withAlpha(36); // ~0.14
+
+// Optional odd-row tint
+final oddRowLight = readerColorsLight.onSurface.withAlpha(9); // ~0.035
+final oddRowDark = readerColorsDark.onSurface.withAlpha(11); // ~0.045
+
 ThemeData buildTheme(
   BuildContext context,
   Brightness b,

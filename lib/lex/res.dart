@@ -42,6 +42,7 @@ Widget noRes(
   bool showOpenReaderBtn = false,
 }) {
   return SliverFillRemaining(
+    hasScrollBody: false,
     child: Center(
       child: Padding(
         padding: const EdgeInsets.all(8.0),

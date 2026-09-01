@@ -1,5 +1,10 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
+final keybardModifier = defaultTargetPlatform == TargetPlatform.macOS
+    ? LogicalKeyboardKey.meta
+    : LogicalKeyboardKey.control;
 
 enum AppShortcut {
   focusSearch(key: LogicalKeyboardKey.keyN, description: 'Focus search field'),
@@ -98,13 +103,14 @@ class ShortcutsHelpList extends StatelessWidget {
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: theme.colorScheme.surfaceContainerHighest,
+                    color: theme.colorScheme.primary,
                     border: Border.all(color: borderColor, width: 0.5),
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text(
                     shortcuts[i].label,
                     style: theme.textTheme.bodyLarge?.copyWith(
+                      color: theme.colorScheme.onPrimary,
                       fontFeatures: [FontFeature.tabularFigures()],
                     ),
                   ),

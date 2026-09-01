@@ -16,6 +16,7 @@ import 'package:arabic_lexicons/main_widgets.dart';
 import 'package:arabic_lexicons/utils.dart';
 import 'package:arabic_lexicons/widgets/selection_chip.dart';
 import 'package:arabic_lexicons/widgets/lex_word_confirm.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
@@ -169,7 +170,16 @@ class _SearchLexiconsState extends State<SearchLexicons>
 
   bool _handleKey(KeyEvent event) {
     if (event is! KeyDownEvent) return false;
-    if (!HardwareKeyboard.instance.isControlPressed) return false;
+
+    final isMac = defaultTargetPlatform == TargetPlatform.macOS;
+    final modifierPressed = isMac
+        ? HardwareKeyboard.instance.isMetaPressed
+        : HardwareKeyboard.instance.isControlPressed;
+
+    if (modifierPressed) {
+      return false;
+    }
+
     for (final b in _keyBindings) {
       if (b.key == event.logicalKey) {
         if (mounted) b.action();

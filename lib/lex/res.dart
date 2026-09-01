@@ -42,16 +42,18 @@ Widget noRes(
   bool showOpenReaderBtn = false,
 }) {
   return SliverFillRemaining(
-    hasScrollBody: false,
     child: Center(
-      child: _noResUniversal(
-        context,
-        currWord,
-        noWordAr: noWordAr,
-        noWordEn: noWordEn,
-        noResAr: noResAr,
-        noResEn: noResEn,
-        showOpenReaderBtn: showOpenReaderBtn,
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: _noResUniversal(
+          context,
+          currWord,
+          noWordAr: noWordAr,
+          noWordEn: noWordEn,
+          noResAr: noResAr,
+          noResEn: noResEn,
+          showOpenReaderBtn: showOpenReaderBtn,
+        ),
       ),
     ),
   );
@@ -83,7 +85,7 @@ Widget _noResUniversal(
           child: Text(
             L.p(noWordEn, noWordAr),
             textDirection: L.dir,
-            style: L.arStyleIf,
+            style: L.arStyleSizedIf,
           ),
         ),
       ],
@@ -110,7 +112,7 @@ Widget _noResUniversal(
       spacing: 8.00,
       children: [
         l,
-        Text(L.p('or', 'أو'), textDirection: L.dir, style: L.arStyleIf),
+        Text(L.p('or', 'أو'), textDirection: L.dir, style: L.arStyleSizedIf),
 
         // const SizedBox(height: 8.00),
         Material(
@@ -144,7 +146,7 @@ Widget _noResUniversal(
                   Text(
                     // L.p('Open Reader', 'افتح القارئ'),
                     L.p('Go to Reader', 'اذهب إلى القارئ'),
-                    style: L.arStyleOrNew.copyWith(
+                    style: L.arStyleSizedOrNew.copyWith(
                       fontWeight: FontWeight.w500,
                       color: cs.onPrimary,
                     ),
@@ -167,11 +169,17 @@ Widget _noResUniversal(
       Icon(Icons.search_off, size: 32.00, color: ic),
       Text(
         L.p(noResEn, noResAr),
-        style: L.arStyleIf,
+        style: L.arStyleSizedIf,
         textDirection: L.dir,
         textAlign: TextAlign.center,
       ),
-      Text(currWord, style: L.arStyle),
+      Text(
+        currWord.takeMax(10),
+        style: L.arStyleSized,
+        textDirection: TextDirection.rtl,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
     ],
   );
 }

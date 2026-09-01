@@ -168,11 +168,11 @@ class _SearchLexiconsState extends State<SearchLexicons>
     touggleFullScreen();
   }
 
+  final _isMac = defaultTargetPlatform == TargetPlatform.macOS;
   bool _handleKey(KeyEvent event) {
     if (event is! KeyDownEvent) return false;
 
-    final isMac = defaultTargetPlatform == TargetPlatform.macOS;
-    final modifierPressed = isMac
+    final modifierPressed = _isMac
         ? HardwareKeyboard.instance.isMetaPressed
         : HardwareKeyboard.instance.isControlPressed;
 

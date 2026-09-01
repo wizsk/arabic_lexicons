@@ -1,6 +1,7 @@
 import 'package:arabic_lexicons/conf.dart';
 import 'package:arabic_lexicons/data.dart';
 import 'package:arabic_lexicons/history/page.dart';
+import 'package:arabic_lexicons/keybaord_shourcuts.dart';
 import 'package:arabic_lexicons/lex/lexicons.dart';
 import 'package:arabic_lexicons/pages/fams/fams.dart';
 import 'package:arabic_lexicons/pages/help/help.dart';
@@ -13,6 +14,7 @@ import 'package:arabic_lexicons/theme.dart';
 import 'package:arabic_lexicons/word_list/page.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 void main() {
   // WidgetsFlutterBinding.ensureInitialized();
@@ -35,7 +37,10 @@ class MyApp extends StatelessWidget {
               ? WakelockController.onUserActivity
               : null,
           // onPointerMove: WakelockController.onUserActivity,
+
           child: MaterialApp(
+            shortcuts: {...WidgetsApp.defaultShortcuts, ...keyShortcuts()},
+            actions: {...WidgetsApp.defaultActions, ...keyActions()},
             debugShowCheckedModeBanner: false,
             title: kDebugMode ? '(D) Arabic Lexicons' : 'Arabic Lexicons',
 

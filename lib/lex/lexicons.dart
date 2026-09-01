@@ -13,10 +13,31 @@ import 'package:arabic_lexicons/lex/widgets.dart';
 import 'package:arabic_lexicons/lex/word_dict_picker.dart';
 import 'package:arabic_lexicons/main_widgets.dart';
 import 'package:arabic_lexicons/utils.dart';
-import 'package:arabic_lexicons/widgets/selection_chip.dart';
 import 'package:arabic_lexicons/widgets/lex_word_confirm.dart';
+import 'package:arabic_lexicons/widgets/selection_chip.dart';
 import 'package:flutter/material.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
+
+// abstract final
+abstract class LxCtrl {
+  static VoidCallback? _focus;
+  static void Function(bool next)? _wordSwitch;
+  static void Function(bool next)? _dictSwitch;
+  static void Function()? _touggleScrolableSelectors;
+
+  static void tryFocus() => _focus?.call();
+  static void tryWordSwitchd(bool next) => _wordSwitch?.call(next);
+  static void tryDictSwitchd(bool next) => _dictSwitch?.call(next);
+  static void tryTouggleScrolableSelectors() =>
+      _touggleScrolableSelectors?.call();
+
+  static void deRegister() {
+    _focus = null;
+    _wordSwitch = null;
+    _dictSwitch = null;
+    _touggleScrolableSelectors = null;
+  }
+}
 
 class SearchLexicons extends StatefulWidget {
   final bool isPopup;
@@ -108,10 +129,18 @@ class _SearchLexiconsState extends State<SearchLexicons>
         if (mounted) setState(() {});
       });
     }
+
+    _setLxCtrls();
   }
 
   @override
   void dispose() {
+    LxCtrl.deRegister();
+
+    if (!_isPopup) {
+      appConf.rmRefetchLexResultsFunc();
+    }
+
     WidgetsBinding.instance.removeObserver(this);
 
     _scrollableSelectionSc.dispose();
@@ -119,11 +148,6 @@ class _SearchLexiconsState extends State<SearchLexicons>
     _controller.dispose();
     _focusNode.dispose();
     _datas.scrollController.dispose();
-    if (!_isPopup) {
-      appConf.rmRefetchLexResultsFunc();
-      // showStatusBar();
-      // SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-    }
 
     super.dispose();
   }
@@ -151,6 +175,65 @@ class _SearchLexiconsState extends State<SearchLexicons>
     if (appConf.scrollLexSelection) {
       _datas.scrollSelectors();
     }
+  }
+
+  void _setLxCtrls() {
+    LxCtrl._focus = () {
+      _focusNode.requestFocus();
+    };
+
+    LxCtrl._wordSwitch = (n) {
+      final wl = _datas.words.length;
+      if (wl <= 1) return;
+
+      var idx = _datas.words.indexOf(_datas.selectedWord);
+      if (idx == -1) return;
+
+      int newIdx;
+      if (n) {
+        idx++;
+        newIdx = idx < wl ? idx : 0;
+      } else {
+        idx--;
+        newIdx = idx < 0 ? wl - 1 : idx;
+      }
+      if (mounted) {
+        _datas.selectedWord = _datas.words[newIdx];
+        _datas.getAndShowResORSugg(context);
+      }
+    };
+
+    LxCtrl._dictSwitch = (n) {
+      final dl = allDictsOrd.length;
+      if (dl <= 1) return;
+
+      var idx = allDictsOrd.indexOf(_datas.selectedDict);
+      if (idx == -1) return;
+
+      int newIdx;
+      if (n) {
+        idx++;
+        newIdx = idx < dl ? idx : 0;
+      } else {
+        idx--;
+        newIdx = idx < 0 ? dl - 1 : idx;
+      }
+
+      if (mounted) {
+        _datas.selectedDict = allDictsOrd[newIdx];
+        _datas.suggDictSorted.clear();
+        _datas.getAndShowResORSugg(context);
+      }
+    };
+
+    LxCtrl._touggleScrolableSelectors = () {
+      if (!appConf.scrollLexSelection) return;
+      if (mounted) {
+        setState(() {
+          _showingScrollableSelection = !_showingScrollableSelection;
+        });
+      }
+    };
   }
 
   int? _selectionOffsetOld;

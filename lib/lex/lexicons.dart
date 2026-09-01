@@ -110,7 +110,6 @@ class _SearchLexiconsState extends State<SearchLexicons>
       });
     }
 
-    postFrame((_) => _focusNode.requestFocus());
     HardwareKeyboard.instance.addHandler(_handleKey);
   }
 

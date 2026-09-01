@@ -3,6 +3,7 @@ import 'package:arabic_lexicons/data.dart';
 import 'package:arabic_lexicons/datas/word_store.dart';
 import 'package:arabic_lexicons/lex/data.dart';
 import 'package:arabic_lexicons/main_widgets.dart';
+import 'package:arabic_lexicons/utils.dart';
 import 'package:flutter/material.dart';
 
 Widget lexAppBar(
@@ -10,31 +11,37 @@ Widget lexAppBar(
   SearchLexiconsDatas datas,
   VoidCallback onChange,
 ) {
-  final dictName = L.p(
-    TextSpan(text: datas.selectedDict.en),
-    TextSpan(text: datas.selectedDict.ar, style: L.arStyle),
+  final dictName =
+      '${datas.selectedDict.name}${datas.selectedWord.isEmpty ? '' : ':'}';
+
+  Widget title = Text(
+    dictName,
+    style: L.arStyleOrNew.copyWith(fontWeight: FontWeight.w500),
+    textDirection: L.dir,
   );
 
-  Widget title;
   if (datas.selectedWord.isNotEmpty) {
-    title = Text.rich(
-      TextSpan(
-        // style: ,
-        children: [
-          dictName,
-          TextSpan(
-            text: ': ${datas.selectedWord.replaceAll('_', ' ')} ',
-            style: L.arStyle,
-          ),
-          // if (bm) WidgetSpan(child: Icon(Icons.bookmark)),
-        ],
-      ),
+    title = Row(
       textDirection: L.dir,
+      // textDirection: TextDirection.rtl,
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      spacing: 4.0,
+      children: [
+        title,
+        Flexible(
+          child: Text(
+            datas.selectedWord.replaceAll('_', ' ').takeMax(12),
+            style: L.arStyle,
+            textDirection: TextDirection.rtl,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
     );
-  } else {
-    title = Text.rich(dictName);
   }
-
   final bm = WordStore.isBm(datas.selectedWord);
   final cs = Theme.of(context).colorScheme;
 

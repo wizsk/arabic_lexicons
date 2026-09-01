@@ -2,9 +2,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-final keybardModifier = defaultTargetPlatform == TargetPlatform.macOS
-    ? LogicalKeyboardKey.meta
-    : LogicalKeyboardKey.control;
+final isMac = defaultTargetPlatform == TargetPlatform.macOS;
+// final keybardModifier = isMac
+//     ? LogicalKeyboardKey.meta
+//     : LogicalKeyboardKey.control;
 
 enum AppShortcut {
   focusSearch(key: LogicalKeyboardKey.keyN, description: 'Focus search field'),

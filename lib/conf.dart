@@ -32,6 +32,8 @@ abstract final class L {
   static TextStyle get arStyleSized =>
       TextStyle(fontFamily: _arUiFont, fontSize: fontSize);
 
+  static TextStyle? get arStyleSizedIf => isAr ? arStyleSized : null;
+
   static bool _isAr = false;
 
   static void set(AppLang l) {
@@ -60,6 +62,8 @@ abstract final class L {
   static TextStyle? get arStyleIf => isAr ? _uiArTextStyle : null;
 
   static TextStyle get arStyleOrNew => isAr ? _uiArTextStyle : TextStyle();
+
+  static TextStyle get arStyleSizedOrNew => isAr ? arStyleSized : TextStyle();
 
   static String? get arFontIf => isAr ? _arUiFont : null;
 

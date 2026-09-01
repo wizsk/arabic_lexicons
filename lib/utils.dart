@@ -262,11 +262,17 @@ class GestureStack extends StatelessWidget {
   }
 }
 
-extension StringSplitOnce on String {
+extension StringExtentions on String {
   ({String? pre, String? suf}) splitOnce(String pattern) {
     final idx = indexOf(pattern);
     if (idx == -1) return (pre: null, suf: null);
     final suf = substring(idx + pattern.length);
     return (pre: substring(0, idx), suf: suf.isEmpty ? null : suf);
+  }
+
+  String takeMax(final int take, {final ellipsis = '…'}) {
+    if (length <= take) return this;
+
+    return '${substring(0, take)}$ellipsis';
   }
 }

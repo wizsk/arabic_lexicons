@@ -16,6 +16,7 @@ import 'package:arabic_lexicons/utils.dart';
 import 'package:arabic_lexicons/widgets/selection_chip.dart';
 import 'package:arabic_lexicons/widgets/lex_word_confirm.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
 class SearchLexicons extends StatefulWidget {
@@ -108,10 +109,14 @@ class _SearchLexiconsState extends State<SearchLexicons>
         if (mounted) setState(() {});
       });
     }
+
+    postFrame((_) => _focusNode.requestFocus());
+    HardwareKeyboard.instance.addHandler(_handleKey);
   }
 
   @override
   void dispose() {
+    HardwareKeyboard.instance.removeHandler(_handleKey);
     WidgetsBinding.instance.removeObserver(this);
 
     _scrollableSelectionSc.dispose();
@@ -140,6 +145,88 @@ class _SearchLexiconsState extends State<SearchLexicons>
   void didChangeDependencies() {
     super.didChangeDependencies();
     touggleFullScreen();
+  }
+
+  bool _handleKey(KeyEvent event) {
+    if (event is! KeyDownEvent) return false;
+    if (!HardwareKeyboard.instance.isControlPressed) return false;
+
+    final k = event.logicalKey;
+    switch (k) {
+      case LogicalKeyboardKey.keyF:
+      case LogicalKeyboardKey.keyN:
+        _focusNode.requestFocus();
+        break;
+
+      case LogicalKeyboardKey.keyH:
+      case LogicalKeyboardKey.keyL:
+        final n = k == LogicalKeyboardKey.keyL;
+
+        final wl = _datas.words.length;
+        if (wl <= 1) break;
+
+        var idx = _datas.words.indexOf(_datas.selectedWord);
+        if (idx == -1) break;
+
+        int newIdx;
+        if (n) {
+          idx++;
+          newIdx = idx < wl ? idx : 0;
+        } else {
+          idx--;
+          newIdx = idx < 0 ? wl - 1 : idx;
+        }
+        if (mounted) {
+          _datas.selectedWord = _datas.words[newIdx];
+          _datas.getAndShowResORSugg(context);
+        }
+        break;
+
+      case LogicalKeyboardKey.keyJ:
+      case LogicalKeyboardKey.keyK:
+        final n = k == LogicalKeyboardKey.keyJ; // ? L.isAr : !L.isAr;
+
+        final dl = allDictsOrd.length;
+        if (dl <= 1) break;
+
+        var idx = allDictsOrd.indexOf(_datas.selectedDict);
+        if (idx == -1) break;
+
+        int newIdx;
+        if (n) {
+          idx++;
+          newIdx = idx < dl ? idx : 0;
+        } else {
+          idx--;
+          newIdx = idx < 0 ? dl - 1 : idx;
+        }
+
+        if (mounted) {
+          _datas.selectedDict = allDictsOrd[newIdx];
+          _datas.suggDictSorted.clear();
+          _datas.getAndShowResORSugg(context);
+        }
+        break;
+
+      case LogicalKeyboardKey.keyB:
+        if (!appConf.scrollLexSelection) break;
+        if (mounted) {
+          setState(() {
+            _showingScrollableSelection = !_showingScrollableSelection;
+          });
+        }
+        break;
+
+      case LogicalKeyboardKey.keyM:
+        appConf.saveUseMoreArabic(!L.isAr).then((_) {
+          if (mounted) setState(() {});
+        });
+        break;
+
+      default:
+        return false;
+    }
+    return true;
   }
 
   void _setSate() => setState(() {});

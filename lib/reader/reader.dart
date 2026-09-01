@@ -138,7 +138,7 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
 
     _setOnChange();
 
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
+    postFrame((_) async {
       if (_rs.bookHash.isEmpty) {
         showSnack(
           context,

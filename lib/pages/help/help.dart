@@ -1,3 +1,4 @@
+import 'package:arabic_lexicons/key_shortcuts.dart';
 import 'package:arabic_lexicons/pages/width_padd.dart';
 import 'package:arabic_lexicons/play_rate.dart';
 import 'package:arabic_lexicons/utils.dart';
@@ -197,54 +198,63 @@ class HelpPage extends StatelessWidget {
 
                   spaceBetweenSections,
                   _Section(
+                    title: 'Keyboard Shortcuts',
+                    child: const ShortcutsHelpList(),
+                  ),
+
+                  spaceBetweenSections,
+                  _Section(
                     // title: 'Feedback',
-                    child: Column(
-                      children: [
-                        Container(
-                          width: 72,
-                          height: 72,
-                          decoration: BoxDecoration(
-                            color: cs.primaryContainer,
-                            shape: BoxShape.circle,
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            width: 72,
+                            height: 72,
+                            decoration: BoxDecoration(
+                              color: cs.primaryContainer,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              Icons.menu_book_rounded,
+                              size: 38,
+                              color: cs.onPrimaryContainer,
+                            ),
                           ),
-                          child: Icon(
-                            Icons.menu_book_rounded,
-                            size: 38,
-                            color: cs.onPrimaryContainer,
-                          ),
-                        ),
 
-                        const SizedBox(height: 20),
+                          const SizedBox(height: 20),
 
-                        Text(
-                          'Enjoying the app?',
-                          textAlign: TextAlign.center,
-                          style: tt.headlineSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
+                          Text(
+                            'Enjoying the app?',
+                            textAlign: TextAlign.center,
+                            style: tt.headlineSmall?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        ),
 
-                        const SizedBox(height: 8),
-                        Text(
-                          'Your support means a lot. A quick rating helps us improve the app and keep building useful features for you.',
-                          style: tt.bodyMedium?.copyWith(
-                            color: cs.onSurfaceVariant,
+                          const SizedBox(height: 8),
+                          Text(
+                            'Your support means a lot. A quick rating helps us improve the app and keep building useful features for you.',
+                            style: tt.bodyLarge?.copyWith(
+                              color: cs.onSurfaceVariant,
+                            ),
+                            textAlign: TextAlign.center,
                           ),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 20),
-                        Container(
-                          constraints: const BoxConstraints(maxWidth: 250),
-                          padding: EdgeInsets.symmetric(horizontal: 8.0),
-                          width: double.infinity,
-                          height: 52,
-                          child: FilledButton.icon(
-                            icon: Icon(Icons.star_rounded),
-                            label: const Text("Sure, I'll rate it"),
-                            onPressed: openRatingFlow,
+                          const SizedBox(height: 20),
+                          Container(
+                            constraints: const BoxConstraints(maxWidth: 250),
+                            padding: EdgeInsets.symmetric(horizontal: 8.0),
+                            width: double.infinity,
+                            height: 52,
+                            child: FilledButton.icon(
+                              icon: Icon(Icons.star_rounded),
+                              label: const Text("Sure, I'll rate it"),
+                              onPressed: openRatingFlow,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
 

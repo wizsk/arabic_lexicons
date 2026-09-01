@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:arabic_lexicons/conf.dart';
 import 'package:arabic_lexicons/data.dart';
 import 'package:arabic_lexicons/first_run.dart';
+import 'package:arabic_lexicons/key_shortcuts.dart';
 import 'package:arabic_lexicons/lex/data.dart';
 import 'package:arabic_lexicons/lex/isolate.dart';
 import 'package:arabic_lexicons/lex/rearrange_dicts.dart';
@@ -42,6 +43,8 @@ class _SearchLexiconsState extends State<SearchLexicons>
   final FocusNode _focusNode = FocusNode();
   // final _autoScrollControler = AutoScrollController();
   late bool _isPopup;
+
+  late final List<KeyBinding> _keyBindings;
 
   late final SearchLexiconsDatas _datas;
 
@@ -110,6 +113,24 @@ class _SearchLexiconsState extends State<SearchLexicons>
       });
     }
 
+    _keyBindings = keybindingsGen(
+      focusTF: () => _focusNode.requestFocus(),
+      cycleWord: _cycleWord,
+      cycleDict: _cycleDict,
+      tgleScSl: () async {
+        if (!appConf.scrollLexSelection) return;
+        if (!mounted) return;
+        setState(() {
+          _showingScrollableSelection = !_showingScrollableSelection;
+        });
+      },
+      tglAr: () async {
+        await appConf.saveUseMoreArabicToggle();
+        if (!mounted) return;
+        setState(() {});
+      },
+    );
+
     HardwareKeyboard.instance.addHandler(_handleKey);
   }
 
@@ -149,83 +170,57 @@ class _SearchLexiconsState extends State<SearchLexicons>
   bool _handleKey(KeyEvent event) {
     if (event is! KeyDownEvent) return false;
     if (!HardwareKeyboard.instance.isControlPressed) return false;
-
-    final k = event.logicalKey;
-    switch (k) {
-      case LogicalKeyboardKey.keyF:
-      case LogicalKeyboardKey.keyN:
-        _focusNode.requestFocus();
-        break;
-
-      case LogicalKeyboardKey.keyH:
-      case LogicalKeyboardKey.keyL:
-        final n = k == LogicalKeyboardKey.keyL;
-
-        final wl = _datas.words.length;
-        if (wl <= 1) break;
-
-        var idx = _datas.words.indexOf(_datas.selectedWord);
-        if (idx == -1) break;
-
-        int newIdx;
-        if (n) {
-          idx++;
-          newIdx = idx < wl ? idx : 0;
-        } else {
-          idx--;
-          newIdx = idx < 0 ? wl - 1 : idx;
-        }
-        if (mounted) {
-          _datas.selectedWord = _datas.words[newIdx];
-          _datas.getAndShowResORSugg(context);
-        }
-        break;
-
-      case LogicalKeyboardKey.keyJ:
-      case LogicalKeyboardKey.keyK:
-        final n = k == LogicalKeyboardKey.keyJ; // ? L.isAr : !L.isAr;
-
-        final dl = allDictsOrd.length;
-        if (dl <= 1) break;
-
-        var idx = allDictsOrd.indexOf(_datas.selectedDict);
-        if (idx == -1) break;
-
-        int newIdx;
-        if (n) {
-          idx++;
-          newIdx = idx < dl ? idx : 0;
-        } else {
-          idx--;
-          newIdx = idx < 0 ? dl - 1 : idx;
-        }
-
-        if (mounted) {
-          _datas.selectedDict = allDictsOrd[newIdx];
-          _datas.suggDictSorted.clear();
-          _datas.getAndShowResORSugg(context);
-        }
-        break;
-
-      case LogicalKeyboardKey.keyB:
-        if (!appConf.scrollLexSelection) break;
-        if (mounted) {
-          setState(() {
-            _showingScrollableSelection = !_showingScrollableSelection;
-          });
-        }
-        break;
-
-      case LogicalKeyboardKey.keyM:
-        appConf.saveUseMoreArabic(!L.isAr).then((_) {
-          if (mounted) setState(() {});
-        });
-        break;
-
-      default:
-        return false;
+    for (final b in _keyBindings) {
+      if (b.key == event.logicalKey) {
+        if (mounted) b.action();
+        return true;
+      }
     }
-    return true;
+    return false;
+  }
+
+  void _cycleWord(bool n) {
+    final wl = _datas.words.length;
+    if (wl <= 1) return;
+
+    var idx = _datas.words.indexOf(_datas.selectedWord);
+    if (idx == -1) return;
+
+    int newIdx;
+    if (n) {
+      idx++;
+      newIdx = idx < wl ? idx : 0;
+    } else {
+      idx--;
+      newIdx = idx < 0 ? wl - 1 : idx;
+    }
+    if (mounted) {
+      _datas.selectedWord = _datas.words[newIdx];
+      _datas.getAndShowResORSugg(context);
+    }
+  }
+
+  void _cycleDict(bool n) {
+    final dl = allDictsOrd.length;
+    if (dl <= 1) return;
+
+    var idx = allDictsOrd.indexOf(_datas.selectedDict);
+    if (idx == -1) return;
+
+    int newIdx;
+    if (n) {
+      idx++;
+      newIdx = idx < dl ? idx : 0;
+    } else {
+      idx--;
+      newIdx = idx < 0 ? dl - 1 : idx;
+    }
+
+    if (mounted) {
+      _datas.selectedDict = allDictsOrd[newIdx];
+      _datas.suggDictSorted.clear();
+      _datas.getAndShowResORSugg(context);
+    }
   }
 
   void _setSate() => setState(() {});

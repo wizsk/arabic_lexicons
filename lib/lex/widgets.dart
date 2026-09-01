@@ -11,14 +11,10 @@ Widget lexAppBar(
   SearchLexiconsDatas datas,
   VoidCallback onChange,
 ) {
-  final dictName =
-      '${datas.selectedDict.name}${datas.selectedWord.isEmpty ? '' : ':'}';
+  final noSelectedWord = datas.selectedWord.isEmpty;
+  final dictName = '${datas.selectedDict.name}${noSelectedWord ? '' : ':'}';
 
-  Widget title = Text(
-    dictName,
-    style: L.arStyleOrNew.copyWith(fontWeight: FontWeight.w500),
-    textDirection: L.dir,
-  );
+  Widget title = Text(dictName, style: L.arStyleIf, textDirection: L.dir);
 
   if (datas.selectedWord.isNotEmpty) {
     title = Row(

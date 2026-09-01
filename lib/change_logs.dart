@@ -3,6 +3,7 @@ final releases = [
     version: 'v3.5.0',
     changes: '''
     Add a delete icon to the scrollable lexicon word selector
+    Add keyboard Shortcuts (see help screen)
     Make the scrollable word and lexicon selectors the default on the Lexicons screen
     Store the lexicon database in the data directory instead of the cache directory
     Add Welcome screen

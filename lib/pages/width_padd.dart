@@ -160,7 +160,7 @@ class _ReaderAdjustPageState extends State<ReaderAdjustPage> {
       _showingDemoTxt = false;
       _hasProvidedDemoTxt = true;
     } else {
-      _paras = stories[_demoTxtIdx];
+      _paras = stories[_demoTxtIdx].txt;
       _hasProvidedDemoTxt = false;
     }
   }
@@ -244,11 +244,11 @@ class _ReaderAdjustPageState extends State<ReaderAdjustPage> {
               case 'demo-txt':
                 setState(() {
                   if (_showingDemoTxt) {
-                    _paras = widget.paras ?? stories[_demoTxtIdx];
+                    _paras = widget.paras ?? stories[_demoTxtIdx].txt;
                     _showingDemoTxt = false;
                   } else {
                     _showingDemoTxt = true;
-                    _paras = stories[_demoTxtIdx];
+                    _paras = stories[_demoTxtIdx].txt;
                   }
                 });
                 break;
@@ -261,7 +261,7 @@ class _ReaderAdjustPageState extends State<ReaderAdjustPage> {
                     context.mounted) {
                   setState(() {
                     _demoTxtIdx = idx;
-                    _paras = stories[_demoTxtIdx];
+                    _paras = stories[_demoTxtIdx].txt;
                   });
                 }
                 break;

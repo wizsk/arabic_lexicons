@@ -95,8 +95,10 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
   Future<void> _openDemoTxt(BuildContext context) async {
     final idx = await showStoryPicker(context);
     if (idx != null && idx >= 0 && idx < stories.length && context.mounted) {
+      final s = stories[idx];
       _isTempMode = true;
-      _showText(context, initialTxt: stories[idx].join('\n'));
+      _isQasidahMode = s.isQasidah;
+      _showText(context, initialTxt: s.txt.join('\n'));
     }
   }
 

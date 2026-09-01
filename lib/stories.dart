@@ -5,7 +5,7 @@ import 'package:arabic_lexicons/utils.dart';
 import 'package:flutter/material.dart';
 
 Future<int?> showStoryPicker(BuildContext context) {
-  return showModalBottomSheet<int>(
+  return showModalBottomSheet<int?>(
     context: context,
     showDragHandle: true,
     isScrollControlled: true,
@@ -96,7 +96,7 @@ Future<int?> showStoryPicker(BuildContext context) {
                           // Story details
                           Expanded(
                             child: Text(
-                              s.first,
+                              s.txt.first,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               textDirection: TextDirection.rtl,

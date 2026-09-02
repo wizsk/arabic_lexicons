@@ -1,3 +1,4 @@
+import 'package:arabic_lexicons/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -103,45 +104,45 @@ class ShortcutsHelpList extends StatelessWidget {
           ),
           const SizedBox(height: 16),
         ],
-        for (int i = 0; i < shortcuts.length; i++)
-          Container(
-            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
-            decoration: BoxDecoration(
-              border: i < shortcuts.length - 1
-                  ? Border(bottom: BorderSide(color: borderColor, width: 0.8))
-                  : null,
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Text(
-                    shortcuts[i].description,
-                    style: theme.textTheme.bodyLarge,
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.primary,
-                    border: Border.all(color: borderColor, width: 0.5),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Text(
-                    shortcuts[i].label,
-                    style: theme.textTheme.bodyLarge?.copyWith(
-                      color: theme.colorScheme.onPrimary,
-                      fontFamily: 'monospace',
-                      fontFeatures: [FontFeature.tabularFigures()],
+        ...separatedBuilder(
+          itemCount: shortcuts.length,
+          separatorBuilder: (_) => const Divider(height: 0),
+          itemBuilder: (i) {
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      shortcuts[i].description,
+                      style: theme.textTheme.bodyLarge,
                     ),
                   ),
-                ),
-              ],
-            ),
-          ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.primary,
+                      border: Border.all(color: borderColor, width: 0.5),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      shortcuts[i].label,
+                      style: theme.textTheme.bodyLarge?.copyWith(
+                        color: theme.colorScheme.onPrimary,
+                        fontFamily: 'monospace',
+                        fontFeatures: [FontFeature.tabularFigures()],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
       ],
     );
   }

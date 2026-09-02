@@ -26,7 +26,10 @@ enum AppShortcut {
     description: 'Toggle use-more-Arabic',
   ),
 
-  showHelp(key: LogicalKeyboardKey.slash, description: 'Toggle help overlay');
+  showHelp(
+    key: LogicalKeyboardKey.slash,
+    description: 'Toggle keyboard shortcuts help overlay',
+  );
 
   const AppShortcut({required this.key, required this.description});
 

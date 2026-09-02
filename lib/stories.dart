@@ -57,7 +57,7 @@ Future<int?> showStoryPicker(BuildContext context) {
             ),
 
             // Stories
-            ...separatedList(
+            ...separatedListBuilder(
               items: stories,
               separatorBuilder: (_) => const SizedBox(height: 8),
               itemBuilder: (s, index) {

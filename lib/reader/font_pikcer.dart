@@ -46,7 +46,7 @@ Future<String?> showFontPickerSheet(
 
             const SizedBox(height: 12),
 
-            ...separatedList(
+            ...separatedListBuilder(
               items: arabicFonts,
               separatorBuilder: (_) => SizedBox(height: 8),
               itemBuilder: (font, _) {

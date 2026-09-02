@@ -129,6 +129,11 @@ class _SearchLexiconsState extends State<SearchLexicons>
         if (!mounted) return;
         setState(() {});
       },
+      delCurr: () {
+        final w = _datas.selectedWord;
+        if (w.isEmpty && mounted) return;
+        _deleteWord(w, true);
+      },
       help: () {
         if (!mounted) return;
         showShortcutsHelpOverlay(context);
@@ -182,8 +187,9 @@ class _SearchLexiconsState extends State<SearchLexicons>
       return false;
     }
 
+    final k = event.logicalKey;
     for (final b in _keyBindings) {
-      if (b.key == event.logicalKey) {
+      if (b.key == k) {
         if (mounted) b.action();
         return true;
       }
@@ -355,30 +361,7 @@ class _SearchLexiconsState extends State<SearchLexicons>
                         },
                         onDelete: !appConf.lexWordRmIcon
                             ? null
-                            : () async {
-                                if (appConf.lexWordDelConfirm) {
-                                  final res = await showLexWordDelConfirm(
-                                    context,
-                                    label,
-                                  );
-                                  if (res != true) return;
-                                }
-
-                                _datas.words.removeAt(index);
-                                _controller.text = _datas.words.join(' ');
-
-                                // _datas.words.isEmpty will never be true because we won't even show
-                                // word picker if there is less than 2 words!
-
-                                if (selected) {
-                                  final next = index == 0 ? 0 : index - 1;
-                                  _datas.selectedWord = _datas.words[next];
-                                }
-
-                                if (mounted) {
-                                  _datas.getAndShowResORSugg(context);
-                                }
-                              },
+                            : () => _deleteWord(w, selected),
                       ),
                     );
                   },
@@ -438,6 +421,36 @@ class _SearchLexiconsState extends State<SearchLexicons>
         ),
       ),
     ];
+  }
+
+  void _deleteWord(final String word, final bool selected) async {
+    if (word.isEmpty) return;
+
+    if (appConf.lexWordDelConfirm) {
+      final res = await showLexWordDelConfirm(context, word);
+      if (res != true) return;
+    }
+
+    final index = _datas.words.indexOf(word);
+    if (index == -1) return;
+    _datas.words.removeAt(index);
+
+    _controller.text = _datas.words.join(' ');
+
+    if (_datas.words.isEmpty) {
+      _datas.resetAll();
+      if (mounted) setState(() {});
+      return;
+    }
+
+    if (selected) {
+      final next = index == 0 ? 0 : index - 1;
+      _datas.selectedWord = _datas.words[next];
+    }
+
+    if (mounted) {
+      _datas.getAndShowResORSugg(context);
+    }
   }
 
   @override

@@ -13,5 +13,6 @@ Future<bool?> showLexWordDelConfirm(BuildContext context, String word) async {
     confirmText: 'Remove',
     constraints: true,
     destructive: true,
+    autofocusConfirm: true,
   );
 }

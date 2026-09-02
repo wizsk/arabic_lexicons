@@ -1,5 +1,6 @@
 import 'package:arabic_lexicons/data.dart';
 import 'package:arabic_lexicons/datas/app_db.dart';
+import 'package:arabic_lexicons/key_shortcuts.dart';
 import 'package:arabic_lexicons/lex/dicts/db.dart';
 import 'package:arabic_lexicons/lex/isolate.dart';
 import 'package:arabic_lexicons/lex/rearrange_dicts.dart';
@@ -22,6 +23,8 @@ class _StartupScreenState extends State<StartupScreen> {
   }
 
   Future<void> _init() async {
+    AppShortcut.assertUniqueKeys();
+
     try {
       // final s = Stopwatch()..start();
       await Future.wait([

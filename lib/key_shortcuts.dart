@@ -22,6 +22,11 @@ enum AppShortcut {
     description: 'Toggle scrollable lexicon selections (if enabled)',
   ),
 
+  rmCurrentlySelectedWord(
+    key: LogicalKeyboardKey.keyD,
+    description: 'Remove currently selected word',
+  ),
+
   toggleArabic(
     key: LogicalKeyboardKey.keyM,
     description: 'Toggle use-more-Arabic',
@@ -38,6 +43,16 @@ enum AppShortcut {
   final String description;
 
   String get label => 'Ctrl+${key.keyLabel.toUpperCase()}';
+
+  static void assertUniqueKeys() {
+    final seen = <LogicalKeyboardKey>{};
+    for (final shortcut in values) {
+      assert(
+        seen.add(shortcut.key),
+        'Duplicate shortcut key "${shortcut.key.keyLabel}" on $shortcut',
+      );
+    }
+  }
 }
 
 class KeyBinding {
@@ -55,6 +70,7 @@ List<KeyBinding> keybindingsGen({
   required void Function(bool) cycleDict,
   required VoidCallback tgleScSl,
   required VoidCallback tglAr,
+  required VoidCallback delCurr,
   required VoidCallback help,
 }) {
   final res = [
@@ -65,8 +81,17 @@ List<KeyBinding> keybindingsGen({
     KeyBinding(AppShortcut.prevDict.key, () => cycleDict(false)),
     KeyBinding(AppShortcut.toggleScrollableSelectors.key, tgleScSl),
     KeyBinding(AppShortcut.toggleArabic.key, tglAr),
+    KeyBinding(AppShortcut.rmCurrentlySelectedWord.key, delCurr),
     KeyBinding(AppShortcut.showHelp.key, help),
   ];
+
+  final seen = <LogicalKeyboardKey>{};
+  for (final r in res) {
+    assert(
+      seen.add(r.key),
+      'Duplicate shortcut key "${r.key.keyLabel}" on has dubpilcates',
+    );
+  }
 
   assert(
     res.length == AppShortcut.values.length,
@@ -151,78 +176,6 @@ class ShortcutsHelpList extends StatelessWidget {
     );
   }
 }
-
-// class ShortcutsHelpList extends StatelessWidget {
-//   final List<AppShortcut> shortcuts;
-//   final String? title;
-
-//   const ShortcutsHelpList({
-//     super.key,
-//     this.shortcuts = AppShortcut.values,
-//     this.title,
-//   });
-
-//   @override
-//   Widget build(BuildContext context) {
-//     final theme = Theme.of(context);
-//     final borderColor = theme.dividerColor;
-
-//     return Column(
-//       mainAxisSize: MainAxisSize.min,
-//       children: [
-//         if (title != null) ...[
-//           Text(
-//             title!,
-//             style: theme.textTheme.titleLarge?.copyWith(
-//               fontWeight: FontWeight.bold,
-//             ),
-//             textAlign: TextAlign.center,
-//           ),
-//           const SizedBox(height: 16),
-//         ],
-//         ...separatedBuilder(
-//           itemCount: shortcuts.length,
-//           separatorBuilder: (_) => const Divider(height: 0),
-//           itemBuilder: (i) {
-//             return Padding(
-//               padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
-//               child: Row(
-//                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//                 children: [
-//                   Expanded(
-//                     child: Text(
-//                       shortcuts[i].description,
-//                       style: theme.textTheme.bodyLarge,
-//                     ),
-//                   ),
-//                   Container(
-//                     padding: const EdgeInsets.symmetric(
-//                       horizontal: 10,
-//                       vertical: 4,
-//                     ),
-//                     decoration: BoxDecoration(
-//                       color: theme.colorScheme.primary,
-//                       border: Border.all(color: borderColor, width: 0.5),
-//                       borderRadius: BorderRadius.circular(6),
-//                     ),
-//                     child: Text(
-//                       shortcuts[i].label,
-//                       style: theme.textTheme.bodyLarge?.copyWith(
-//                         color: theme.colorScheme.onPrimary,
-//                         fontFamily: 'monospace',
-//                         fontFeatures: [FontFeature.tabularFigures()],
-//                       ),
-//                     ),
-//                   ),
-//                 ],
-//               ),
-//             );
-//           },
-//         ),
-//       ],
-//     );
-//   }
-// }
 
 bool _showing = false;
 Future<void> showShortcutsHelpOverlay(BuildContext context) async {

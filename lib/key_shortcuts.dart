@@ -163,6 +163,7 @@ Future<void> showShortcutsHelpOverlay(BuildContext context) async {
     context: context,
     builder: (context) {
       return const Dialog(
+        insetPadding: EdgeInsets.all(14.0),
         constraints: BoxConstraints(maxWidth: 700),
         child: SafeArea(
           child: Padding(

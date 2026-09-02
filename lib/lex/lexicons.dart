@@ -129,6 +129,10 @@ class _SearchLexiconsState extends State<SearchLexicons>
         if (!mounted) return;
         setState(() {});
       },
+      help: () {
+        if (!mounted) return;
+        showShortcutsHelpOverlay(context);
+      },
     );
 
     HardwareKeyboard.instance.addHandler(_handleKey);
@@ -174,7 +178,7 @@ class _SearchLexiconsState extends State<SearchLexicons>
         ? HardwareKeyboard.instance.isMetaPressed
         : HardwareKeyboard.instance.isControlPressed;
 
-    if (modifierPressed) {
+    if (!modifierPressed) {
       return false;
     }
 

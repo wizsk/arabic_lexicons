@@ -18,13 +18,15 @@ enum AppShortcut {
 
   toggleScrollableSelectors(
     key: LogicalKeyboardKey.keyB,
-    description: 'Toggle scrollable lexicon selection',
+    description: 'Toggle scrollable lexicon selections (if enabled)',
   ),
 
   toggleArabic(
     key: LogicalKeyboardKey.keyM,
     description: 'Toggle use-more-Arabic',
-  );
+  ),
+
+  showHelp(key: LogicalKeyboardKey.slash, description: 'Toggle help overlay');
 
   const AppShortcut({required this.key, required this.description});
 
@@ -49,6 +51,7 @@ List<KeyBinding> keybindingsGen({
   required void Function(bool) cycleDict,
   required VoidCallback tgleScSl,
   required VoidCallback tglAr,
+  required VoidCallback help,
 }) {
   final res = [
     KeyBinding(AppShortcut.focusSearch.key, focusTF),
@@ -58,6 +61,7 @@ List<KeyBinding> keybindingsGen({
     KeyBinding(AppShortcut.prevDict.key, () => cycleDict(false)),
     KeyBinding(AppShortcut.toggleScrollableSelectors.key, tgleScSl),
     KeyBinding(AppShortcut.toggleArabic.key, tglAr),
+    KeyBinding(AppShortcut.showHelp.key, help),
   ];
 
   assert(
@@ -70,8 +74,13 @@ List<KeyBinding> keybindingsGen({
 
 class ShortcutsHelpList extends StatelessWidget {
   final List<AppShortcut> shortcuts;
+  final String? title;
 
-  const ShortcutsHelpList({super.key, this.shortcuts = AppShortcut.values});
+  const ShortcutsHelpList({
+    super.key,
+    this.shortcuts = AppShortcut.values,
+    this.title,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -81,6 +90,16 @@ class ShortcutsHelpList extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
+        if (title != null) ...[
+          Text(
+            title!,
+            style: theme.textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 16),
+        ],
         for (int i = 0; i < shortcuts.length; i++)
           Container(
             padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
@@ -112,6 +131,7 @@ class ShortcutsHelpList extends StatelessWidget {
                     shortcuts[i].label,
                     style: theme.textTheme.bodyLarge?.copyWith(
                       color: theme.colorScheme.onPrimary,
+                      fontFamily: 'monospace',
                       fontFeatures: [FontFeature.tabularFigures()],
                     ),
                   ),
@@ -122,4 +142,36 @@ class ShortcutsHelpList extends StatelessWidget {
       ],
     );
   }
+}
+
+bool _showing = false;
+Future<void> showShortcutsHelpOverlay(BuildContext context) async {
+  if (_showing) {
+    _showing = false;
+
+    Navigator.of(context).pop();
+    return;
+  }
+
+  _showing = true;
+
+  const pad = 24.00;
+  await showDialog(
+    context: context,
+    builder: (context) {
+      return const Dialog(
+        constraints: BoxConstraints(maxWidth: 700),
+        child: SafeArea(
+          child: Padding(
+            padding: EdgeInsets.symmetric(vertical: pad),
+            child: SingleChildScrollView(
+              padding: EdgeInsets.symmetric(horizontal: pad),
+              child: ShortcutsHelpList(title: 'Keybaord Shortcuts'),
+            ),
+          ),
+        ),
+      );
+    },
+  );
+  _showing = false;
 }

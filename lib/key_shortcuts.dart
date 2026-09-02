@@ -89,7 +89,7 @@ class ShortcutsHelpList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final borderColor = theme.dividerColor;
+    final cs = theme.colorScheme;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -98,43 +98,47 @@ class ShortcutsHelpList extends StatelessWidget {
           Text(
             title!,
             style: theme.textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
+              fontWeight: FontWeight.w600,
             ),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 20),
         ],
         ...separatedBuilder(
           itemCount: shortcuts.length,
-          separatorBuilder: (_) => const Divider(height: 0),
+          separatorBuilder: (_) => Divider(height: 1, color: cs.outlineVariant),
           itemBuilder: (i) {
+            final shortcut = shortcuts[i];
+
             return Padding(
-              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Expanded(
                     child: Text(
-                      shortcuts[i].description,
+                      shortcut.description,
                       style: theme.textTheme.bodyLarge,
                     ),
                   ),
+                  const SizedBox(width: 20),
                   Container(
+                    constraints: const BoxConstraints(minWidth: 36),
                     padding: const EdgeInsets.symmetric(
                       horizontal: 10,
-                      vertical: 4,
+                      vertical: 5,
                     ),
                     decoration: BoxDecoration(
-                      color: theme.colorScheme.primary,
-                      border: Border.all(color: borderColor, width: 0.5),
-                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(color: cs.outlineVariant),
+                      borderRadius: BorderRadius.circular(8),
+                      color: cs.secondaryContainer,
                     ),
                     child: Text(
-                      shortcuts[i].label,
-                      style: theme.textTheme.bodyLarge?.copyWith(
-                        color: theme.colorScheme.onPrimary,
+                      shortcut.label,
+                      textAlign: TextAlign.center,
+                      style: theme.textTheme.labelLarge?.copyWith(
                         fontFamily: 'monospace',
-                        fontFeatures: [FontFeature.tabularFigures()],
+                        fontFeatures: const [FontFeature.tabularFigures()],
+                        color: cs.onSecondaryContainer,
                       ),
                     ),
                   ),
@@ -147,6 +151,78 @@ class ShortcutsHelpList extends StatelessWidget {
     );
   }
 }
+
+// class ShortcutsHelpList extends StatelessWidget {
+//   final List<AppShortcut> shortcuts;
+//   final String? title;
+
+//   const ShortcutsHelpList({
+//     super.key,
+//     this.shortcuts = AppShortcut.values,
+//     this.title,
+//   });
+
+//   @override
+//   Widget build(BuildContext context) {
+//     final theme = Theme.of(context);
+//     final borderColor = theme.dividerColor;
+
+//     return Column(
+//       mainAxisSize: MainAxisSize.min,
+//       children: [
+//         if (title != null) ...[
+//           Text(
+//             title!,
+//             style: theme.textTheme.titleLarge?.copyWith(
+//               fontWeight: FontWeight.bold,
+//             ),
+//             textAlign: TextAlign.center,
+//           ),
+//           const SizedBox(height: 16),
+//         ],
+//         ...separatedBuilder(
+//           itemCount: shortcuts.length,
+//           separatorBuilder: (_) => const Divider(height: 0),
+//           itemBuilder: (i) {
+//             return Padding(
+//               padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+//               child: Row(
+//                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//                 children: [
+//                   Expanded(
+//                     child: Text(
+//                       shortcuts[i].description,
+//                       style: theme.textTheme.bodyLarge,
+//                     ),
+//                   ),
+//                   Container(
+//                     padding: const EdgeInsets.symmetric(
+//                       horizontal: 10,
+//                       vertical: 4,
+//                     ),
+//                     decoration: BoxDecoration(
+//                       color: theme.colorScheme.primary,
+//                       border: Border.all(color: borderColor, width: 0.5),
+//                       borderRadius: BorderRadius.circular(6),
+//                     ),
+//                     child: Text(
+//                       shortcuts[i].label,
+//                       style: theme.textTheme.bodyLarge?.copyWith(
+//                         color: theme.colorScheme.onPrimary,
+//                         fontFamily: 'monospace',
+//                         fontFeatures: [FontFeature.tabularFigures()],
+//                       ),
+//                     ),
+//                   ),
+//                 ],
+//               ),
+//             );
+//           },
+//         ),
+//       ],
+//     );
+//   }
+// }
 
 bool _showing = false;
 Future<void> showShortcutsHelpOverlay(BuildContext context) async {

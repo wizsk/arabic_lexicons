@@ -183,6 +183,7 @@ Future<bool?> showConfirmDialog(
   bool useLClass = false,
   String? fontFam,
   bool scroolable = false,
+  bool autofocusConfirm = false,
 }) {
   if (useLClass && cancelText == 'Cancel') {
     cancelText = L.p('Cancel', 'إغلاق');
@@ -243,6 +244,7 @@ Future<bool?> showConfirmDialog(
             ),
 
           FilledButton(
+            autofocus: autofocusConfirm,
             onPressed: () => Navigator.pop(context, true),
             style: FilledButton.styleFrom(
               backgroundColor: destructive ? cs.error : null,

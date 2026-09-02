@@ -41,7 +41,7 @@ Future<RatePromptResult?> showRatePromptBottomSheet(BuildContext context) {
           mainAxisSize: MainAxisSize.min,
           children: [
             // Header icon
-            elevatedIcon(cs, Icons.menu_book_rounded),
+            elevatedIcon(cs, Icons.star),
             const SizedBox(height: 20),
 
             Text(
@@ -53,7 +53,7 @@ Future<RatePromptResult?> showRatePromptBottomSheet(BuildContext context) {
             const SizedBox(height: 8),
             Text(
               'Your support means a lot. A quick rating helps us improve the app and keep building useful features for you.',
-              style: tt.bodyMedium?.copyWith(color: cs.onSurfaceVariant),
+              style: tt.bodyLarge?.copyWith(color: cs.onSurfaceVariant),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 20),

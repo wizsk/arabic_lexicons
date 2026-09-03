@@ -56,10 +56,9 @@ class Isolates {
     if (_suggInited || _suggIniting || !appConf.showSearchSugg) return;
     _suggIniting = true;
 
-    final cacheDir = (await getApplicationCacheDirectory()).path;
     final dataDir = (await getApplicationDocumentsDirectory()).path;
     final reply = ReceivePort();
-    _sendPort.send(InitSuggMessage(cacheDir, dataDir, reply.sendPort));
+    _sendPort.send(InitSuggMessage(dataDir, reply.sendPort));
     await reply.first; // wait for ack
     reply.close();
 
@@ -132,7 +131,7 @@ void _isolateEngines(SendPort mainSendPort) {
 
       // sugg
     } else if (message is InitSuggMessage) {
-      await suggEngine.init(message.cacheDir, message.dataDir);
+      await suggEngine.init(message.dataDir);
       message.replyPort.send(true); // ack
     } else if (message is SuggSearch) {
       var res = suggEngine.getSuggestions(message.query);

@@ -10,7 +10,7 @@ class SuggDatas {
   final List<String> allWordKeys;
   final Map<String, List<String>> prefixIndex;
 
-  SuggDatas({
+  const SuggDatas({
     required this.suggMap,
     required this.allRootKeys,
     required this.allWordKeys,

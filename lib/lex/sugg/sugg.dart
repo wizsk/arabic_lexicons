@@ -19,10 +19,10 @@ sealed class SuggMessage {
 }
 
 class InitSuggMessage extends SuggMessage {
-  final String cacheDir;
+  // final String cacheDir;
   final String dataDir;
   final SendPort replyPort;
-  const InitSuggMessage(this.cacheDir, this.dataDir, this.replyPort);
+  const InitSuggMessage(this.dataDir, this.replyPort);
 }
 
 class SuggSearch extends SuggMessage {
@@ -47,10 +47,10 @@ class SearchSuggestions {
   //   return _initialized && appSettingsNotifier.showSearchSugg;
   // }
 
-  Future<void> init(String cacheDirPath, String dataDir) async {
+  Future<void> init(String dataDir) async {
     if (_initialized) return;
 
-    _initialized = await _loadCache(cacheDirPath);
+    _initialized = await _loadCache(dataDir);
     if (_initialized) return;
 
     try {
@@ -67,7 +67,7 @@ class SearchSuggestions {
     if (_datas.isEmpty) return;
     _initialized = true;
 
-    _saveCache(cacheDirPath, _datas);
+    _saveCache(dataDir, _datas);
   }
 
   /// Results must be cleaned
@@ -216,8 +216,9 @@ class SearchSuggestions {
     return results;
   }
 
-  final String _suggSaveFileName = 'sugg_data.txt';
-  final String _suggPrefixSaveFileName = 'sugg_prefix.txt';
+  final String _suggSaveFileName = '.arabic_lexicons_sugg_data_cache.txt';
+  final String _suggPrefixSaveFileName =
+      '.arabic_lexicons_sugg_prefix_cache.txt';
 
   Future<void> _saveCache(String cacheDir, SuggDatas currDatas) async {
     if (!_initialized) return;

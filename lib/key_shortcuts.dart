@@ -42,6 +42,7 @@ enum AppShortcut {
   final LogicalKeyboardKey key;
   final String description;
 
+  /// Dont' change
   String get label => 'Ctrl+${key.keyLabel.toUpperCase()}';
 
   static void assertUniqueKeys() {

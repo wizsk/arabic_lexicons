@@ -216,8 +216,9 @@ class SearchSuggestions {
     return results;
   }
 
-  final String _suggSaveFileName = '.arabic_lexicons_sugg_data_cache.txt';
-  final String _suggPrefixSaveFileName =
+  static const String _suggSaveFileName =
+      '.arabic_lexicons_sugg_data_cache.txt';
+  static const String _suggPrefixSaveFileName =
       '.arabic_lexicons_sugg_prefix_cache.txt';
 
   Future<void> _saveCache(String cacheDir, SuggDatas currDatas) async {

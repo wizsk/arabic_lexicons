@@ -132,7 +132,27 @@ class _SearchLexiconsState extends State<SearchLexicons>
       delCurr: () {
         final w = _datas.selectedWord;
         if (w.isEmpty && mounted) return;
-        _deleteWord(w, true);
+        _deleteWord(w, true, keyShort: true);
+      },
+      clearWords: () async {
+        if (!mounted || _controller.text.isEmpty) return;
+
+        final res = await showConfirmDialog(
+          context,
+          'Clear Words',
+          message:
+              'Do you want to clear all searched words?'
+              '$keyShortConfirmMsg',
+          confirmText: 'Clear',
+          autofocusConfirm: true,
+        );
+
+        if (res == true && mounted) {
+          setState(() {
+            _controller.clear();
+            _datas.resetAll();
+          });
+        }
       },
       help: () {
         if (!mounted) return;
@@ -423,11 +443,19 @@ class _SearchLexiconsState extends State<SearchLexicons>
     ];
   }
 
-  void _deleteWord(final String word, final bool selected) async {
+  void _deleteWord(
+    final String word,
+    final bool selected, {
+    final bool keyShort = false,
+  }) async {
     if (word.isEmpty) return;
 
     if (appConf.lexWordDelConfirm) {
-      final res = await showLexWordDelConfirm(context, word);
+      final res = await showLexWordDelConfirm(
+        context,
+        word,
+        extramsg: keyShort ? keyShortConfirmMsg : '',
+      );
       if (res != true) return;
     }
 

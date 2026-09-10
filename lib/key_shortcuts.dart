@@ -3,6 +3,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+const keyShortConfirmMsg =
+    '\n\n'
+    'Press Enter to confirm';
+
 final isMac = defaultTargetPlatform == TargetPlatform.macOS;
 // final keybardModifier = isMac
 //     ? LogicalKeyboardKey.meta
@@ -26,6 +30,8 @@ enum AppShortcut {
     key: LogicalKeyboardKey.keyD,
     description: 'Remove currently selected word',
   ),
+
+  clearWords(key: LogicalKeyboardKey.keyC, description: 'Clear searched words'),
 
   toggleArabic(
     key: LogicalKeyboardKey.keyM,
@@ -71,6 +77,7 @@ List<KeyBinding> keybindingsGen({
   required void Function(bool) cycleDict,
   required VoidCallback tgleScSl,
   required VoidCallback tglAr,
+  required VoidCallback clearWords,
   required VoidCallback delCurr,
   required VoidCallback help,
 }) {
@@ -83,6 +90,7 @@ List<KeyBinding> keybindingsGen({
     KeyBinding(AppShortcut.toggleScrollableSelectors.key, tgleScSl),
     KeyBinding(AppShortcut.toggleArabic.key, tglAr),
     KeyBinding(AppShortcut.rmCurrentlySelectedWord.key, delCurr),
+    KeyBinding(AppShortcut.clearWords.key, clearWords),
     KeyBinding(AppShortcut.showHelp.key, help),
   ];
 

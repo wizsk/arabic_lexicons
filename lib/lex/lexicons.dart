@@ -137,14 +137,9 @@ class _SearchLexiconsState extends State<SearchLexicons>
       clearWords: () async {
         if (!mounted || _controller.text.isEmpty) return;
 
-        final res = await showConfirmDialog(
+        final res = await showLexWordClearAllConfirm(
           context,
-          'Clear Words',
-          message:
-              'Do you want to clear all searched words?'
-              '$keyShortConfirmMsg',
-          confirmText: 'Clear',
-          autofocusConfirm: true,
+          extramsg: keyShortConfirmMsg,
         );
 
         if (res == true && mounted) {

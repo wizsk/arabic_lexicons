@@ -2,12 +2,10 @@ import 'package:arabic_lexicons/alphabets.dart';
 import 'package:arabic_lexicons/conf.dart';
 import 'package:arabic_lexicons/data.dart';
 import 'package:arabic_lexicons/lex/data.dart';
-import 'package:arabic_lexicons/reader/reader_utils.dart';
 import 'package:arabic_lexicons/theme.dart';
 import 'package:arabic_lexicons/utils.dart';
 import 'package:arabic_lexicons/widgets/selectable_text_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
@@ -252,36 +250,6 @@ Widget _showArEnRes(
               final e = a.$2;
               final isHi = a.$1.isOdd;
 
-              Future<void> onTab() async {
-                await Clipboard.setData(ClipboardData(text: e.def));
-
-                if (context.mounted) {
-                  showSnack(
-                    context,
-                    'Definition copied. Long-press to select text',
-                  );
-                }
-              }
-
-              void onLongPress() {
-                if (context.mounted) {
-                  SelectableTextScreen.show(
-                    context,
-                    dir: TextDirection.ltr,
-                    textAlign: TextAlign.center,
-                    fullTextFunc: (_) => e.def,
-                    start: 0,
-                    length: 1,
-                    textStyleBodyMedium: ts,
-                  );
-                }
-              }
-
-              final defW = Padding(
-                padding: tp,
-                child: Text(e.def, style: ts),
-              );
-
               final rootOnTap = e.root.isEmpty
                   ? null
                   : () {
@@ -307,7 +275,10 @@ Widget _showArEnRes(
                     child: Center(child: Text(e.word, style: ts)),
                   ),
 
-                  InkWell(onTap: onTab, onLongPress: onLongPress, child: defW),
+                  Padding(
+                    padding: tp,
+                    child: SelectableText(e.def, style: ts),
+                  ),
 
                   InkWell(onTap: rootOnTap, child: rootW),
                 ],

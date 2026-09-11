@@ -12,6 +12,7 @@ Future<void> showWhatsNewSheet(BuildContext context) async {
     useSafeArea: true,
     constraints: const BoxConstraints(maxWidth: 600),
     builder: (context) {
+      final cs = Theme.of(context).colorScheme;
       return DraggableScrollableSheet(
         expand: false,
         initialChildSize: 0.75,
@@ -27,10 +28,7 @@ Future<void> showWhatsNewSheet(BuildContext context) async {
               if (index == 0) {
                 return Column(
                   children: [
-                    elevatedIcon(
-                      Theme.of(context).colorScheme,
-                      Icons.new_releases_rounded,
-                    ),
+                    elevatedIcon(cs, Icons.new_releases_rounded),
                     const SizedBox(height: 16),
                     Text(
                       "What's New",
@@ -40,10 +38,11 @@ Future<void> showWhatsNewSheet(BuildContext context) async {
                     ),
                     const SizedBox(height: 12),
                     Text(
-                      "Email sakibul706@gmail.com if you have any questions or encounter any problems",
+                      "Email $emailAddr if you have any questions or encounter any problems",
                       textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        fontWeight: FontWeight.bold,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w500,
+                        color: cs.onSurfaceVariant,
                       ),
                     ),
                     const SizedBox(height: 12),

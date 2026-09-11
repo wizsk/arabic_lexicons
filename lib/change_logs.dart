@@ -1,9 +1,18 @@
+import 'package:arabic_lexicons/data.dart';
 import 'package:arabic_lexicons/key_shortcuts.dart';
 
 final releases = [
   Release(
+    version: 'v3.6.0',
+    changes:
+        '''
+    Directly selectable text in (${Dict.arEn.name})
+  ''',
+  ),
+  Release(
     version: 'v3.5.0',
-    changes: '''
+    changes:
+        '''
     Add a delete icon to the scrollable lexicon word selector
     Add keyboard Shortcuts (see help screen or ${AppShortcut.showHelp.label})
     Make the scrollable word and lexicon selectors the default on the Lexicons screen

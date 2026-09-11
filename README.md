@@ -100,8 +100,8 @@ This project is fully open source and released under the **GPL-3.0 License**.
 
 ## Regards
 
-- Thanks to [HansWehrDictionary](https://play.google.com/store/apps/details?id=com.muslimtechnet.lanelexicon) by [GibreelAbdullah](https://github.com/GibreelAbdullah/)
-- Thanks to [LaneLexicon](https://play.google.com/store/apps/details?id=com.muslimtechnet.hanswehr) by [GibreelAbdullah](https://github.com/GibreelAbdullah/)
-- Thanks to [معجم العرب](https://play.google.com/store/apps/details?id=com.ristekmuslim.mujamarob) by Ristek Muslim
+- Thanks to [haikalzain](https://github.com/haikalzain/) for [Dictionary-Chrome-Extension](https://github.com/haikalzain/Dictionary-Chrome-Extension)
+- Thanks to [GibreelAbdullah](https://github.com/GibreelAbdullah/) for [HansWehrDictionary](https://play.google.com/store/apps/details?id=com.muslimtechnet.lanelexicon) and [LaneLexicon](https://play.google.com/store/apps/details?id=com.muslimtechnet.hanswehr)
+- Thanks to Ristek Muslim for [معجم العرب](https://play.google.com/store/apps/details?id=com.ristekmuslim.mujamarob)
 
 for their amazing works and providing us with the databases

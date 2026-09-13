@@ -6,6 +6,7 @@ import 'package:arabic_lexicons/alphabets.dart';
 import 'package:arabic_lexicons/conf.dart';
 import 'package:arabic_lexicons/pages/settings/settings.dart';
 import 'package:arabic_lexicons/reader/data.dart';
+import 'package:arabic_lexicons/utils/toast_snack.dart';
 import 'package:archive/archive.dart';
 import 'package:flutter/material.dart';
 
@@ -221,12 +222,9 @@ void showSnackL(
   required String ar,
   required String en,
   Duration duration = const Duration(seconds: 2),
-}) => showSnack(
-  context,
-  L.p(en, ar),
+}) => MsgSv.showSnackbar(
+  Text(L.p(en, ar), style: L.arStyleIf, textDirection: L.dir),
   duration: duration,
-  textStyle: L.arStyleIf,
-  textDir: L.dir,
 );
 
 Timer? _snackMsgTimmer;
@@ -241,7 +239,6 @@ void snackClearForced() {
 void showSnack(
   BuildContext context,
   String message, {
-  Widget? messageWidget,
   Duration duration = const Duration(seconds: 2),
   TextStyle? textStyle,
   TextDirection? textDir,
@@ -249,35 +246,12 @@ void showSnack(
   bool? showCloseIcon,
   Duration? forceCloseAfter,
 }) {
-  // we are clearing the snaksbars anyways
-  _snackMsgTimmerCallback = null;
-  _snackMsgTimmer?.cancel();
-
-  final messenger = ScaffoldMessenger.of(context);
-
-  messenger
-    ..clearSnackBars()
-    ..showSnackBar(
-      SnackBar(
-        content:
-            messageWidget ??
-            Text(message, style: textStyle, textDirection: textDir),
-        duration: forceCloseAfter != null ? const Duration(days: 1) : duration,
-        behavior: SnackBarBehavior.floating,
-        action: action,
-        showCloseIcon: showCloseIcon,
-      ),
-    );
-
-  if (forceCloseAfter != null) {
-    void clear() {
-      messenger.clearSnackBars();
-      _snackMsgTimmerCallback = null;
-    }
-
-    _snackMsgTimmerCallback = clear;
-    _snackMsgTimmer = Timer(forceCloseAfter, clear);
-  }
+  MsgSv.showSnackbar(
+    Text(message, style: textStyle, textDirection: textDir),
+    action: action,
+    duration: duration,
+    showCloseIcon: showCloseIcon,
+  );
 }
 
 Future<(File, List<int>)> zipFiles(

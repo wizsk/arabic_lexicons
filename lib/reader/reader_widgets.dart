@@ -7,6 +7,7 @@ import 'package:arabic_lexicons/reader/data.dart';
 import 'package:arabic_lexicons/reader/reader_utils.dart';
 import 'package:arabic_lexicons/reader/settings_class.dart';
 import 'package:arabic_lexicons/utils.dart';
+import 'package:arabic_lexicons/utils/toast_snack.dart';
 import 'package:arabic_lexicons/widgets/selectable_text_screen.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -268,10 +269,8 @@ Future<void> openDictAndAddForeign(
     rs.callOnChange();
     if (rs.foreignAdd) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        showSnack(
-          context,
-          '',
-          messageWidget: Text.rich(
+        MsgSv.showSnackbar(
+          Text.rich(
             TextSpan(
               children: [
                 TextSpan(text: 'Foreign added: '),
@@ -279,7 +278,6 @@ Future<void> openDictAndAddForeign(
               ],
             ),
           ),
-          forceCloseAfter: const Duration(seconds: 5),
           action: SnackBarAction(
             label: 'Undo',
             onPressed: () async {

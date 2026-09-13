@@ -10,6 +10,7 @@ import 'package:arabic_lexicons/pages/welcome_screen.dart';
 import 'package:arabic_lexicons/reader/input.dart';
 import 'package:arabic_lexicons/reader/reader.dart';
 import 'package:arabic_lexicons/theme.dart';
+import 'package:arabic_lexicons/utils/toast_snack.dart';
 import 'package:arabic_lexicons/word_list/page.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -34,10 +35,10 @@ class MyApp extends StatelessWidget {
           onPointerDown: WakelockController.isEnabled
               ? WakelockController.onUserActivity
               : null,
-          // onPointerMove: WakelockController.onUserActivity,
           child: MaterialApp(
             debugShowCheckedModeBanner: false,
             title: kDebugMode ? '(D) Arabic Lexicons' : 'Arabic Lexicons',
+            scaffoldMessengerKey: MsgSv.snackMessengerKey,
 
             theme: buildTheme(context, Brightness.light, appConf),
             darkTheme: buildTheme(context, Brightness.dark, appConf),

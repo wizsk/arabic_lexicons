@@ -10,6 +10,7 @@ final releases = [
     Find words
     Adjust word Spacing in the reader
     Change highligh style for bookmarks and foreign words
+    Use background color hightligted words
   ''',
   ),
   Release(

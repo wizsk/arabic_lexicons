@@ -10,7 +10,7 @@ import 'package:flutter/material.dart';
 
 class ReaderModeSettingsSheet extends StatefulWidget {
   final ReaderPageSettings original;
-  final PeraEntries paras;
+  final PeraEntries? paras;
 
   const ReaderModeSettingsSheet({
     super.key,
@@ -21,7 +21,7 @@ class ReaderModeSettingsSheet extends StatefulWidget {
   static Future<void> show(
     BuildContext context, {
     required ReaderPageSettings settings,
-    required PeraEntries paras,
+    required PeraEntries? paras,
   }) async {
     await Navigator.push(
       context,
@@ -173,7 +173,7 @@ class _ReaderModeSettingsSheetState extends State<ReaderModeSettingsSheet> {
                     final old = ReaderAdjustData.fromReaderPageSettings(_rs);
 
                     final parasInput = widget.paras
-                        .map((e) => e.map((f) => f.ar).toList())
+                        ?.map((e) => e.map((f) => f.ar).toList())
                         .toList(growable: false);
 
                     final res = await ReaderAdjustPage.open(

@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:isolate';
 
-import 'package:arabic_lexicons/alphabets.dart';
 import 'package:arabic_lexicons/conf.dart';
 import 'package:arabic_lexicons/data.dart';
 import 'package:arabic_lexicons/pages/settings/settings.dart';
@@ -14,7 +13,6 @@ import 'package:arabic_lexicons/reader/settings.dart';
 import 'package:arabic_lexicons/reader/settings_class.dart';
 import 'package:arabic_lexicons/utils.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:path/path.dart' as path;
 
 Future<void> showOpendictOrFindword(
@@ -67,7 +65,7 @@ Future<void> showOpendictOrFindword(
                     width: double.infinity,
                     child: OutlinedButton.icon(
                       icon: const Icon(Icons.search),
-                      label: const Text("Find Word"),
+                      label: const Text("Find in Books"),
                       onPressed: () {
                         Navigator.pop(context);
                         onFindWord();
@@ -84,29 +82,41 @@ Future<void> showOpendictOrFindword(
   );
 }
 
-Future<(PeraEntries, int)> _yo(
+class _FindWordEnry {
+  final String title;
+  final PeraEntries paras;
+
+  const _FindWordEnry(this.title, this.paras);
+}
+
+Future<(List<_FindWordEnry>, int)> _yo(
   String w,
   String bPath,
-  List<String> books,
+  List<BookEntry> books,
 ) async {
-  final PeraEntries res = [];
+  final List<_FindWordEnry> res = [];
   var totalWords = 0;
 
-  for (final s in books) {
-    final d = '${path.join(bPath, s)}.txt';
+  for (final b in books) {
+    final d = '${path.join(bPath, b.sha)}.txt';
 
     try {
       final text = File(d).readAsStringSync();
       final paras = cleanReaderInputAndPrepare(text);
 
+      final PeraEntries en = [];
+
       for (final p in paras) {
         for (final e in p) {
           if (e.cl == w) {
             totalWords += p.length;
-            res.add(p);
+            en.add(p);
             break;
           }
         }
+      }
+      if (en.isNotEmpty) {
+        res.add(_FindWordEnry(b.title, en));
       }
     } catch (_) {}
   }
@@ -114,8 +124,8 @@ Future<(PeraEntries, int)> _yo(
   return (res, totalWords);
 }
 
-Future<(PeraEntries, int)> _getData(String word) async {
-  final books = ReaderInputPageData.bookEntries.map((b) => b.sha).toList();
+Future<(List<_FindWordEnry>, int)> _getData(String word) async {
+  final books = ReaderInputPageData.bookEntries;
   final bpath = ReaderInputPageData.booksDirPath;
   return Isolate.run(() => _yo(word, bpath, books));
 }
@@ -137,8 +147,7 @@ class FindWordReaderPage extends StatefulWidget {
 }
 
 class _FindWordReaderPageState extends State<FindWordReaderPage> {
-  PeraEntries _paras = [];
-  late final int _totalWords;
+  List<_FindWordEnry> _paras = [];
   late String _title;
   late ReaderPageSettings _rs;
 
@@ -175,7 +184,6 @@ class _FindWordReaderPageState extends State<FindWordReaderPage> {
     final result = await _getData(widget.word);
 
     _paras = result.$1;
-    _totalWords = result.$2;
 
     setState(() {
       _inited = true;
@@ -233,43 +241,71 @@ class _FindWordReaderPageState extends State<FindWordReaderPage> {
     );
   }
 
-  Widget _buildParagraphSliver(
+  List<Widget> _buildParagraphSliver(
     BuildContext context,
+    EdgeInsets padd,
     TextStyle style,
     TextStyle styleLU,
     TextStyle highStyletyle,
   ) {
     final cs = Theme.of(context).colorScheme;
 
-    return SliverList(
-      delegate: SliverChildBuilderDelegate((context, index) {
-        final first = _paras[index].length == 1 ? _paras[index][0] : null;
-
-        return Padding(
-          padding: paraSpaceInbetween(_rs.fontSize),
-          child: first != null && first.cl.isEmpty
-              ? Center(
-                  child: Text(
-                    first.ar,
-                    style: ArabicNormalizer.isArabicNum(first.ar)
-                        ? style.copyWith(fontWeight: FontWeight.bold)
-                        : style,
+    padd = padd.copyWith(top: 12, bottom: 22);
+    return _paras.map((p) {
+      return SliverPadding(
+        padding: padd,
+        sliver: SliverList(
+          delegate: SliverChildBuilderDelegate((context, index) {
+            if (index == 0) {
+              return Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Center(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12.0,
+                      vertical: 8.0,
+                    ),
+                    decoration: BoxDecoration(
+                      color: cs.secondaryContainer,
+                      borderRadius: BorderRadius.circular(12.0),
+                    ),
+                    child: Text(
+                      p.title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.titleLarge?.ar
+                          .copyWith(
+                            color: cs.onSecondaryContainer,
+                            fontWeight: FontWeight.w500,
+                          ),
+                    ),
                   ),
-                )
-              : ClickableParagraph(
-                  rs: _rs,
-                  index: index,
-                  peras: _paras,
-                  style: style,
-                  styleLU: styleLU,
-                  highStyletyle: highStyletyle,
-                  cs: cs,
-                  textAlign: _rs.textAlign,
-                  onChange: () => setState(() {}),
                 ),
-        );
-      }, childCount: _paras.length),
-    );
+              );
+            }
+
+            index--;
+            return Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: padd.right,
+                vertical: paraSpaceInbetween(_rs.fontSize).right,
+              ),
+              child: ClickableParagraph(
+                rs: _rs,
+                index: index,
+                peras: p.paras,
+                style: style,
+                styleLU: styleLU,
+                highStyletyle: highStyletyle,
+                cs: cs,
+                textAlign: _rs.textAlign,
+                onChange: () => setState(() {}),
+              ),
+            );
+          }, childCount: _paras.length + 1),
+        ),
+      );
+    }).toList();
   }
 
   @override
@@ -341,14 +377,17 @@ class _FindWordReaderPageState extends State<FindWordReaderPage> {
                           child: Center(child: Text('No Results')),
                         )
                       else
-                        SliverPadding(
-                          padding: padd,
-                          sliver: _buildParagraphSliver(
-                            context,
-                            style,
-                            styleLU,
-                            highStyle,
-                          ),
+                        ..._buildParagraphSliver(
+                          context,
+                          padd,
+                          style,
+                          styleLU,
+                          highStyle,
+                        ),
+
+                      if (_paras.isNotEmpty)
+                        SliverToBoxAdapter(
+                          child: SizedBox(height: scrollPadding.bottom),
                         ),
                     ],
                   ),
@@ -374,8 +413,8 @@ class _FindWordReaderPageState extends State<FindWordReaderPage> {
                     isScrollControlled: true,
                     constraints: const BoxConstraints(maxWidth: 600),
                     builder: (context) {
-                      final theme = Theme.of(context);
-                      final cs = theme.colorScheme;
+                      // final theme = Theme.of(context);
+                      // final cs = theme.colorScheme;
 
                       return SingleChildScrollView(
                         padding: scrollPaddingBottmSheet(context),
@@ -442,23 +481,8 @@ class _FindWordReaderPageState extends State<FindWordReaderPage> {
                       await ReaderModeSettingsSheet.show(
                         context,
                         settings: _rs,
-                        paras: _paras,
+                        paras: null,
                       );
-                      break;
-
-                    case 'copy-txt':
-                      Clipboard.setData(
-                        ClipboardData(
-                          text: _paras
-                              .map((p) => p.map((w) => w.ar).join(" "))
-                              .join("\n"),
-                        ),
-                      ).then((_) {
-                        if (context.mounted) {
-                          showSnack(context, 'Text Copied');
-                        }
-                      });
-
                       break;
                   }
                 },

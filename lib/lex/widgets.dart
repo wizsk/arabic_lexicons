@@ -3,6 +3,7 @@ import 'package:arabic_lexicons/data.dart';
 import 'package:arabic_lexicons/datas/word_store.dart';
 import 'package:arabic_lexicons/lex/data.dart';
 import 'package:arabic_lexicons/main_widgets.dart';
+import 'package:arabic_lexicons/reader/find_word.dart';
 import 'package:arabic_lexicons/utils.dart';
 import 'package:flutter/material.dart';
 
@@ -60,6 +61,11 @@ Widget lexAppBar(
               );
             }
           : null,
+      onLongPress: datas.selectedWord.isEmpty
+          ? null
+          : () {
+              FindWordReaderPage.open(context, datas.selectedWord);
+            },
     ),
     IconButton(
       icon: bm

@@ -286,6 +286,8 @@ class _FindWordReaderPageState extends State<FindWordReaderPage> {
     final cs = Theme.of(context).colorScheme;
 
     padd = padd.copyWith(top: 12, bottom: 22);
+    final paddBtwn = paraSpaceInbetween(_rs.fontSize);
+
     return _paras.map((p) {
       return SliverPadding(
         padding: padd,
@@ -321,10 +323,7 @@ class _FindWordReaderPageState extends State<FindWordReaderPage> {
 
             index--;
             return Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: padd.right,
-                vertical: paraSpaceInbetween(_rs.fontSize).right,
-              ),
+              padding: paddBtwn,
               child: ClickableParagraph(
                 rs: _rs,
                 index: index,

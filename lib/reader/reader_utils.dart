@@ -227,13 +227,8 @@ void showSnackL(
   duration: duration,
 );
 
-Timer? _snackMsgTimmer;
-VoidCallback? _snackMsgTimmerCallback;
-
 void snackClearForced() {
-  _snackMsgTimmer?.cancel();
-  _snackMsgTimmerCallback?.call();
-  _snackMsgTimmerCallback = null;
+  MsgSv.clearSnackActions();
 }
 
 void showSnack(

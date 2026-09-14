@@ -40,6 +40,10 @@ class ReaderPageSettings {
     _onChange = f;
   }
 
+  void dispose() {
+    _onChange = null;
+  }
+
   final String bookHash;
 
   final bool isFindWordMode;

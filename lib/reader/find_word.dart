@@ -89,13 +89,18 @@ class _FindWordEnry {
   const _FindWordEnry(this.title, this.paras);
 }
 
-Future<(List<_FindWordEnry>, int)> _yo(
+Future<List<_FindWordEnry>> _yo(
   String w,
   String bPath,
   List<BookEntry> books,
+  bool exatctMatch,
 ) async {
   final List<_FindWordEnry> res = [];
-  var totalWords = 0;
+
+  bool matchExact(String word) => w == word;
+  bool matchContains(String word) => word.contains(w);
+
+  final matchFunc = exatctMatch ? matchExact : matchContains;
 
   for (final b in books) {
     final d = '${path.join(bPath, b.sha)}.txt';
@@ -108,8 +113,7 @@ Future<(List<_FindWordEnry>, int)> _yo(
 
       for (final p in paras) {
         for (final e in p) {
-          if (e.cl == w) {
-            totalWords += p.length;
+          if (matchFunc(e.cl)) {
             en.add(p);
             break;
           }
@@ -121,13 +125,13 @@ Future<(List<_FindWordEnry>, int)> _yo(
     } catch (_) {}
   }
 
-  return (res, totalWords);
+  return res;
 }
 
-Future<(List<_FindWordEnry>, int)> _getData(String word) async {
+Future<List<_FindWordEnry>> _getData(String word, bool exactMatch) async {
   final books = ReaderInputPageData.bookEntries;
   final bpath = ReaderInputPageData.booksDirPath;
-  return Isolate.run(() => _yo(word, bpath, books));
+  return Isolate.run(() => _yo(word, bpath, books, exactMatch));
 }
 
 class FindWordReaderPage extends StatefulWidget {
@@ -151,6 +155,8 @@ class _FindWordReaderPageState extends State<FindWordReaderPage> {
   late String _title;
   late ReaderPageSettings _rs;
 
+  final _sc = ScrollController();
+
   // bool _isFabVisable = true;
 
   // File? _peraIndexSave;
@@ -171,22 +177,37 @@ class _FindWordReaderPageState extends State<FindWordReaderPage> {
       isFindWordMode: true,
       findWordWord: widget.word,
     );
+    _setOnChange();
 
     _init();
   }
 
-  bool _inited = false;
-  Future<void> _init() async {
+  bool _exactMath = true;
+  var _initState = InitState.not;
+
+  Future<void> _init([bool firstRun = true]) async {
+    if (_initState.isIniting) return;
+
+    if (!firstRun) {
+      setState(() {
+        _initState = InitState.initing;
+        _paras.clear();
+      });
+    }
+
     if (!ReaderInputPageData.inited) {
       await ReaderInputPageData.init();
     }
 
-    final result = await _getData(widget.word);
-
-    _paras = result.$1;
+    final result = await _getData(widget.word, _exactMath);
+    final count = result.isEmpty
+        ? null
+        : enToArNum(result.map((e) => e.paras.length).reduce((a, b) => a + b));
 
     setState(() {
-      _inited = true;
+      _paras = result;
+      _title = count == null ? widget.word : '${widget.word} $count';
+      _initState = InitState.done;
     });
   }
 
@@ -198,6 +219,7 @@ class _FindWordReaderPageState extends State<FindWordReaderPage> {
 
   @override
   void dispose() {
+    _rs.dispose();
     super.dispose();
   }
 
@@ -211,9 +233,9 @@ class _FindWordReaderPageState extends State<FindWordReaderPage> {
   }
 
   void _setOnChange() {
-    if (!_inited) return;
+    if (!_initState.isInited) return;
     _rs.onChange = () {
-      if (mounted) setState(() {});
+      setState(() {});
     };
   }
 
@@ -221,7 +243,7 @@ class _FindWordReaderPageState extends State<FindWordReaderPage> {
   //   await ReaderModeSettingsSheet.show(context, settings: _rs, paras: _paras);
   // }
 
-  Widget _buildSliverAppBar(BuildContext context, TextStyle arabicFontStyle) {
+  Widget _buildSliverAppBar(BuildContext context) {
     return Directionality(
       textDirection: TextDirection.ltr,
       child: SliverAppBar(
@@ -231,11 +253,23 @@ class _FindWordReaderPageState extends State<FindWordReaderPage> {
         // backgroundColor: _readerAppBarColorBg
         //     ? appConf.readerSurface(context)
         //     : null,
-        title: Text(
-          _title,
-          textDirection: TextDirection.rtl,
-          style: TextStyle(fontFamily: arabicFontStyle.fontFamily),
-        ),
+        title: Text(_title, textDirection: TextDirection.rtl, style: L.arStyle),
+        centerTitle: false,
+        actions: [
+          SizedBox(
+            width: 140,
+            child: FilledButton.icon(
+              icon: Icon(Icons.search),
+              label: Text(_exactMath ? 'Exact' : 'Contains'),
+              onPressed: !_initState.isInited
+                  ? null
+                  : () {
+                      _exactMath = !_exactMath;
+                      _init(false);
+                    },
+            ),
+          ),
+        ],
         // actions: [...scrollUpDownBtns(_sc, _paras.length - 1)],
       ),
     );
@@ -258,7 +292,7 @@ class _FindWordReaderPageState extends State<FindWordReaderPage> {
           delegate: SliverChildBuilderDelegate((context, index) {
             if (index == 0) {
               return Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: const EdgeInsets.all(8.0).copyWith(bottom: 16),
                 child: Center(
                   child: Container(
                     padding: const EdgeInsets.symmetric(
@@ -300,9 +334,10 @@ class _FindWordReaderPageState extends State<FindWordReaderPage> {
                 cs: cs,
                 textAlign: _rs.textAlign,
                 onChange: () => setState(() {}),
+                matchExact: _exactMath,
               ),
             );
-          }, childCount: _paras.length + 1),
+          }, childCount: p.paras.length + 1),
         ),
       );
     }).toList();
@@ -313,7 +348,7 @@ class _FindWordReaderPageState extends State<FindWordReaderPage> {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
 
-    final style = !_inited
+    final style = !_initState.isInited
         ? TextStyle()
         : appConf
               .readerTS(context)
@@ -341,7 +376,7 @@ class _FindWordReaderPageState extends State<FindWordReaderPage> {
       backgroundColor: cs.errorContainer,
     );
 
-    final EdgeInsets padd = _inited
+    final EdgeInsets padd = _initState.isInited
         ? _rs.readerPadd(context)
         : EdgeInsets.all(0);
 
@@ -352,48 +387,44 @@ class _FindWordReaderPageState extends State<FindWordReaderPage> {
       //   exitReaderPage(context);
       // },
       child: Scaffold(
-        appBar: _inited
-            ? null
-            : AppBar(
-                title: Text(
-                  L.p('Loading...', 'جارٍ التحميل...'),
-                  textDirection: L.dir,
-                  style: L.arStyleIf,
-                ),
-                // backgroundColor: appConf.readerSurface(context),
-              ),
         // backgroundColor: appConf.readerSurface(context),
         body: GestureStack(
           child: Directionality(
             textDirection: TextDirection.rtl,
-            child: !_inited
-                ? const Center(child: CircularProgressIndicator())
-                : CustomScrollView(
-                    slivers: [
-                      _buildSliverAppBar(context, style),
-                      if (_paras.isEmpty)
-                        const SliverFillRemaining(
-                          hasScrollBody: false,
-                          child: Center(child: Text('No Results')),
-                        )
-                      else
-                        ..._buildParagraphSliver(
-                          context,
-                          padd,
-                          style,
-                          styleLU,
-                          highStyle,
-                        ),
+            child: CustomScrollView(
+              controller: _sc,
+              key: ValueKey(_exactMath),
+              slivers: [
+                _buildSliverAppBar(context),
 
-                      if (_paras.isNotEmpty)
-                        SliverToBoxAdapter(
-                          child: SizedBox(height: scrollPadding.bottom),
-                        ),
-                    ],
+                if (!_initState.isInited)
+                  const SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: Center(child: CircularProgressIndicator()),
+                  )
+                else if (_paras.isEmpty)
+                  const SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: Center(child: Text('No Results')),
+                  )
+                else ...[
+                  ..._buildParagraphSliver(
+                    context,
+                    padd,
+                    style,
+                    styleLU,
+                    highStyle,
                   ),
+
+                  SliverToBoxAdapter(
+                    child: SizedBox(height: scrollPadding.bottom),
+                  ),
+                ],
+              ],
+            ),
           ),
         ),
-        floatingActionButton: !_inited
+        floatingActionButton: !_initState.isInited
             ? null
             :
               // : AnimatedSlide(
@@ -422,16 +453,23 @@ class _FindWordReaderPageState extends State<FindWordReaderPage> {
                           spacing: 12,
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const SettingsSectionSurface(
-                              children: [
-                                ReaderSelectionTile(
-                                  icon: Icons.menu_book,
-                                  title: 'Chapters & Paragraphs',
-                                  subtitle: 'Navigate book',
-                                  value: 'inspect',
-                                ),
-                              ],
-                            ),
+                            if (_paras.isNotEmpty)
+                              const SettingsSectionSurface(
+                                children: [
+                                  ReaderSelectionTile(
+                                    icon: Icons.vertical_align_top,
+                                    title: 'Scroll to top',
+                                    subtitle: 'Jump to the beginning',
+                                    value: 'scroll-top',
+                                  ),
+                                  ReaderSelectionTile(
+                                    icon: Icons.vertical_align_bottom,
+                                    title: 'Scroll to bottom',
+                                    subtitle: 'Jump to the end',
+                                    value: 'scroll-bot',
+                                  ),
+                                ],
+                              ),
 
                             /// Main actions
                             SettingsSectionSurface(
@@ -483,6 +521,39 @@ class _FindWordReaderPageState extends State<FindWordReaderPage> {
                         settings: _rs,
                         paras: null,
                       );
+                      break;
+
+                    case 'scroll-top':
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        if (!_sc.hasClients) return;
+                        _sc.animateTo(
+                          0.0,
+                          duration: const Duration(milliseconds: 400),
+                          curve: Curves.easeOut,
+                        );
+                      });
+
+                      break;
+
+                    case 'scroll-bot':
+                      if (_sc.hasClients) {
+                        WidgetsBinding.instance.addPostFrameCallback((_) async {
+                          if (!_sc.hasClients) return;
+
+                          double prePos = 0.0;
+                          while (prePos < _sc.position.maxScrollExtent) {
+                            if (!_sc.hasClients) return;
+
+                            prePos = _sc.position.maxScrollExtent;
+
+                            await _sc.animateTo(
+                              prePos,
+                              duration: const Duration(milliseconds: 400),
+                              curve: Curves.linear,
+                            );
+                          }
+                        });
+                      }
                       break;
                   }
                 },

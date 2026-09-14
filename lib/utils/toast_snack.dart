@@ -44,6 +44,7 @@ abstract final class MsgSv {
   );
 
   static Timer? _snackMsgTimmer;
+  static VoidCallback? _snackMsgClearAction;
 
   static void showSnackbar(
     Widget message, {
@@ -83,12 +84,21 @@ abstract final class MsgSv {
     );
 
     if (f != null && action != null) {
-      _snackMsgTimmer = Timer(duration, () {
+      void c() {
         try {
           f.close();
         } catch (_) {}
         _snackMsgTimmer = null;
-      });
+        _snackMsgClearAction = null;
+      }
+
+      _snackMsgClearAction = c;
+      _snackMsgTimmer = Timer(duration, c);
     }
+  }
+
+  static void clearSnackActions() {
+    _snackMsgTimmer?.cancel();
+    _snackMsgClearAction?.call();
   }
 }

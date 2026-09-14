@@ -31,6 +31,7 @@ class ClickableParagraph extends StatelessWidget {
   final TextStyle highStyletyle;
   final TextAlign textAlign;
   final ColorScheme cs;
+  final bool matchExact;
 
   const ClickableParagraph({
     super.key,
@@ -43,6 +44,7 @@ class ClickableParagraph extends StatelessWidget {
     required this.highStyletyle,
     required this.cs,
     this.textAlign = TextAlign.justify,
+    this.matchExact = true,
   });
 
   @override
@@ -81,6 +83,7 @@ class ClickableParagraph extends StatelessWidget {
       style: style,
       styleLU: styleLU,
       highStyle: highStyletyle,
+      exactMach: matchExact,
     );
 
     return spans;
@@ -174,6 +177,7 @@ class ClickableBayt extends StatelessWidget {
       style: style,
       styleLU: styleLU,
       highStyle: highStyletyle,
+      exactMach: false,
     );
 
     return spans;
@@ -188,6 +192,7 @@ void _buildParaSpans(
   required TextStyle style,
   required TextStyle styleLU,
   required TextStyle highStyle,
+  required bool exactMach,
 }) {
   final len = para.length;
   final sp = TextSpan(text: ' ' * rs.wordSpacing, style: style);
@@ -203,6 +208,7 @@ void _buildParaSpans(
         style: style,
         styleLU: styleLU,
         highStyle: highStyle,
+        exatMatch: exactMach,
       ),
     );
     if (i != len - 1) {
@@ -220,9 +226,12 @@ TextSpan _readerWordSpan({
   required TextStyle style,
   required TextStyle styleLU,
   required TextStyle highStyle,
+  required bool exatMatch,
 }) {
   TextStyle ts;
-  if (rs.isFindWordMode && word.cl == rs.findWordWord) {
+  if (rs.isFindWordMode &&
+      (word.cl == rs.findWordWord ||
+          !exatMatch && word.cl.contains(rs.findWordWord))) {
     final cs = Theme.of(context).colorScheme;
     ts = style.copyWith(color: cs.onPrimary, backgroundColor: cs.primary);
   } else {
@@ -295,11 +304,9 @@ Future<void> openDictAndAddForeign(
   snackClearForced();
 
   openDict(context, word).then((_) {
-    if (!context.mounted) return;
-
-    rs.callOnChange();
     if (rs.foreignAdd) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
+        rs.callOnChange();
         MsgSv.showSnackbar(
           Text.rich(
             TextSpan(
@@ -322,5 +329,7 @@ Future<void> openDictAndAddForeign(
     }
   });
 
-  if (rs.foreignAdd) WordStore.addForeign(word);
+  if (rs.foreignAdd) {
+    WordStore.addForeign(word);
+  }
 }

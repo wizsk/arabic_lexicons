@@ -11,6 +11,7 @@ import 'package:arabic_lexicons/reader/reader_utils.dart';
 import 'package:arabic_lexicons/reader/reader_widgets.dart';
 import 'package:arabic_lexicons/reader/settings.dart';
 import 'package:arabic_lexicons/reader/settings_class.dart';
+import 'package:arabic_lexicons/theme.dart';
 import 'package:arabic_lexicons/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
@@ -345,8 +346,8 @@ class _FindWordReaderPageState extends State<FindWordReaderPage> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
+    // final theme = Theme.of(context);
+    // final cs = theme.colorScheme;
 
     final style = !_initState.isInited
         ? TextStyle()
@@ -366,14 +367,22 @@ class _FindWordReaderPageState extends State<FindWordReaderPage> {
     //     ? Color.fromARGB(255, 0, 0, 255)
     //     : Color.fromARGB(255, 165, 165, 255); // deep teal
 
-    final styleLU = style.copyWith(
-      color: cs.onTertiaryContainer,
-      backgroundColor: cs.tertiaryContainer,
-    );
+    // final styleLU = style.copyWith(
+    //   color: cs.onTertiaryContainer,
+    //   backgroundColor: cs.tertiaryContainer,
+    // );
 
+    // final highStyle = style.copyWith(
+    //   color: cs.onErrorContainer,
+    //   backgroundColor: cs.errorContainer,
+    // );
+
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final styleLU = style.copyWith(
+      backgroundColor: isDark ? foreignWordBgDark : foreignWordBg,
+    );
     final highStyle = style.copyWith(
-      color: cs.onErrorContainer,
-      backgroundColor: cs.errorContainer,
+      backgroundColor: isDark ? bookmarkWordBgDark : bookmarkWordBg,
     );
 
     final EdgeInsets padd = _initState.isInited

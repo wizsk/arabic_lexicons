@@ -14,6 +14,7 @@ import 'package:arabic_lexicons/reader/reader_widgets.dart';
 import 'package:arabic_lexicons/reader/settings.dart';
 import 'package:arabic_lexicons/reader/settings_class.dart';
 import 'package:arabic_lexicons/reader/word_lists.dart';
+import 'package:arabic_lexicons/theme.dart';
 import 'package:arabic_lexicons/utils.dart';
 import 'package:arabic_lexicons/widgets/scroll.dart';
 import 'package:flutter/foundation.dart';
@@ -385,8 +386,8 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
+    // final theme = Theme.of(context);
+    // final cs = theme.colorScheme;
 
     final style = !_inited
         ? TextStyle()
@@ -410,15 +411,23 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
 
     // final highStyle = style.copyWith(color: cs.error);
 
+    // final styleLU = style.copyWith(
+    //   color: cs.onTertiaryContainer,
+    //   backgroundColor: cs.tertiaryContainer,
+    // );
+
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final styleLU = style.copyWith(
-      color: cs.onTertiaryContainer,
-      backgroundColor: cs.tertiaryContainer,
+      backgroundColor: isDark ? foreignWordBgDark : foreignWordBg,
+    );
+    final highStyle = style.copyWith(
+      backgroundColor: isDark ? bookmarkWordBgDark : bookmarkWordBg,
     );
 
-    final highStyle = style.copyWith(
-      color: cs.onErrorContainer,
-      backgroundColor: cs.errorContainer,
-    );
+    // final highStyle = style.copyWith(
+    //   color: cs.onErrorContainer,
+    //   backgroundColor: cs.errorContainer,
+    // );
 
     final EdgeInsets padd = _inited
         ? _rs.readerPadd(context)

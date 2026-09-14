@@ -7,6 +7,9 @@ final releases = [
     changes:
         '''
     Directly selectable text in (${Dict.arEn.name})
+    Find words
+    Adjust word Spacing in the reader
+    Change highligh style for bookmarks and foreign words
   ''',
   ),
   Release(

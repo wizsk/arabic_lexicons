@@ -103,6 +103,7 @@ class AppSettingsController extends ChangeNotifier {
   static const _scrollLexSelectionAutoScKey = 'scroll-lex-sel-auto';
   static const _readerScrollPersentKey = 'reader-sc-p';
   static const _arUiFontSizeKey = 'aruif';
+  static const _wordSpacingKey = 'wspke';
 
   int _playRate = 0;
   int get playRatelastShown => _playRate;
@@ -146,6 +147,8 @@ class AppSettingsController extends ChangeNotifier {
 
   double _padding = ReaderPageSettings.paddingDef;
   double _maxWidth = ReaderPageSettings.maxWidthDef;
+
+  int _wordSpacing = ReaderPageSettings.wordSpacingDef;
 
   static const String _readerFontDef = defaultReaderArabicFont;
   String _readerFont = _readerFontDef;
@@ -249,6 +252,9 @@ class AppSettingsController extends ChangeNotifier {
     _showSearchSugg = prefs.getBool(_showSearchSuggKey) ?? _showSearchSuggDef;
 
     _luwColored = prefs.getBool(_luwColoredKey) ?? _luwColoredDef;
+
+    _wordSpacing =
+        prefs.getInt(_wordSpacingKey) ?? ReaderPageSettings.wordSpacingDef;
 
     _arUiFontSize = prefs.getDouble(_arUiFontSizeKey);
     L._fontSize = _arUiFontSize;
@@ -383,6 +389,18 @@ class AppSettingsController extends ChangeNotifier {
 
   bool get lexWordDelConfirm {
     return _lexWordDelConfirm;
+  }
+
+  Future<void> saveWordSpacing(int p) async {
+    if (_wordSpacing == p) return;
+    _wordSpacing = p;
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_wordSpacingKey, p);
+  }
+
+  int get wordSpacing {
+    return _wordSpacing;
   }
 
   Future<void> saveReaderScrollPersent(int p) async {
@@ -539,27 +557,32 @@ class AppSettingsController extends ChangeNotifier {
 
     if (_readerFont != d.fontFam) {
       _readerFont = d.fontFam;
-      pref.setString(_readerFontKey, _readerFont);
+      await pref.setString(_readerFontKey, _readerFont);
     }
 
     if (_readerFontSize != d.fontSize) {
       _readerFontSize = d.fontSize;
-      pref.setDouble(_readerFontSizeKey, _readerFontSize);
+      await pref.setDouble(_readerFontSizeKey, _readerFontSize);
     }
 
     if (_readerFontHeight != d.fontHeight) {
       _readerFontHeight = d.fontHeight;
-      pref.setDouble(_readerFontHeightKey, _readerFontHeight);
+      await pref.setDouble(_readerFontHeightKey, _readerFontHeight);
     }
 
     if (_maxWidth != d.maxWidth) {
       _maxWidth = d.maxWidth;
-      pref.setDouble(_maxWidthKey, _maxWidth);
+      await pref.setDouble(_maxWidthKey, _maxWidth);
     }
 
     if (_padding != d.padding) {
       _padding = d.padding;
-      pref.setDouble(_paddingKey, _padding);
+      await pref.setDouble(_paddingKey, _padding);
+    }
+
+    if (_wordSpacing != d.wordSpacing) {
+      _wordSpacing = d.wordSpacing;
+      await pref.setInt(_wordSpacingKey, d.wordSpacing);
     }
 
     notify();

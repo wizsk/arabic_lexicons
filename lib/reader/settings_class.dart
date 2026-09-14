@@ -28,6 +28,7 @@ class RPS extends ReaderSettingsRes {
 class ReaderPageSettings {
   static const double maxWidthDef = 720;
   static const double paddingDef = 10;
+  static const int wordSpacingDef = 2;
 
   VoidCallback? _onChange;
 
@@ -40,6 +41,12 @@ class ReaderPageSettings {
   }
 
   final String bookHash;
+
+  final bool isFindWordMode;
+  final String findWordWord;
+
+  int wordSpacing;
+
   bool isQasidah;
   bool isQasidahCentered;
   bool qasidahLineNum;
@@ -71,6 +78,9 @@ class ReaderPageSettings {
     required this.foreignColored,
     required this.maxWidth,
     required this.padding,
+    required this.wordSpacing,
+    this.findWordWord = '',
+    this.isFindWordMode = false,
   });
 
   static ReaderPageSettings def({String hash = "", bool? isQasidah}) =>
@@ -90,6 +100,7 @@ class ReaderPageSettings {
         foreignColored: appConf.luwColored,
         maxWidth: appConf.maxWidth,
         padding: appConf.padding,
+        wordSpacing: appConf.wordSpacing,
       );
 
   bool isEqual(ReaderPageSettings rs) {
@@ -115,6 +126,7 @@ class ReaderPageSettings {
     fontFam = d.fontFam;
     fontSize = d.fontSize;
     fontHeight = d.fontHeight;
+    wordSpacing = d.wordSpacing;
   }
 
   ReaderPageSettings copyWith({
@@ -134,6 +146,9 @@ class ReaderPageSettings {
     bool? foreignColored,
     double? padding,
     double? maxWidth,
+    String? findWordWord,
+    bool? isFindWordMode,
+    int? wordSpacing,
   }) {
     return ReaderPageSettings(
       bookHash: bookHash ?? this.bookHash,
@@ -151,6 +166,9 @@ class ReaderPageSettings {
       foreignColored: foreignColored ?? this.foreignColored,
       maxWidth: maxWidth ?? this.maxWidth,
       padding: padding ?? this.padding,
+      findWordWord: findWordWord ?? this.findWordWord,
+      isFindWordMode: isFindWordMode ?? this.isFindWordMode,
+      wordSpacing: wordSpacing ?? this.wordSpacing,
     );
   }
 
@@ -170,6 +188,7 @@ class ReaderPageSettings {
       'luwColored': foreignColored,
       'maxWidth': maxWidth,
       'padding': padding,
+      'wordSpacing': wordSpacing,
     };
   }
 
@@ -187,6 +206,7 @@ class ReaderPageSettings {
     final luwColored = map['luwColored'] as bool?;
     final maxWidth = map['maxWidth'] as double?;
     final padding = map['padding'] as double?;
+    final wordSpacing = map['wordSpacing'] as int?;
 
     final fontFam = arabicFonts.firstWhere(
       (e) => e == map['fontFam'],
@@ -214,6 +234,7 @@ class ReaderPageSettings {
       foreignColored: luwColored,
       padding: padding,
       maxWidth: maxWidth,
+      wordSpacing: wordSpacing,
     );
   }
 

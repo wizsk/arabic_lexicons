@@ -94,16 +94,17 @@ class _ReaderModeSettingsSheetState extends State<ReaderModeSettingsSheet> {
             // READING STYLE
             SettingsSectionSurface(
               children: [
-                SwitchListTile(
-                  title: const Text('Qasidah mode'),
-                  subtitle: const Text('Poem layout'),
-                  secondary: const FilledIcon(Icons.notes),
-                  value: _rs.isQasidah,
-                  onChanged: (v) {
-                    _rs.isQasidah = v;
-                    _save();
-                  },
-                ),
+                if (!_rs.isFindWordMode)
+                  SwitchListTile(
+                    title: const Text('Qasidah mode'),
+                    subtitle: const Text('Poem layout'),
+                    secondary: const FilledIcon(Icons.notes),
+                    value: _rs.isQasidah,
+                    onChanged: (v) {
+                      _rs.isQasidah = v;
+                      _save();
+                    },
+                  ),
 
                 if (_rs.isQasidah) ...[
                   SwitchListTile(
@@ -172,7 +173,7 @@ class _ReaderModeSettingsSheetState extends State<ReaderModeSettingsSheet> {
                     final old = ReaderAdjustData.fromReaderPageSettings(_rs);
 
                     final parasInput = widget.paras
-                        .map((e) => e.map((f) => f.ar).join(" "))
+                        .map((e) => e.map((f) => f.ar).toList())
                         .toList(growable: false);
 
                     final res = await ReaderAdjustPage.open(
@@ -209,6 +210,7 @@ class _ReaderModeSettingsSheetState extends State<ReaderModeSettingsSheet> {
                   },
                 ),
 
+                // if (_rs.isFindWordMode) ...[
                 SwitchListTile(
                   title: const Text('Colored bookmarks'),
                   subtitle: const Text('Highlight bookmarked words'),
@@ -240,6 +242,7 @@ class _ReaderModeSettingsSheetState extends State<ReaderModeSettingsSheet> {
                     _save();
                   },
                 ),
+                // ],
               ],
             ),
           ],

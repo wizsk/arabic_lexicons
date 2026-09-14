@@ -54,8 +54,8 @@ abstract final class ReaderInputPageData {
   static const booksIndexName = 'books.txt';
 
   static late final String booksDirPath;
-  static String bookTextDest(String sha) =>
-      '${path.join(booksDirPath, sha)}.txt';
+  static String bookTextDest(String sha, [String? bpath]) =>
+      '${path.join(bpath ?? booksDirPath, sha)}.txt';
 
   static late final String confDirPath;
 

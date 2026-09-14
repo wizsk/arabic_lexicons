@@ -402,13 +402,23 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
     final isFabVisable = appConf.hideAppbar ? _isFabVisable : true;
 
     // const lookedUpColor = Color(0xFF2F5FAF); // strong readable blue
-    final lookedUpColor = theme.brightness == Brightness.light
-        ? Color.fromARGB(255, 0, 0, 255)
-        : Color.fromARGB(255, 165, 165, 255); // deep teal
+    // final lookedUpColor = theme.brightness == Brightness.light
+    //     ? Color.fromARGB(255, 0, 0, 255)
+    //     : Color.fromARGB(255, 165, 165, 255); // deep teal
 
-    final styleLU = style.copyWith(color: lookedUpColor);
+    // final styleLU = style.copyWith(color: lookedUpColor);
 
-    final highStyle = style.copyWith(color: cs.error);
+    // final highStyle = style.copyWith(color: cs.error);
+
+    final styleLU = style.copyWith(
+      color: cs.onTertiaryContainer,
+      backgroundColor: cs.tertiaryContainer,
+    );
+
+    final highStyle = style.copyWith(
+      color: cs.onErrorContainer,
+      backgroundColor: cs.errorContainer,
+    );
 
     final EdgeInsets padd = _inited
         ? _rs.readerPadd(context)

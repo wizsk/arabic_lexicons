@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:arabic_lexicons/alphabets.dart';
 import 'package:arabic_lexicons/conf.dart';
 import 'package:arabic_lexicons/data.dart';
 import 'package:arabic_lexicons/datas/stories_txts.dart';
@@ -36,6 +37,7 @@ class ReaderAdjustData {
   double maxWidth;
   double fontSize;
   double fontHeight;
+  int wordSpacing;
   String fontFam;
 
   ReaderAdjustData({
@@ -44,6 +46,7 @@ class ReaderAdjustData {
     required this.fontHeight,
     required this.padding,
     required this.maxWidth,
+    required this.wordSpacing,
   });
 
   static ReaderAdjustData def() {
@@ -53,6 +56,7 @@ class ReaderAdjustData {
       fontSize: defaultReaderArabicFontSize,
       maxWidth: ReaderPageSettings.maxWidthDef,
       padding: ReaderPageSettings.paddingDef,
+      wordSpacing: ReaderPageSettings.wordSpacingDef,
     );
   }
 
@@ -63,6 +67,7 @@ class ReaderAdjustData {
       fontFam: c.readerFont,
       fontSize: c.readerFontSize,
       fontHeight: c.readerFontHeight,
+      wordSpacing: c.wordSpacing,
     );
   }
 
@@ -73,6 +78,7 @@ class ReaderAdjustData {
       fontFam: s.fontFam,
       fontSize: s.fontSize,
       fontHeight: s.fontHeight,
+      wordSpacing: s.wordSpacing,
     );
   }
 
@@ -81,6 +87,7 @@ class ReaderAdjustData {
         maxWidth == b.maxWidth &&
         fontFam == b.fontFam &&
         fontHeight == b.fontHeight &&
+        wordSpacing == b.wordSpacing &&
         fontSize == b.fontSize;
   }
 
@@ -90,6 +97,7 @@ class ReaderAdjustData {
     double? fontSize,
     double? fontHeight,
     String? fontFam,
+    int? wordSpacing,
   }) {
     return ReaderAdjustData(
       padding: padding ?? this.padding,
@@ -97,6 +105,7 @@ class ReaderAdjustData {
       fontFam: fontFam ?? this.fontFam,
       fontSize: fontSize ?? this.fontSize,
       fontHeight: fontHeight ?? this.fontHeight,
+      wordSpacing: wordSpacing ?? this.wordSpacing,
     );
   }
 
@@ -107,6 +116,7 @@ class ReaderAdjustData {
       fontFam: fontFam,
       fontSize: fontSize,
       fontHeight: fontHeight,
+      wordSpacing: wordSpacing,
     );
   }
 }
@@ -116,14 +126,14 @@ const double maxReaderFontSize = 36.00;
 
 class ReaderAdjustPage extends StatefulWidget {
   final ReaderAdjustData data;
-  final List<String>? paras;
+  final List<List<String>>? paras;
 
   const ReaderAdjustPage({super.key, required this.data, this.paras});
 
   static Future<ReaderAdjustData?> open(
     BuildContext context, {
     required ReaderAdjustData data,
-    List<String>? paras,
+    List<List<String>>? paras,
   }) async {
     return Navigator.push<ReaderAdjustData?>(
       context,
@@ -156,13 +166,28 @@ class _ReaderAdjustPageState extends State<ReaderAdjustPage> {
 
     _data = widget.data.copyWith();
     if (widget.paras != null && widget.paras!.isNotEmpty) {
-      _paras = widget.paras!;
+      _makeProvidedParas();
       _showingDemoTxt = false;
       _hasProvidedDemoTxt = true;
     } else {
-      _paras = stories[_demoTxtIdx].txt;
+      _makeDemoParas();
       _hasProvidedDemoTxt = false;
     }
+  }
+
+  void _makeProvidedParas() {
+    _paras = widget.paras!.map((p) => p.join(' ' * _data.wordSpacing)).toList();
+  }
+
+  void _makeDemoParas() {
+    _paras = stories[_demoTxtIdx].txt
+        .map(
+          (p) => p
+              .split(ArabicNormalizer.spaces)
+              .where((w) => w.isNotEmpty)
+              .join(' ' * _data.wordSpacing),
+        )
+        .toList();
   }
 
   @override
@@ -244,11 +269,11 @@ class _ReaderAdjustPageState extends State<ReaderAdjustPage> {
               case 'demo-txt':
                 setState(() {
                   if (_showingDemoTxt) {
-                    _paras = widget.paras ?? stories[_demoTxtIdx].txt;
+                    _makeProvidedParas();
                     _showingDemoTxt = false;
                   } else {
                     _showingDemoTxt = true;
-                    _paras = stories[_demoTxtIdx].txt;
+                    _makeDemoParas();
                   }
                 });
                 break;
@@ -387,6 +412,10 @@ class _ReaderAdjustPageState extends State<ReaderAdjustPage> {
             ),
             label: 'Width',
           ),
+          const NavigationDestination(
+            icon: Icon(Icons.text_format_sharp),
+            label: 'Word',
+          ),
         ],
       ),
       body: SafeArea(
@@ -521,6 +550,35 @@ class _ReaderAdjustPageState extends State<ReaderAdjustPage> {
                             });
                           },
                           disabled: _data.maxWidth < 0,
+                        ),
+                        5 => _Changer(
+                          key: const ValueKey('word'),
+                          title: 'Space between words',
+                          subTitle: 'Adjust word spacing for easier reading',
+                          current: _data.wordSpacing.toDouble(),
+                          valName: 'sp',
+                          minV: 1,
+                          maxV: 6,
+                          def: ReaderPageSettings.wordSpacingDef.toDouble(),
+                          step: 1,
+                          setVal: (v) => setState(() {
+                            _data.wordSpacing = v.toInt();
+                            if (_showingDemoTxt) {
+                              _makeDemoParas();
+                            } else {
+                              _makeProvidedParas();
+                            }
+                          }),
+                          // touggleDisable: () {
+                          //   setState(() {
+                          //     if (_data.maxWidth > 0) {
+                          //       _data.maxWidth = -1;
+                          //     } else {
+                          //       _data.maxWidth = ReaderPageSettings.maxWidthDef;
+                          //     }
+                          //   });
+                          // },
+                          // disabled: _data.maxWidth < 0,
                         ),
                         _ => const SizedBox.shrink(),
                       },
@@ -726,8 +784,8 @@ class _Changer extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('${minV.toInt()}px', style: subTitleStyle),
-                  Text('${maxV.toInt()}px', style: subTitleStyle),
+                  Text('${minV.toInt()}$valName', style: subTitleStyle),
+                  Text('${maxV.toInt()}$valName', style: subTitleStyle),
                 ],
               ),
             ),

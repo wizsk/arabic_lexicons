@@ -72,19 +72,17 @@ class ClickableParagraph extends StatelessWidget {
     final spans = <TextSpan>[];
 
     spans.add(TextSpan(children: [paraSpacerStart(rs.fontSize)]));
-    for (final word in peras[index]) {
-      spans.add(
-        _readerWordSpan(
-          context: context,
-          rs: rs,
-          isBmk: WordStore.isBm(word.cl),
-          word: word,
-          style: style,
-          styleLU: styleLU,
-          highStyle: highStyletyle,
-        ),
-      );
-    }
+
+    _buildParaSpans(
+      context,
+      spans,
+      peras[index],
+      rs: rs,
+      style: style,
+      styleLU: styleLU,
+      highStyle: highStyletyle,
+    );
+
     return spans;
   }
 }
@@ -168,20 +166,48 @@ class ClickableBayt extends StatelessWidget {
       );
     }
 
-    for (final word in paras[index]) {
-      spans.add(
-        _readerWordSpan(
-          context: context,
-          rs: rs,
-          isBmk: WordStore.isBm(word.cl),
-          word: word,
-          style: style,
-          styleLU: styleLU,
-          highStyle: highStyletyle,
-        ),
-      );
-    }
+    _buildParaSpans(
+      context,
+      spans,
+      paras[index],
+      rs: rs,
+      style: style,
+      styleLU: styleLU,
+      highStyle: highStyletyle,
+    );
+
     return spans;
+  }
+}
+
+void _buildParaSpans(
+  BuildContext context,
+  List<TextSpan> spans,
+  PeraEntry para, {
+  required ReaderPageSettings rs,
+  required TextStyle style,
+  required TextStyle styleLU,
+  required TextStyle highStyle,
+}) {
+  final len = para.length;
+  final sp = TextSpan(text: ' ' * rs.wordSpacing, style: style);
+
+  for (var i = 0; i < len; i++) {
+    final word = para[i];
+    spans.add(
+      _readerWordSpan(
+        context: context,
+        rs: rs,
+        isBmk: WordStore.isBm(word.cl),
+        word: word,
+        style: style,
+        styleLU: styleLU,
+        highStyle: highStyle,
+      ),
+    );
+    if (i != len - 1) {
+      spans.add(sp);
+    }
   }
 }
 
@@ -196,16 +222,21 @@ TextSpan _readerWordSpan({
   required TextStyle highStyle,
 }) {
   TextStyle ts;
-  if (rs.isBmColored && isBmk) {
-    ts = highStyle;
-  } else if (rs.foreignColored && WordStore.isForeign(word.cl)) {
-    ts = styleLU;
+  if (rs.isFindWordMode && word.cl == rs.findWordWord) {
+    final cs = Theme.of(context).colorScheme;
+    ts = style.copyWith(color: cs.onPrimary, backgroundColor: cs.primary);
   } else {
-    ts = style;
+    if (rs.isBmColored && isBmk) {
+      ts = highStyle;
+    } else if (rs.foreignColored && WordStore.isForeign(word.cl)) {
+      ts = styleLU;
+    } else {
+      ts = style;
+    }
   }
 
   return TextSpan(
-    text: rs.isRmTashkil ? '${word.nTk} ' : '${word.ar} ',
+    text: rs.isRmTashkil ? word.nTk : word.ar,
     recognizer: word.cl.isEmpty
         ? null
         : (TapGestureRecognizer()

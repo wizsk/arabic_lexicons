@@ -79,7 +79,7 @@ PeraEntries cleanReaderInputAndPrepare(String text) {
     l = l.trim();
     if (l.isEmpty) continue;
     List<WordEntry> curr = [];
-    for (var w in l.split(RegExp(r'\s'))) {
+    for (var w in l.split(ArabicNormalizer.spaces)) {
       curr.add(
         WordEntry(
           ar: w,

@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 class ArabicNormalizer {
   // arabic only numbers
   static final arabicDigits = RegExp(r'^[\u0660-\u0669]+$');
+  static final spaces = RegExp(r'\s');
 
   static bool isArabicNum(String s) => arabicDigits.hasMatch(s);
 

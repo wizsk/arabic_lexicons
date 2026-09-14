@@ -3,6 +3,7 @@ import 'package:arabic_lexicons/data.dart';
 import 'package:arabic_lexicons/datas/word_store.dart';
 import 'package:arabic_lexicons/main_widgets.dart';
 import 'package:arabic_lexicons/multi_selection.dart';
+import 'package:arabic_lexicons/reader/find_word.dart';
 import 'package:arabic_lexicons/utils.dart';
 import 'package:flutter/material.dart';
 
@@ -62,7 +63,23 @@ class SelectableWordListTitle extends StatelessWidget {
           if (selection.hasSelection) {
             selection.toggle(word);
           } else {
-            openDict(context, word, dict: dict).then((_) => setState(() {}));
+            showOpendictOrFindword(
+              context,
+              word,
+              () {
+                openDict(
+                  context,
+                  word,
+                  dict: dict,
+                ).then((_) => setState(() {}));
+              },
+              () {
+                FindWordReaderPage.open(context, word).then((_) {
+                  setState(() {});
+                });
+              },
+              L.arStyle,
+            );
           }
         },
         leading: IconButton(

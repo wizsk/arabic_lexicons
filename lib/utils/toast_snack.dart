@@ -57,11 +57,26 @@ abstract final class MsgSv {
     final messenger = snackMessengerKey.currentState;
     messenger?.hideCurrentSnackBar();
 
+    final ac = action == null
+        ? null
+        : SnackBarAction(
+            key: action.key,
+            label: action.label,
+            onPressed: () {
+              _snackMsgTimmer?.cancel();
+              action.onPressed();
+            },
+            disabledTextColor: action.disabledTextColor,
+            disabledBackgroundColor: action.disabledBackgroundColor,
+            backgroundColor: action.backgroundColor,
+            textColor: action.textColor,
+          );
+
     final f = messenger?.showSnackBar(
       SnackBar(
         content: message,
         duration: duration,
-        action: action,
+        action: ac,
         showCloseIcon: showCloseIcon,
         behavior: SnackBarBehavior.floating,
       ),
@@ -69,7 +84,10 @@ abstract final class MsgSv {
 
     if (f != null && action != null) {
       _snackMsgTimmer = Timer(duration, () {
-        f.close();
+        try {
+          f.close();
+        } catch (_) {}
+        _snackMsgTimmer = null;
       });
     }
   }

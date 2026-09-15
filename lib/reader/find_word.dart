@@ -14,6 +14,7 @@ import 'package:arabic_lexicons/reader/settings_class.dart';
 import 'package:arabic_lexicons/theme.dart';
 import 'package:arabic_lexicons/utils.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:path/path.dart' as path;
 
 Future<void> showOpendictOrFindword(
@@ -178,6 +179,8 @@ class _FindWordReaderPageState extends State<FindWordReaderPage> {
       isFindWordMode: true,
       findWordWord: widget.word,
     );
+    _sc.addListener(_onScroll);
+
     _setOnChange();
 
     _init();
@@ -212,6 +215,27 @@ class _FindWordReaderPageState extends State<FindWordReaderPage> {
     });
   }
 
+  bool _readerAppBarColorBg = true;
+  bool _isFabVisable = true;
+
+  void _onScroll() {
+    final appbarColor = readerAppBarColorBg(_sc.offset);
+    if (_readerAppBarColorBg != appbarColor) {
+      setState(() => _readerAppBarColorBg = appbarColor);
+    }
+
+    final sd = _sc.position.userScrollDirection;
+    if (sd == ScrollDirection.reverse && _isFabVisable) {
+      setState(() {
+        _isFabVisable = false;
+      });
+    } else if (sd == ScrollDirection.forward && !_isFabVisable) {
+      setState(() {
+        _isFabVisable = true;
+      });
+    }
+  }
+
   @override
   void setState(VoidCallback fn) {
     if (!mounted) return;
@@ -221,6 +245,10 @@ class _FindWordReaderPageState extends State<FindWordReaderPage> {
   @override
   void dispose() {
     _rs.dispose();
+
+    _sc.removeListener(_onScroll);
+    _sc.dispose();
+
     super.dispose();
   }
 
@@ -251,9 +279,9 @@ class _FindWordReaderPageState extends State<FindWordReaderPage> {
         floating: true,
         snap: appConf.hideAppbar,
         pinned: !appConf.hideAppbar,
-        // backgroundColor: _readerAppBarColorBg
-        //     ? appConf.readerSurface(context)
-        //     : null,
+        backgroundColor: _readerAppBarColorBg
+            ? appConf.readerSurface(context)
+            : null,
         title: Text(_title, textDirection: TextDirection.rtl, style: L.arStyle),
         centerTitle: false,
         actions: [
@@ -359,7 +387,7 @@ class _FindWordReaderPageState extends State<FindWordReaderPage> {
                 height: _rs.fontHeight,
               );
 
-    // final isFabVisable = appConf.hideAppbar ? _isFabVisable : true;
+    final isFabVisable = appConf.hideAppbar ? _isFabVisable : true;
 
     // const lookedUpColor = Color(0xFF2F5FAF); // strong readable blue
     // final lookedUpColor = theme.brightness == Brightness.light
@@ -380,6 +408,7 @@ class _FindWordReaderPageState extends State<FindWordReaderPage> {
     final styleLU = style.copyWith(
       backgroundColor: isDark ? foreignWordBgDark : foreignWordBg,
     );
+
     final highStyle = style.copyWith(
       backgroundColor: isDark ? bookmarkWordBgDark : bookmarkWordBg,
     );
@@ -388,187 +417,180 @@ class _FindWordReaderPageState extends State<FindWordReaderPage> {
         ? _rs.readerPadd(context)
         : EdgeInsets.all(0);
 
-    return PopScope(
-      // canPop: false,
-      // onPopInvokedWithResult: (didPop, _) {
-      //   if (didPop) return;
-      //   exitReaderPage(context);
-      // },
-      child: Scaffold(
-        // backgroundColor: appConf.readerSurface(context),
-        body: GestureStack(
-          child: Directionality(
-            textDirection: TextDirection.rtl,
-            child: CustomScrollView(
-              controller: _sc,
-              key: ValueKey(_exactMath),
-              slivers: [
-                _buildSliverAppBar(context),
+    return Scaffold(
+      backgroundColor: appConf.readerSurface(context),
+      body: GestureStack(
+        child: Directionality(
+          textDirection: TextDirection.rtl,
+          child: CustomScrollView(
+            controller: _sc,
+            key: ValueKey(_exactMath),
+            slivers: [
+              _buildSliverAppBar(context),
 
-                if (!_initState.isInited)
-                  const SliverFillRemaining(
-                    hasScrollBody: false,
-                    child: Center(child: CircularProgressIndicator()),
-                  )
-                else if (_paras.isEmpty)
-                  const SliverFillRemaining(
-                    hasScrollBody: false,
-                    child: Center(child: Text('No Results')),
-                  )
-                else ...[
-                  ..._buildParagraphSliver(
-                    context,
-                    padd,
-                    style,
-                    styleLU,
-                    highStyle,
-                  ),
+              if (!_initState.isInited)
+                const SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: Center(child: CircularProgressIndicator()),
+                )
+              else if (_paras.isEmpty)
+                const SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: Center(child: Text('No Results')),
+                )
+              else ...[
+                ..._buildParagraphSliver(
+                  context,
+                  padd,
+                  style,
+                  styleLU,
+                  highStyle,
+                ),
 
-                  SliverToBoxAdapter(
-                    child: SizedBox(height: scrollPadding.bottom),
-                  ),
-                ],
+                SliverToBoxAdapter(
+                  child: SizedBox(height: scrollPadding.bottom),
+                ),
               ],
-            ),
+            ],
           ),
         ),
-        floatingActionButton: !_initState.isInited
-            ? null
-            :
-              // : AnimatedSlide(
-              //     duration: Duration(milliseconds: 300),
-              //     offset: isFabVisable ? Offset.zero : Offset(0, 2),
-              //     child: AnimatedOpacity(
-              //       duration: Duration(milliseconds: 300),
-              //       opacity: isFabVisable ? 1.0 : 0.0,
-              //       child:
-              FloatingActionButton(
-                child: Icon(Icons.menu_book),
-                onPressed: () async {
-                  final result = await showModalBottomSheet<String>(
-                    context: context,
-                    showDragHandle: true,
-                    useSafeArea: true,
-                    isScrollControlled: true,
-                    constraints: const BoxConstraints(maxWidth: 600),
-                    builder: (context) {
-                      // final theme = Theme.of(context);
-                      // final cs = theme.colorScheme;
+      ),
+      floatingActionButton: !_initState.isInited
+          ? null
+          : AnimatedSlide(
+              duration: Duration(milliseconds: 300),
+              offset: isFabVisable ? Offset.zero : Offset(0, 2),
+              child: AnimatedOpacity(
+                duration: Duration(milliseconds: 300),
+                opacity: isFabVisable ? 1.0 : 0.0,
+                child: FloatingActionButton(
+                  child: Icon(Icons.menu_book),
+                  onPressed: () async {
+                    final result = await showModalBottomSheet<String>(
+                      context: context,
+                      showDragHandle: true,
+                      useSafeArea: true,
+                      isScrollControlled: true,
+                      constraints: const BoxConstraints(maxWidth: 600),
+                      builder: (context) {
+                        // final theme = Theme.of(context);
+                        // final cs = theme.colorScheme;
 
-                      return SingleChildScrollView(
-                        padding: scrollPaddingBottmSheet(context),
-                        child: Column(
-                          spacing: 12,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            if (_paras.isNotEmpty)
-                              const SettingsSectionSurface(
+                        return SingleChildScrollView(
+                          padding: scrollPaddingBottmSheet(context),
+                          child: Column(
+                            spacing: 12,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              if (_paras.isNotEmpty)
+                                const SettingsSectionSurface(
+                                  children: [
+                                    ReaderSelectionTile(
+                                      icon: Icons.vertical_align_top,
+                                      title: 'Scroll to top',
+                                      subtitle: 'Jump to the beginning',
+                                      value: 'scroll-top',
+                                    ),
+                                    ReaderSelectionTile(
+                                      icon: Icons.vertical_align_bottom,
+                                      title: 'Scroll to bottom',
+                                      subtitle: 'Jump to the end',
+                                      value: 'scroll-bot',
+                                    ),
+                                  ],
+                                ),
+
+                              /// Main actions
+                              SettingsSectionSurface(
                                 children: [
                                   ReaderSelectionTile(
-                                    icon: Icons.vertical_align_top,
-                                    title: 'Scroll to top',
-                                    subtitle: 'Jump to the beginning',
-                                    value: 'scroll-top',
+                                    icon: Icons.settings,
+                                    title: 'Settings',
+                                    subtitle: 'Reader preferences',
+                                    value: 'settings',
                                   ),
-                                  ReaderSelectionTile(
-                                    icon: Icons.vertical_align_bottom,
-                                    title: 'Scroll to bottom',
-                                    subtitle: 'Jump to the end',
-                                    value: 'scroll-bot',
-                                  ),
+                                  if (_paras.isNotEmpty)
+                                    ReaderSelectionTile(
+                                      icon: Icons.copy_all,
+                                      title: 'Copy Text',
+                                      subtitle: 'Copy original content',
+                                      value: 'copy-txt',
+                                    ),
                                 ],
                               ),
 
-                            /// Main actions
-                            SettingsSectionSurface(
-                              children: [
-                                ReaderSelectionTile(
-                                  icon: Icons.settings,
-                                  title: 'Settings',
-                                  subtitle: 'Reader preferences',
-                                  value: 'settings',
-                                ),
-                                if (_paras.isNotEmpty)
+                              /// Exit (destructive)
+                              const SettingsSectionSurface(
+                                // mode: SettingsSectionSurfaceMode.alert,
+                                children: [
                                   ReaderSelectionTile(
-                                    icon: Icons.copy_all,
-                                    title: 'Copy Text',
-                                    subtitle: 'Copy original content',
-                                    value: 'copy-txt',
+                                    icon: Icons.logout,
+                                    title: 'Exit Reader',
+                                    subtitle: 'Return to input screen',
+                                    value: 'exit',
                                   ),
-                              ],
-                            ),
-
-                            /// Exit (destructive)
-                            const SettingsSectionSurface(
-                              // mode: SettingsSectionSurfaceMode.alert,
-                              children: [
-                                ReaderSelectionTile(
-                                  icon: Icons.logout,
-                                  title: 'Exit Reader',
-                                  subtitle: 'Return to input screen',
-                                  value: 'exit',
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  );
-
-                  if (result == null || !context.mounted) return;
-
-                  switch (result) {
-                    case 'exit':
-                      Navigator.of(context).pop();
-                      break;
-
-                    case 'settings':
-                      await ReaderModeSettingsSheet.show(
-                        context,
-                        settings: _rs,
-                        paras: null,
-                      );
-                      break;
-
-                    case 'scroll-top':
-                      WidgetsBinding.instance.addPostFrameCallback((_) {
-                        if (!_sc.hasClients) return;
-                        _sc.animateTo(
-                          0.0,
-                          duration: const Duration(milliseconds: 400),
-                          curve: Curves.easeOut,
+                                ],
+                              ),
+                            ],
+                          ),
                         );
-                      });
+                      },
+                    );
 
-                      break;
+                    if (result == null || !context.mounted) return;
 
-                    case 'scroll-bot':
-                      if (_sc.hasClients) {
-                        WidgetsBinding.instance.addPostFrameCallback((_) async {
+                    switch (result) {
+                      case 'exit':
+                        Navigator.of(context).pop();
+                        break;
+
+                      case 'settings':
+                        await ReaderModeSettingsSheet.show(
+                          context,
+                          settings: _rs,
+                          paras: null,
+                        );
+                        break;
+
+                      case 'scroll-top':
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
                           if (!_sc.hasClients) return;
+                          _sc.animateTo(
+                            0.0,
+                            duration: const Duration(milliseconds: 400),
+                            curve: Curves.easeOut,
+                          );
+                        });
 
-                          double prePos = 0.0;
-                          while (prePos < _sc.position.maxScrollExtent) {
+                        break;
+
+                      case 'scroll-bot':
+                        if (_sc.hasClients) {
+                          WidgetsBinding.instance.addPostFrameCallback((
+                            _,
+                          ) async {
                             if (!_sc.hasClients) return;
 
-                            prePos = _sc.position.maxScrollExtent;
+                            double prePos = 0.0;
+                            while (prePos < _sc.position.maxScrollExtent) {
+                              if (!_sc.hasClients) return;
 
-                            await _sc.animateTo(
-                              prePos,
-                              duration: const Duration(milliseconds: 400),
-                              curve: Curves.linear,
-                            );
-                          }
-                        });
-                      }
-                      break;
-                  }
-                },
+                              prePos = _sc.position.maxScrollExtent;
+
+                              await _sc.animateTo(
+                                prePos,
+                                duration: const Duration(milliseconds: 400),
+                                curve: Curves.linear,
+                              );
+                            }
+                          });
+                        }
+                        break;
+                    }
+                  },
+                ),
               ),
-        //     ),
-        //   ),
-      ),
+            ),
     );
   }
 }

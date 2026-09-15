@@ -92,13 +92,14 @@ class _FindWordEnry {
   const _FindWordEnry(this.title, this.paras);
 }
 
-Future<List<_FindWordEnry>> _yo(
+Future<({int matchCount, List<_FindWordEnry> res})> _getResIsolate(
   String w,
   String bPath,
   List<BookEntry> books,
   bool exatctMatch,
 ) async {
   final List<_FindWordEnry> res = [];
+  int matchCount = 0;
 
   bool matchExact(String word) => w == word;
   bool matchContains(String word) => word.contains(w);
@@ -118,6 +119,7 @@ Future<List<_FindWordEnry>> _yo(
         for (final e in p) {
           if (matchFunc(e.cl)) {
             en.add(p);
+            matchCount++;
             break;
           }
         }
@@ -128,13 +130,16 @@ Future<List<_FindWordEnry>> _yo(
     } catch (_) {}
   }
 
-  return res;
+  return (matchCount: matchCount, res: res);
 }
 
-Future<List<_FindWordEnry>> _getData(String word, bool exactMatch) async {
+Future<({int matchCount, List<_FindWordEnry> res})> _getData(
+  String word,
+  bool exactMatch,
+) async {
   final books = ReaderInputPageData.bookEntries;
   final bpath = ReaderInputPageData.booksDirPath;
-  return Isolate.run(() => _yo(word, bpath, books, exactMatch));
+  return Isolate.run(() => _getResIsolate(word, bpath, books, exactMatch));
 }
 
 class FindWordReaderPage extends StatefulWidget {
@@ -207,19 +212,20 @@ class _FindWordReaderPageState extends State<FindWordReaderPage> {
     }
 
     final result = await _getData(widget.word, _exactMath);
-    final count = result.isEmpty
-        ? null
-        : enToArNum(result.map((e) => e.paras.length).reduce((a, b) => a + b));
+    final count = result.matchCount == 0 ? null : enToArNum(result.matchCount);
 
     setState(() {
-      _paras = result;
+      _paras = result.res;
       _title = count == null ? widget.word : '${widget.word} $count';
       _initState = InitState.done;
     });
 
     if (mounted) {
+      final es = result.matchCount > 1 ? 'es' : '';
       MsgSv.showToast(
-        'Showing ${_exactMath ? 'exact word matches' : 'matches containing'}',
+        result.matchCount == 0
+            ? 'No matches found'
+            : 'Showing ${result.matchCount} ${_exactMath ? 'exact word match$es' : 'match$es containing'}',
       );
     }
   }

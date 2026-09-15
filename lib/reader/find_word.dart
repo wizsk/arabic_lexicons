@@ -197,6 +197,7 @@ class _FindWordReaderPageState extends State<FindWordReaderPage> {
       setState(() {
         _initState = InitState.initing;
         _paras.clear();
+        _readerAppBarColorBg = true;
       });
     }
 
@@ -323,30 +324,26 @@ class _FindWordReaderPageState extends State<FindWordReaderPage> {
         sliver: SliverList(
           delegate: SliverChildBuilderDelegate((context, index) {
             if (index == 0) {
-              return Padding(
-                padding: const EdgeInsets.all(8.0).copyWith(bottom: 16),
-                child: Center(
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12.0,
-                      vertical: 8.0,
-                    ),
-                    decoration: BoxDecoration(
-                      color: cs.secondaryContainer,
-                      borderRadius: BorderRadius.circular(12.0),
-                    ),
-                    child: Text(
-                      p.title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.titleLarge?.ar
-                          .copyWith(
-                            color: cs.onSecondaryContainer,
-                            fontWeight: FontWeight.w500,
-                          ),
+              return Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                    child: Center(
+                      child: Text(
+                        p.title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.titleLarge?.ar
+                            .copyWith(
+                              color: cs.onSecondaryContainer,
+                              fontWeight: FontWeight.w500,
+                            ),
+                      ),
                     ),
                   ),
-                ),
+                  SizedBox(height: 6),
+                  Divider(),
+                ],
               );
             }
 

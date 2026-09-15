@@ -16,11 +16,11 @@ const uiSeedColors = [
   Color(0xFFE76F50),
 ];
 
-const bookmarkWordBg = Color(0xD0FFF3A3);
-const foreignWordBg = Color(0x80D9F7BE);
+const bookmarkWordBg = Color(0xE0FFF3A3);
+const foreignWordBg = Color(0xA0D9F7BE);
 
-const bookmarkWordBgDark = Color(0xD0513f13);
-const foreignWordBgDark = Color(0xA025543b);
+const bookmarkWordBgDark = Color(0xE0513f13);
+const foreignWordBgDark = Color(0xC025543b);
 
 class ReaderColors {
   final Color surface;

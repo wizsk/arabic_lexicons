@@ -1,5 +1,3 @@
-import 'dart:math' as math;
-
 import 'package:arabic_lexicons/alphabets.dart';
 import 'package:arabic_lexicons/conf.dart';
 import 'package:arabic_lexicons/data.dart';
@@ -390,31 +388,28 @@ class _ReaderAdjustPageState extends State<ReaderAdjustPage> {
         }),
         destinations: [
           const NavigationDestination(
-            icon: Icon(Icons.text_fields),
+            icon: Icon(Icons.format_size),
             label: 'Size',
-          ),
-          const NavigationDestination(
-            icon: Icon(Icons.text_format_sharp),
-            label: 'Height',
           ),
           const NavigationDestination(
             icon: Icon(Icons.font_download_outlined),
             label: 'Font',
           ),
           const NavigationDestination(
-            icon: Icon(Icons.space_bar),
-            label: 'Margin',
-          ),
-          NavigationDestination(
-            icon: Transform.rotate(
-              angle: 90 * math.pi / 180, // 90 degrees
-              child: const Icon(Icons.expand),
-            ),
-            label: 'Width',
+            icon: Icon(Icons.format_line_spacing),
+            label: 'Height',
           ),
           const NavigationDestination(
-            icon: Icon(Icons.text_format_sharp),
+            icon: Icon(Icons.space_bar),
             label: 'Word',
+          ),
+          const NavigationDestination(
+            icon: Icon(Icons.format_indent_increase),
+            label: 'Margin',
+          ),
+          const NavigationDestination(
+            icon: Icon(Icons.width_normal),
+            label: 'Width',
           ),
         ],
       ),
@@ -496,7 +491,15 @@ class _ReaderAdjustPageState extends State<ReaderAdjustPage> {
                           step: 1,
                           setVal: (v) => setState(() => _data.fontSize = v),
                         ),
-                        1 => _Changer(
+                        1 => _FontPicker(
+                          key: const ValueKey('font'),
+                          fonts: arabicFonts,
+                          selectedFont: _data.fontFam,
+                          titleStyle: titleStyle,
+                          onSelect: (font) =>
+                              setState(() => _data.fontFam = font),
+                        ),
+                        2 => _Changer(
                           key: const ValueKey('fontHeight'),
                           title: 'Font height',
                           subTitle: 'Make the font height smaller or larger.',
@@ -509,56 +512,14 @@ class _ReaderAdjustPageState extends State<ReaderAdjustPage> {
                           setVal: (v) =>
                               setState(() => _data.fontHeight = v / 100),
                         ),
-                        2 => _FontPicker(
-                          key: const ValueKey('font'),
-                          fonts: arabicFonts,
-                          selectedFont: _data.fontFam,
-                          titleStyle: titleStyle,
-                          onSelect: (font) =>
-                              setState(() => _data.fontFam = font),
-                        ),
                         3 => _Changer(
-                          key: const ValueKey('padding'),
-                          title: 'Side Margin',
-                          subTitle:
-                              'Minimum padding on small screens like phones',
-                          current: _data.padding,
-                          minV: 0,
-                          maxV: 50,
-                          def: ReaderPageSettings.paddingDef,
-                          step: 5,
-                          setVal: (v) => setState(() => _data.padding = v),
-                        ),
-                        4 => _Changer(
-                          key: const ValueKey('width'),
-                          title: 'Max Paragraph Width',
-                          subTitle:
-                              'Limits line length on wide screens like tablets',
-                          current: _data.maxWidth,
-                          minV: 400,
-                          maxV: 1200,
-                          def: ReaderPageSettings.maxWidthDef,
-                          step: 20,
-                          setVal: (v) => setState(() => _data.maxWidth = v),
-                          touggleDisable: () {
-                            setState(() {
-                              if (_data.maxWidth > 0) {
-                                _data.maxWidth = -1;
-                              } else {
-                                _data.maxWidth = ReaderPageSettings.maxWidthDef;
-                              }
-                            });
-                          },
-                          disabled: _data.maxWidth < 0,
-                        ),
-                        5 => _Changer(
                           key: const ValueKey('word'),
                           title: 'Space between words',
                           subTitle: 'Adjust word spacing for easier reading',
                           current: _data.wordSpacing.toDouble(),
                           valName: 'sp',
                           minV: 1,
-                          maxV: 6,
+                          maxV: 8,
                           def: ReaderPageSettings.wordSpacingDef.toDouble(),
                           step: 1,
                           setVal: (v) => setState(() {
@@ -579,6 +540,40 @@ class _ReaderAdjustPageState extends State<ReaderAdjustPage> {
                           //   });
                           // },
                           // disabled: _data.maxWidth < 0,
+                        ),
+                        4 => _Changer(
+                          key: const ValueKey('padding'),
+                          title: 'Side Margin',
+                          subTitle:
+                              'Minimum padding on small screens like phones',
+                          current: _data.padding,
+                          minV: 0,
+                          maxV: 50,
+                          def: ReaderPageSettings.paddingDef,
+                          step: 5,
+                          setVal: (v) => setState(() => _data.padding = v),
+                        ),
+                        5 => _Changer(
+                          key: const ValueKey('width'),
+                          title: 'Max Paragraph Width',
+                          subTitle:
+                              'Limits line length on wide screens like tablets',
+                          current: _data.maxWidth,
+                          minV: 400,
+                          maxV: 1200,
+                          def: ReaderPageSettings.maxWidthDef,
+                          step: 20,
+                          setVal: (v) => setState(() => _data.maxWidth = v),
+                          touggleDisable: () {
+                            setState(() {
+                              if (_data.maxWidth > 0) {
+                                _data.maxWidth = -1;
+                              } else {
+                                _data.maxWidth = ReaderPageSettings.maxWidthDef;
+                              }
+                            });
+                          },
+                          disabled: _data.maxWidth < 0,
                         ),
                         _ => const SizedBox.shrink(),
                       },

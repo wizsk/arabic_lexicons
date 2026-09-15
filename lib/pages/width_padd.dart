@@ -515,7 +515,8 @@ class _ReaderAdjustPageState extends State<ReaderAdjustPage> {
                         3 => _Changer(
                           key: const ValueKey('word'),
                           title: 'Space between words',
-                          subTitle: 'Adjust word spacing for easier reading',
+                          subTitle:
+                              'Adjust the spacing between words for easier reading',
                           current: _data.wordSpacing.toDouble(),
                           valName: 'sp',
                           minV: 1,

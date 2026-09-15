@@ -179,6 +179,7 @@ class _FindWordReaderPageState extends State<FindWordReaderPage> {
       isFindWordMode: true,
       findWordWord: widget.word,
     );
+
     _sc.addListener(_onScroll);
 
     _setOnChange();

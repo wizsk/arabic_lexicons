@@ -47,7 +47,8 @@ Widget lexAppBar(
       icon: datas.state.isSug
           ? const Icon(Icons.directions)
           : const Icon(Icons.auto_awesome),
-      tooltip: 'Toggle search suggestions',
+      tooltip:
+          'Toggle search suggestions. Long press to search current word in saved books',
       onPressed:
           datas.selectedWord.isNotEmpty &&
               appConf.showSearchSugg &&

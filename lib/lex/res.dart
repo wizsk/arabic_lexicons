@@ -359,13 +359,18 @@ Widget _hansLaneView(
 
 Widget _arabicLexView(TextStyle ts, SearchLexiconsDatas datas) {
   final showWordTitle = datas.selectedDict.showTitle;
+  final spaces = appConf.wordSpacing > 1 ? " " * appConf.wordSpacing : " ";
+
   return SliverList.separated(
     itemCount: datas.dbRes.length,
     separatorBuilder: (context, index) =>
         const Divider(height: 0, thickness: 0.5),
     itemBuilder: (context, index) {
       final row = datas.dbRes[index];
-      final txt = showWordTitle ? '${row.word}: ${row.meanings}' : row.meanings;
+
+      final meanings = row.formatMeanings;
+
+      final txt = showWordTitle ? '${row.word}:$spaces$meanings}' : meanings;
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 8),
         child: _arMeaningView(txt, ts),

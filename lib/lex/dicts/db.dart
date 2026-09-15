@@ -18,7 +18,30 @@ class DbRow {
   final bool isRoot;
   final bool isHi;
 
-  const DbRow({
+  String? _formattedMeanings;
+  int? _formattedSpacing;
+
+  String get formatMeanings {
+    final spacing = appConf.wordSpacing;
+
+    if (spacing == 1) return meanings;
+
+    if (spacing == _formattedSpacing && _formattedMeanings != null) {
+      return _formattedMeanings!;
+    }
+
+    final formatted = meanings
+        .split(ArabicNormalizer.spaces)
+        .where((e) => e.isNotEmpty)
+        .join(' ' * spacing);
+
+    _formattedMeanings = formatted;
+    _formattedSpacing = spacing;
+
+    return formatted;
+  }
+
+  DbRow({
     required this.word,
     required this.meanings,
     this.isRoot = false,

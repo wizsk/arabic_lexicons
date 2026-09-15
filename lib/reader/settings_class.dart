@@ -28,7 +28,7 @@ class RPS extends ReaderSettingsRes {
 class ReaderPageSettings {
   static const double maxWidthDef = 720;
   static const double paddingDef = 10;
-  static const int wordSpacingDef = 2;
+  static const int wordSpacingDef = 1;
 
   VoidCallback? _onChange;
 

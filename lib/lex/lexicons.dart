@@ -85,7 +85,7 @@ class _SearchLexiconsState extends State<SearchLexicons>
     sc.addListener(() {
       final appbarColor = readerAppBarColorBg(sc.offset);
 
-      final shouldShowUpDownArrow = sc.offset > 150;
+      final shouldShowUpDownArrow = sc.offset > 100;
 
       if (_datas.appbarReaderBg != appbarColor ||
           shouldShowUpDownArrow != _datas.shouldShowUpDownArrow) {
@@ -485,7 +485,6 @@ class _SearchLexiconsState extends State<SearchLexicons>
   Widget _scrollToTopFloatingBtn(
     BuildContext context,
     ColorScheme cs,
-
     bool willShowSugg,
   ) {
     final shouldShow =
@@ -517,7 +516,8 @@ class _SearchLexiconsState extends State<SearchLexicons>
                   ),
                   child: IconButton.filled(
                     icon: const Icon(Icons.arrow_upward),
-                    // visualDensity: VisualDensity.compact,
+                    tooltip:
+                        'Go top (or long press to go to bottom[not stable])',
                     onPressed: () {
                       postFrame((_) {
                         final sc = _datas.scrollController;
@@ -528,6 +528,25 @@ class _SearchLexiconsState extends State<SearchLexicons>
                           duration: const Duration(milliseconds: 400),
                           curve: Curves.easeOut,
                         );
+                      });
+                    },
+                    onLongPress: () {
+                      final sc = _datas.scrollController;
+                      WidgetsBinding.instance.addPostFrameCallback((_) async {
+                        if (!sc.hasClients) return;
+
+                        double prePos = 0.0;
+                        while (prePos < sc.position.maxScrollExtent) {
+                          if (!sc.hasClients) return;
+
+                          prePos = sc.position.maxScrollExtent;
+
+                          await sc.animateTo(
+                            prePos,
+                            duration: const Duration(milliseconds: 400),
+                            curve: Curves.linear,
+                          );
+                        }
                       });
                     },
                   ),

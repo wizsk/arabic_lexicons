@@ -14,6 +14,7 @@ import 'package:arabic_lexicons/lex/widgets.dart';
 import 'package:arabic_lexicons/lex/word_dict_picker.dart';
 import 'package:arabic_lexicons/main_widgets.dart';
 import 'package:arabic_lexicons/utils.dart';
+import 'package:arabic_lexicons/utils/scroll_funcs.dart';
 import 'package:arabic_lexicons/widgets/lex_word_confirm.dart';
 import 'package:arabic_lexicons/widgets/selection_chip.dart';
 import 'package:flutter/material.dart';
@@ -530,23 +531,24 @@ class _SearchLexiconsState extends State<SearchLexicons>
                       });
                     },
                     onLongPress: () {
-                      final sc = _datas.scrollController;
-                      WidgetsBinding.instance.addPostFrameCallback((_) async {
-                        if (!sc.hasClients) return;
+                      scrollToBottomSmooth(_datas.scrollController);
+                      // final sc = _datas.scrollController;
+                      // WidgetsBinding.instance.addPostFrameCallback((_) async {
+                      //   if (!sc.hasClients) return;
 
-                        double prePos = 0.0;
-                        while (prePos < sc.position.maxScrollExtent) {
-                          if (!sc.hasClients) return;
+                      //   double prePos = 0.0;
+                      //   while (prePos < sc.position.maxScrollExtent) {
+                      //     if (!sc.hasClients) return;
 
-                          prePos = sc.position.maxScrollExtent;
+                      //     prePos = sc.position.maxScrollExtent;
 
-                          await sc.animateTo(
-                            prePos,
-                            duration: const Duration(milliseconds: 400),
-                            curve: Curves.linear,
-                          );
-                        }
-                      });
+                      //     await sc.animateTo(
+                      //       prePos,
+                      //       duration: const Duration(milliseconds: 400),
+                      //       curve: Curves.linear,
+                      //     );
+                      //   }
+                      // });
                     },
                   ),
                 )

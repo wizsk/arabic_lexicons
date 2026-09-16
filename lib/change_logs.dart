@@ -11,6 +11,7 @@ final releases = [
     Adjust word Spacing in the reader
     Change highligh style for bookmarks and foreign words
     Use background color hightligted words
+    Add scroll to top in the lexicon page (long press to go bottom)
   ''',
   ),
   Release(

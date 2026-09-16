@@ -85,8 +85,14 @@ class _SearchLexiconsState extends State<SearchLexicons>
     sc.addListener(() {
       final appbarColor = readerAppBarColorBg(sc.offset);
 
-      if (_datas.appbarReaderBg != appbarColor) {
-        setState(() => _datas.appbarReaderBg = appbarColor);
+      final shouldShowUpDownArrow = sc.offset > 150;
+
+      if (_datas.appbarReaderBg != appbarColor ||
+          shouldShowUpDownArrow != _datas.shouldShowUpDownArrow) {
+        setState(() {
+          _datas.appbarReaderBg = appbarColor;
+          _datas.shouldShowUpDownArrow = shouldShowUpDownArrow;
+        });
       }
     });
 
@@ -476,9 +482,96 @@ class _SearchLexiconsState extends State<SearchLexicons>
     }
   }
 
+  Widget _scrollToTopFloatingBtn(
+    BuildContext context,
+    ColorScheme cs,
+
+    bool willShowSugg,
+  ) {
+    final shouldShow =
+        _datas.shouldShowUpDownArrow &&
+        !_datas.resultsAreEmpty &&
+        !willShowSugg;
+
+    return Align(
+      alignment: Alignment.bottomCenter,
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 16),
+        child: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 200),
+          switchInCurve: Curves.easeOutBack,
+          switchOutCurve: Curves.easeIn,
+          transitionBuilder: (child, animation) =>
+              ScaleTransition(scale: animation, child: child),
+          child: (shouldShow)
+              ? DecoratedBox(
+                  key: const ValueKey('up-arrow'),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: cs.shadow.withValues(alpha: 0.20),
+                        blurRadius: 12,
+                      ),
+                    ],
+                  ),
+                  child: IconButton.filled(
+                    icon: const Icon(Icons.arrow_upward),
+                    // visualDensity: VisualDensity.compact,
+                    onPressed: () {
+                      postFrame((_) {
+                        final sc = _datas.scrollController;
+                        if (!sc.hasClients) return;
+
+                        sc.animateTo(
+                          0.0,
+                          duration: const Duration(milliseconds: 400),
+                          curve: Curves.easeOut,
+                        );
+                      });
+                    },
+                  ),
+                )
+              : const SizedBox.shrink(),
+        ),
+      ),
+    );
+  }
+
+  Widget _dictView(
+    BuildContext context,
+    TextDirection dir,
+    bool willShowSugg,
+    EdgeInsets padd,
+    ColorScheme cs,
+  ) {
+    final arTxtTheme = appConf.readerTS(context);
+    return Directionality(
+      textDirection: dir,
+      child: CustomScrollView(
+        key: ValueKey((_datas.selectedDict, _datas.selectedWord, _datas.state)),
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+        // physics: NeverScrollableScrollPhysics(),
+        reverse: willShowSugg,
+        controller: _datas.scrollController,
+        slivers: [
+          if (!willShowSugg) lexAppBar(context, _datas, _setSate),
+
+          SliverPadding(
+            padding: _datas.sugg.isEmpty && _datas.resultsAreEmpty
+                ? EdgeInsets.zero
+                : willShowSugg
+                ? padd.copyWith(bottom: 0)
+                : padd,
+            sliver: _mainDict(context, cs, arTxtTheme),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final arTxtTheme = appConf.readerTS(context);
     // final isAr = appSettingsNotifier.useMoreArabic;
 
     final bg = appConf.readerSurface(context);
@@ -517,32 +610,11 @@ class _SearchLexiconsState extends State<SearchLexicons>
           child: Column(
             children: [
               Expanded(
-                child: Directionality(
-                  textDirection: dir,
-                  child: CustomScrollView(
-                    key: ValueKey((
-                      _datas.selectedDict,
-                      _datas.selectedWord,
-                      _datas.state,
-                    )),
-                    keyboardDismissBehavior:
-                        ScrollViewKeyboardDismissBehavior.onDrag,
-                    // physics: NeverScrollableScrollPhysics(),
-                    reverse: willShowSugg,
-                    controller: _datas.scrollController,
-                    slivers: [
-                      if (!willShowSugg) lexAppBar(context, _datas, _setSate),
-
-                      SliverPadding(
-                        padding: _datas.sugg.isEmpty && _datas.resultsAreEmpty
-                            ? EdgeInsets.zero
-                            : willShowSugg
-                            ? padd.copyWith(bottom: 0)
-                            : padd,
-                        sliver: _mainDict(context, cs, arTxtTheme),
-                      ),
-                    ],
-                  ),
+                child: Stack(
+                  children: [
+                    _dictView(context, dir, willShowSugg, padd, cs),
+                    _scrollToTopFloatingBtn(context, cs, willShowSugg),
+                  ],
                 ),
               ),
 

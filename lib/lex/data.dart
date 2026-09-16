@@ -35,6 +35,7 @@ class SearchLexiconsDatas {
   final VoidCallback setState;
 
   bool appbarReaderBg = true;
+  bool shouldShowUpDownArrow = false;
 
   SearchLexiconsDatas({
     required this.selectedDict,
@@ -69,6 +70,7 @@ class SearchLexiconsDatas {
 
   void _resetLoadedValues() {
     appbarReaderBg = true;
+    shouldShowUpDownArrow = false;
     state = LexRT.empty;
 
     /// don't clear because they are cached if u clear the cached version is cleared also!

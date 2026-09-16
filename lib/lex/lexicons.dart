@@ -516,8 +516,7 @@ class _SearchLexiconsState extends State<SearchLexicons>
                   ),
                   child: IconButton.filled(
                     icon: const Icon(Icons.arrow_upward),
-                    tooltip:
-                        'Go top (or long press to go to bottom[not stable])',
+                    tooltip: 'Go top (or long press to go to bottom)',
                     onPressed: () {
                       postFrame((_) {
                         final sc = _datas.scrollController;

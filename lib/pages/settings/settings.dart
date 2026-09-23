@@ -161,12 +161,13 @@ class _SettingsPageState extends State<SettingsPage> {
                     children: [
                       ListTile(
                         leading: const FilledIcon(Icons.reorder),
-                        title: Text('Reorder lexicons'),
+                        title: Text('Reorder or remove lexicons'),
                         subtitle: const Text(
-                          'Change the Order of the Lexicons',
+                          'Change the Order of the Lexicons or remove unwanted ones',
                         ),
                         trailing: const Icon(Icons.chevron_right),
-                        onTap: () => showDictReorderScreen(context, after: null),
+                        onTap: () =>
+                            showDictReorderScreen(context, after: null),
                       ),
 
                       /// Suggestions

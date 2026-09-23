@@ -11,6 +11,8 @@ class Selection extends StatelessWidget {
   final String deleteButtonTooltipMessage;
   final double? arFontSize;
   final Color? backgroundColor;
+  final Widget? avatar;
+  final Color? color;
 
   const Selection(
     this.label, {
@@ -23,6 +25,8 @@ class Selection extends StatelessWidget {
     this.deleteButtonTooltipMessage = 'Remove',
     this.arFontSize,
     this.backgroundColor,
+    this.avatar,
+    this.color,
   });
 
   @override
@@ -30,16 +34,17 @@ class Selection extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     return RawChip(
       key: ValueKey(label),
+      avatar: avatar,
       tooltip: tooltip,
       label: Text(
         label,
         textDirection: isAr ? TextDirection.rtl : TextDirection.ltr,
         style: isAr
             ? L.arStyleSized.copyWith(
-                color: selected ? cs.onPrimary : null,
+                color: selected ? cs.onPrimary : color,
                 fontSize: arFontSize,
               )
-            : TextStyle(color: selected ? cs.onPrimary : null),
+            : TextStyle(color: selected ? cs.onPrimary : color),
       ),
       selected: selected,
       selectedColor: cs.primary,

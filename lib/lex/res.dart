@@ -2,6 +2,7 @@ import 'package:arabic_lexicons/alphabets.dart';
 import 'package:arabic_lexicons/conf.dart';
 import 'package:arabic_lexicons/data.dart';
 import 'package:arabic_lexicons/lex/data.dart';
+import 'package:arabic_lexicons/lex/ref.dart';
 import 'package:arabic_lexicons/theme.dart';
 import 'package:arabic_lexicons/utils.dart';
 import 'package:arabic_lexicons/widgets/selectable_text_screen.dart';
@@ -371,26 +372,32 @@ Widget _arabicLexView(TextStyle ts, SearchLexiconsDatas datas) {
       final meanings = row.formatMeanings;
 
       final txt = showWordTitle ? '${row.word}:$spaces$meanings}' : meanings;
+      final child = datas.selectedDict == Dict.lisanAlArab
+          ? Text.rich(
+              ReferenceProcessor.processRich(context, meanings, ts),
+              textDirection: TextDirection.rtl,
+              textAlign: TextAlign.right,
+              style: ts.copyWith(
+                leadingDistribution: TextLeadingDistribution.even,
+              ),
+            )
+          : Text(
+              txt,
+              textDirection: TextDirection.rtl,
+              textAlign: TextAlign.right,
+              style: ts.copyWith(
+                leadingDistribution: TextLeadingDistribution.even,
+              ),
+            );
+
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 8),
-        child: _arMeaningView(txt, ts),
+        child: SelectionArea(
+          magnifierConfiguration: TextMagnifierConfiguration.disabled,
+          child: child,
+        ),
       );
     },
-  );
-}
-
-Widget _arMeaningView(String txt, TextStyle ts) {
-  return SelectionArea(
-    magnifierConfiguration: TextMagnifierConfiguration.disabled,
-    child: Text(
-      txt,
-      textDirection: TextDirection.rtl,
-      textAlign: TextAlign.right,
-      style: ts.copyWith(
-        // height: 2,
-        leadingDistribution: TextLeadingDistribution.even,
-      ),
-    ),
   );
 }
 

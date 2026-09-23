@@ -7,6 +7,7 @@ final releases = [
     changes:
         '''
     Lisanul Arab lexicon show refferences on click no need to scrool to the bottom
+    Remove unwanted dictionaries from reording menu
     Directly selectable text in (${Dict.arEn.name})
     Find words
     Adjust word Spacing in the reader

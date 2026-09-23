@@ -372,7 +372,7 @@ Widget _arabicLexView(TextStyle ts, SearchLexiconsDatas datas) {
       final meanings = row.formatMeanings;
 
       final txt = showWordTitle ? '${row.word}:$spaces$meanings}' : meanings;
-      final child = datas.selectedDict == Dict.lisanAlArab
+      final child = datas.selectedDict.hasRefs
           ? Text.rich(
               ReferenceProcessor.processRich(context, meanings, ts),
               textDirection: TextDirection.rtl,

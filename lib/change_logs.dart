@@ -6,6 +6,7 @@ final releases = [
     version: 'v3.6.0',
     changes:
         '''
+    Lisanul Arab lexicon show refferences on click no need to scrool to the bottom
     Directly selectable text in (${Dict.arEn.name})
     Find words
     Adjust word Spacing in the reader

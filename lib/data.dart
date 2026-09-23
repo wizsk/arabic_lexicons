@@ -266,6 +266,7 @@ enum Dict {
     this.hasRefs = false,
   });
 
+  static String get reOrdLabel => L.p('Reorder', 'ترتيب');
   bool get showTitle => this == mujamulGhoni;
 }
 

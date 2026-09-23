@@ -56,7 +56,7 @@ abstract final class MsgSv {
     _snackMsgTimmer = null;
 
     final messenger = snackMessengerKey.currentState;
-    messenger?.hideCurrentSnackBar();
+    messenger?.clearSnackBars();
 
     final ac = action == null
         ? null

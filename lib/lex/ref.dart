@@ -64,27 +64,46 @@ void showReferenceBottomSheet(
   String ref,
   TextStyle refStyle,
 ) {
-  showModalBottomSheet<void>(
+  const pad = 24.00;
+  showDialog(
     context: context,
-    showDragHandle: true,
-    isScrollControlled: true,
-    constraints: BoxConstraints(
-      maxWidth: appConf.maxWidth > 0 ? appConf.maxWidth : maxUiWidth.maxWidth,
-    ),
     builder: (context) {
-      return SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
-          child: SingleChildScrollView(
-            child: SelectionArea(
-              magnifierConfiguration: TextMagnifierConfiguration.disabled,
-              child: Text(
-                ref,
-                style: refStyle.copyWith(
-                  color: Theme.of(context).textTheme.bodyLarge?.color,
+      return Dialog(
+        insetPadding: EdgeInsets.all(14.0),
+        constraints: BoxConstraints(
+          maxWidth: appConf.maxWidth > 0
+              ? appConf.maxWidth
+              : maxUiWidth.maxWidth,
+        ),
+        child: SafeArea(
+          child: Padding(
+            padding: EdgeInsets.symmetric(vertical: pad),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SingleChildScrollView(
+                  padding: EdgeInsets.symmetric(horizontal: pad),
+                  child: SelectionArea(
+                    magnifierConfiguration: TextMagnifierConfiguration.disabled,
+                    child: Text(
+                      ref,
+                      style: refStyle.copyWith(
+                        color: Theme.of(context).textTheme.bodyLarge?.color,
+                      ),
+                      textAlign: TextAlign.right,
+                    ),
+                  ),
                 ),
-                textAlign: TextAlign.right,
-              ),
+
+                const SizedBox(height: 18),
+                OutlinedButton.icon(
+                  label: Text('Close'),
+                  icon: Icon(Icons.close),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
             ),
           ),
         ),

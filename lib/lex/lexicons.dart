@@ -410,9 +410,32 @@ class _SearchLexiconsState extends State<SearchLexicons>
                 shrinkWrap: true,
                 controller: _scrollableSelectionDictSc,
                 key: const PageStorageKey('dict-selector'),
-                itemCount: allDictsOrd.length,
+                itemCount: allDictsOrd.length + 1,
                 scrollDirection: Axis.horizontal,
                 itemBuilder: (_, index) {
+                  if (index == allDictsOrd.length) {
+                    // do stuff
+                    return Selection(
+                      Dict.reOrdLabel,
+                      onTab: () {
+                        showDictReorderSheet(
+                          context,
+                          after: () {
+                            if (context.mounted) setState(() {});
+                          },
+                        );
+                      },
+                      selected: false,
+                      backgroundColor: bg,
+                      avatar: Icon(
+                        Icons.settings,
+                        color: Theme.of(context).colorScheme.outline,
+                      ),
+                      isAr: L.isAr,
+                      color: Theme.of(context).colorScheme.outline,
+                      tooltip: 'Open reorder lexicons popup',
+                    );
+                  }
                   final d = allDictsOrd[index];
                   final selected = d == _datas.selectedDict;
 

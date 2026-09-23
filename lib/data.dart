@@ -7,6 +7,8 @@ const appName = 'Arabic Lexcions';
 
 const emailAddr = 'sakibul706@gmail.com';
 
+const maxUiWidth = BoxConstraints(maxWidth: 600);
+
 const fontAmiri = 'Amiri';
 const fontKitab = 'Kitab';
 const fontNotoSansArabic = 'NotoSansArabic';

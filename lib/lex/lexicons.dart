@@ -98,6 +98,7 @@ class _SearchLexiconsState extends State<SearchLexicons>
     });
 
     if (!_isPopup) {
+      // TODO: fix this
       appConf.refetchLexResultsFunc = () => _datas.getAndShowResORSugg(context);
 
       // show msg
@@ -418,10 +419,19 @@ class _SearchLexiconsState extends State<SearchLexicons>
                     return Selection(
                       Dict.reOrdLabel,
                       onTab: () {
-                        showDictReorderSheet(
+                        showDictReorderScreen(
                           context,
                           after: () {
-                            if (context.mounted) setState(() {});
+                            if (!context.mounted) return;
+
+                            if (allDictsOrd.contains(_datas.selectedDict)) {
+                              setState(() {});
+                              _datas.scrollSelectors();
+                            } else {
+                              _datas.selectedDict = allDictsOrd.first;
+                              _datas.getAndShowResORSugg(context);
+                              _datas.scrollSelectors();
+                            }
                           },
                         );
                       },
@@ -707,7 +717,7 @@ class _SearchLexiconsState extends State<SearchLexicons>
 
                           if (res != null && res.openSettings == true) {
                             postFrame(
-                              (_) => showDictReorderSheet(
+                              (_) => showDictReorderScreen(
                                 context,
                                 after: () {
                                   if (!context.mounted) return;

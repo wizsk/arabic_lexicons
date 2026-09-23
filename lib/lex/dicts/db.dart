@@ -156,7 +156,6 @@ class DbService {
     for (final row in res) {
       final meaningsRaw = row['meanings'] as String? ?? '';
       String m = meaningsRaw.replaceAll('|', '\n').replaceAll('<br>', '\n');
-      if (d.hasRefs) m = ReferenceProcessor.process(m);
       entries.add(DbRow(word: row['word'] as String? ?? '', meanings: m));
     }
 
@@ -448,56 +447,5 @@ class DbService {
 
     _cache.put(key, dbRes);
     return dbRes;
-  }
-}
-
-class ReferenceProcessor {
-  // Compiled once. Never recreated.
-  static final RegExp _refExp = RegExp(r'\[\[(.*?)\]\]', dotAll: true);
-
-  static String process(String text) {
-    if (text.isEmpty) return text;
-
-    final StringBuffer mainBuffer = StringBuffer();
-    final List<String> refs = [];
-
-    int lastIndex = 0;
-    int counter = 1;
-
-    for (final match in _refExp.allMatches(text)) {
-      // Write text before match
-      mainBuffer.write(text.substring(lastIndex, match.start));
-
-      final refContent = match.group(1);
-      if (refContent != null) {
-        refs.add(refContent.trim());
-
-        final arabicNumber = enToArNum(counter.toString());
-        mainBuffer.write('($arabicNumber)');
-        counter++;
-      }
-
-      lastIndex = match.end;
-    }
-
-    // Write remaining text
-    mainBuffer.write(text.substring(lastIndex));
-
-    if (refs.isEmpty) {
-      return mainBuffer.toString();
-    }
-
-    mainBuffer.write('\n\n');
-    // Append references section
-
-    for (int i = 0; i < refs.length; i++) {
-      final arabicNumber = enToArNum((i + 1).toString());
-      final r = refs[i].trim().replaceFirst('. ', '');
-      mainBuffer
-        ..write('($arabicNumber) ')
-        ..writeln(r);
-    }
-
-    return mainBuffer.toString().trimRight();
   }
 }

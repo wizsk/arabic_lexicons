@@ -210,6 +210,19 @@ List<Widget> separatedBuilder({
   return result;
 }
 
+List<Widget> listBuilder<T>({
+  required List<T> items,
+  required Widget Function(T item, int index) itemBuilder,
+}) {
+  final result = <Widget>[];
+
+  for (int i = 0; i < items.length; i++) {
+    result.add(itemBuilder(items[i], i));
+  }
+
+  return result;
+}
+
 @pragma("vm:prefer-inline")
 bool readerAppBarColorBg(double offset) {
   return offset <= kToolbarHeight;

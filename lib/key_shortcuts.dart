@@ -31,7 +31,7 @@ enum AppShortcut {
     description: 'Remove currently selected word',
   ),
 
-  clearWords(key: LogicalKeyboardKey.keyC, description: 'Clear searched words'),
+  clearWords(key: LogicalKeyboardKey.keyR, description: 'Clear searched words'),
 
   toggleArabic(
     key: LogicalKeyboardKey.keyM,

@@ -25,10 +25,20 @@ class _ReviewPageState extends State<ReviewPage> {
   @override
   void initState() {
     super.initState();
+
     ReviewRepo.init().then((r) {
       _repo = r;
       _load();
     });
+
+    touggleFullScreen();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    touggleFullScreen();
   }
 
   Future<void> _load() async {
@@ -98,12 +108,13 @@ class _ReviewPageState extends State<ReviewPage> {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
+    final surfaceColor = appConf.readerSurface(context);
 
     return Scaffold(
-      backgroundColor: appConf.readerSurface(context),
+      backgroundColor: surfaceColor,
       drawer: buildDrawer(context),
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: surfaceColor,
         title: const Text('Review'),
         centerTitle: false,
         actions: [

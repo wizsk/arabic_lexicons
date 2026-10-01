@@ -296,7 +296,7 @@ class _RevWordListPageState extends State<RevWordListPage> {
           children: [
             Padding(
               padding: EdgeInsets.symmetric(
-                horizontal: 8 + padd.left,
+                horizontal: padd.left,
                 vertical: 14,
               ),
               child: TextField(
@@ -340,9 +340,9 @@ class _RevWordListPageState extends State<RevWordListPage> {
                       textDirection: TextDirection.rtl,
                       child: ListView.separated(
                         padding: EdgeInsets.fromLTRB(
-                          16 + padd.right,
+                          padd.right,
                           4,
-                          16 + padd.right,
+                          padd.right,
                           scrollPadding.bottom,
                         ),
                         itemCount: _items.length,

@@ -53,6 +53,7 @@ Widget buildDrawer(BuildContext context) {
         case 2:
           if (currRoute != Routes.review) {
             Navigator.pushReplacementNamed(context, Routes.review);
+            appConf.saveRoute(Routes.review);
           }
 
         case 3:

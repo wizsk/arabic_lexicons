@@ -96,6 +96,7 @@ const routesToBeSavedInPref = [
   Routes.dictionary,
   Routes.readerInput,
   Routes.readerPage,
+  Routes.review,
 ];
 
 // class DictEntry {

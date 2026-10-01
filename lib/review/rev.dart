@@ -1,17 +1,12 @@
 import 'package:arabic_lexicons/conf.dart';
 import 'package:arabic_lexicons/data.dart';
-import 'package:arabic_lexicons/review/list.dart';
-import 'package:arabic_lexicons/review/provider.dart';
 import 'package:arabic_lexicons/main_widgets.dart';
 import 'package:arabic_lexicons/reader/find_word.dart';
+import 'package:arabic_lexicons/review/list.dart';
+import 'package:arabic_lexicons/review/provider.dart';
 import 'package:arabic_lexicons/utils.dart';
 import 'package:arabic_lexicons/utils/toast_snack.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-
-const _customChoices = [1, 2, 3, 5, 7, 10, 14, 21, 30, 60, 90];
-
-/// Persistence for flashcards. Table is created lazily.
 
 class ReviewPage extends StatefulWidget {
   const ReviewPage({super.key});
@@ -59,7 +54,7 @@ class _ReviewPageState extends State<ReviewPage> {
   Future<void> _customAfter() async {
     final days = await showDialog<int>(
       context: context,
-      builder: (_) => const _CustomDaysDialog(),
+      builder: (_) => DaysDialog(initial: _intervals?.last ?? 0),
     );
     if (days != null) await _showAfter(days);
   }
@@ -113,6 +108,7 @@ class _ReviewPageState extends State<ReviewPage> {
         centerTitle: false,
         actions: [
           IconButton(
+            tooltip: 'Search all book entries for matching words',
             icon: Icon(Icons.image_search),
             onPressed: _word == null
                 ? null
@@ -128,6 +124,7 @@ class _ReviewPageState extends State<ReviewPage> {
                   },
           ),
           IconButton(
+            tooltip: 'Open reviewd word list',
             icon: Icon(Icons.list),
             onPressed: () async {
               await Navigator.push(
@@ -139,11 +136,16 @@ class _ReviewPageState extends State<ReviewPage> {
           ),
           PopupMenuButton<String>(
             icon: const Icon(Icons.sort),
-            tooltip: 'Order',
+            tooltip: 'Review Order',
             initialValue: _ord.name,
-            onSelected: (o) {
+            onSelected: (o) async {
               if (o == 'no-due-tgl') {
                 _showNoDueWords = !_showNoDueWords;
+                MsgSv.showToast(
+                  _showNoDueWords
+                      ? 'Showing only new words'
+                      : 'Showing old and new words',
+                );
               } else {
                 _ord = RevOrder.values.firstWhere(
                   (e) => e.name == o,
@@ -151,7 +153,7 @@ class _ReviewPageState extends State<ReviewPage> {
                 );
               }
               // });
-              _load();
+              await _load();
             },
             itemBuilder: (_) => [
               for (final o in RevOrder.values)
@@ -163,11 +165,11 @@ class _ReviewPageState extends State<ReviewPage> {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    _showNoDueWords
+                    !_showNoDueWords
                         ? Icon(Icons.check_box)
                         : Icon(Icons.check_box_outline_blank_outlined),
                     SizedBox(width: 6),
-                    Text('Show only new'),
+                    Text('Review Mode'),
                   ],
                 ),
               ),
@@ -221,7 +223,7 @@ class _ReviewPageState extends State<ReviewPage> {
                           message: 'Repeat. Show again after 10m',
                           child: FilledButton.tonal(
                             style: FilledButton.styleFrom(
-                              minimumSize: const Size(82, 54),
+                              minimumSize: const Size(72, 48),
                             ),
                             onPressed: () => _showAfter(-1),
                             child: const Text('${repeatDurMin}m'),
@@ -231,7 +233,7 @@ class _ReviewPageState extends State<ReviewPage> {
                           for (final d in _intervals!)
                             FilledButton(
                               style: FilledButton.styleFrom(
-                                minimumSize: const Size(82, 54),
+                                minimumSize: const Size(72, 48),
                               ),
                               onPressed: () => _showAfter(d),
                               child: Text(
@@ -245,7 +247,7 @@ class _ReviewPageState extends State<ReviewPage> {
                     const SizedBox(height: 28),
                     Wrap(
                       spacing: 8,
-                      runSpacing: 8,
+                      runSpacing: 12,
                       alignment: WrapAlignment.center,
                       children: [
                         OutlinedButton.icon(
@@ -259,8 +261,8 @@ class _ReviewPageState extends State<ReviewPage> {
                           icon: const Icon(Icons.visibility_off_outlined),
                           label: Text('Hide'),
                         ),
-                        FilledButton.tonalIcon(
-                          label: Text('Lexicon'),
+                        OutlinedButton.icon(
+                          label: Text('Def'),
                           icon: Icon(Icons.search),
                           onPressed: _word == null
                               ? null
@@ -278,79 +280,6 @@ class _ReviewPageState extends State<ReviewPage> {
                 ],
               ),
             ),
-    );
-  }
-}
-
-class _CustomDaysDialog extends StatefulWidget {
-  const _CustomDaysDialog();
-
-  @override
-  State<_CustomDaysDialog> createState() => _CustomDaysDialogState();
-}
-
-class _CustomDaysDialogState extends State<_CustomDaysDialog> {
-  final _ctrl = TextEditingController();
-  int _selected = _customChoices.first;
-
-  @override
-  void dispose() {
-    _ctrl.dispose();
-    super.dispose();
-  }
-
-  void _submit() {
-    final txt = _ctrl.text.trim();
-    final days = txt.isEmpty ? _selected : int.tryParse(txt);
-    if (days == null || days < 0) {
-      MsgSv.showToast("Invalid number of days: '$txt'");
-      return;
-    }
-    Navigator.pop(context, days);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: const Text('Show after'),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          DropdownButtonFormField<int>(
-            initialValue: _selected,
-            decoration: const InputDecoration(
-              labelText: 'Days',
-              border: OutlineInputBorder(),
-            ),
-            items: [
-              for (final d in _customChoices)
-                DropdownMenuItem(value: d, child: Text('$d')),
-            ],
-            onChanged: (v) => setState(() {
-              _selected = v ?? _selected;
-              _ctrl.clear();
-            }),
-          ),
-          const SizedBox(height: 12),
-          TextField(
-            controller: _ctrl,
-            keyboardType: TextInputType.number,
-            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-            decoration: const InputDecoration(
-              labelText: 'Or enter days',
-              border: OutlineInputBorder(),
-            ),
-            onSubmitted: (_) => _submit(),
-          ),
-        ],
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
-        ),
-        FilledButton(onPressed: _submit, child: const Text('OK')),
-      ],
     );
   }
 }

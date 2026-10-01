@@ -3,38 +3,40 @@ import 'dart:async';
 import 'package:arabic_lexicons/alphabets.dart';
 import 'package:arabic_lexicons/conf.dart';
 import 'package:arabic_lexicons/data.dart';
+import 'package:arabic_lexicons/multi_selection.dart';
 import 'package:arabic_lexicons/review/provider.dart';
 import 'package:arabic_lexicons/main_widgets.dart';
 import 'package:arabic_lexicons/utils/toast_snack.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-/// Add these to your existing ReviewRepo (or keep them here).
-
 class RevWordListPage extends StatefulWidget {
-  const RevWordListPage({super.key, this.rr});
-  final ReviewRepo? rr;
+  const RevWordListPage({super.key, required this.rr});
+  final ReviewRepo rr;
 
   @override
   State<RevWordListPage> createState() => _RevWordListPageState();
 }
 
 class _RevWordListPageState extends State<RevWordListPage> {
-  late final ReviewRepo _rr;
+  late final ReviewRepo _rr = widget.rr;
   final _search = TextEditingController();
   Timer? _debounce;
   List<RevItem> _items = [];
   bool _loading = true;
   bool _showOnlyHidden = false;
 
+  late final _selection = SelectionController<String>(() {
+    if (mounted) {
+      setState(() {});
+    }
+  });
+
   @override
   void initState() {
     super.initState();
 
-    () async {
-      _rr = widget.rr ?? await ReviewRepo.init();
-      await _load();
-    }();
+    _load();
   }
 
   @override
@@ -58,16 +60,6 @@ class _RevWordListPageState extends State<RevWordListPage> {
     _debounce?.cancel();
     _debounce = Timer(const Duration(milliseconds: 150), _load);
   }
-
-  // String _dueShort(RevItem i) {
-  //   final d = Duration(
-  //     milliseconds: i.due - DateTime.now().millisecondsSinceEpoch,
-  //   );
-  //   if (d.inMinutes < 1) return 'Now';
-  //   if (d.inHours < 1) return '${d.inMinutes}m';
-  //   if (d.inDays < 1) return '${d.inHours}h';
-  //   return '${d.inDays}d';
-  // }
 
   void _showActions(String word, RevItem i) {
     showModalBottomSheet(
@@ -139,7 +131,7 @@ class _RevWordListPageState extends State<RevWordListPage> {
         when = '${diff.inHours}h';
       }
     } else {
-      final h = diff.inDays % 24;
+      final h = diff.inHours % 24;
       if (h > 0) {
         when = '${diff.inDays}d ${h}h';
       } else {
@@ -154,7 +146,7 @@ class _RevWordListPageState extends State<RevWordListPage> {
   Future<void> _editDays(RevItem i) async {
     final days = await showDialog<int>(
       context: context,
-      builder: (_) => _DaysDialog(initial: i.lastInterval),
+      builder: (_) => DaysDialog(initial: i.lastInterval),
     );
     if (days == null) return;
     await _rr.setDays(i.word, days);
@@ -236,82 +228,129 @@ class _RevWordListPageState extends State<RevWordListPage> {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final padd = appConf.readerPadd(context);
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Words (${_items.length})'),
-        actions: [
-          IconButton(onPressed: _add, icon: const Icon(Icons.add)),
-          IconButton(
-            onPressed: () {
-              setState(() {
-                _showOnlyHidden = !_showOnlyHidden;
-              });
-              _load();
-            },
-            icon: _showOnlyHidden
-                ? Icon(Icons.visibility_off)
-                : Icon(Icons.visibility),
-          ),
-        ],
-      ),
-      body: SafeArea(
-        child: Padding(
-          padding: appConf.readerPadd(context).copyWith(bottom: 0),
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 8,
-                  vertical: 14,
-                ),
-                child: TextField(
-                  controller: _search,
-                  textDirection: TextDirection.rtl,
-                  textAlign: TextAlign.start,
-                  style: L.arStyleSized,
-                  decoration: InputDecoration(
-                    hintText: L.p('Search Words', 'ابحث'),
-                    hintTextDirection: L.dir,
-                    prefixIcon: _search.text.isEmpty
-                        ? null
-                        : IconButton(
-                            onPressed: () {
-                              if (_search.text.isEmpty) return;
-                              setState(() {
-                                _search.clear();
-                              });
-                              _load();
-                              // this is when it's focued but keyboard is not oppended
-                            },
-                            icon: Icon(Icons.clear),
-                          ),
-                  ),
-                  onChanged: (v) {
-                    final c = ArabicNormalizer.keepOnlyAr(v);
-                    setState(() {
-                      if (c != v) _search.text = c;
-                    });
-                    _onSearch(v);
+        title: _selection.appBarTitle('Words (${_items.length})'),
+        actions: _selection.hasSelection
+            ? [
+                ..._selection.genricAppBarActions(
+                  context,
+                  all: () => _items.map((e) => e.word),
+                  rm: (x) async {
+                    await _rr.rmAll(x);
                   },
                 ),
+                IconButton(
+                  tooltip: _showOnlyHidden
+                      ? 'Un-hide selected'
+                      : 'Hide selected',
+                  icon: Icon(
+                    _showOnlyHidden ? Icons.visibility : Icons.visibility_off,
+                  ),
+                  onPressed: () async {
+                    final res = await showConfirmDialog(
+                      context,
+                      '${_showOnlyHidden ? 'Show' : 'Hide'} selected words?',
+                    );
+
+                    if (res != true) return;
+
+                    for (final w in _selection.selected) {
+                      _rr.setHidden(w, !_showOnlyHidden);
+                    }
+                    _load();
+                    _selection.clear();
+                  },
+                ),
+              ]
+            : [
+                IconButton(
+                  tooltip: 'Add a new word',
+                  onPressed: _add,
+                  icon: const Icon(Icons.add),
+                ),
+                IconButton(
+                  tooltip: 'Show only hidden touggle',
+                  onPressed: () {
+                    setState(() {
+                      _showOnlyHidden = !_showOnlyHidden;
+                    });
+                    MsgSv.showToast(
+                      _showOnlyHidden
+                          ? 'Showing only hidden words'
+                          : 'Showing non-hidden words',
+                    );
+
+                    _load();
+                  },
+                  icon: _showOnlyHidden
+                      ? Icon(Icons.visibility_off)
+                      : Icon(Icons.visibility),
+                ),
+              ],
+      ),
+      body: SafeArea(
+        child: Column(
+          children: [
+            Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: 8 + padd.left,
+                vertical: 14,
               ),
-              Expanded(
-                child: _loading
-                    ? const Center(child: CircularProgressIndicator())
-                    : _items.isEmpty
-                    ? const Center(child: Text('No words'))
-                    : ListView.separated(
+              child: TextField(
+                // readOnly: _selection.hasSelection,
+                controller: _search,
+                textDirection: TextDirection.rtl,
+                textAlign: TextAlign.start,
+                style: L.arStyleSized,
+                decoration: InputDecoration(
+                  hintText: L.p('Search Words', 'ابحث'),
+                  hintTextDirection: L.dir,
+                  prefixIcon: _search.text.isEmpty
+                      ? null
+                      : IconButton(
+                          onPressed: () {
+                            if (_search.text.isEmpty) return;
+                            setState(() {
+                              _search.clear();
+                            });
+                            _load();
+                            // this is when it's focued but keyboard is not oppended
+                          },
+                          icon: Icon(Icons.clear),
+                        ),
+                ),
+                onChanged: (v) {
+                  final c = ArabicNormalizer.keepOnlyAr(v);
+                  setState(() {
+                    if (c != v) _search.text = c;
+                  });
+                  _onSearch(v);
+                },
+              ),
+            ),
+            Expanded(
+              child: _loading
+                  ? const Center(child: CircularProgressIndicator())
+                  : _items.isEmpty
+                  ? const Center(child: Text('No words'))
+                  : Directionality(
+                      textDirection: TextDirection.rtl,
+                      child: ListView.separated(
                         padding: EdgeInsets.fromLTRB(
-                          16,
+                          16 + padd.right,
                           4,
-                          16,
+                          16 + padd.right,
                           scrollPadding.bottom,
                         ),
                         itemCount: _items.length,
                         separatorBuilder: (_, _) => const SizedBox(height: 2),
                         itemBuilder: (_, idx) {
                           final i = _items[idx];
+                          final selected = _selection.isSelected(i.word);
+
                           final r = BorderRadius.vertical(
                             top: Radius.circular(idx == 0 ? 20 : 4),
                             bottom: Radius.circular(
@@ -319,91 +358,108 @@ class _RevWordListPageState extends State<RevWordListPage> {
                             ),
                           );
 
+                          final child = Material(
+                            color: selected
+                                ? cs.surfaceContainerHigh
+                                : cs.surfaceContainerLow,
+                            child: ListTile(
+                              minVerticalPadding: 16,
+                              selected: selected,
+                              onLongPress: () {
+                                _selection.toggle(i.word);
+                              },
+                              onTap: () {
+                                if (_selection.hasSelection) {
+                                  _selection.toggle(i.word);
+                                  return;
+                                }
+                                _showActions(i.word, i);
+                              },
+                              title: Text(
+                                i.word,
+                                textDirection: TextDirection.rtl,
+                                style: Theme.of(context).textTheme.titleLarge
+                                    ?.copyWith(
+                                      fontFamily: L.arFont,
+                                      color: i.hidden ? cs.outline : null,
+                                    ),
+                              ),
+                              trailing: _selection.hasSelection
+                                  ? Checkbox(
+                                      onChanged: (_) {
+                                        _selection.toggle(i.word);
+                                      },
+                                      value: selected,
+                                    )
+                                  : Text(
+                                      i.hidden ? 'Hidden' : _dueText(i),
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .labelLarge
+                                          ?.copyWith(
+                                            color: i.hidden
+                                                ? cs.outline
+                                                : cs.onSurfaceVariant,
+                                          ),
+                                    ),
+                            ),
+                          );
                           return ClipRRect(
                             borderRadius: r,
-                            child: Dismissible(
-                              key: ValueKey(i.word),
-                              background: Container(
-                                color: cs.secondaryContainer,
-                                alignment: Alignment.centerLeft,
-                                padding: const EdgeInsets.only(left: 24),
-                                child: Icon(
-                                  i.hidden
-                                      ? Icons.visibility
-                                      : Icons.visibility_off,
-                                  color: cs.onSecondaryContainer,
-                                ),
-                              ),
-                              secondaryBackground: Container(
-                                color: cs.errorContainer,
-                                alignment: Alignment.centerRight,
-                                padding: const EdgeInsets.only(right: 24),
-                                child: Icon(
-                                  Icons.delete,
-                                  color: cs.onErrorContainer,
-                                ),
-                              ),
-                              confirmDismiss: (dir) async {
-                                if (dir == DismissDirection.startToEnd) {
-                                  await _toggleHidden(i);
-                                  return true; // keep the row, just toggle
-                                }
-                                return _delete(context, i);
-                              },
-                              child: Material(
-                                color: cs.surfaceContainerLow,
-                                child: ListTile(
-                                  minVerticalPadding: 16,
-                                  // contentPadding: ,
-                                  // onTap: () => _editDays(i),
-                                  onTap: () => _showActions(i.word, i),
-                                  title: Text(
-                                    i.word,
-                                    textDirection: TextDirection.rtl,
-                                    textAlign: TextAlign.left,
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .titleLarge
-                                        ?.copyWith(
-                                          fontFamily: L.arFont,
-                                          color: i.hidden ? cs.outline : null,
-                                        ),
+                            child: _selection.hasSelection
+                                ? child
+                                : Dismissible(
+                                    key: ValueKey(i.word),
+                                    background: Container(
+                                      color: cs.secondaryContainer,
+                                      alignment: Alignment.centerRight,
+                                      padding: const EdgeInsets.only(right: 24),
+                                      child: Icon(
+                                        i.hidden
+                                            ? Icons.visibility
+                                            : Icons.visibility_off,
+                                        color: cs.onSecondaryContainer,
+                                      ),
+                                    ),
+                                    secondaryBackground: Container(
+                                      color: cs.errorContainer,
+                                      alignment: Alignment.centerLeft,
+                                      padding: const EdgeInsets.only(left: 24),
+                                      child: Icon(
+                                        Icons.delete,
+                                        color: cs.onErrorContainer,
+                                      ),
+                                    ),
+                                    confirmDismiss: (dir) async {
+                                      if (dir == DismissDirection.startToEnd) {
+                                        await _toggleHidden(i);
+                                        return true; // keep the row, just toggle
+                                      }
+                                      return _delete(context, i);
+                                    },
+                                    child: child,
                                   ),
-                                  trailing: Text(
-                                    i.hidden ? 'Hidden' : _dueText(i),
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .labelLarge
-                                        ?.copyWith(
-                                          color: i.hidden
-                                              ? cs.outline
-                                              : cs.onSurfaceVariant,
-                                        ),
-                                  ),
-                                ),
-                              ),
-                            ),
                           );
                         },
                       ),
-              ),
-            ],
-          ),
+                    ),
+            ),
+          ],
         ),
       ),
     );
   }
 }
 
-class _DaysDialog extends StatefulWidget {
+class DaysDialog extends StatefulWidget {
   final int initial;
-  const _DaysDialog({required this.initial});
+  const DaysDialog({super.key, required this.initial});
 
   @override
-  State<_DaysDialog> createState() => _DaysDialogState();
+  State<DaysDialog> createState() => _DaysDialogState();
 }
 
-class _DaysDialogState extends State<_DaysDialog> {
+class _DaysDialogState extends State<DaysDialog> {
   late final _ctrl = TextEditingController(
     text: widget.initial > 0 ? '${widget.initial}' : '',
   );

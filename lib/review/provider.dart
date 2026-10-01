@@ -46,6 +46,16 @@ class ReviewRepo {
     return n > 0; // false if it already existed
   }
 
+  Future<void> rmAll(Iterable<String> words) async {
+    if (words.isEmpty) return;
+    _words.removeAll(words);
+
+    final list = words.toList();
+    final placeholders = List.filled(list.length, '?').join(' ,');
+
+    await _db.delete(_t, where: 'word IN ($placeholders)', whereArgs: list);
+  }
+
   // ReviewRepo: return the last interval for a word
   // Future<int> lastInterval(String word) async {
   //   final rows = await _db.query(

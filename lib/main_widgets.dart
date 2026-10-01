@@ -25,7 +25,7 @@ Widget buildDrawer(BuildContext context) {
       Navigator.pop(context);
 
       final isReading = currRoute == Routes.readerPage;
-      if (isReading && (index == 0 || index == 1)) {
+      if (isReading && (index == 0 || index == 1 || index == 2)) {
         final res = await showConfirmDialog(
           context,
           'Exit Reader?',
@@ -51,36 +51,41 @@ Widget buildDrawer(BuildContext context) {
           break;
 
         case 2:
+          if (currRoute != Routes.review) {
+            Navigator.pushReplacementNamed(context, Routes.review);
+          }
+
+        case 3:
           if (currRoute != Routes.bookMarks) {
             Navigator.pushNamed(context, Routes.bookMarks);
           }
           break;
 
-        case 3:
+        case 4:
           ForeignWordsPage.open(context);
           break;
 
-        case 4:
+        case 5:
           Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => HistPage()),
           );
           break;
 
-        case 5:
+        case 6:
           Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => SettingsPage()),
           );
 
-        case 6:
+        case 7:
           Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => ArabicFamilyList()),
           );
           break;
 
-        case 7:
+        case 8:
           Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => HelpPage()),
@@ -110,6 +115,10 @@ Widget buildDrawer(BuildContext context) {
       ),
 
       const Divider(),
+      NavigationDrawerDestination(
+        label: const Text("Review Words"),
+        icon: const Icon(Icons.style_outlined),
+      ),
       NavigationDrawerDestination(
         icon: Icon(Icons.bookmark_outline),
         label: Text("BookMarks"),

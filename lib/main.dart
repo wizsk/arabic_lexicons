@@ -1,5 +1,6 @@
 import 'package:arabic_lexicons/conf.dart';
 import 'package:arabic_lexicons/data.dart';
+import 'package:arabic_lexicons/review/rev.dart';
 import 'package:arabic_lexicons/history/page.dart';
 import 'package:arabic_lexicons/lex/lexicons.dart';
 import 'package:arabic_lexicons/pages/fams/fams.dart';
@@ -52,6 +53,7 @@ class MyApp extends StatelessWidget {
               Routes.readerInput: (_) => const ReaderInputPage(),
               Routes.readerPage: (_) => const ReaderPage(bookHash: null),
 
+              Routes.review: (_) => const ReviewPage(),
               Routes.bookMarks: (_) =>
                   const WordListPage(listType: WordListType.bookmarks),
               Routes.foreings: (_) =>

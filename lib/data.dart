@@ -82,6 +82,7 @@ abstract final class Routes {
   static const readerInput = '/readerInput';
   static const readerPage = '/readerPage';
 
+  static const review = '/review';
   static const bookMarks = '/bookMarks';
   static const foreings = '/foreigns';
   static const searhHist = '/sHist';

@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 class SelectableWordListTitle extends StatelessWidget {
   final Function(VoidCallback) setState;
   final String word;
+  final String wordMatch;
   final SelectionController<String> selection;
   final EdgeInsetsGeometry contentPadding;
   final Widget? subtitle;
@@ -28,6 +29,7 @@ class SelectableWordListTitle extends StatelessWidget {
     this.subtitle,
     required this.remove,
     this.dict,
+    this.wordMatch = '',
   });
 
   @override
@@ -36,6 +38,37 @@ class SelectableWordListTitle extends StatelessWidget {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
     final bm = WordStore.isBm(word);
+
+    Widget title;
+    if (wordMatch.isEmpty) {
+      title = Text(
+        word,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        textDirection: TextDirection.rtl,
+        textAlign: TextAlign.right,
+        style: L.arStyle,
+      );
+    } else {
+      final (:pre, :suf) = word.splitOnce(wordMatch);
+      title = Text.rich(
+        TextSpan(
+          children: [
+            if (pre != null) TextSpan(text: pre),
+            TextSpan(
+              text: wordMatch,
+              style: TextStyle(color: cs.error),
+            ),
+            if (suf != null) TextSpan(text: suf),
+          ],
+        ),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        textDirection: TextDirection.rtl,
+        textAlign: TextAlign.right,
+        style: L.arStyle,
+      );
+    }
 
     return Material(
       color: selected ? cs.secondaryContainer : cs.surfaceContainerLow,
@@ -50,14 +83,7 @@ class SelectableWordListTitle extends StatelessWidget {
           selection.toggle(word);
         },
         contentPadding: contentPadding,
-        title: Text(
-          word,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          textDirection: TextDirection.rtl,
-          textAlign: TextAlign.right,
-          style: L.arStyle,
-        ),
+        title: title,
         subtitle: subtitle,
         onTap: () {
           if (selection.hasSelection) {

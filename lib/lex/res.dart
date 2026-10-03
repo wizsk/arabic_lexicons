@@ -308,6 +308,9 @@ Widget _hansLaneView(
   //     : fontAmiriLineHeight;
 
   final fontHeight = htmlFontHeight;
+  final isDark = Theme.of(context).brightness == Brightness.dark;
+  final hiColor = isDark ? bookmarkWordBgDark : bookmarkWordBg;
+
   return SliverList.separated(
     itemCount: datas.dbRes.length,
     separatorBuilder: (context, index) =>
@@ -350,6 +353,7 @@ Widget _hansLaneView(
               fontFam,
               cs,
               row.isHi,
+              hiColor,
             ),
           ),
         ),
@@ -409,6 +413,7 @@ Widget _engMeaningView(
   String fontFam,
   ColorScheme cs,
   bool isHighResult,
+  Color hiColor,
 ) {
   return Html(
     data: html,
@@ -424,7 +429,7 @@ Widget _engMeaningView(
       'strong': Style(fontWeight: FontWeight.bold),
       'i': Style(fontStyle: FontStyle.italic),
       'center': Style(textAlign: TextAlign.center),
-      '.high': Style(color: cs.onPrimary, backgroundColor: cs.primary),
+      '.high': Style(backgroundColor: hiColor),
     },
   );
 }

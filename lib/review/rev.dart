@@ -70,9 +70,12 @@ class _ReviewPageState extends State<ReviewPage> {
   }
 
   Future<void> _customAfter() async {
+    final curr = (_intervals?.last ?? 1);
+    final nextDate = (curr * 1.5).round();
+
     final days = await showDialog<int>(
       context: context,
-      builder: (_) => DaysDialog(initial: _intervals?.last ?? 0),
+      builder: (_) => DaysDialog(initial: nextDate),
     );
     if (days != null) await _showAfter(days);
   }

@@ -10,7 +10,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
 
-void showBackupOptionsButtomSheet(
+Future<void> showBackupOptionsButtomSheet(
   BuildContext context, {
   required String title,
   required String saveDialogTitle,
@@ -23,7 +23,7 @@ void showBackupOptionsButtomSheet(
   String shareTxt = "Share",
   String saveToDeviceTxt = "Save to device",
   bool useLclass = false,
-}) {
+}) async {
   final afterSaveCallback =
       afterSave ??
       () async => await showInfoDialog(
@@ -35,7 +35,7 @@ void showBackupOptionsButtomSheet(
         confirmText: 'Okay',
       );
 
-  showModalBottomSheet(
+  await showModalBottomSheet(
     context: context,
     useSafeArea: true,
     showDragHandle: true,
@@ -98,22 +98,25 @@ void showBackupOptionsButtomSheet(
                             fontFamily: useLclass ? L.arFontIf : null,
                           ),
                         ),
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          spacing: 6,
-                          children: [
-                            Icon(fileIcon, color: cs.primary),
-                            Flexible(
-                              child: Text(
-                                fileName,
-                                style: theme.textTheme.bodyLarge?.copyWith(
-                                  fontFamily: useLclass ? L.arFontIf : null,
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            spacing: 6,
+                            children: [
+                              Icon(fileIcon, color: cs.primary),
+                              Flexible(
+                                child: Text(
+                                  fileName,
+                                  style: theme.textTheme.bodyLarge?.copyWith(
+                                    fontFamily: useLclass ? L.arFontIf : null,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
                                 ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ],
                     ),

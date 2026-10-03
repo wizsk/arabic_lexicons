@@ -194,6 +194,7 @@ Future<bool?> showConfirmDialog(
   String? fontFam,
   bool scroolable = false,
   bool autofocusConfirm = false,
+  bool barrierDismissible = true,
 }) {
   if (useLClass && cancelText == 'Cancel') {
     cancelText = L.p('Cancel', 'إغلاق');
@@ -201,6 +202,7 @@ Future<bool?> showConfirmDialog(
 
   return showDialog<bool>(
     context: context,
+    barrierDismissible: barrierDismissible,
     builder: (context) {
       final theme = Theme.of(context);
       final cs = theme.colorScheme;

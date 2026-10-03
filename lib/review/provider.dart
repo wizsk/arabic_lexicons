@@ -257,4 +257,32 @@ class ReviewRepo {
     );
     _words.add(i.word);
   }
+
+  Future<({int preLen, int nowLen})> insertRevItems(
+    List<RevItem> items,
+    bool replace,
+  ) async {
+    final batch = _db.batch();
+
+    for (final item in items) {
+      if (replace) {
+        batch.insert(
+          _t,
+          item.toMap(),
+          conflictAlgorithm: ConflictAlgorithm.replace,
+        );
+      } else {
+        batch.insert(_t, {
+          'word': item.word,
+          'due': -1,
+        }, conflictAlgorithm: ConflictAlgorithm.ignore);
+      }
+    }
+
+    await batch.commit(noResult: true);
+    final preLen = _words.length;
+    _words.addAll(items.map((e) => e.word));
+    final nowLen = _words.length;
+    return (preLen: preLen, nowLen: nowLen);
+  }
 }

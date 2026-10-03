@@ -4,7 +4,7 @@ import 'package:arabic_lexicons/conf.dart';
 import 'package:arabic_lexicons/data.dart';
 import 'package:arabic_lexicons/main_widgets.dart';
 import 'package:arabic_lexicons/pages/settings/settings.dart';
-import 'package:arabic_lexicons/reader/reader_utils.dart';
+import 'package:arabic_lexicons/utils/toast_snack.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -142,9 +142,10 @@ Future<void> showBackupOptionsButtomSheet(
 
                 if (context.mounted && outputFile != null) {
                   await afterSaveCallback();
-                  if (context.mounted) {
-                    showSnack(context, 'Saved to: $outputFile');
-                  }
+                  MsgSv.showSnackbarMsg(
+                    'Saved to: $outputFile',
+                    duration: const Duration(seconds: 6),
+                  );
                 }
               },
             ),

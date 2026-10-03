@@ -6,9 +6,10 @@ final releases = [
     version: 'v3.6.0',
     changes:
         '''
+    Add Review Words page
     Lisanul Arab lexicon show refferences on click no need to scrool to the bottom
     Remove unwanted dictionaries from reording menu
-    Directly selectable text in (${Dict.arEn.name})
+    Directly selectable text in (${Dict.arEn.en})
     Find words
     Adjust word Spacing in the reader
     Change highligh style for bookmarks and foreign words

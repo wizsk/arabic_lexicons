@@ -240,8 +240,13 @@ class _RevWordListPageState extends State<RevWordListPage> {
       onPressed: () async {
         if (_items.isEmpty) return;
         try {
-          await exportImportRevWords(context, _items, _rr, _selection);
-          _load();
+          final reload = await exportImportRevWords(
+            context,
+            _items,
+            _rr,
+            _selection,
+          );
+          if (reload) _load();
         } catch (e) {
           if (kDebugMode) debugPrint('While e/i in revmode: $e');
           MsgSv.showSnackbarMsg('Export/Import failed: $e');
@@ -264,6 +269,7 @@ class _RevWordListPageState extends State<RevWordListPage> {
                 all: () => _items.map((e) => e.word),
                 rm: (x) async {
                   await _rr.rmAll(x);
+                  _load();
                 },
               ),
               IconButton(

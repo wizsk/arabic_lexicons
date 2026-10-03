@@ -34,7 +34,7 @@ Future<void> importRevWords(BuildContext context, ReviewRepo rr) async {
         'Otherwise, cards will be added as new, and existing words will be skipped.',
     barrierDismissible: false,
     constraints: true,
-    confirmText: 'Keep',
+    confirmText: 'Override',
     cancelText: 'Discard',
   );
 
@@ -53,17 +53,18 @@ Future<void> importRevWords(BuildContext context, ReviewRepo rr) async {
   MsgSv.showSnackbarMsg(msg, duration: const Duration(seconds: 3));
 }
 
-Future<void> exportImportRevWords(
+Future<bool> exportImportRevWords(
   BuildContext context,
   List<RevItem> itsms,
   ReviewRepo rr,
   SelectionController sc,
 ) async {
   final todo = await showExportImportDialuge(context, sc.hasSelection);
-  if (todo == null || !context.mounted) return;
+  if (todo == null || !context.mounted) return false;
 
   if (todo == 'import') {
-    return importRevWords(context, rr);
+    await importRevWords(context, rr);
+    return true;
   }
 
   final List<RevItem> toBeExported;
@@ -77,6 +78,7 @@ Future<void> exportImportRevWords(
   }
 
   await exportRevWords(context, toBeExported);
+  return true;
 }
 
 Future<void> exportRevWords(BuildContext context, List<RevItem> items) async {
@@ -84,11 +86,8 @@ Future<void> exportRevWords(BuildContext context, List<RevItem> items) async {
       'arabic_lexicons_review_words_${formatDateTimeForFileName()}.json';
   final filePath = path.join((await getTemporaryDirectory()).path, fileNmae);
 
-  final fileBytes = utf8.encode(filePath);
-
-  await File(
-    filePath,
-  ).writeAsString(RevItem.listToJsonString(items), flush: true);
+  final fileBytes = utf8.encode(RevItem.listToJsonString(items));
+  await File(filePath).writeAsBytes(fileBytes, flush: true);
 
   if (!context.mounted) return;
   await showBackupOptionsButtomSheet(

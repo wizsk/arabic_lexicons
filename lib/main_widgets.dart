@@ -15,7 +15,7 @@ Widget buildDrawer(BuildContext context) {
   int selectedIndex = switch (currRoute) {
     Routes.dictionary => 0,
     Routes.readerInput || Routes.readerPage => 1,
-    Routes.bookMarks => 2,
+    Routes.review => 2,
     _ => -1,
   };
 

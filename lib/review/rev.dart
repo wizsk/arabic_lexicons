@@ -3,9 +3,10 @@ import 'package:arabic_lexicons/data.dart';
 import 'package:arabic_lexicons/main_widgets.dart';
 import 'package:arabic_lexicons/reader/find_word.dart';
 import 'package:arabic_lexicons/review/list.dart';
+import 'package:arabic_lexicons/review/models.dart';
+import 'package:arabic_lexicons/review/order.dart';
 import 'package:arabic_lexicons/review/provider.dart';
 import 'package:arabic_lexicons/utils.dart';
-import 'package:arabic_lexicons/utils/toast_snack.dart';
 import 'package:flutter/material.dart';
 
 class ReviewPage extends StatefulWidget {
@@ -16,7 +17,8 @@ class ReviewPage extends StatefulWidget {
 }
 
 class _ReviewPageState extends State<ReviewPage> {
-  RevOrder _ord = RevOrder.old;
+  RevOrdData _ord = RevOrdData.def;
+
   String? _word;
   List<int>? _intervals;
   bool _loading = true;
@@ -41,10 +43,16 @@ class _ReviewPageState extends State<ReviewPage> {
     touggleFullScreen();
   }
 
+  Future<void> _openDict() async {
+    await openDict(context, _word ?? '');
+    // TODO: look into it. should we load or not
+    _load();
+  }
+
   Future<void> _load() async {
     setState(() => _loading = true);
 
-    final res = await _repo.next(_ord, _showNoDueWords);
+    final res = await _repo.next(_ord);
 
     if (!mounted) return;
     setState(() {
@@ -85,28 +93,9 @@ class _ReviewPageState extends State<ReviewPage> {
     }
   }
 
-  Widget _ordLabel(RevOrder o) => Row(
-    mainAxisSize: MainAxisSize.min,
-    children: [
-      Icon(switch (o) {
-        RevOrder.old => Icons.history_rounded,
-        RevOrder.newest => Icons.update_rounded,
-        RevOrder.rand => Icons.shuffle_rounded,
-      }),
-      const SizedBox(width: 8),
-      Text(switch (o) {
-        RevOrder.old => 'Oldest',
-        RevOrder.newest => 'Newest',
-        RevOrder.rand => 'Random',
-      }),
-    ],
-  );
-
-  bool _showNoDueWords = false;
-
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    // final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
     final surfaceColor = appConf.readerSurface(context);
 
@@ -145,47 +134,6 @@ class _ReviewPageState extends State<ReviewPage> {
               _load();
             },
           ),
-          PopupMenuButton<String>(
-            icon: const Icon(Icons.sort),
-            tooltip: 'Review Order',
-            initialValue: _ord.name,
-            onSelected: (o) async {
-              if (o == 'no-due-tgl') {
-                _showNoDueWords = !_showNoDueWords;
-                MsgSv.showToast(
-                  _showNoDueWords
-                      ? 'Showing only new words'
-                      : 'Showing old and new words',
-                );
-              } else {
-                _ord = RevOrder.values.firstWhere(
-                  (e) => e.name == o,
-                  orElse: () => _ord,
-                );
-              }
-              // });
-              await _load();
-            },
-            itemBuilder: (_) => [
-              for (final o in RevOrder.values)
-                PopupMenuItem(value: o.name, child: _ordLabel(o)),
-
-              const PopupMenuDivider(),
-              PopupMenuItem(
-                value: 'no-due-tgl',
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    !_showNoDueWords
-                        ? Icon(Icons.check_box)
-                        : Icon(Icons.check_box_outline_blank_outlined),
-                    SizedBox(width: 6),
-                    Text('Review Mode'),
-                  ],
-                ),
-              ),
-            ],
-          ),
         ],
       ),
       body: _loading
@@ -196,34 +144,49 @@ class _ReviewPageState extends State<ReviewPage> {
                 children: [
                   Expanded(
                     child: Center(
-                      child: Padding(
-                        padding: const EdgeInsets.all(24),
-                        child: Directionality(
-                          textDirection: TextDirection.rtl,
-                          child: Text(
-                            _word ?? 'لا موجود',
-                            textAlign: TextAlign.center,
-                            style: tt.displaySmall?.copyWith(
-                              fontFamily: L.arFont,
-                              color: _word == null
-                                  ? cs.onSurfaceVariant
-                                  : cs.onSurface,
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(12),
+                        onTap: _word == null ? null : _openDict,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 10,
+                          ),
+                          child: Directionality(
+                            textDirection: TextDirection.rtl,
+                            child: Text(
+                              _word ?? 'لا موجود',
+                              textAlign: TextAlign.center,
+                              style: tt.displaySmall?.copyWith(
+                                fontFamily: L.arFont,
+                                // TODO: Fix color
+                                // color: cs.onSurface,
+                              ),
                             ),
                           ),
                         ),
                       ),
                     ),
                   ),
-                  if (_word != null) ...[
-                    const Divider(height: 0),
-                    // const SizedBox(height: 16),
-                    // Text(
-                    //   'Show After',
-                    //   style: tt.labelLarge?.copyWith(
-                    //     color: cs.onSurfaceVariant,
-                    //   ),
-                    // ),
 
+                  if (_word != null) ...[
+                    FilledButton.tonalIcon(
+                      style: FilledButton.styleFrom(
+                        minimumSize: const Size(82, 48),
+                      ),
+                      icon: const Icon(Icons.sort_rounded),
+                      label: Text(_ord.label),
+                      onPressed: () async {
+                        final res = await showRevOrdSheet(context, _ord);
+                        if (res == null || res == _ord) return;
+                        _ord = res;
+                        _load();
+                        _ord.save();
+                      },
+                    ),
+
+                    const SizedBox(height: 18),
+                    const Divider(height: 0),
                     const SizedBox(height: 16),
                     Wrap(
                       spacing: 8,
@@ -275,13 +238,7 @@ class _ReviewPageState extends State<ReviewPage> {
                         OutlinedButton.icon(
                           label: Text('Def'),
                           icon: Icon(Icons.search),
-                          onPressed: _word == null
-                              ? null
-                              : () async {
-                                  await openDict(context, _word ?? '');
-                                  // TODO: look into it. should we load or not
-                                  _load();
-                                },
+                          onPressed: _word == null ? null : _openDict,
                         ),
                       ],
                     ),

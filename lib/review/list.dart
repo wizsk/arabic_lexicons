@@ -4,6 +4,7 @@ import 'package:arabic_lexicons/alphabets.dart';
 import 'package:arabic_lexicons/conf.dart';
 import 'package:arabic_lexicons/data.dart';
 import 'package:arabic_lexicons/multi_selection.dart';
+import 'package:arabic_lexicons/review/models.dart';
 import 'package:arabic_lexicons/review/provider.dart';
 import 'package:arabic_lexicons/main_widgets.dart';
 import 'package:arabic_lexicons/utils/toast_snack.dart';
@@ -114,13 +115,15 @@ class _RevWordListPageState extends State<RevWordListPage> {
   }
 
   String _dueText(RevItem i) {
+    if (i.due == -1) return 'New';
+
     final diff = Duration(
       milliseconds: i.due - DateTime.now().millisecondsSinceEpoch,
     );
 
     final String when;
     if (diff.isNegative || diff.inMinutes < 1) {
-      when = 'Now';
+      when = 'now';
     } else if (diff.inHours < 1) {
       when = '${diff.inMinutes}m';
     } else if (diff.inDays < 1) {
@@ -139,7 +142,7 @@ class _RevWordListPageState extends State<RevWordListPage> {
       }
     }
 
-    return when;
+    return 'Due $when';
     // return '$when · interval ${i.lastInterval}d';
   }
 
@@ -378,6 +381,8 @@ class _RevWordListPageState extends State<RevWordListPage> {
                               title: Text(
                                 i.word,
                                 textDirection: TextDirection.rtl,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                                 style: Theme.of(context).textTheme.titleLarge
                                     ?.copyWith(
                                       fontFamily: L.arFont,

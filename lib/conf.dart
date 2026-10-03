@@ -104,6 +104,7 @@ class AppSettingsController extends ChangeNotifier {
   static const _readerScrollPersentKey = 'reader-sc-p';
   static const _arUiFontSizeKey = 'aruif';
   static const _wordSpacingKey = 'wspke';
+  static const _reviewBookmarksFirstKey = 'revBMF';
 
   int _playRate = 0;
   int get playRatelastShown => _playRate;
@@ -120,6 +121,9 @@ class AppSettingsController extends ChangeNotifier {
   bool _fullScreen = _fullScreenDef;
 
   double? _arUiFontSize;
+
+  static const bool _reviewBookmarksFirstDef = true;
+  bool _reviewBookmarksFirst = _reviewBookmarksFirstDef;
 
   static const bool _hideStatusbarDef = false;
   bool _hideStatusbar = _hideStatusbarDef;
@@ -231,6 +235,9 @@ class AppSettingsController extends ChangeNotifier {
 
     _hideAppbar = prefs.getBool(_hideAppbarKey) ?? _hideAppbarDef;
 
+    _reviewBookmarksFirst =
+        prefs.getBool(_reviewBookmarksFirstKey) ?? _reviewBookmarksFirstDef;
+
     _readerFont = prefs.getString(_readerFontKey) ?? _readerFontDef;
     if (!arabicFonts.contains(_readerFont)) {
       _readerFont = defaultReaderArabicFont;
@@ -292,6 +299,18 @@ class AppSettingsController extends ChangeNotifier {
     notifyListeners();
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_themeKey, _theme.name);
+  }
+
+  Future<void> saveReviewBookmarksFirst(bool v) async {
+    if (_reviewBookmarksFirst == v) return;
+
+    _reviewBookmarksFirst = v;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_reviewBookmarksFirstKey, v);
+  }
+
+  bool get reviewBookmarksFirst {
+    return _reviewBookmarksFirst;
   }
 
   Future<void> saveFirstRun(bool v) async {

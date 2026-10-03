@@ -2,9 +2,8 @@ import 'dart:math';
 
 import 'package:arabic_lexicons/datas/app_db.dart';
 import 'package:arabic_lexicons/datas/word_store.dart';
+import 'package:arabic_lexicons/review/models.dart';
 import 'package:sqflite/sqflite.dart';
-
-enum RevOrder { old, newest, rand }
 
 const repeatDurMin = 10;
 
@@ -22,7 +21,7 @@ class ReviewRepo {
     await db.execute('''
       CREATE TABLE IF NOT EXISTS $_t (
         word TEXT PRIMARY KEY,
-        due INTEGER NOT NULL,
+        due INTEGER NOT NULL, -- denoted by -1 is a word that is newly endtered but never was shown
         last_interval INTEGER NOT NULL DEFAULT 0,
         hidden INTEGER NOT NULL DEFAULT 0
       )''');
@@ -36,11 +35,15 @@ class ReviewRepo {
   static int get _now => DateTime.now().millisecondsSinceEpoch;
 
   /// Adds a word as due now (no-op if it already exists).
-  Future<bool> add(String word) async {
+  Future<bool> add(
+    String word, {
+    final ConflictAlgorithm conflictAlgorithm = ConflictAlgorithm.ignore,
+  }) async {
     final n = await _db.insert(_t, {
       'word': word,
-      'due': _now,
-    }, conflictAlgorithm: ConflictAlgorithm.ignore);
+      'due': -1,
+    }, conflictAlgorithm: conflictAlgorithm);
+
     _words.add(word);
 
     return n > 0; // false if it already existed
@@ -80,21 +83,19 @@ class ReviewRepo {
   }
 
   /// Next due, non-hidden word, or null.
-  Future<({String word, List<int> intervals})?> next(
-    RevOrder ord,
-    bool onlyNew,
-  ) async {
-    if (!onlyNew) {
-      final orderBy = switch (ord) {
+  Future<({String word, List<int> intervals})?> next(RevOrdData ord) async {
+    if (!ord.onlyNew) {
+      final orderBy = switch (ord.ord) {
         RevOrder.old => 'due ASC',
         RevOrder.newest => 'due DESC',
         RevOrder.rand => 'RANDOM()',
       };
 
+      // 1. Try due cards first.
       final rows = await _db.query(
         _t,
         columns: ['word'],
-        where: 'hidden = 0 AND due <= ?',
+        where: 'hidden = 0 AND due != -1 AND due <= ?',
         whereArgs: [_now],
         orderBy: orderBy,
         limit: 1,
@@ -107,12 +108,32 @@ class ReviewRepo {
       }
     }
 
-    switch (ord) {
+    // 2. Nothing due then get a new card.
+    final newRows = await _db.query(
+      _t,
+      columns: ['word'],
+      where: 'hidden = 0 AND due = -1',
+      orderBy: ord.ord == RevOrder.rand ? 'RANDOM()' : null,
+      limit: 1,
+    );
+
+    if (newRows.isNotEmpty) {
+      final r = newRows.first;
+      final intervals = calcIntervals(r['last_interval'] as int?);
+      return (word: r['word'] as String, intervals: intervals);
+    }
+
+    // 3. Nothing due and no new cards then add new ones
+    switch (ord.ord) {
       case RevOrder.old:
       case RevOrder.newest:
-        for (final l in [WordStore.bookmarkedWords, WordStore.foreignWords]) {
+        final mainList = ord.bookMarksFirst
+            ? [WordStore.bookmarkedWords, WordStore.foreignWords]
+            : [WordStore.foreignWords, WordStore.bookmarkedWords];
+
+        for (final l in mainList) {
           Iterable<String> x = l;
-          if (ord == RevOrder.newest) x = l.reversed;
+          if (ord.ord == RevOrder.newest) x = l.reversed;
           for (final w in x) {
             if (_words.contains(w)) continue;
             add(w);
@@ -236,27 +257,4 @@ class ReviewRepo {
     );
     _words.add(i.word);
   }
-}
-
-class RevItem {
-  final String word;
-  final int due; // epoch ms
-  final int lastInterval; // days
-  final bool hidden;
-
-  RevItem(this.word, this.due, this.lastInterval, this.hidden);
-
-  factory RevItem.fromMap(Map<String, Object?> m) => RevItem(
-    m['word'] as String,
-    m['due'] as int,
-    m['last_interval'] as int,
-    (m['hidden'] as int) == 1,
-  );
-
-  Map<String, Object?> toMap() => {
-    'word': word,
-    'due': due,
-    'last_interval': lastInterval,
-    'hidden': hidden ? 1 : 0,
-  };
 }

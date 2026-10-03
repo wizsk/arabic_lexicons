@@ -114,4 +114,9 @@ class RevItem {
 
   static String listToJsonString(List<RevItem> items) =>
       jsonEncode(listToJson(items));
+
+  @override
+  String toString() {
+    return 'RevItem(${toMap().entries.map((e) => '${e.key}: ${e.value}').join(', ')})';
+  }
 }

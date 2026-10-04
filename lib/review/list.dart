@@ -160,37 +160,37 @@ class _RevWordListPageState extends State<RevWordListPage> {
     return 'Due in $when';
   }
 
-//   String _dueText(RevItem i) {
-//     if (i.due == -1) return 'New';
-//
-//     final diff = Duration(
-//       milliseconds: i.due - DateTime.now().millisecondsSinceEpoch,
-//     );
-//
-//     final String when;
-//     if (diff.isNegative || diff.inMinutes < 1) {
-//       when = 'now';
-//     } else if (diff.inHours < 1) {
-//       when = '${diff.inMinutes}m';
-//     } else if (diff.inDays < 1) {
-//       final minutes = diff.inMinutes % 60;
-//       if (minutes > 0) {
-//         when = '${diff.inHours}h ${minutes}m';
-//       } else {
-//         when = '${diff.inHours}h';
-//       }
-//     } else {
-//       final h = diff.inHours % 24;
-//       if (h > 0) {
-//         when = '${diff.inDays}d ${h}h';
-//       } else {
-//         when = '${diff.inDays}d';
-//       }
-//     }
-//
-//     return 'Due $when';
-//     // return '$when · interval ${i.lastInterval}d';
-//   }
+  //   String _dueText(RevItem i) {
+  //     if (i.due == -1) return 'New';
+  //
+  //     final diff = Duration(
+  //       milliseconds: i.due - DateTime.now().millisecondsSinceEpoch,
+  //     );
+  //
+  //     final String when;
+  //     if (diff.isNegative || diff.inMinutes < 1) {
+  //       when = 'now';
+  //     } else if (diff.inHours < 1) {
+  //       when = '${diff.inMinutes}m';
+  //     } else if (diff.inDays < 1) {
+  //       final minutes = diff.inMinutes % 60;
+  //       if (minutes > 0) {
+  //         when = '${diff.inHours}h ${minutes}m';
+  //       } else {
+  //         when = '${diff.inHours}h';
+  //       }
+  //     } else {
+  //       final h = diff.inHours % 24;
+  //       if (h > 0) {
+  //         when = '${diff.inDays}d ${h}h';
+  //       } else {
+  //         when = '${diff.inDays}d';
+  //       }
+  //     }
+  //
+  //     return 'Due $when';
+  //     // return '$when · interval ${i.lastInterval}d';
+  //   }
 
   Future<void> _editDays(RevItem i) async {
     final days = await DaysDialog.show(

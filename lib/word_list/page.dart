@@ -575,7 +575,7 @@ class _WordListPageState extends State<WordListPage> {
                           sliver: SliverList.separated(
                             itemCount: _words.length,
                             separatorBuilder: (_, _) {
-                              return const SizedBox(height: 8);
+                              return const SizedBox(height: 4);
                             },
                             itemBuilder: (context, visualIndex) {
                               final index = _isShowNewToOld
@@ -585,6 +585,8 @@ class _WordListPageState extends State<WordListPage> {
                               final word = _words[index];
 
                               return SelectableWordListTitle(
+                                index: visualIndex,
+                                length: _words.length,
                                 wordMatch: _shearced,
                                 word: word,
                                 selection: _selection,

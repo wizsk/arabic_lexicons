@@ -138,7 +138,7 @@ class _HistPageState extends State<HistPage> {
                     padding: appConf.readerPadd(context),
                     sliver: SliverList.separated(
                       itemCount: WordStore.histLen,
-                      separatorBuilder: (_, _) => const SizedBox(height: 8),
+                      separatorBuilder: (_, _) => const SizedBox(height: 4),
                       itemBuilder: (context, visualIndex) {
                         final index = _isShowNewToOld
                             ? WordStore.histLen - 1 - visualIndex
@@ -147,6 +147,8 @@ class _HistPageState extends State<HistPage> {
                         final itm = WordStore.histAt(index);
 
                         return SelectableWordListTitle(
+                          index: visualIndex,
+                          length: WordStore.histLen,
                           word: itm.word,
                           dict: itm.dict,
                           selection: _selection,

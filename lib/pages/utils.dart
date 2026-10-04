@@ -16,12 +16,16 @@ class SelectableWordListTitle extends StatelessWidget {
   final Widget? subtitle;
   final Future<void> Function()? remove;
   final Dict? dict;
+  final int index;
+  final int length;
 
   const SelectableWordListTitle({
     super.key,
     required this.word,
     required this.selection,
     required this.setState,
+    required this.index,
+    required this.length,
     this.contentPadding = const EdgeInsets.symmetric(
       horizontal: 12,
       vertical: 6,
@@ -38,6 +42,7 @@ class SelectableWordListTitle extends StatelessWidget {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
     final bm = WordStore.isBm(word);
+    final selecting = selection.hasSelection;
 
     Widget title;
     if (wordMatch.isEmpty) {
@@ -70,89 +75,84 @@ class SelectableWordListTitle extends StatelessWidget {
       );
     }
 
-    return Material(
-      color: selected ? cs.secondaryContainer : cs.surfaceContainerLow,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: cs.outlineVariant),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: ListTile(
-        selected: selected,
-        onLongPress: () {
+    final child = ListTile(
+      selected: selected,
+      onLongPress: () {
+        selection.toggle(word);
+      },
+      contentPadding: contentPadding,
+      title: title,
+      subtitle: subtitle,
+      onTap: () {
+        if (selecting) {
           selection.toggle(word);
-        },
-        contentPadding: contentPadding,
-        title: title,
-        subtitle: subtitle,
-        onTap: () {
-          if (selection.hasSelection) {
-            selection.toggle(word);
-          } else {
-            showOpendictOrFindword(
-              context,
-              word,
-              () {
-                openDict(
-                  context,
-                  word,
-                  dict: dict,
-                ).then((_) => setState(() {}));
-              },
-              () {
-                FindWordReaderPage.open(context, word).then((_) {
-                  setState(() {});
-                });
-              },
-              L.arStyle,
-            );
-          }
-        },
-        leading: IconButton(
-          icon: bm
-              ? Icon(Icons.bookmark, color: cs.error)
-              : const Icon(Icons.bookmark_outline),
-          onPressed: () async {
-            if (bm) {
-              final confirm = await showConfirmDialog(
-                context,
-                'Remove Bookmark: $word',
-                destructive: true,
-                confirmText: 'Remove',
-              );
-              if (confirm != true) return;
-              await WordStore.rmBM(word);
-            } else {
-              await WordStore.addBM(word);
-            }
-            if (context.mounted) setState(() {});
-          },
-        ),
-        trailing: selection.hasSelection
-            ? Checkbox(
-                value: selected,
-                onChanged: (_) => selection.toggle(word),
-              )
-            : remove != null
-            ? IconButton(
-                icon: const Icon(Icons.delete_outline),
-                tooltip: L.p('Delete', 'حذف'),
-                onPressed: () async {
+        } else {
+          showOpendictOrFindword(
+            context,
+            word,
+            () {
+              openDict(context, word, dict: dict).then((_) => setState(() {}));
+            },
+            () {
+              FindWordReaderPage.open(context, word).then((_) {
+                setState(() {});
+              });
+            },
+            L.arStyle,
+          );
+        }
+      },
+      leading: IconButton(
+        icon: bm
+            ? Icon(Icons.bookmark, color: cs.error)
+            : const Icon(Icons.bookmark_outline),
+        onPressed: selecting
+            ? null
+            : () async {
+                if (bm) {
                   final confirm = await showConfirmDialog(
                     context,
-                    '${L.p('Delete: ', 'حذف:')} $word',
+                    'Remove Bookmark: $word',
                     destructive: true,
-                    confirmText: L.p('Delete', 'حذف'),
-                    dir: L.dir,
+                    confirmText: 'Remove',
                   );
                   if (confirm != true) return;
-
-                  await remove?.call();
-                  if (context.mounted) setState(() {});
-                },
-              )
-            : null,
+                  await WordStore.rmBM(word);
+                } else {
+                  await WordStore.addBM(word);
+                }
+                if (context.mounted) setState(() {});
+              },
       ),
+      trailing: selection.hasSelection
+          ? Checkbox(value: selected, onChanged: (_) => selection.toggle(word))
+          : remove != null
+          ? IconButton(
+              icon: const Icon(Icons.delete_outline),
+              tooltip: L.p('Delete', 'حذف'),
+              onPressed: () async {
+                final confirm = await showConfirmDialog(
+                  context,
+                  '${L.p('Delete: ', 'حذف:')} $word',
+                  destructive: true,
+                  confirmText: L.p('Delete', 'حذف'),
+                  dir: L.dir,
+                );
+                if (confirm != true) return;
+
+                await remove?.call();
+                if (context.mounted) setState(() {});
+              },
+            )
+          : null,
+    );
+
+    final bgColor = selected ? cs.secondaryContainer : cs.surfaceContainer;
+    return segmentedListItem(
+      bg: bgColor,
+      index: index,
+      length: length,
+      item: child,
     );
   }
 }

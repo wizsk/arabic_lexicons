@@ -10,8 +10,9 @@ import 'package:flutter/material.dart';
 class SelectableWordListTitle extends StatelessWidget {
   final Function(VoidCallback) setState;
   final String word;
+  final bool? isBm;
   final String wordMatch;
-  final SelectionController<String> selection;
+  final SelectionController<String>? selection;
   final EdgeInsetsGeometry contentPadding;
   final Widget? subtitle;
   final Future<void> Function()? remove;
@@ -20,10 +21,14 @@ class SelectableWordListTitle extends StatelessWidget {
   final int length;
   final bool onBmPage;
 
+  /// returns after adding true
+  final Future<void> Function(bool, String) touggleBM;
+
   const SelectableWordListTitle({
     super.key,
     required this.word,
-    required this.selection,
+    this.isBm,
+    this.selection,
     required this.setState,
     required this.index,
     required this.length,
@@ -36,7 +41,17 @@ class SelectableWordListTitle extends StatelessWidget {
     this.dict,
     this.wordMatch = '',
     this.onBmPage = false,
+    this.touggleBM = touggleBMDef,
   });
+
+  static Future<void> touggleBMDef(bool isBm, String word) async {
+    if (isBm) {
+      await WordStore.rmBM(word);
+      return;
+    }
+
+    await WordStore.addBM(word);
+  }
 
   static Future<bool?> _confirmDelete(BuildContext context, String word) {
     return showConfirmDialog(
@@ -62,11 +77,12 @@ class SelectableWordListTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final selected = selection.isSelected(word);
+    final canBeSelected = selection != null;
+    final selected = canBeSelected ? selection!.isSelected(word) : false;
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
-    final bm = WordStore.isBm(word);
-    final selecting = selection.hasSelection;
+    final bm = isBm ?? WordStore.isBm(word);
+    final selecting = selection?.hasSelection ?? false;
 
     Widget title;
     if (wordMatch.isEmpty) {
@@ -103,15 +119,17 @@ class SelectableWordListTitle extends StatelessWidget {
 
     final child = ListTile(
       selected: selected,
-      onLongPress: () {
-        selection.toggle(word);
-      },
+      onLongPress: canBeSelected
+          ? () {
+              selection!.toggle(word);
+            }
+          : null,
       contentPadding: contentPadding,
       title: title,
       subtitle: subtitle,
       onTap: () {
-        if (selecting) {
-          selection.toggle(word);
+        if (selecting && canBeSelected) {
+          selection!.toggle(word);
         } else {
           showOpendictOrFindword(
             context,
@@ -139,15 +157,15 @@ class SelectableWordListTitle extends StatelessWidget {
                 if (bm) {
                   final confirm = await _confirmRmBm(context, word);
                   if (confirm != true) return;
-                  await WordStore.rmBM(word);
+                  await touggleBM(bm, word);
                 } else {
-                  await WordStore.addBM(word);
+                  await touggleBM(bm, word);
                 }
                 if (context.mounted) setState(() {});
               },
       ),
-      trailing: selection.hasSelection
-          ? Checkbox(value: selected, onChanged: (_) => selection.toggle(word))
+      trailing: canBeSelected && selection!.hasSelection
+          ? Checkbox(value: selected, onChanged: (_) => selection!.toggle(word))
           : remove != null
           ? IconButton(
               icon: const Icon(Icons.delete_outline),
@@ -192,12 +210,12 @@ class SelectableWordListTitle extends StatelessWidget {
                   final confirm = await _confirmRmBm(context, word);
                   if (confirm != true) return false;
 
-                  await WordStore.rmBM(word);
+                  await touggleBM(bm, word);
                   if (onBmPage) return true;
                   if (context.mounted) setState(() {});
                   return false; // keep the row, just toggle
                 } else {
-                  await WordStore.addBM(word);
+                  await touggleBM(bm, word);
                   if (context.mounted) setState(() {});
                   return false;
                 }

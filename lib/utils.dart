@@ -324,3 +324,28 @@ extension StringExtentions on String {
     return '${substring(0, take)}$ellipsis';
   }
 }
+
+Widget segmentedList({
+  required Color bg,
+  required List<Widget> list,
+  final double spacing = 4.00,
+  final MainAxisSize mainAxisSize = MainAxisSize.min,
+}) {
+  final children = <Widget>[];
+
+  for (int i = 0; i < list.length; i++) {
+    final r = BorderRadius.vertical(
+      top: Radius.circular(i == 0 ? 20 : 4),
+      bottom: Radius.circular(i == list.length - 1 ? 20 : 4),
+    );
+
+    final child = ClipRRect(
+      borderRadius: r,
+      child: Material(color: bg, child: list[i]),
+    );
+
+    children.add(child);
+  }
+
+  return Column(mainAxisSize: mainAxisSize, spacing: spacing, children: children);
+}

@@ -330,22 +330,50 @@ Widget segmentedList({
   required List<Widget> list,
   final double spacing = 4.00,
   final MainAxisSize mainAxisSize = MainAxisSize.min,
+  final double firstLastRadious = 20.00,
+  final double middleRadious = 4.00,
 }) {
   final children = <Widget>[];
 
   for (int i = 0; i < list.length; i++) {
-    final r = BorderRadius.vertical(
-      top: Radius.circular(i == 0 ? 20 : 4),
-      bottom: Radius.circular(i == list.length - 1 ? 20 : 4),
-    );
-
-    final child = ClipRRect(
-      borderRadius: r,
-      child: Material(color: bg, child: list[i]),
+    final child = segmentedListItem(
+      bg: bg,
+      item: list[i],
+      index: i,
+      length: list.length,
+      firstLastRadious: firstLastRadious,
+      middleRadious: middleRadious,
     );
 
     children.add(child);
   }
 
-  return Column(mainAxisSize: mainAxisSize, spacing: spacing, children: children);
+  return Column(
+    mainAxisSize: mainAxisSize,
+    spacing: spacing,
+    children: children,
+  );
+}
+
+Widget segmentedListItem({
+  required Color bg,
+  required Widget item,
+  required int index,
+  required int length,
+  final double firstLastRadious = 20.00,
+  final double middleRadious = 4.00,
+}) {
+  final r = BorderRadius.vertical(
+    top: Radius.circular(index == 0 ? firstLastRadious : middleRadious),
+    bottom: Radius.circular(
+      index == length - 1 ? firstLastRadious : middleRadious,
+    ),
+  );
+
+  final child = ClipRRect(
+    borderRadius: r,
+    child: Material(color: bg, child: item),
+  );
+
+  return child;
 }

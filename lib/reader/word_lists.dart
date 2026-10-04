@@ -2,6 +2,7 @@ import 'package:arabic_lexicons/conf.dart';
 import 'package:arabic_lexicons/data.dart';
 import 'package:arabic_lexicons/datas/word_store.dart';
 import 'package:arabic_lexicons/main_widgets.dart';
+import 'package:arabic_lexicons/pages/selectable_word_list_title_widget.dart';
 import 'package:arabic_lexicons/reader/data.dart';
 import 'package:arabic_lexicons/reader/reader_utils.dart';
 import 'package:arabic_lexicons/reader/settings_class.dart';
@@ -201,7 +202,7 @@ class _CBWordListState extends State<CBWordList> {
                   padding: appConf.readerPadd(context),
                   sliver: SliverList.separated(
                     itemCount: curr.length,
-                    separatorBuilder: (_, _) => const SizedBox(height: 8),
+                    separatorBuilder: (_, _) => const SizedBox(height: 4),
                     itemBuilder: (context, visualIndex) {
                       final index = _isShowNewToOld
                           ? curr.length - 1 - visualIndex
@@ -210,88 +211,29 @@ class _CBWordListState extends State<CBWordList> {
                       final word = curr.elementAt(index);
                       final bm = _bookmarkedShowing || WordStore.isBm(word);
 
-                      return Material(
-                        color: cs.surfaceContainerLow,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          side: BorderSide(color: cs.outlineVariant),
-                        ),
-                        clipBehavior: Clip.antiAlias,
-                        child: ListTile(
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 6,
-                          ),
-
-                          title: Text(
-                            // '${itm.word} • ${itm.dict.name}',
-                            word,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            textDirection: TextDirection.rtl,
-                            textAlign: TextAlign.right,
-                            style: L.arStyle,
-                          ),
-                          onTap: () {
-                            openDict(
-                              context,
-                              word,
-                            ).then((_) => setState(() {}));
-                          },
-                          leading: IconButton(
-                            icon: bm
-                                ? Icon(Icons.bookmark, color: cs.error)
-                                : Icon(Icons.bookmark_outline),
-                            onPressed: () async {
-                              if (bm) {
-                                final confirm = await showConfirmDialog(
-                                  context,
-                                  'Remove Bookmark: $word',
-                                  // message: 'Remove: $word',
-                                  destructive: true,
-                                  confirmText: 'Remove',
-                                );
-                                if (confirm != true) return;
-
-                                _bookmarked.remove(word);
-                                await WordStore.rmBM(word);
-                              } else {
-                                _bookmarked.add(word);
-                                await WordStore.addBM(word);
-                              }
-                              if (context.mounted) setState(() {});
-                            },
-                          ),
-                          trailing: _bookmarkedShowing
-                              ? null
-                              : IconButton(
-                                  icon: const Icon(Icons.delete_outline),
-                                  tooltip: L.p('Delete', 'حذف'),
-                                  onPressed: () async {
-                                    final confirm = await showConfirmDialog(
-                                      context,
-                                      '${L.p('Delete: ', 'حذف:')} $word',
-                                      destructive: true,
-                                      confirmText: L.p('Delete', 'حذف'),
-                                      dir: L.dir,
-                                    );
-                                    if (confirm != true) return;
-
-                                    _fws.remove(word);
-                                    await WordStore.removeForeign(word);
-
-                                    if (context.mounted) {
-                                      setState(() {});
-                                      showSnackL(
-                                        context,
-                                        en: 'Deleted: $word',
-                                        ar: 'تم الحذف: $word',
-                                      );
-                                    }
-                                  },
-                                ),
-                        ),
+                      final child = SelectableWordListTitle(
+                        onBmPage: _bookmarkedShowing,
+                        word: word,
+                        index: visualIndex,
+                        length: curr.length,
+                        setState: setState,
+                        touggleBM: (_, _) async {
+                          if (bm) {
+                            _bookmarked.remove(word);
+                            await WordStore.rmBM(word);
+                          } else {
+                            _bookmarked.add(word);
+                            await WordStore.addBM(word);
+                          }
+                        },
+                        remove: _bookmarkedShowing
+                            ? null
+                            : () async {
+                                _fws.remove(word);
+                                await WordStore.removeForeign(word);
+                              },
                       );
+                      return child;
                     },
                   ),
                 ),

@@ -9,6 +9,7 @@ import 'package:arabic_lexicons/review/models.dart';
 import 'package:arabic_lexicons/review/provider.dart';
 import 'package:arabic_lexicons/review/set_day_popup_widget.dart';
 import 'package:arabic_lexicons/review/utils.dart';
+import 'package:arabic_lexicons/utils.dart';
 import 'package:arabic_lexicons/utils/toast_snack.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -85,34 +86,40 @@ class _RevWordListPageState extends State<RevWordListPage> {
               style: Theme.of(context).textTheme.headlineMedium?.ar,
               textAlign: TextAlign.center,
             ),
-            SizedBox(height: 24),
-            ListTile(
-              leading: const Icon(Icons.edit_calendar_outlined),
-              title: const Text('Edit days'),
-              onTap: () {
-                Navigator.pop(ctx);
-                _editDays(i);
-              },
-            ),
-            ListTile(
-              leading: Icon(
-                i.hidden
-                    ? Icons.visibility_outlined
-                    : Icons.visibility_off_outlined,
-              ),
-              title: Text(i.hidden ? 'Unhide' : 'Hide'),
-              onTap: () {
-                Navigator.pop(ctx);
-                _toggleHidden(i);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.delete_outline),
-              title: const Text('Delete'),
-              onTap: () {
-                Navigator.pop(ctx);
-                _delete(context, i);
-              },
+            SizedBox(height: 20),
+            segmentedList(
+              bg: Theme.of(context).colorScheme.surfaceContainerHigh,
+              spacing: 4,
+              list: [
+                ListTile(
+                  leading: const Icon(Icons.edit_calendar_outlined),
+                  title: const Text('Edit days'),
+                  onTap: () {
+                    Navigator.pop(ctx);
+                    _editDays(i);
+                  },
+                ),
+                ListTile(
+                  leading: Icon(
+                    i.hidden
+                        ? Icons.visibility_outlined
+                        : Icons.visibility_off_outlined,
+                  ),
+                  title: Text(i.hidden ? 'Unhide' : 'Hide'),
+                  onTap: () {
+                    Navigator.pop(ctx);
+                    _toggleHidden(i);
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.delete_outline),
+                  title: const Text('Delete'),
+                  onTap: () {
+                    Navigator.pop(ctx);
+                    _delete(context, i);
+                  },
+                ),
+              ],
             ),
           ],
         ),

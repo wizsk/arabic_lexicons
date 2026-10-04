@@ -7,11 +7,11 @@ import 'package:arabic_lexicons/main_widgets.dart';
 import 'package:arabic_lexicons/multi_selection.dart';
 import 'package:arabic_lexicons/review/models.dart';
 import 'package:arabic_lexicons/review/provider.dart';
+import 'package:arabic_lexicons/review/set_day_popup_widget.dart';
 import 'package:arabic_lexicons/review/utils.dart';
 import 'package:arabic_lexicons/utils/toast_snack.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 class RevWordListPage extends StatefulWidget {
   const RevWordListPage({super.key, required this.rr});
@@ -123,42 +123,77 @@ class _RevWordListPageState extends State<RevWordListPage> {
   String _dueText(RevItem i) {
     if (i.due == -1) return 'New';
 
-    final diff = Duration(
-      milliseconds: i.due - DateTime.now().millisecondsSinceEpoch,
-    );
+    final diff = i.due - DateTime.now().millisecondsSinceEpoch;
+    if (diff <= 0) return 'Due now';
+
+    // Round up to whole minutes once, then derive everything from it.
+    final totalMin =
+        (diff + Duration.millisecondsPerMinute - 1) ~/
+        Duration.millisecondsPerMinute;
 
     final String when;
-    if (diff.isNegative || diff.inMinutes < 1) {
-      when = 'now';
-    } else if (diff.inHours < 1) {
-      when = '${diff.inMinutes}m';
-    } else if (diff.inDays < 1) {
-      final minutes = diff.inMinutes % 60;
-      if (minutes > 0) {
-        when = '${diff.inHours}h ${minutes}m';
-      } else {
-        when = '${diff.inHours}h';
-      }
+
+    if (totalMin < 60) {
+      when = '${totalMin}m';
+    } else if (totalMin < 24 * 60) {
+      final h = totalMin ~/ 60;
+      final m = totalMin % 60;
+      when = m > 0 ? '${h}h ${m}m' : '${h}h';
     } else {
-      final h = diff.inHours % 24;
-      if (h > 0) {
-        when = '${diff.inDays}d ${h}h';
-      } else {
-        when = '${diff.inDays}d';
+      var d = totalMin ~/ (24 * 60);
+      var h =
+          ((totalMin % (24 * 60)) + 59) ~/ 60; // round remainder up to hours
+      if (h == 24) {
+        d++;
+        h = 0;
       }
+      when = h > 0 ? '${d}d ${h}h' : '${d}d';
     }
 
-    return 'Due $when';
-    // return '$when · interval ${i.lastInterval}d';
+    return 'Due in $when';
   }
 
+//   String _dueText(RevItem i) {
+//     if (i.due == -1) return 'New';
+//
+//     final diff = Duration(
+//       milliseconds: i.due - DateTime.now().millisecondsSinceEpoch,
+//     );
+//
+//     final String when;
+//     if (diff.isNegative || diff.inMinutes < 1) {
+//       when = 'now';
+//     } else if (diff.inHours < 1) {
+//       when = '${diff.inMinutes}m';
+//     } else if (diff.inDays < 1) {
+//       final minutes = diff.inMinutes % 60;
+//       if (minutes > 0) {
+//         when = '${diff.inHours}h ${minutes}m';
+//       } else {
+//         when = '${diff.inHours}h';
+//       }
+//     } else {
+//       final h = diff.inHours % 24;
+//       if (h > 0) {
+//         when = '${diff.inDays}d ${h}h';
+//       } else {
+//         when = '${diff.inDays}d';
+//       }
+//     }
+//
+//     return 'Due $when';
+//     // return '$when · interval ${i.lastInterval}d';
+//   }
+
   Future<void> _editDays(RevItem i) async {
-    final days = await showDialog<int>(
-      context: context,
-      builder: (_) => DaysDialog(initial: i.lastInterval),
+    final days = await DaysDialog.show(
+      context,
+      initial: i.lastInterval,
+      showShowAfter10m: true,
     );
+
     if (days == null) return;
-    await _rr.setDays(i.word, days);
+    await _rr.showAfter(i.word, days, i.hidden);
     _load();
   }
 
@@ -489,57 +524,6 @@ class _RevWordListPageState extends State<RevWordListPage> {
           ],
         ),
       ),
-    );
-  }
-}
-
-class DaysDialog extends StatefulWidget {
-  final int initial;
-  const DaysDialog({super.key, required this.initial});
-
-  @override
-  State<DaysDialog> createState() => _DaysDialogState();
-}
-
-class _DaysDialogState extends State<DaysDialog> {
-  late final _ctrl = TextEditingController(
-    text: widget.initial > 0 ? '${widget.initial}' : '',
-  );
-
-  @override
-  void dispose() {
-    _ctrl.dispose();
-    super.dispose();
-  }
-
-  void _submit() {
-    final d = int.tryParse(_ctrl.text.trim());
-    if (d == null || d < 0) return;
-    Navigator.pop(context, d);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: const Text('Show again after (days)'),
-      content: TextField(
-        controller: _ctrl,
-        autofocus: true,
-        keyboardType: TextInputType.number,
-        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-        decoration: const InputDecoration(
-          border: OutlineInputBorder(),
-          suffixText: 'days',
-        ),
-        onSubmitted: (_) => _submit(),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
-        ),
-        FilledButton(onPressed: _submit, child: const Text('Save')),
-      ],
     );
   }
 }

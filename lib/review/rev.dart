@@ -6,6 +6,7 @@ import 'package:arabic_lexicons/review/list.dart';
 import 'package:arabic_lexicons/review/models.dart';
 import 'package:arabic_lexicons/review/order.dart';
 import 'package:arabic_lexicons/review/provider.dart';
+import 'package:arabic_lexicons/review/set_day_popup_widget.dart';
 import 'package:arabic_lexicons/utils.dart';
 import 'package:flutter/material.dart';
 
@@ -65,7 +66,7 @@ class _ReviewPageState extends State<ReviewPage> {
   Future<void> _showAfter(int days) async {
     final w = _word;
     if (w == null) return;
-    await _repo.showAfter(w, days);
+    await _repo.showAfter(w, days, false);
     await _load();
   }
 
@@ -73,10 +74,7 @@ class _ReviewPageState extends State<ReviewPage> {
     final curr = (_intervals?.last ?? 1);
     final nextDate = (curr * 1.5).round();
 
-    final days = await showDialog<int>(
-      context: context,
-      builder: (_) => DaysDialog(initial: nextDate),
-    );
+    final days = await DaysDialog.show(context, initial: nextDate);
     if (days != null) await _showAfter(days);
   }
 

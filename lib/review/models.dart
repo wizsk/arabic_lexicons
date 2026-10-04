@@ -49,7 +49,7 @@ class RevOrdData {
     await appConf.saveReviewBookmarksFirst(bookMarksFirst);
   }
 
-  String get label => '${ord.label}${onlyNew ? ' • Only new' : ''}';
+  String get label => '${ord.label}${onlyNew ? ' • New' : ''}';
   String get name => ord.name;
 
   RevOrdData copyWith({RevOrder? ord, bool? onlyNew, bool? bookMarksFirst}) {

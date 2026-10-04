@@ -124,49 +124,57 @@ class ReviewRepo {
     }
 
     // 3. Nothing due and no new cards then add new ones
+
+    final mainList = ord.bookMarksFirst
+        ? [WordStore.bookmarkedWords, WordStore.foreignWords]
+        : [WordStore.foreignWords, WordStore.bookmarkedWords];
+
     switch (ord.ord) {
       case RevOrder.old:
       case RevOrder.newest:
-        final mainList = ord.bookMarksFirst
-            ? [WordStore.bookmarkedWords, WordStore.foreignWords]
-            : [WordStore.foreignWords, WordStore.bookmarkedWords];
-
         for (final l in mainList) {
+          if (l.isEmpty) continue;
+
           Iterable<String> x = l;
           if (ord.ord == RevOrder.newest) x = l.reversed;
           for (final w in x) {
             if (_words.contains(w)) continue;
-            add(w);
+            // add(w);
             return (word: w, intervals: defIntervals);
           }
         }
         return null;
 
       case RevOrder.rand:
-        final Set<(int, int)> s = {};
+        final Set<int> s = {};
 
-        final len =
-            WordStore.bookmarkedWords.length + WordStore.foreignWords.length;
+        for (final l in mainList) {
+          // edge cases!
+          if (l.isEmpty) continue;
+          if (l.length == 1) {
+            final w = l[0];
+            if (!_words.contains(w)) {
+              // await add(w);
+              return (word: w, intervals: defIntervals);
+            }
+            continue;
+          }
 
-        while (s.length < len) {
-          final listNo = _rnd.nextInt(1);
+          s.clear();
+          final len = l.length;
+          while (s.length < len) {
+            final idx = _rnd.nextInt(len);
 
-          final l = listNo == 0
-              ? WordStore.bookmarkedWords
-              : WordStore.foreignWords;
+            if (s.contains(idx)) continue;
+            s.add(idx);
 
-          final wordNo = _rnd.nextInt(l.length - 1);
-          final key = (listNo, wordNo);
-          if (s.contains(key)) continue;
-          s.add(key);
-
-          final w = l[wordNo];
-
-          if (_words.contains(w)) continue;
-          add(w);
-          return (word: w, intervals: defIntervals);
+            final w = l[idx];
+            if (_words.contains(w)) {
+              continue;
+            }
+            return (word: w, intervals: defIntervals);
+          }
         }
-
         return null;
     }
   }
@@ -183,18 +191,51 @@ class ReviewRepo {
   // }
 
   /// days < 0 means "repeat": show again in 10 minutes.
-  Future<void> showAfter(String word, int days) async {
+  Future<void> showAfter(String word, int days, bool hidden) async {
     final due = days < 0
         ? _now + const Duration(minutes: repeatDurMin).inMilliseconds
         : _now + Duration(days: days).inMilliseconds;
 
-    await _db.update(
+    final itm = RevItem(word, due, days < 0 ? 0 : days, hidden);
+
+    final id = await _db.insert(
       _t,
-      {'due': due, if (days >= 0) 'last_interval': days},
-      where: 'word = ?',
-      whereArgs: [word],
+      itm.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
     );
+
+    if (id < 0) return;
+    _words.add(word);
   }
+
+//   Future<void> setDays(String word, int days, bool hidden) async {
+//     final itm = RevItem(
+//       word,
+//       DateTime.now().add(Duration(days: days)).millisecondsSinceEpoch,
+//       days,
+//       hidden,
+//     );
+//
+//     final id = await _db.insert(
+//       _t,
+//       itm.toMap(),
+//       conflictAlgorithm: ConflictAlgorithm.replace,
+//     );
+//
+//     print(id);
+//     if (id < 0) return;
+//     _words.add(word);
+//
+//     // await _db.update(
+//     //   _t,
+//     //   {
+//     //     'due': DateTime.now().add(Duration(days: days)).millisecondsSinceEpoch,
+//     //     'last_interval': days,
+//     //   },
+//     //   where: 'word = ?',
+//     //   whereArgs: [word],
+//     // );
+//   }
 
   Future<void> hide(String word, {bool hide = true}) async {
     await _db.update(
@@ -225,18 +266,6 @@ class ReviewRepo {
       orderBy: 'due ASC',
     );
     return rows.map(RevItem.fromMap).toList();
-  }
-
-  Future<void> setDays(String word, int days) async {
-    await _db.update(
-      _t,
-      {
-        'due': DateTime.now().add(Duration(days: days)).millisecondsSinceEpoch,
-        'last_interval': days,
-      },
-      where: 'word = ?',
-      whereArgs: [word],
-    );
   }
 
   Future<void> setHidden(String word, bool hidden) async {

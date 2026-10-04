@@ -3,7 +3,7 @@ import 'package:arabic_lexicons/data.dart';
 import 'package:arabic_lexicons/datas/word_store.dart';
 import 'package:arabic_lexicons/main_widgets.dart';
 import 'package:arabic_lexicons/multi_selection.dart';
-import 'package:arabic_lexicons/pages/utils.dart';
+import 'package:arabic_lexicons/pages/selectable_word_list_title_widget.dart';
 import 'package:arabic_lexicons/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';

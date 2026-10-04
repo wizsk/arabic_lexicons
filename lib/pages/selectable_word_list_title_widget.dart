@@ -18,6 +18,7 @@ class SelectableWordListTitle extends StatelessWidget {
   final Dict? dict;
   final int index;
   final int length;
+  final bool onBmPage;
 
   const SelectableWordListTitle({
     super.key,
@@ -34,7 +35,30 @@ class SelectableWordListTitle extends StatelessWidget {
     required this.remove,
     this.dict,
     this.wordMatch = '',
+    this.onBmPage = false,
   });
+
+  static Future<bool?> _confirmDelete(BuildContext context, String word) {
+    return showConfirmDialog(
+      context,
+      'Delete: $word',
+      message: 'Do you really want to delete $word?',
+      destructive: true,
+      confirmText: 'Delete',
+      fontFam: L.arFont,
+    );
+  }
+
+  static Future<bool?> _confirmRmBm(BuildContext context, String word) {
+    return showConfirmDialog(
+      context,
+      'Remove Bookmark: $word',
+      message: 'Do you really want to remove $word?',
+      destructive: true,
+      confirmText: 'Remove',
+      fontFam: L.arFont,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -68,9 +92,11 @@ class SelectableWordListTitle extends StatelessWidget {
           ],
         ),
         maxLines: 1,
+
         overflow: TextOverflow.ellipsis,
         textDirection: TextDirection.rtl,
         textAlign: TextAlign.right,
+
         style: L.arStyle,
       );
     }
@@ -102,6 +128,7 @@ class SelectableWordListTitle extends StatelessWidget {
           );
         }
       },
+
       leading: IconButton(
         icon: bm
             ? Icon(Icons.bookmark, color: cs.error)
@@ -110,12 +137,7 @@ class SelectableWordListTitle extends StatelessWidget {
             ? null
             : () async {
                 if (bm) {
-                  final confirm = await showConfirmDialog(
-                    context,
-                    'Remove Bookmark: $word',
-                    destructive: true,
-                    confirmText: 'Remove',
-                  );
+                  final confirm = await _confirmRmBm(context, word);
                   if (confirm != true) return;
                   await WordStore.rmBM(word);
                 } else {
@@ -131,13 +153,7 @@ class SelectableWordListTitle extends StatelessWidget {
               icon: const Icon(Icons.delete_outline),
               tooltip: L.p('Delete', 'حذف'),
               onPressed: () async {
-                final confirm = await showConfirmDialog(
-                  context,
-                  '${L.p('Delete: ', 'حذف:')} $word',
-                  destructive: true,
-                  confirmText: L.p('Delete', 'حذف'),
-                  dir: L.dir,
-                );
+                final confirm = await _confirmDelete(context, word);
                 if (confirm != true) return;
 
                 await remove?.call();
@@ -147,12 +163,65 @@ class SelectableWordListTitle extends StatelessWidget {
           : null,
     );
 
+    final dissmiss = selecting
+        ? child
+        : Dismissible(
+            key: ValueKey(word),
+            direction: remove == null
+                ? DismissDirection.startToEnd
+                : DismissDirection.horizontal,
+            background: Container(
+              color: bm ? cs.errorContainer : cs.secondaryContainer,
+              alignment: Alignment.centerRight,
+              padding: const EdgeInsets.only(right: 24),
+              child: bm
+                  ? Icon(Icons.bookmark_remove, color: cs.onErrorContainer)
+                  : Icon(Icons.bookmark_add, color: cs.onSecondaryContainer),
+            ),
+            secondaryBackground: remove == null
+                ? null
+                : Container(
+                    color: cs.errorContainer,
+                    alignment: Alignment.centerLeft,
+                    padding: const EdgeInsets.only(left: 24),
+                    child: Icon(Icons.delete, color: cs.onErrorContainer),
+                  ),
+            confirmDismiss: (dir) async {
+              if (dir == DismissDirection.startToEnd) {
+                if (bm) {
+                  final confirm = await _confirmRmBm(context, word);
+                  if (confirm != true) return false;
+
+                  await WordStore.rmBM(word);
+                  if (onBmPage) return true;
+                  if (context.mounted) setState(() {});
+                  return false; // keep the row, just toggle
+                } else {
+                  await WordStore.addBM(word);
+                  if (context.mounted) setState(() {});
+                  return false;
+                }
+              }
+
+              if (remove == null) return false;
+              final confirm = await _confirmDelete(context, word);
+              if (confirm != true) return false;
+
+              await remove!.call();
+              return true;
+            },
+            onDismissed: (_) {
+              if (context.mounted) setState(() {});
+            },
+            child: child,
+          );
+
     final bgColor = selected ? cs.secondaryContainer : cs.surfaceContainer;
     return segmentedListItem(
       bg: bgColor,
       index: index,
       length: length,
-      item: child,
+      item: dissmiss,
     );
   }
 }

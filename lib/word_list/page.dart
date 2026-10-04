@@ -9,7 +9,7 @@ import 'package:arabic_lexicons/datas/word_store.dart';
 import 'package:arabic_lexicons/helper_widgets.dart';
 import 'package:arabic_lexicons/main_widgets.dart';
 import 'package:arabic_lexicons/multi_selection.dart';
-import 'package:arabic_lexicons/pages/utils.dart';
+import 'package:arabic_lexicons/pages/selectable_word_list_title_widget.dart';
 import 'package:arabic_lexicons/reader/reader_utils.dart';
 import 'package:arabic_lexicons/reader/word_lists.dart';
 import 'package:arabic_lexicons/utils.dart';
@@ -49,6 +49,7 @@ class _WordListPageState extends State<WordListPage> {
   late final SelectionController<String> _selection;
   final _tc = TextEditingController();
   String _shearced = '';
+  late final isBmPage = widget.listType == WordListType.bookmarks;
 
   @override
   void initState() {
@@ -594,6 +595,7 @@ class _WordListPageState extends State<WordListPage> {
                                 remove: _hasDeleteInList
                                     ? () async => await _remove(word)
                                     : null,
+                                onBmPage: isBmPage,
                               );
                             },
                           ),

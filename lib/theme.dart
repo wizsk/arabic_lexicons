@@ -71,6 +71,13 @@ ThemeData buildTheme(
         borderRadius: BorderRadius.circular(16),
         borderSide: BorderSide(color: cs.outlineVariant, width: 1.2),
       ),
+      disabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide(
+          color: cs.outlineVariant.withValues(alpha: 0.38),
+          width: 1.2,
+        ),
+      ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
         borderSide: BorderSide(color: cs.primary, width: 2),

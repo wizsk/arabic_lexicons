@@ -1,6 +1,7 @@
 import 'package:arabic_lexicons/data.dart';
 import 'package:arabic_lexicons/pages/settings/settings.dart';
 import 'package:arabic_lexicons/review/models.dart';
+import 'package:arabic_lexicons/utils.dart';
 import 'package:flutter/material.dart';
 
 Future<RevOrdData?> showRevOrdSheet(BuildContext context, RevOrdData initial) {
@@ -115,8 +116,10 @@ class _RevOrdSheetState extends State<_RevOrdSheet> {
 
                   const SizedBox(height: 18),
 
-                  SettingsSectionSurface(
-                    children: [
+                  segmentedList(
+                    bg: cs.surfaceContainerHigh,
+                    spacing: 4,
+                    list: [
                       SwitchListTile(
                         value: data.onlyNew,
                         onChanged: (value) {

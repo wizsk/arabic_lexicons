@@ -4,7 +4,6 @@ import 'package:arabic_lexicons/datas/word_store.dart';
 import 'package:arabic_lexicons/main_widgets.dart';
 import 'package:arabic_lexicons/pages/selectable_word_list_title_widget.dart';
 import 'package:arabic_lexicons/reader/data.dart';
-import 'package:arabic_lexicons/reader/reader_utils.dart';
 import 'package:arabic_lexicons/reader/settings_class.dart';
 import 'package:arabic_lexicons/utils.dart';
 import 'package:flutter/material.dart';
@@ -89,7 +88,7 @@ class _CBWordListState extends State<CBWordList> {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    // final cs = Theme.of(context).colorScheme;
     final isFabVisable = appConf.hideAppbar ? _isFabVisable : true;
     final List<String> curr = _bookmarkedShowing ? _bookmarked : _fws;
 

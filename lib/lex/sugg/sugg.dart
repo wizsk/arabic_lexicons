@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
 
@@ -50,9 +49,9 @@ class SearchSuggestions {
   Future<void> init(String dataDir) async {
     if (_initialized) return;
 
-    _initialized = await _loadCache(dataDir);
     if (_initialized) return;
 
+    _loadCache(dataDir);
     try {
       sqfliteFfiInit();
       databaseFactory = databaseFactoryFfi;
@@ -66,8 +65,6 @@ class SearchSuggestions {
 
     if (_datas.isEmpty) return;
     _initialized = true;
-
-    _saveCache(dataDir, _datas);
   }
 
   /// Results must be cleaned
@@ -220,56 +217,11 @@ class SearchSuggestions {
       '.arabic_lexicons_sugg_data_cache.txt';
   static const String _suggPrefixSaveFileName =
       '.arabic_lexicons_sugg_prefix_cache.txt';
-
-  Future<void> _saveCache(String cacheDir, SuggDatas currDatas) async {
-    if (!_initialized) return;
-
-    Stopwatch? sw;
-    if (kDebugMode) sw = Stopwatch()..start();
-
-    final data = currDatas.suggMap.entries
-        .map(
-          (v) =>
-              '${v.value.isRoot ? "1" : "0"}'
-              '$suggDataSep${encode(v.value.dicts)}$suggDataSep${v.key}',
-        )
-        .join('\n');
-
-    File(join(cacheDir, _suggSaveFileName)).writeAsString(data);
-
-    final prefixData = currDatas.prefixIndex.entries
-        .map((v) => '${v.key}$suggDataSep${jsonEncode(v.value)}')
-        .join('\n');
-
-    File(join(cacheDir, _suggPrefixSaveFileName)).writeAsString(prefixData);
-
-    if (kDebugMode) {
-      debugPrint('sugg_db saved in ${sw?.elapsedMilliseconds}ms');
-    }
-  }
-
-  Future<bool> _loadCache(String cacheDir) async {
+  Future<void> _loadCache(String cacheDir) async {
     try {
-      final suggData = await File(
-        join(cacheDir, _suggSaveFileName),
-      ).readAsLines();
-
-      final prefixData = await File(
-        join(cacheDir, _suggPrefixSaveFileName),
-      ).readAsLines();
-
-      // Parse in background isolate
-      final parsed = parseCacheDatas(suggData, prefixData);
-
-      if (parsed.suggMap.isEmpty || parsed.prefixIndex.isEmpty) return false;
-
-      _datas = parsed;
-      if (kDebugMode) debugPrint('loaded sugg form cache: $cacheDir');
-
-      return true;
-    } catch (e) {
-      return false;
-    }
+      await File(join(cacheDir, _suggSaveFileName)).delete();
+      await File(join(cacheDir, _suggPrefixSaveFileName)).delete();
+    } catch (_) {}
   }
 }
 

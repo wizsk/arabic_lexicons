@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:arabic_lexicons/data.dart';
 import 'package:arabic_lexicons/lex/dicts/db.dart';
 import 'package:arabic_lexicons/lex/sugg/sugg.dart';
@@ -157,51 +155,6 @@ Future<SuggDatas> initSuggetions() async {
   //   debugPrint('Biggest key -> ${sorted.first.length} --> ${sorted.first}');
   // }
   return currData;
-}
-
-SuggDatas parseCacheDatas(List<String> suggLines, List<String> prefixLines) {
-  final suggMap = <String, SuggestionMeta>{};
-  final allRootKeys = <String>[];
-  final allWordKeys = <String>[];
-  final prefixIndex = <String, List<String>>{};
-
-  for (final l in suggLines) {
-    if (l.isEmpty) continue;
-
-    final datas = l.split(suggDataSep);
-    if (datas.length != 3) continue;
-
-    final isRoot = datas[0] == '1';
-    final dictTables = int.parse(datas[1]);
-    final key = datas[2];
-
-    suggMap[key] = SuggestionMeta(isRoot, decode(dictTables));
-
-    if (isRoot) {
-      allRootKeys.add(key);
-    } else {
-      allWordKeys.add(key);
-    }
-  }
-
-  for (final l in prefixLines) {
-    if (l.isEmpty) continue;
-
-    final datas = l.split(suggDataSep);
-    if (datas.length != 2) continue;
-
-    final prefix = datas[0];
-    final words = List<String>.from(jsonDecode(datas[1]));
-
-    prefixIndex[prefix] = words;
-  }
-
-  return SuggDatas(
-    suggMap: suggMap,
-    allRootKeys: allRootKeys,
-    allWordKeys: allWordKeys,
-    prefixIndex: prefixIndex,
-  );
 }
 
 class SuggestionMeta {

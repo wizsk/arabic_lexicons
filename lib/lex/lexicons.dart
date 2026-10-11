@@ -17,6 +17,7 @@ import 'package:arabic_lexicons/utils.dart';
 import 'package:arabic_lexicons/utils/scroll_funcs.dart';
 import 'package:arabic_lexicons/widgets/lex_word_confirm.dart';
 import 'package:arabic_lexicons/widgets/selection_chip.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
@@ -29,10 +30,10 @@ class SearchLexicons extends StatefulWidget {
   const SearchLexicons({
     super.key,
     this.isPopup = false,
-    this.initialText = '',
-    this.initialDict,
-    // this.initialText = kDebugMode ? 'عاملون' : '',
-    // this.initialDict = kDebugMode ? Dict.mujamulGhoni : null,
+    // this.initialText = '',
+    // this.initialDict,
+    this.initialText = kDebugMode ? 'عمل' : '',
+    this.initialDict = kDebugMode ? Dict.mujamulGhoni : null,
   });
 
   @override

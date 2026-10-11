@@ -25,18 +25,41 @@ const foreignWordBgDark = Color(0xC025543b);
 class ReaderColors {
   final Color surface;
   final Color onSurface;
+  final Color definitionSurface;
+  final Color outline;
+  final Color shadow;
 
-  const ReaderColors({required this.surface, required this.onSurface});
+  const ReaderColors({
+    required this.surface,
+    required this.onSurface,
+    required this.definitionSurface,
+    required this.outline,
+    required this.shadow,
+  });
+
+  static ReaderColors curr(BuildContext c) =>
+      Theme.of(c).brightness == Brightness.light
+      ? readerColorsLight
+      : readerColorsDark;
 }
 
 const readerColorsLight = ReaderColors(
   surface: Color(0xFFFFFAF3),
-  onSurface: Color(0xFF222223),
+  // onSurface: Color(0xFF222223),
+  onSurface: Color(0xFF302820), // Dark ink
+  definitionSurface: Color(0xFFFFFDF8), // Lighter paper
+  outline: Color(0xFFE7DCCB), // Soft beige
+  shadow: Color(0x163B2A18), // Warm, subtle shadow
 );
 
 const readerColorsDark = ReaderColors(
-  surface: Color(0xFF121212),
-  onSurface: Color(0xFFEAEAEA),
+  // surface: Color(0xFF121212),
+  // onSurface: Color(0xFFEAEAEA),
+  surface: Color(0xFF141311), // Deep charcoal
+  onSurface: Color(0xFFE8E0D4), // Warm ivory
+  definitionSurface: Color(0xFF1E1C19), // Raised charcoal
+  outline: Color(0xFF39342D), // Muted warm border
+  shadow: Color(0x55000000), //
 );
 
 // Borders

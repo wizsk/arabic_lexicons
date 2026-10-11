@@ -58,6 +58,7 @@ class SearchLexiconsDatas {
   List<String> words = [];
   String selectedWord = "";
 
+  List<bool> expanded = [];
   List<DbRow> dbRes = [];
   List<ArEnEntry> arEnRes = [];
 
@@ -77,6 +78,7 @@ class SearchLexiconsDatas {
     sugg = {};
     dbRes = [];
     arEnRes = [];
+    expanded.clear();
   }
 
   bool get isSelectedWordEmpty {
@@ -106,6 +108,10 @@ class SearchLexiconsDatas {
       arEnRes = await Isolates.arEnSearch(selectedWord);
     } else {
       dbRes = await DbService.search(selectedDict, selectedWord);
+      final e = dbRes.length == 1;
+      for (var i = 0; i < dbRes.length; i++) {
+        expanded.add(e);
+      }
     }
 
     final empty = resultsAreEmpty;

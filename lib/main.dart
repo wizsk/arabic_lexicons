@@ -16,6 +16,8 @@ import 'package:arabic_lexicons/word_list/page.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+const lruCacheOff = kDebugMode && true;
+
 void main() {
   // WidgetsFlutterBinding.ensureInitialized();
   // await appSettingsNotifier.load();

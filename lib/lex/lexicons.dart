@@ -30,8 +30,9 @@ class SearchLexicons extends StatefulWidget {
     super.key,
     this.isPopup = false,
     this.initialText = '',
-    // this.initialText = kDebugMode ? 'عمل وقت' : '',
     this.initialDict,
+    // this.initialText = kDebugMode ? 'عاملون' : '',
+    // this.initialDict = kDebugMode ? Dict.mujamulGhoni : null,
   });
 
   @override

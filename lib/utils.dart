@@ -1,8 +1,14 @@
 import 'package:arabic_lexicons/data.dart';
 import 'package:arabic_lexicons/lex/lexicons.dart';
+import 'package:arabic_lexicons/main.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:html/parser.dart' as html_parser;
+
+void dp([Object? a, Object? b, Object? c, Object? d]) {
+  if (kDebugMode) debugPrint([a, b, c, d].where((x) => x != null).join(' '));
+}
 
 enum InitState {
   not,
@@ -95,6 +101,8 @@ class LruCache<K, V> {
   LruCache(this.capacity);
 
   V? get(K key) {
+    if (lruCacheOff) return null;
+
     final value = _map.remove(key);
     if (value != null) {
       _map[key] = value; // move to end
@@ -103,6 +111,8 @@ class LruCache<K, V> {
   }
 
   void put(K key, V value) {
+    if (lruCacheOff) return;
+
     if (_map.containsKey(key)) {
       _map.remove(key); // take it to first
     } else if (_map.length >= capacity) {

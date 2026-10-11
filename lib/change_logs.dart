@@ -6,6 +6,7 @@ final releases = [
     version: 'v3.6.0',
     changes:
         '''
+    Fixed many issues ghani dataset
     Add Review Words page
     Lisanul Arab lexicon show refferences on click no need to scrool to the bottom
     Remove unwanted dictionaries from reording menu

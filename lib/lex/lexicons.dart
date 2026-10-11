@@ -673,124 +673,135 @@ class _SearchLexiconsState extends State<SearchLexicons>
                 ),
               ),
 
-              Divider(thickness: 0.5, height: 0),
-              if (_showingScrollableSelection && appConf.scrollLexSelection)
-                ..._scrolabeSelectors(padd, bg),
-              Padding(
-                padding: EdgeInsetsGeometry.symmetric(
-                  horizontal: padd.right,
-                  vertical: 8,
-                ),
-                child: Row(
-                  textDirection: TextDirection.rtl,
+              Material(
+                color: bg,
+                child: Column(
                   children: [
-                    if (appConf.scrollLexSelection)
-                      IconButton.filled(
-                        tooltip: 'hide/show selections',
-                        icon: _showingScrollableSelection
-                            ? Icon(Icons.keyboard_arrow_down_rounded)
-                            : Icon(Icons.keyboard_arrow_up_rounded),
-                        onLongPress: toggleWLSelectionMethod,
-                        onPressed: () {
-                          setState(() {
-                            _showingScrollableSelection =
-                                !_showingScrollableSelection;
-                          });
-
-                          // it seems like we don't need it, if we use PageStorageKey(...)
-                          _datas.scrollSelectors();
-                        },
-                      )
-                    else
-                      IconButton.filled(
-                        icon: Icon(dictWordSelectModalOpenIcon),
-                        onLongPress: toggleWLSelectionMethod,
-                        onPressed: () async {
-                          FocusManager.instance.primaryFocus?.unfocus();
-
-                          final previousWordListSize = _datas.words.length;
-                          final previousWord = _datas.selectedWord;
-                          final previousDict = _datas.selectedDict;
-
-                          final res = await showWordPickerBottomSheet(
-                            context,
-                            _datas,
-                          );
-
-                          if (res != null && res.openSettings == true) {
-                            postFrame(
-                              (_) => showDictReorderScreen(
-                                context,
-                                after: () {
-                                  if (!context.mounted) return;
-                                  setState(() {
-                                    _datas.suggDictSorted.clear();
-                                  });
-                                },
-                              ),
-                            );
-                          }
-
-                          if (previousWordListSize != _datas.words.length) {
-                            _controller.text = _datas.words.join(' ');
-                          }
-
-                          final newWord =
-                              previousWord != _datas.selectedWord &&
-                              _datas.selectedWord.isNotEmpty;
-
-                          if ((newWord ||
-                                  previousDict != _datas.selectedDict) &&
-                              context.mounted) {
-                            _datas.getAndShowResORSugg(context);
-                          } else if (context.mounted) {
-                            setState(() {});
-                          }
-                        },
+                    Divider(thickness: 0.5, height: 0),
+                    if (_showingScrollableSelection &&
+                        appConf.scrollLexSelection)
+                      ..._scrolabeSelectors(padd, bg),
+                    Padding(
+                      padding: EdgeInsetsGeometry.symmetric(
+                        horizontal: padd.right,
+                        vertical: 8,
                       ),
-                    SizedBox(width: 5),
-                    Expanded(
-                      child: TextField(
-                        onTap: () async {
-                          if (_controller.selection.base.offset !=
-                              _selectionOffsetOld) {
-                            await _onChangeTxt();
-                          }
-                        },
-                        controller: _controller,
-                        focusNode: _focusNode,
+                      child: Row(
                         textDirection: TextDirection.rtl,
-                        textAlign: TextAlign.start,
-                        onChanged: (_) async {
-                          if (_debouce?.isActive ?? false) _debouce!.cancel();
-                          _debouce = Timer(
-                            const Duration(milliseconds: 200),
-                            () async => await _onChangeTxt(),
-                          );
-                        },
-                        // style: arTxtTheme,
-                        style: L.arStyleSized,
-                        decoration: InputDecoration(
-                          hintText: L.p('Search Words', 'ابحث'),
-                          hintTextDirection: L.dir,
-                          prefixIcon: IconButton(
-                            onPressed: () {
-                              setState(() {
-                                _controller.clear();
-                                _datas.resetAll();
-                              });
-                              // this is when it's focued but keyboard is not oppended
-                              _focusNode.requestFocus();
-                            },
-                            icon: Icon(Icons.clear),
+                        children: [
+                          if (appConf.scrollLexSelection)
+                            IconButton.filled(
+                              tooltip: 'hide/show selections',
+                              icon: _showingScrollableSelection
+                                  ? Icon(Icons.keyboard_arrow_down_rounded)
+                                  : Icon(Icons.keyboard_arrow_up_rounded),
+                              onLongPress: toggleWLSelectionMethod,
+                              onPressed: () {
+                                setState(() {
+                                  _showingScrollableSelection =
+                                      !_showingScrollableSelection;
+                                });
+
+                                // it seems like we don't need it, if we use PageStorageKey(...)
+                                _datas.scrollSelectors();
+                              },
+                            )
+                          else
+                            IconButton.filled(
+                              icon: Icon(dictWordSelectModalOpenIcon),
+                              onLongPress: toggleWLSelectionMethod,
+                              onPressed: () async {
+                                FocusManager.instance.primaryFocus?.unfocus();
+
+                                final previousWordListSize =
+                                    _datas.words.length;
+                                final previousWord = _datas.selectedWord;
+                                final previousDict = _datas.selectedDict;
+
+                                final res = await showWordPickerBottomSheet(
+                                  context,
+                                  _datas,
+                                );
+
+                                if (res != null && res.openSettings == true) {
+                                  postFrame(
+                                    (_) => showDictReorderScreen(
+                                      context,
+                                      after: () {
+                                        if (!context.mounted) return;
+                                        setState(() {
+                                          _datas.suggDictSorted.clear();
+                                        });
+                                      },
+                                    ),
+                                  );
+                                }
+
+                                if (previousWordListSize !=
+                                    _datas.words.length) {
+                                  _controller.text = _datas.words.join(' ');
+                                }
+
+                                final newWord =
+                                    previousWord != _datas.selectedWord &&
+                                    _datas.selectedWord.isNotEmpty;
+
+                                if ((newWord ||
+                                        previousDict != _datas.selectedDict) &&
+                                    context.mounted) {
+                                  _datas.getAndShowResORSugg(context);
+                                } else if (context.mounted) {
+                                  setState(() {});
+                                }
+                              },
+                            ),
+                          SizedBox(width: 5),
+                          Expanded(
+                            child: TextField(
+                              onTap: () async {
+                                if (_controller.selection.base.offset !=
+                                    _selectionOffsetOld) {
+                                  await _onChangeTxt();
+                                }
+                              },
+                              controller: _controller,
+                              focusNode: _focusNode,
+                              textDirection: TextDirection.rtl,
+                              textAlign: TextAlign.start,
+                              onChanged: (_) async {
+                                if (_debouce?.isActive ?? false)
+                                  _debouce!.cancel();
+                                _debouce = Timer(
+                                  const Duration(milliseconds: 200),
+                                  () async => await _onChangeTxt(),
+                                );
+                              },
+                              // style: arTxtTheme,
+                              style: L.arStyleSized,
+                              decoration: InputDecoration(
+                                hintText: L.p('Search Words', 'ابحث'),
+                                hintTextDirection: L.dir,
+                                prefixIcon: IconButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      _controller.clear();
+                                      _datas.resetAll();
+                                    });
+                                    // this is when it's focued but keyboard is not oppended
+                                    _focusNode.requestFocus();
+                                  },
+                                  icon: Icon(Icons.clear),
+                                ),
+                              ),
+                            ),
                           ),
-                        ),
+                        ],
                       ),
                     ),
+                    if (appConf.fullScreen) const SizedBox(height: 10),
                   ],
                 ),
               ),
-              if (appConf.fullScreen) const SizedBox(height: 10),
             ],
           ),
         ),

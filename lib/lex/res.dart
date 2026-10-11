@@ -2,15 +2,15 @@ import 'package:arabic_lexicons/alphabets.dart';
 import 'package:arabic_lexicons/conf.dart';
 import 'package:arabic_lexicons/data.dart';
 import 'package:arabic_lexicons/lex/data.dart';
-import 'package:arabic_lexicons/lex/dicts/db.dart';
 import 'package:arabic_lexicons/lex/ref.dart';
 import 'package:arabic_lexicons/pages/settings/theme_color_font.dart';
 import 'package:arabic_lexicons/theme.dart';
 import 'package:arabic_lexicons/utils.dart';
+import 'package:arabic_lexicons/utils/toast_snack.dart';
 import 'package:arabic_lexicons/widgets/dahsed_divider.dart';
 import 'package:arabic_lexicons/widgets/expandalbe_text/ex.dart';
-import 'package:arabic_lexicons/widgets/selectable_text_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
@@ -32,7 +32,7 @@ Widget showRes(
   if (curDict == Dict.hanswehr || curDict == Dict.laneLexicon) {
     return _hansLaneView(context, ts, datas, cs);
   }
-  return _defCard(context, datas, ts, _arMeaning);
+  return _arabicLexView(context, ts, datas);
 }
 
 Widget noRes(
@@ -97,19 +97,6 @@ Widget _noResUniversal(
 
     if (!showOpenReaderBtn) return l;
 
-    // return Padding(
-    //   padding: const EdgeInsets.all(12.0),
-    //   child: Container(
-    //     padding: EdgeInsets.all(8.0),
-    //     width: double.infinity,
-    //     height: double.infinity,
-    //     constraints: const BoxConstraints(maxWidth: 260, maxHeight: 200),
-    //     alignment: AlignmentGeometry.center,
-    //     decoration: BoxDecoration(
-    //       color: cs.surfaceContainer,
-    //       borderRadius: BorderRadius.circular(14.00),
-    //     ),
-    // child:
     return Column(
       textDirection: L.dir,
       mainAxisSize: MainAxisSize.min,
@@ -296,6 +283,75 @@ Widget _showArEnRes(
   );
 }
 
+Widget _resCount(
+  ThemeData theme,
+  SearchLexiconsDatas datas,
+  bool isEnglish,
+  TextStyle ts,
+) {
+  final colors = theme.colorScheme;
+  final count = datas.dbRes.length;
+
+  return Padding(
+    padding: const EdgeInsets.only(top: 12, bottom: 0),
+    child: Center(
+      child: Chip(
+        // avatar: Icon(
+        //   Icons.check_rounded,
+        //   // size: 18,
+        //   color: colors.onSurfaceVariant,
+        // ),
+        label: Text(
+          isEnglish
+              ? 'Found $count results'
+              : 'تم العثور على ${enToArNum(count)} نتيجة',
+          textDirection: isEnglish ? TextDirection.ltr : TextDirection.rtl,
+          style: theme.textTheme.titleMedium?.ar.copyWith(
+            fontWeight: FontWeight.w600,
+            color: colors.onSurfaceVariant,
+          ),
+        ),
+        backgroundColor: colors.surfaceContainerLowest,
+        side: BorderSide(color: colors.outlineVariant),
+        shape: const StadiumBorder(),
+        visualDensity: VisualDensity.compact,
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      ),
+    ),
+  );
+}
+
+Widget __resCount(
+  ThemeData theme,
+  SearchLexiconsDatas datas,
+  bool isEnglish,
+  TextStyle ts,
+) {
+  return Padding(
+    padding: EdgeInsets.only(top: 10, bottom: 0),
+    child: Center(
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 6.0),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.secondaryContainer,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: theme.colorScheme.outline),
+        ),
+        child: Text(
+          isEnglish
+              ? "Found ${datas.dbRes.length} restuls"
+              :
+                /* nice */ "تم العثور على ${enToArNum(datas.dbRes.length)}",
+          style: theme.textTheme.titleLarge?.ar.copyWith(
+            color: theme.colorScheme.onSecondaryContainer,
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
 Widget _hansLaneView(
   BuildContext context,
   TextStyle ts,
@@ -307,59 +363,43 @@ Widget _hansLaneView(
       : fontAmiri;
 
   final fontSize = appConf.readerFontSize;
-  // final fontHeight = appConf.useHansLaneDefRDStyle
-  //     ? appConf.readerFontHeight
-  //     : fontAmiriLineHeight;
 
   final fontHeight = htmlFontHeight;
   final isDark = Theme.of(context).brightness == Brightness.dark;
   final hiColor = isDark ? bookmarkWordBgDark : bookmarkWordBg;
 
   return SliverList.separated(
-    itemCount: datas.dbRes.length,
-    separatorBuilder: (context, index) =>
-        const Divider(height: 0, thickness: 0.5),
+    itemCount: datas.dbRes.length + 1,
+    separatorBuilder: (_, _) => _defGapInbettenDef,
     itemBuilder: (context, index) {
+      if (index == 0) {
+        return _resCount(Theme.of(context), datas, true, ts);
+      }
+      index--;
+
       final row = datas.dbRes[index];
       String txt = row.meanings;
+      final child = _engMeaningView(
+        txt,
+        fontSize,
+        fontHeight,
+        fontFam,
+        cs,
+        row.isHi,
+        hiColor,
+        datas.expanded[index],
+      );
+
       return AutoScrollTag(
         key: ValueKey(index),
         controller: datas.scrollController,
         index: index,
-        child: GestureDetector(
-          behavior: HitTestBehavior.translucent,
-          onLongPress: () {
-            // final cleanTxt = htmlToPlainText(txt);
-            final cleanTxtBr = htmlToPlainTextWithLineBr(txt);
-            SelectableTextScreen.show(
-              context,
-              fullTextFunc: (_) => cleanTxtBr,
-              textAlign: TextAlign.left,
-              dir: TextDirection.ltr,
-              // ts,
-              textStyleBodyMedium: ts.copyWith(
-                fontFamily: fontFam,
-                // the html renderer and normal renderer not the same :)
-                height: appConf.useHansLaneDefRDStyle
-                    ? htmlFontHeight + 0.3
-                    : fontHeight,
-              ),
-              start: 0,
-              length: 1,
-            );
-          },
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            child: _engMeaningView(
-              txt,
-              fontSize,
-              fontHeight,
-              fontFam,
-              cs,
-              row.isHi,
-              hiColor,
-            ),
-          ),
+        child: _defCard(
+          context,
+          index,
+          datas,
+          child,
+          text: () => htmlToPlainTextWithLineBr(txt),
         ),
       );
     },
@@ -368,24 +408,207 @@ Widget _hansLaneView(
 
 Widget _defCard(
   BuildContext context,
+  int index,
   SearchLexiconsDatas datas,
+  Widget child, {
+  required String Function() text,
+}) {
+  final expanded = datas.expanded[index];
+  final cs = Theme.of(context).colorScheme;
+  // final colors = cs;
+
+  final textWidget = Padding(
+    padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        child,
+        // if (expanded) ...[
+        DashedDivider(height: 8, color: cs.outlineVariant),
+        // ] else
+        //   const SizedBox(height: 4),
+        Row(
+          // mainAxisAlignment: MainAxisAlignment.end,
+          // spacing: 2,
+          children: [
+            iconButtonSized(
+              context,
+              icon: expanded
+                  ? Icons.keyboard_arrow_up_rounded
+                  : Icons.keyboard_arrow_down_rounded,
+              scheme: IconButtonSizedColor.primary,
+              tooltip: 'expan/collaspe',
+              onPressed: () {
+                datas.expanded[index] = !datas.expanded[index];
+                datas.rebuild();
+              },
+            ),
+            Spacer(),
+            iconButtonSized(
+              context,
+              icon: Icons.copy_rounded,
+              tooltip: 'Copy',
+              onPressed: () async {
+                await Clipboard.setData(ClipboardData(text: text()));
+                MsgSv.showToast("Definiton copied");
+              },
+            ),
+            iconButtonSized(
+              context,
+              icon: Icons.flag_outlined,
+              tooltip: 'Report an issue',
+              onPressed: () {
+                // TODO: Report this entry.
+              },
+              scheme: IconButtonSizedColor.err,
+            ),
+          ],
+        ),
+        const SizedBox(height: 6),
+      ],
+    ),
+  );
+
+  final rc = ReaderColors.curr(context);
+  final borderRadius = BorderRadius.circular(12);
+
+  final selectable = expanded
+      ? SelectionArea(
+          magnifierConfiguration: TextMagnifierConfiguration.disabled,
+          child: textWidget,
+        )
+      : textWidget;
+
+  final decoration = BoxDecoration(
+    color: rc.definitionSurface,
+    borderRadius: borderRadius,
+    border: Border.all(color: rc.outline),
+    boxShadow: [
+      BoxShadow(
+        color: rc.shadow,
+        offset: const Offset(2, 3),
+        blurRadius: 7,
+        spreadRadius: -2,
+      ),
+    ],
+  );
+
+  return expanded
+      ? DecoratedBox(decoration: decoration, child: selectable)
+      : Ink(
+          decoration: decoration,
+          child: InkWell(
+            borderRadius: borderRadius,
+            onTap: () {
+              datas.expanded[index] = !datas.expanded[index];
+              datas.rebuild();
+            },
+            child: selectable,
+          ),
+        );
+}
+
+const int _defCollapsedMaxLines = 1;
+const _defCollapsedTextOverFlow = TextOverflow.ellipsis;
+const _defGapInbettenDef = SizedBox(height: 16);
+
+// Widget _arMeaning(
+//   BuildContext context,
+//   SearchLexiconsDatas datas,
+//   TextStyle ts,
+//   bool expanded,
+//   DbRow row,
+// ) {
+//   final ml = expanded ? null : _defCollapsedMaxLines;
+//   final of = expanded ? null : _defCollapsedTextOverFlow;
+//
+//   final txt = expanded
+//       ? row.formatMeanings
+//       : row.formatMeanings.replaceAll("\n", " ");
+//
+//   return datas.selectedDict.hasRefs
+//       ? Text.rich(
+//           ReferenceProcessor.processRich(context, txt, ts),
+//           textDirection: TextDirection.rtl,
+//           textAlign: TextAlign.right,
+//           style: ts.copyWith(leadingDistribution: TextLeadingDistribution.even),
+//           maxLines: ml,
+//           overflow: of,
+//         )
+//       : Text(
+//           txt,
+//           textDirection: TextDirection.rtl,
+//           textAlign: TextAlign.right,
+//           style: ts.copyWith(leadingDistribution: TextLeadingDistribution.even),
+//           maxLines: ml,
+//           overflow: of,
+//         );
+// }
+
+Widget _arabicLexView(
+  BuildContext context,
   TextStyle ts,
-  _DbMeaningFunc entry,
+  SearchLexiconsDatas datas,
 ) {
   final cs = Theme.of(context).colorScheme;
   // final colors = cs;
 
   return SliverList.separated(
-    itemCount: datas.dbRes.length,
-    separatorBuilder: (context, index) => const SizedBox(height: 16),
+    itemCount: datas.dbRes.length + 1,
+    separatorBuilder: (_, _) => _defGapInbettenDef,
     itemBuilder: (context, index) {
+      if (index == 0) return _resCount(Theme.of(context), datas, false, ts);
+      index--;
+
       final expanded = datas.expanded[index];
       final row = datas.dbRes[index];
       // final meanings = row.formatMeanings;
 
-      // final ml = expanded ? null : 1;
-      // final of = expanded ? null : TextOverflow.ellipsis;
-      final child = entry(context, datas, ts, expanded, row);
+      final txt = expanded
+          ? row.formatMeanings
+          : row.formatMeanings.replaceAll("\n", " ");
+
+      final ml = expanded ? null : 1;
+      final of = expanded ? null : TextOverflow.ellipsis;
+
+      // if (!datas.selectedDict.hasRefs) {
+      //   return ExpandableText(
+      //     row.formatMeanings.replaceAll("\n", " "),
+      //     row.formatMeanings,
+      //     onExpandedChanged: (b) {
+      //       datas.expanded[index] = b;
+      //     },
+      //     expanded: datas.expanded[index],
+      //     style: ts,
+      //     maxLines: 1,
+      //   );
+      // }
+
+      final child = datas.selectedDict.hasRefs
+          ? Text.rich(
+              ReferenceProcessor.processRich(context, txt, ts),
+              textDirection: TextDirection.rtl,
+              textAlign: TextAlign.right,
+              style: ts.copyWith(
+                leadingDistribution: TextLeadingDistribution.even,
+              ),
+              maxLines: ml,
+              overflow: of,
+            )
+          : Text(
+              txt,
+              textDirection: TextDirection.rtl,
+              textAlign: TextAlign.right,
+              style: ts.copyWith(
+                leadingDistribution: TextLeadingDistribution.even,
+              ),
+              maxLines: ml,
+              overflow: of,
+            );
+
+      return _defCard(context, index, datas, child, text: () => row.meanings);
+
       final textWidget = Padding(
         padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
         child: Column(
@@ -496,285 +719,6 @@ Widget _defCard(
   );
 }
 
-typedef _DbMeaningFunc =
-    Widget Function(
-      BuildContext context,
-      SearchLexiconsDatas datas,
-      TextStyle ts,
-      bool expanded,
-      DbRow row,
-    );
-
-const int _defCollapsedMaxLines = 1;
-const _defCollapsedTextOverFlow = TextOverflow.ellipsis;
-
-Widget _arMeaning(
-  BuildContext context,
-  SearchLexiconsDatas datas,
-  TextStyle ts,
-  bool expanded,
-  DbRow row,
-) {
-  final ml = expanded ? null : 1;
-  final of = expanded ? null : TextOverflow.ellipsis;
-
-  final txt = expanded
-      ? row.formatMeanings
-      : row.formatMeanings.replaceAll("\n", " ");
-
-  return datas.selectedDict.hasRefs
-      ? Text.rich(
-          ReferenceProcessor.processRich(context, txt, ts),
-          textDirection: TextDirection.rtl,
-          textAlign: TextAlign.right,
-          style: ts.copyWith(leadingDistribution: TextLeadingDistribution.even),
-          maxLines: ml,
-          overflow: of,
-        )
-      : Text(
-          txt,
-          textDirection: TextDirection.rtl,
-          textAlign: TextAlign.right,
-          style: ts.copyWith(leadingDistribution: TextLeadingDistribution.even),
-          maxLines: ml,
-          overflow: of,
-        );
-}
-
-// Widget _arabicLexView(
-//   BuildContext context,
-//   TextStyle ts,
-//   SearchLexiconsDatas datas,
-// ) {
-//   final cs = Theme.of(context).colorScheme;
-//   // final colors = cs;
-//
-//   return SliverList.separated(
-//     itemCount: datas.dbRes.length,
-//     separatorBuilder: (context, index) => const SizedBox(height: 16),
-//     // separatorBuilder: (context, index) => Divider(
-//     //   height: 1,
-//     //   thickness: 0.5,
-//     //   color: cs.outlineVariant.withValues(alpha: 0.6),
-//     // ),
-//     itemBuilder: (context, index) {
-//       final expanded = datas.expanded[index];
-//       final row = datas.dbRes[index];
-//       // final meanings = row.formatMeanings;
-//
-//       final txt = expanded
-//           ? row.formatMeanings
-//           : row.formatMeanings.replaceAll("\n", " ");
-//
-//       final ml = expanded ? null : 1;
-//       final of = expanded ? null : TextOverflow.ellipsis;
-//
-//       // if (!datas.selectedDict.hasRefs) {
-//       //   return ExpandableText(
-//       //     row.formatMeanings.replaceAll("\n", " "),
-//       //     row.formatMeanings,
-//       //     onExpandedChanged: (b) {
-//       //       datas.expanded[index] = b;
-//       //     },
-//       //     expanded: datas.expanded[index],
-//       //     style: ts,
-//       //     maxLines: 1,
-//       //   );
-//       // }
-//
-//       final child = datas.selectedDict.hasRefs
-//           ? Text.rich(
-//               ReferenceProcessor.processRich(context, txt, ts),
-//               textDirection: TextDirection.rtl,
-//               textAlign: TextAlign.right,
-//               style: ts.copyWith(
-//                 leadingDistribution: TextLeadingDistribution.even,
-//               ),
-//               maxLines: ml,
-//               overflow: of,
-//             )
-//           : Text(
-//               txt,
-//               textDirection: TextDirection.rtl,
-//               textAlign: TextAlign.right,
-//               style: ts.copyWith(
-//                 leadingDistribution: TextLeadingDistribution.even,
-//               ),
-//               maxLines: ml,
-//               overflow: of,
-//             );
-//
-//       final textWidget = Padding(
-//         padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
-//         child: Column(
-//           mainAxisAlignment: MainAxisAlignment.start,
-//           crossAxisAlignment: CrossAxisAlignment.start,
-//           children: [
-//             child,
-//             if (expanded) ...[
-//               DashedDivider(height: 8, color: cs.outlineVariant),
-//             ] else
-//               const SizedBox(height: 4),
-//             Row(
-//               // mainAxisAlignment: MainAxisAlignment.end,
-//               // spacing: 2,
-//               children: [
-//                 iconButtonSized(
-//                   context,
-//                   icon: expanded
-//                       ? Icons.keyboard_arrow_up_rounded
-//                       : Icons.keyboard_arrow_down_rounded,
-//                   scheme: IconButtonSizedColor.primary,
-//                   tooltip: 'expan/collaspe',
-//                   onPressed: () {
-//                     datas.expanded[index] = !datas.expanded[index];
-//                     datas.rebuild();
-//                   },
-//                 ),
-//                 Spacer(),
-//                 iconButtonSized(
-//                   context,
-//                   icon: Icons.copy_rounded,
-//                   tooltip: 'Copy',
-//                   onPressed: () {
-//                     // TODO: Bookmark this entry.
-//                   },
-//                 ),
-//                 iconButtonSized(
-//                   context,
-//                   icon: Icons.flag_outlined,
-//                   tooltip: 'Report an issue',
-//                   onPressed: () {
-//                     // TODO: Report this entry.
-//                   },
-//                   scheme: IconButtonSizedColor.err,
-//                 ),
-//               ],
-//             ),
-//             const SizedBox(height: 6),
-//           ],
-//         ),
-//       );
-//
-//       final rc = ReaderColors.curr(context);
-//       final borderRadius = BorderRadius.circular(12);
-//
-//       final selectable = expanded
-//           ? SelectionArea(
-//               magnifierConfiguration: TextMagnifierConfiguration.disabled,
-//               child: textWidget,
-//             )
-//           : textWidget;
-//
-//       // final card = Ink(
-//       //   decoration: BoxDecoration(
-//       //     color: rc.definitionSurface,
-//       //     borderRadius: borderRadius,
-//       //     border: Border.all(color: rc.outline),
-//       //     boxShadow: [
-//       //       BoxShadow(
-//       //         color: rc.shadow,
-//       //         offset: const Offset(2, 3),
-//       //         blurRadius: 7,
-//       //         spreadRadius: -2,
-//       //       ),
-//       //     ],
-//       //   ),
-//       //   child: selectable,
-//       // );
-//
-//       final decoration = BoxDecoration(
-//         color: rc.definitionSurface,
-//         borderRadius: borderRadius,
-//         border: Border.all(color: rc.outline),
-//         boxShadow: [
-//           BoxShadow(
-//             color: rc.shadow,
-//             offset: const Offset(2, 3),
-//             blurRadius: 7,
-//             spreadRadius: -2,
-//           ),
-//         ],
-//       );
-//
-//       return expanded
-//           ? DecoratedBox(decoration: decoration, child: selectable)
-//           : Ink(
-//               decoration: decoration,
-//               child: InkWell(
-//                 borderRadius: borderRadius,
-//                 onTap: () {
-//                   datas.expanded[index] = !datas.expanded[index];
-//                   datas.rebuild();
-//                 },
-//                 child: selectable,
-//               ),
-//             );
-//     },
-//   );
-// }
-
-Widget __arabicLexView(TextStyle ts, SearchLexiconsDatas datas) {
-  final showWordTitle = datas.selectedDict.showTitle;
-  final spaces = appConf.wordSpacing > 1 ? " " * appConf.wordSpacing : " ";
-
-  return SliverList.separated(
-    itemCount: datas.dbRes.length,
-    separatorBuilder: (context, index) =>
-        const Divider(height: 0, thickness: 0.5),
-    itemBuilder: (context, index) {
-      final row = datas.dbRes[index];
-
-      final meanings = row.formatMeanings;
-
-      final txt = showWordTitle ? '${row.word}:$spaces$meanings' : meanings;
-      final child = datas.selectedDict.hasRefs
-          ? Text.rich(
-              ReferenceProcessor.processRich(context, meanings, ts),
-              textDirection: TextDirection.rtl,
-              textAlign: TextAlign.right,
-              style: ts.copyWith(
-                leadingDistribution: TextLeadingDistribution.even,
-              ),
-            )
-          : Text(
-              txt,
-              textDirection: TextDirection.rtl,
-              textAlign: TextAlign.right,
-              style: ts.copyWith(
-                leadingDistribution: TextLeadingDistribution.even,
-              ),
-            );
-
-      final box = Column(
-        mainAxisSize: MainAxisSize.max,
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          child,
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              IconButton(
-                icon: Icon(Icons.info),
-                onPressed: () {},
-                visualDensity: VisualDensity.compact,
-              ),
-            ],
-          ),
-        ],
-      );
-
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        child: SelectionArea(
-          magnifierConfiguration: TextMagnifierConfiguration.disabled,
-          child: box,
-        ),
-      );
-    },
-  );
-}
-
 Widget _engMeaningView(
   String html,
   // String fontFam,
@@ -784,6 +728,7 @@ Widget _engMeaningView(
   ColorScheme cs,
   bool isHighResult,
   Color hiColor,
+  bool expanded,
 ) {
   return Html(
     data: html,
@@ -795,8 +740,8 @@ Widget _engMeaningView(
         textAlign: TextAlign.left,
         fontSize: FontSize(fontSize),
         color: isHighResult ? cs.primary : null,
-        maxLines: 1,
-        textOverflow: _defCollapsedTextOverFlow,
+        maxLines: expanded ? null : _defCollapsedMaxLines,
+        textOverflow: expanded ? null : _defCollapsedTextOverFlow,
       ),
       'strong': Style(fontWeight: FontWeight.bold),
       'i': Style(fontStyle: FontStyle.italic),

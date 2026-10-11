@@ -111,16 +111,17 @@ Widget showSearchSugg(
                             style: choiceChipTxtStyleHigh,
                           );
                         } else {
-                          final (:pre, :suf) = r.word
-                              .replaceAll('_', ' ')
-                              .splitOnce(word);
+                          var (:pre, :suf) = r.word.splitOnce(word);
+                          pre = pre?.replaceAll("_", " ");
+                          suf = suf?.replaceAll("_", " ");
+                          final wordCl = word.replaceAll("_", " ");
 
                           txt = Text.rich(
                             TextSpan(
                               children: [
                                 if (pre != null) TextSpan(text: pre),
                                 TextSpan(
-                                  text: word,
+                                  text: wordCl,
                                   style: TextStyle(color: highColor),
                                 ),
                                 if (suf != null) TextSpan(text: suf),

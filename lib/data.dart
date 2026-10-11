@@ -271,7 +271,7 @@ enum Dict {
   });
 
   static String get reOrdLabel => L.p('Reorder', 'ترتيب');
-  bool get showTitle => this == mujamulGhoni;
+  bool get showTitle => false;
 }
 
 int encode(Set<Dict> selected) {

@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:arabic_lexicons/alphabets.dart';
 import 'package:arabic_lexicons/data.dart';
+import 'package:arabic_lexicons/lex/dicts/ghani.dart';
 import 'package:arabic_lexicons/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -10,7 +11,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 /// db is saved in data directory
-const String dbFileName = 'arabic_lexicons_db_v3.sqlite';
+const String dbFileName = 'arabic_lexicons_db_v4_beta.sqlite';
 
 class DbRow {
   final String word;
@@ -53,6 +54,7 @@ class DbService {
   static const _assetDbPath = 'assets/data/db/db.sqlite';
   static const _oldDbFileNames = [
     'db_v3.sqlite', // v3.5.0
+    'arabic_lexicons_db_v3.sqlite', // v3.6.0
   ];
 
   static Database? _db;
@@ -66,6 +68,7 @@ class DbService {
       await _copyDbFromAssetsIfNeeded(dbPath, dbDir);
     }
 
+    dp("loading db: $dbPath");
     return openDatabase(dbPath, readOnly: true);
   }
 
@@ -167,25 +170,8 @@ class DbService {
       return const [];
     }
     final db = database;
-    const q =
-        'SELECT word, root, meanings FROM mujamul_ghoni WHERE root = ? OR no_harakat = ?';
-    final res = await db.rawQuery(q, [word, word]);
 
-    final entries = <DbRow>[];
-
-    for (final row in res) {
-      final meaningsRaw = row['meanings'] as String? ?? '';
-
-      entries.add(
-        DbRow(
-          word: row['word'] as String? ?? '',
-          meanings: meaningsRaw.replaceAll('|', '\n').replaceAll('<br>', '\n'),
-          isRoot: (row['root'] as String?) != "",
-        ),
-      );
-    }
-
-    return entries;
+    return getGoniRes(db, word.replaceAll("_", " "));
   }
 
   static Future<List<DbRow>> _getByWordHans(String? wordArg) async {
@@ -365,17 +351,12 @@ class DbService {
       case Dict.mujamulGhoni:
         final db = database;
 
-        var dbRes = await db.rawQuery(
-          'SELECT root, no_harakat FROM ${selectedDict.table}',
-        );
+        var dbRes = await db.rawQuery('SELECT word, is_root FROM ghani_words');
 
         for (final r in dbRes) {
-          final root = r['root'] as String;
-          if (root.isNotEmpty) res.add((root, root.length < 5));
-          final nh = r['no_harakat'] as String;
-          if (nh.isNotEmpty && nh != root) {
-            res.add((nh, false));
-          }
+          final root = r['is_root'] as int;
+          final nh = r['word'] as String;
+          res.add((nh.replaceAll(" ", "_"), root == 1));
         }
 
         return res;

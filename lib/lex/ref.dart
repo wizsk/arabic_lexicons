@@ -7,62 +7,61 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 /// tafseer.app (maybe) thier refferences are like this...
-class ReferenceProcessor {
-  static final RegExp _refExp = RegExp(r'\[\[(.*?)\]\]', dotAll: true);
-
-  static InlineSpan processRich(
+abstract final class ReferenceProcessor {
+  static TextSpan processRich(
     BuildContext context,
     String text,
     TextStyle refStyle,
   ) {
-    if (text.isEmpty) {
-      return const TextSpan();
+    final initial = text.split("]]").toList();
+    final iLen = initial.length;
+    for (int i = 1; i < iLen; i++) {
+      if (initial[i].startsWith("]")) {
+        initial[i] = initial[i].replaceFirst("]", "");
+        initial[i - 1] = '${initial[i - 1]}]';
+      }
     }
 
     final refColor = Theme.of(context).colorScheme.primary;
-
     final spans = <InlineSpan>[];
-    int lastIndex = 0;
-    int counter = 1;
 
-    for (final match in _refExp.allMatches(text)) {
-      // Text before the reference.
-      if (match.start > lastIndex) {
-        spans.add(TextSpan(text: text.substring(lastIndex, match.start)));
-      }
+    int count = 0;
+    for (final e in initial) {
+      // even if it has [[[ then the last one will remain at the right pos
+      // as the split works by spliting by the 1st one
+      if (e.contains("[[")) {
+        var (:pre, :suf) = e.splitOnce("[[");
+        pre ??= "";
+        suf ??= "";
 
-      final refContent = match.group(1);
+        if (pre.isNotEmpty) spans.add(TextSpan(text: pre));
+        if (suf.isEmpty) continue;
+        if (suf.startsWith(".")) {
+          suf = suf.replaceFirst(".", " ").trim();
+        }
 
-      if (refContent != null) {
-        final ref = refContent.replaceFirst('.', '').trim();
-        final number = enToArNum(counter.toString());
-        counter++;
-
+        count++;
+        final number = enToArNum(count);
         spans.add(
           TextSpan(
             text: '($number)',
             style: TextStyle(color: refColor),
             recognizer: TapGestureRecognizer()
               ..onTap = () {
-                showReferenceBottomSheet(context, ref, refStyle);
+                _showReferenceBottomSheet(context, suf!, refStyle);
               },
           ),
         );
+      } else {
+        spans.add(TextSpan(text: e));
       }
-
-      lastIndex = match.end;
-    }
-
-    // Remaining text.
-    if (lastIndex < text.length) {
-      spans.add(TextSpan(text: text.substring(lastIndex)));
     }
 
     return TextSpan(children: spans);
   }
 }
 
-void showReferenceBottomSheet(
+void _showReferenceBottomSheet(
   BuildContext context,
   String ref,
   TextStyle refStyle,

@@ -7,7 +7,7 @@ import 'package:arabic_lexicons/theme.dart';
 import 'package:arabic_lexicons/utils.dart';
 import 'package:arabic_lexicons/utils/toast_snack.dart';
 import 'package:arabic_lexicons/widgets/dahsed_divider.dart';
-import 'package:arabic_lexicons/widgets/expandalbe_text/ex.dart';
+import 'package:arabic_lexicons/widgets/small_icon_btns.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_html/flutter_html.dart';
@@ -394,9 +394,9 @@ Widget _defCard(
   final cs = Theme.of(context).colorScheme;
   // final colors = cs;
 
-  const sidesPadd = 8.0;
+  const sidesPadd = 12.0;
   final textWidget = Padding(
-    padding: const EdgeInsets.fromLTRB(sidesPadd, 10, sidesPadd, 0),
+    padding: const EdgeInsets.fromLTRB(sidesPadd, 12, sidesPadd, 0),
     child: Column(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -420,6 +420,15 @@ Widget _defCard(
               onPressed: () {
                 datas.expanded[index] = !datas.expanded[index];
                 datas.rebuild();
+
+                if (datas.expanded[index]) return;
+                postFrame((_) {
+                  if (!datas.scrollController.hasClients) return;
+                  if (datas.scrollController.offset == 0) {
+                    datas.appbarReaderBg = true;
+                    datas.rebuild();
+                  }
+                });
               },
             ),
             Spacer(),
@@ -529,9 +538,6 @@ Widget _arabicLexView(
   TextStyle ts,
   SearchLexiconsDatas datas,
 ) {
-  final cs = Theme.of(context).colorScheme;
-  // final colors = cs;
-
   return SliverList.separated(
     itemCount: datas.dbRes.length + 1,
     separatorBuilder: (_, _) => _defGapInbettenDef,
@@ -552,20 +558,7 @@ Widget _arabicLexView(
       final ml = expanded ? null : 1;
       final of = expanded ? null : TextOverflow.ellipsis;
 
-      // if (!datas.selectedDict.hasRefs) {
-      //   return ExpandableText(
-      //     row.formatMeanings.replaceAll("\n", " "),
-      //     row.formatMeanings,
-      //     onExpandedChanged: (b) {
-      //       datas.expanded[index] = b;
-      //     },
-      //     expanded: datas.expanded[index],
-      //     style: ts,
-      //     maxLines: 1,
-      //   );
-      // }
-
-      final child = datas.selectedDict.hasRefs
+      final child = datas.selectedDict.hasRefs && expanded
           ? Text.rich(
               ReferenceProcessor.processRich(context, txt, ts),
               textDirection: TextDirection.rtl,
@@ -588,113 +581,6 @@ Widget _arabicLexView(
             );
 
       return _defCard(context, index, datas, child, text: () => row.meanings);
-
-      final textWidget = Padding(
-        padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            child,
-            if (expanded) ...[
-              DashedDivider(height: 8, color: cs.outlineVariant),
-            ] else
-              const SizedBox(height: 4),
-            Row(
-              // mainAxisAlignment: MainAxisAlignment.end,
-              // spacing: 2,
-              children: [
-                iconButtonSized(
-                  context,
-                  icon: expanded
-                      ? Icons.keyboard_arrow_up_rounded
-                      : Icons.keyboard_arrow_down_rounded,
-                  scheme: IconButtonSizedColor.primary,
-                  tooltip: 'expan/collaspe',
-                  onPressed: () {
-                    datas.expanded[index] = !datas.expanded[index];
-                    datas.rebuild();
-                  },
-                ),
-                Spacer(),
-                iconButtonSized(
-                  context,
-                  icon: Icons.copy_rounded,
-                  tooltip: 'Copy',
-                  onPressed: () {
-                    // TODO: Bookmark this entry.
-                  },
-                ),
-                iconButtonSized(
-                  context,
-                  icon: Icons.flag_outlined,
-                  tooltip: 'Report an issue',
-                  onPressed: () {
-                    // TODO: Report this entry.
-                  },
-                  scheme: IconButtonSizedColor.err,
-                ),
-              ],
-            ),
-            const SizedBox(height: 6),
-          ],
-        ),
-      );
-
-      final rc = ReaderColors.curr(context);
-      final borderRadius = BorderRadius.circular(12);
-
-      final selectable = expanded
-          ? SelectionArea(
-              magnifierConfiguration: TextMagnifierConfiguration.disabled,
-              child: textWidget,
-            )
-          : textWidget;
-
-      // final card = Ink(
-      //   decoration: BoxDecoration(
-      //     color: rc.definitionSurface,
-      //     borderRadius: borderRadius,
-      //     border: Border.all(color: rc.outline),
-      //     boxShadow: [
-      //       BoxShadow(
-      //         color: rc.shadow,
-      //         offset: const Offset(2, 3),
-      //         blurRadius: 7,
-      //         spreadRadius: -2,
-      //       ),
-      //     ],
-      //   ),
-      //   child: selectable,
-      // );
-
-      final decoration = BoxDecoration(
-        color: rc.definitionSurface,
-        borderRadius: borderRadius,
-        border: Border.all(color: rc.outline),
-        boxShadow: [
-          BoxShadow(
-            color: rc.shadow,
-            offset: const Offset(2, 3),
-            blurRadius: 7,
-            spreadRadius: -2,
-          ),
-        ],
-      );
-
-      return expanded
-          ? DecoratedBox(decoration: decoration, child: selectable)
-          : Ink(
-              decoration: decoration,
-              child: InkWell(
-                borderRadius: borderRadius,
-                onTap: () {
-                  datas.expanded[index] = !datas.expanded[index];
-                  datas.rebuild();
-                },
-                child: selectable,
-              ),
-            );
     },
   );
 }

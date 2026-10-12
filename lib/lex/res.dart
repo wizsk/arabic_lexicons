@@ -2,6 +2,7 @@ import 'package:arabic_lexicons/alphabets.dart';
 import 'package:arabic_lexicons/conf.dart';
 import 'package:arabic_lexicons/data.dart';
 import 'package:arabic_lexicons/lex/data.dart';
+import 'package:arabic_lexicons/lex/expandable_definition.dart';
 import 'package:arabic_lexicons/lex/ref.dart';
 import 'package:arabic_lexicons/theme.dart';
 import 'package:arabic_lexicons/utils.dart';
@@ -367,17 +368,23 @@ Widget _hansLaneView(
         datas.expanded[index],
       );
 
+      final _ = ExpandableDefinition(
+        
+        style: ts,
+      );
+
+      final def = _defCard(
+        context,
+        index,
+        datas,
+        child,
+        text: () => htmlToPlainTextWithLineBr(txt),
+      );
       return AutoScrollTag(
         key: ValueKey(index),
         controller: datas.scrollController,
         index: index,
-        child: _defCard(
-          context,
-          index,
-          datas,
-          child,
-          text: () => htmlToPlainTextWithLineBr(txt),
-        ),
+        child: def,
       );
     },
   );
@@ -580,7 +587,15 @@ Widget _arabicLexView(
               overflow: of,
             );
 
-      return _defCard(context, index, datas, child, text: () => row.meanings);
+      return ExpandableDefinition(
+        row.formatMeanings.replaceAll("\n", " "),
+        row.formatMeanings,
+        style: ts,
+        textAlign: TextAlign.start,
+        textDirection: TextDirection.rtl,
+      );
+
+      // return _defCard(context, index, datas, child, text: () => row.meanings);
     },
   );
 }

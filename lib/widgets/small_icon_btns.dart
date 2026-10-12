@@ -6,7 +6,7 @@ Widget iconButtonSized(
   BuildContext context, {
   required IconData icon,
   String? tooltip,
-  required VoidCallback onPressed,
+  required VoidCallback? onPressed,
   final IconButtonSizedColor scheme = IconButtonSizedColor.normal,
   final double size = 40.00,
   final double iconSize = 20.00,

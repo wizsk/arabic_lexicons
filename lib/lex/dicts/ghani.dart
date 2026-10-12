@@ -16,10 +16,8 @@ Future<List<DbRow>> getGoniRes(Database db, String word) async {
     for (final r in rows) {
       acc.putIfAbsent(
         r['id'] as int,
-        () => DbRow(
-          word: r['word'] as String,
-          meanings: r['meanings'] as String,
-        ),
+        () =>
+            DbRow(word: r['word'] as String, meanings: r['meanings'] as String),
       );
     }
   }
@@ -33,12 +31,9 @@ Future<List<DbRow>> getGoniRes(Database db, String word) async {
       ids.toList(),
     );
 
-    final roots = <String?>[
-      for (final x in r) ...[
-        x['root'] as String?,
-        x['root_secondary'] as String?,
-      ],
-    ].whereType<String>().toSet();
+    final roots = <int?>[
+      for (final x in r) ...[x['root_id'] as int?, x['root_secondary'] as int?],
+    ].whereType<int>().toSet();
 
     if (roots.isEmpty) return;
 
@@ -46,7 +41,7 @@ Future<List<DbRow>> getGoniRes(Database db, String word) async {
     add(
       await db.rawQuery(
         'SELECT id, word, meanings FROM ghani '
-        'WHERE root IN ($rp) OR root_secondary IN ($rp) ORDER BY id',
+        'WHERE root_id IN ($rp) OR root_secondary_id IN ($rp) ORDER BY id',
         [...roots, ...roots],
       ),
     );
@@ -68,7 +63,9 @@ Future<List<DbRow>> getGoniRes(Database db, String word) async {
   // casue: if it's the root, then it already contains
   // all the word ids so, we don't need to add them again
   final needToGet = idx
-      .where((r) => r['is_root'] as int == 0)
+      .where((r) {
+        return r['is_root'] as int == 0;
+      })
       .map((r) => r['id'] as int);
 
   dp("need to get:", needToGet.length);

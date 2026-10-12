@@ -605,7 +605,7 @@ class _SearchLexiconsState extends State<SearchLexicons>
       textDirection: dir,
       child: CustomScrollView(
         key: ValueKey((_datas.selectedDict, _datas.selectedWord, _datas.state)),
-        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+        // keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         // physics: NeverScrollableScrollPhysics(),
         reverse: willShowSugg,
         controller: _datas.scrollController,

@@ -552,6 +552,7 @@ Widget _arabicLexView(
       // final meanings = row.formatMeanings;
 
       return ExpandableDefinition(
+        key: ValueKey(index),
         row.formatMeanings.replaceAll("\n", " "),
         row.formatMeanings,
         style: ts,

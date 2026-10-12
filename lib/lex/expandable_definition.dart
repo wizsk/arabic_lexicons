@@ -69,20 +69,24 @@ class _ExpandableDefinitionState extends State<ExpandableDefinition> {
 
     Widget child = LayoutBuilder(
       builder: (context, constraints) {
-        final painter = TextPainter(
-          text: TextSpan(text: text, style: style),
-          maxLines: widget.maxLines,
-          textDirection: textDirection,
-          textScaler: MediaQuery.textScalerOf(context),
-          locale: Localizations.maybeLocaleOf(context),
-        )..layout(maxWidth: constraints.maxWidth);
+        bool overflows = !true;
+        if (!_expanded) {
+          final painter = TextPainter(
+            text: TextSpan(text: text, style: style),
+            maxLines: widget.maxLines,
+            textDirection: textDirection,
+            textScaler: MediaQuery.textScalerOf(context),
+            locale: Localizations.maybeLocaleOf(context),
+          )..layout(maxWidth: constraints.maxWidth);
 
-        final overflows = painter.didExceedMaxLines;
-        painter.dispose();
+          overflows = painter.didExceedMaxLines;
+          painter.dispose();
+          print(overflows);
+        }
 
         final expanded = _expanded;
         final alreadyExpanded =
-            !widget.expandedText.contains("\n") && !overflows;
+            !overflows && !widget.expandedText.contains("\n");
 
         final textWidget = Text(
           text,
@@ -123,19 +127,6 @@ class _ExpandableDefinitionState extends State<ExpandableDefinition> {
                   scheme: IconButtonSizedColor.primary,
                   tooltip: 'expan/collaspe',
                   onPressed: alreadyExpanded ? null : _toggle,
-                  //() {
-                  //                           datas.expanded[index] = !datas.expanded[index];
-                  //                           datas.rebuild();
-                  //
-                  //                           if (datas.expanded[index]) return;
-                  //                           postFrame((_) {
-                  //                             if (!datas.scrollController.hasClients) return;
-                  //                             if (datas.scrollController.offset == 0) {
-                  //                               datas.appbarReaderBg = true;
-                  //                               datas.rebuild();
-                  //                             }
-                  //                           });
-                  // },
                 ),
                 Spacer(),
                 iconButtonSized(
@@ -198,116 +189,3 @@ class _ExpandableDefinitionState extends State<ExpandableDefinition> {
         : InkWell(borderRadius: borderRadius, onTap: _toggle, child: child);
   }
 }
-
-// Widget _defCard(
-//   BuildContext context,
-//   int index,
-//   SearchLexiconsDatas datas,
-//   Widget child, {
-//   required String Function() text,
-// }) {
-//   final expanded = datas.expanded[index];
-//   final cs = Theme.of(context).colorScheme;
-//   // final colors = cs;
-//
-//   const sidesPadd = 12.0;
-//   final textWidget = Padding(
-//     padding: const EdgeInsets.fromLTRB(sidesPadd, 12, sidesPadd, 0),
-//     child: Column(
-//       mainAxisAlignment: MainAxisAlignment.start,
-//       crossAxisAlignment: CrossAxisAlignment.start,
-//       children: [
-//         child,
-//         // if (expanded) ...[
-//         DashedDivider(height: 8, color: cs.outlineVariant),
-//         // ] else
-//         //   const SizedBox(height: 4),
-//         Row(
-//           // mainAxisAlignment: MainAxisAlignment.end,
-//           // spacing: 2,
-//           children: [
-//             iconButtonSized(
-//               context,
-//               icon: expanded
-//                   ? Icons.keyboard_arrow_up_rounded
-//                   : Icons.keyboard_arrow_down_rounded,
-//               scheme: IconButtonSizedColor.primary,
-//               tooltip: 'expan/collaspe',
-//               onPressed: () {
-//                 datas.expanded[index] = !datas.expanded[index];
-//                 datas.rebuild();
-//
-//                 if (datas.expanded[index]) return;
-//                 postFrame((_) {
-//                   if (!datas.scrollController.hasClients) return;
-//                   if (datas.scrollController.offset == 0) {
-//                     datas.appbarReaderBg = true;
-//                     datas.rebuild();
-//                   }
-//                 });
-//               },
-//             ),
-//             Spacer(),
-//             iconButtonSized(
-//               context,
-//               icon: Icons.copy_rounded,
-//               tooltip: 'Copy',
-//               onPressed: () async {
-//                 await Clipboard.setData(ClipboardData(text: text()));
-//                 MsgSv.showToast("Definiton copied");
-//               },
-//             ),
-//             iconButtonSized(
-//               context,
-//               icon: Icons.flag_outlined,
-//               tooltip: 'Report an issue',
-//               onPressed: () {
-//                 // TODO: Report this entry.
-//               },
-//               scheme: IconButtonSizedColor.err,
-//             ),
-//           ],
-//         ),
-//         const SizedBox(height: 6),
-//       ],
-//     ),
-//   );
-//
-//   final rc = ReaderColors.curr(context);
-//   final borderRadius = BorderRadius.circular(12);
-//
-//   final selectable = expanded
-//       ? SelectionArea(
-//           magnifierConfiguration: TextMagnifierConfiguration.disabled,
-//           child: textWidget,
-//         )
-//       : textWidget;
-//
-//   final decoration = BoxDecoration(
-//     color: rc.definitionSurface,
-//     borderRadius: borderRadius,
-//     border: Border.all(color: rc.outline),
-//     boxShadow: [
-//       BoxShadow(
-//         color: rc.shadow,
-//         offset: const Offset(2, 3),
-//         blurRadius: 7,
-//         spreadRadius: -2,
-//       ),
-//     ],
-//   );
-//
-//   return expanded
-//       ? DecoratedBox(decoration: decoration, child: selectable)
-//       : Ink(
-//           decoration: decoration,
-//           child: InkWell(
-//             borderRadius: borderRadius,
-//             onTap: () {
-//               datas.expanded[index] = !datas.expanded[index];
-//               datas.rebuild();
-//             },
-//             child: selectable,
-//           ),
-//         );
-// }

@@ -1,3 +1,6 @@
+import 'dart:math';
+
+import 'package:arabic_lexicons/conf.dart';
 import 'package:arabic_lexicons/data.dart';
 import 'package:arabic_lexicons/utils.dart';
 import 'package:flutter/gestures.dart';
@@ -64,48 +67,67 @@ void showReferenceBottomSheet(
   String ref,
   TextStyle refStyle,
 ) {
-  const pad = 24.00;
   showDialog(
     context: context,
     builder: (context) {
-      return Dialog(
-        insetPadding: EdgeInsets.all(14.0),
-        constraints: BoxConstraints(
-          maxWidth: appConf.maxWidth > 0
-              ? appConf.maxWidth
-              : maxUiWidth.maxWidth,
-        ),
-        child: SafeArea(
-          child: Padding(
-            padding: EdgeInsets.symmetric(vertical: pad),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                SingleChildScrollView(
-                  padding: EdgeInsets.symmetric(horizontal: pad),
-                  child: SelectionArea(
-                    magnifierConfiguration: TextMagnifierConfiguration.disabled,
-                    child: Text(
-                      ref,
-                      style: refStyle.copyWith(
-                        color: Theme.of(context).textTheme.bodyLarge?.color,
-                      ),
-                      textAlign: TextAlign.right,
-                    ),
-                  ),
-                ),
+      final theme = Theme.of(context);
+      final cs = theme.colorScheme;
 
-                const SizedBox(height: 18),
-                OutlinedButton.icon(
-                  label: Text('Close'),
-                  icon: Icon(Icons.close),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
+      final maxWidth = appConf.maxWidth > 0
+          ? appConf.maxWidth
+          : maxUiWidth.maxWidth;
+
+      return Directionality(
+        textDirection: TextDirection.rtl,
+        child: AlertDialog(
+          scrollable: true,
+          insetPadding: const EdgeInsets.all(14),
+          constraints: BoxConstraints(
+            maxWidth: maxWidth,
+            minWidth: min(400, maxWidth - 1),
+          ),
+          icon: Icon(Icons.menu_book_rounded, color: cs.primary, size: 28),
+          iconPadding: const EdgeInsets.only(top: 24, bottom: 8),
+          title: Text(
+            'المراجع والملاحظات',
+            style: theme.textTheme.titleMedium?.ar.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          titlePadding: const EdgeInsets.fromLTRB(24, 0, 24, 20),
+          contentPadding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+          content: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: cs.surfaceContainerLow,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: cs.outlineVariant.withValues(alpha: 0.6),
+              ),
+            ),
+            child: SelectionArea(
+              magnifierConfiguration: TextMagnifierConfiguration.disabled,
+              child: Text.rich(
+                TextSpan(
+                  text: ref,
+                  style: refStyle.copyWith(color: cs.onSurface),
                 ),
-              ],
+                textDirection: TextDirection.rtl,
+                textAlign: TextAlign.start,
+              ),
             ),
           ),
+          actionsPadding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
+          actionsAlignment: MainAxisAlignment.start,
+          actions: [
+            FilledButton.icon(
+              onPressed: () => Navigator.of(context).pop(),
+              icon: const Icon(Icons.close_rounded, size: 18),
+              label: Text('إغلاق', style: L.arStyle),
+            ),
+          ],
         ),
       );
     },

@@ -3,7 +3,6 @@ import 'package:arabic_lexicons/conf.dart';
 import 'package:arabic_lexicons/data.dart';
 import 'package:arabic_lexicons/lex/data.dart';
 import 'package:arabic_lexicons/lex/expandable_definition.dart';
-import 'package:arabic_lexicons/lex/ref.dart';
 import 'package:arabic_lexicons/theme.dart';
 import 'package:arabic_lexicons/utils.dart';
 import 'package:arabic_lexicons/utils/toast_snack.dart';
@@ -368,11 +367,6 @@ Widget _hansLaneView(
         datas.expanded[index],
       );
 
-      final _ = ExpandableDefinition(
-        
-        style: ts,
-      );
-
       final def = _defCard(
         context,
         index,
@@ -467,12 +461,12 @@ Widget _defCard(
   final rc = ReaderColors.curr(context);
   final borderRadius = BorderRadius.circular(12);
 
-  final selectable = expanded
-      ? SelectionArea(
-          magnifierConfiguration: TextMagnifierConfiguration.disabled,
-          child: textWidget,
-        )
-      : textWidget;
+  final selectable = SelectionArea(
+    magnifierConfiguration: TextMagnifierConfiguration.disabled,
+    child: expanded
+        ? textWidget
+        : SelectionContainer.disabled(child: textWidget),
+  );
 
   final decoration = BoxDecoration(
     color: rc.definitionSurface,
@@ -554,38 +548,8 @@ Widget _arabicLexView(
       }
       index--;
 
-      final expanded = datas.expanded[index];
       final row = datas.dbRes[index];
       // final meanings = row.formatMeanings;
-
-      final txt = expanded
-          ? row.formatMeanings
-          : row.formatMeanings.replaceAll("\n", " ");
-
-      final ml = expanded ? null : 1;
-      final of = expanded ? null : TextOverflow.ellipsis;
-
-      final child = datas.selectedDict.hasRefs && expanded
-          ? Text.rich(
-              ReferenceProcessor.processRich(context, txt, ts),
-              textDirection: TextDirection.rtl,
-              textAlign: TextAlign.right,
-              style: ts.copyWith(
-                leadingDistribution: TextLeadingDistribution.even,
-              ),
-              maxLines: ml,
-              overflow: of,
-            )
-          : Text(
-              txt,
-              textDirection: TextDirection.rtl,
-              textAlign: TextAlign.right,
-              style: ts.copyWith(
-                leadingDistribution: TextLeadingDistribution.even,
-              ),
-              maxLines: ml,
-              overflow: of,
-            );
 
       return ExpandableDefinition(
         row.formatMeanings.replaceAll("\n", " "),

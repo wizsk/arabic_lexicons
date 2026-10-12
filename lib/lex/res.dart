@@ -3,7 +3,6 @@ import 'package:arabic_lexicons/conf.dart';
 import 'package:arabic_lexicons/data.dart';
 import 'package:arabic_lexicons/lex/data.dart';
 import 'package:arabic_lexicons/lex/ref.dart';
-import 'package:arabic_lexicons/pages/settings/theme_color_font.dart';
 import 'package:arabic_lexicons/theme.dart';
 import 'package:arabic_lexicons/utils.dart';
 import 'package:arabic_lexicons/utils/toast_snack.dart';
@@ -180,7 +179,8 @@ Widget _showArEnRes(
   TextStyle tsOg,
   SearchLexiconsDatas datas,
 ) {
-  final cs = Theme.of(context).colorScheme;
+  final theme = Theme.of(context);
+  final cs = theme.colorScheme;
   final ts = tsOg.copyWith(height: defArabicFontHeihgt);
   const tp = EdgeInsets.symmetric(horizontal: 8, vertical: 4);
 
@@ -191,109 +191,116 @@ Widget _showArEnRes(
   );
 
   return SliverToBoxAdapter(
-    child: Center(
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.only(top: 8),
-        child: Table(
-          border: TableBorder.all(color: cs.outlineVariant, width: 0.5),
-          columnWidths: const {
-            0: IntrinsicColumnWidth(),
-            1: IntrinsicColumnWidth(),
-            // 1: FlexColumnWidth(),
-            2: IntrinsicColumnWidth(),
-          },
-          children: [
-            // Header
-            TableRow(
-              decoration: tblHDec,
-              children: [
-                Padding(
-                  padding: tp,
-                  child: Center(
-                    child: Text(
-                      'Word',
-                      style: ts.copyWith(fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: tp,
-                  child: Center(
-                    child: Text(
-                      'Meanings',
-                      style: ts.copyWith(fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: tp,
-                  child: Center(
-                    child: Text(
-                      'Root',
-                      style: ts.copyWith(fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-
-            ...datas.arEnRes.indexed.map((a) {
-              final e = a.$2;
-              final isHi = a.$1.isOdd;
-
-              final rootOnTap = e.root.isEmpty
-                  ? null
-                  : () {
-                      final s = e.root.split('/');
-                      if (s.isEmpty) return;
-
-                      final t = ArabicNormalizer.keepOnlyAr(s[0]);
-                      if (t.isEmpty) return;
-
-                      datas.onChangeTxt(appendTxt: t);
-                    };
-
-              final rootW = Padding(
-                padding: tp,
-                child: Center(child: Text(e.root, style: ts)),
-              );
-
-              return TableRow(
-                decoration: isHi ? tblHDec : null,
+    child: Column(
+      children: [
+        _resCount(
+          theme,
+          datas.arEnRes.length,
+          true,
+          padding: const EdgeInsets.symmetric(vertical: 12),
+        ),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.only(top: 8),
+          child: Table(
+            border: TableBorder.all(color: cs.outlineVariant, width: 0.5),
+            columnWidths: const {
+              0: IntrinsicColumnWidth(),
+              1: IntrinsicColumnWidth(),
+              // 1: FlexColumnWidth(),
+              2: IntrinsicColumnWidth(),
+            },
+            children: [
+              // Header
+              TableRow(
+                decoration: tblHDec,
                 children: [
                   Padding(
                     padding: tp,
-                    child: Center(child: Text(e.word, style: ts)),
+                    child: Center(
+                      child: Text(
+                        'Word',
+                        style: ts.copyWith(fontWeight: FontWeight.bold),
+                      ),
+                    ),
                   ),
-
                   Padding(
                     padding: tp,
-                    child: SelectableText(e.def, style: ts),
+                    child: Center(
+                      child: Text(
+                        'Meanings',
+                        style: ts.copyWith(fontWeight: FontWeight.bold),
+                      ),
+                    ),
                   ),
-
-                  InkWell(onTap: rootOnTap, child: rootW),
+                  Padding(
+                    padding: tp,
+                    child: Center(
+                      child: Text(
+                        'Root',
+                        style: ts.copyWith(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
                 ],
-              );
-            }),
-          ],
+              ),
+
+              ...datas.arEnRes.indexed.map((a) {
+                final e = a.$2;
+                final isHi = a.$1.isOdd;
+
+                final rootOnTap = e.root.isEmpty
+                    ? null
+                    : () {
+                        final s = e.root.split('/');
+                        if (s.isEmpty) return;
+
+                        final t = ArabicNormalizer.keepOnlyAr(s[0]);
+                        if (t.isEmpty) return;
+
+                        datas.onChangeTxt(appendTxt: t);
+                      };
+
+                final rootW = Padding(
+                  padding: tp,
+                  child: Center(child: Text(e.root, style: ts)),
+                );
+
+                return TableRow(
+                  decoration: isHi ? tblHDec : null,
+                  children: [
+                    Padding(
+                      padding: tp,
+                      child: Center(child: Text(e.word, style: ts)),
+                    ),
+
+                    Padding(
+                      padding: tp,
+                      child: SelectableText(e.def, style: ts),
+                    ),
+
+                    InkWell(onTap: rootOnTap, child: rootW),
+                  ],
+                );
+              }),
+            ],
+          ),
         ),
-      ),
+      ],
     ),
   );
 }
 
 Widget _resCount(
   ThemeData theme,
-  SearchLexiconsDatas datas,
-  bool isEnglish,
-  TextStyle ts,
-) {
+  int count,
+  bool isEnglish, {
+  final EdgeInsets padding = const EdgeInsets.only(top: 12, bottom: 0),
+}) {
   final colors = theme.colorScheme;
-  final count = datas.dbRes.length;
 
   return Padding(
-    padding: const EdgeInsets.only(top: 12, bottom: 0),
+    padding: padding,
     child: Center(
       child: Chip(
         // avatar: Icon(
@@ -322,36 +329,6 @@ Widget _resCount(
   );
 }
 
-Widget __resCount(
-  ThemeData theme,
-  SearchLexiconsDatas datas,
-  bool isEnglish,
-  TextStyle ts,
-) {
-  return Padding(
-    padding: EdgeInsets.only(top: 10, bottom: 0),
-    child: Center(
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 6.0),
-        decoration: BoxDecoration(
-          color: theme.colorScheme.secondaryContainer,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: theme.colorScheme.outline),
-        ),
-        child: Text(
-          isEnglish
-              ? "Found ${datas.dbRes.length} restuls"
-              :
-                /* nice */ "تم العثور على ${enToArNum(datas.dbRes.length)}",
-          style: theme.textTheme.titleLarge?.ar.copyWith(
-            color: theme.colorScheme.onSecondaryContainer,
-          ),
-        ),
-      ),
-    ),
-  );
-}
-
 Widget _hansLaneView(
   BuildContext context,
   TextStyle ts,
@@ -373,7 +350,7 @@ Widget _hansLaneView(
     separatorBuilder: (_, _) => _defGapInbettenDef,
     itemBuilder: (context, index) {
       if (index == 0) {
-        return _resCount(Theme.of(context), datas, true, ts);
+        return _resCount(Theme.of(context), datas.dbRes.length, true);
       }
       index--;
 
@@ -417,8 +394,9 @@ Widget _defCard(
   final cs = Theme.of(context).colorScheme;
   // final colors = cs;
 
+  const sidesPadd = 8.0;
   final textWidget = Padding(
-    padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
+    padding: const EdgeInsets.fromLTRB(sidesPadd, 10, sidesPadd, 0),
     child: Column(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -558,7 +536,9 @@ Widget _arabicLexView(
     itemCount: datas.dbRes.length + 1,
     separatorBuilder: (_, _) => _defGapInbettenDef,
     itemBuilder: (context, index) {
-      if (index == 0) return _resCount(Theme.of(context), datas, false, ts);
+      if (index == 0) {
+        return _resCount(Theme.of(context), datas.dbRes.length, false);
+      }
       index--;
 
       final expanded = datas.expanded[index];

@@ -233,7 +233,7 @@ Future<bool?> showConfirmDialog(
             ? Text(
                 message,
                 textDirection: useLClass ? L.dir : dir,
-                style: theme.textTheme.bodyMedium?.copyWith(
+                style: theme.textTheme.bodyLarge?.copyWith(
                   color: cs.onSurfaceVariant,
                   fontFamily: useLClass ? L.arFontIf : fontFam,
                 ),

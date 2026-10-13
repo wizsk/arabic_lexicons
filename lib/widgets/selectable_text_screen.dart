@@ -25,6 +25,7 @@ class SelectionBounds {
 }
 
 class SelectableTextScreen extends StatefulWidget {
+  final String? title;
   final SelectableTextScreenFunc fullTextFunc;
   final int start;
   // exclusive aka upuntil
@@ -37,6 +38,7 @@ class SelectableTextScreen extends StatefulWidget {
 
   const SelectableTextScreen({
     super.key,
+    this.title,
     required this.fullTextFunc,
     required this.start,
     this.end,
@@ -48,6 +50,7 @@ class SelectableTextScreen extends StatefulWidget {
 
   static Future<void> show(
     BuildContext context, {
+    String? title,
     required SelectableTextScreenFunc fullTextFunc,
     required TextAlign textAlign,
     required TextDirection dir,
@@ -60,6 +63,7 @@ class SelectableTextScreen extends StatefulWidget {
       context,
       MaterialPageRoute(
         builder: (_) => SelectableTextScreen(
+          title: title,
           fullTextFunc: fullTextFunc,
           textAlign: textAlign,
           dir: dir,
@@ -115,8 +119,8 @@ class _SelectableTextScreenState extends State<SelectableTextScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          L.p('Select Text', /* txt */ 'حدد النص'),
-          style: TextStyle(fontFamily: L.arFontIf),
+          widget.title ?? L.p('Select Text', /* txt */ 'حدد النص'),
+          style: L.arStyle,
         ),
         actions: [
           IconButton(

@@ -7,6 +7,8 @@ class ArabicNormalizer {
   static final arabicDigits = RegExp(r'^[\u0660-\u0669]+$');
   static final spaces = RegExp(r'\s');
 
+  static final english = RegExp(r'[a-zA-Z]');
+
   static bool isArabicNum(String s) => arabicDigits.hasMatch(s);
 
   // Arabic diacritics (tashkil)
@@ -63,6 +65,7 @@ class ArabicNormalizer {
   );
 
   static final RegExp _whiteSpace = RegExp(r'\s+');
+
   static String keepOnlyArWithSpace(String word) {
     if (word.isEmpty) return word;
 
@@ -74,13 +77,24 @@ class ArabicNormalizer {
         .trim();
   }
 
-  static List<String> keepOnlyArListUnique(String sentence) {
+  static String removeTashkilAndNomarize(String word) {
+    if (word.isEmpty) return word;
+
+    return word
+        .replaceAll(_tashkil, '')
+        .replaceAll(_farsiYaEnd, 'ى')
+        .replaceAll(_farsiYaMiddle, 'ي')
+        .replaceAll(_whiteSpace, ' ')
+        .trim();
+  }
+
+  static List<String> removeTashkilAndNomarizeListUnique(String sentence) {
     sentence = sentence.trim();
     if (sentence.isEmpty) return [];
 
     List<String> res = [];
     for (final w in sentence.split(RegExp(r'\s+'))) {
-      final cw = keepOnlyAr(w);
+      final cw = removeTashkilAndNomarize(w);
       if (cw.isEmpty) continue;
       res.remove(cw);
       res.add(cw);

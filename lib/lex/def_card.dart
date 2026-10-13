@@ -1,8 +1,9 @@
+import 'package:arabic_lexicons/conf.dart';
 import 'package:arabic_lexicons/data.dart';
 import 'package:arabic_lexicons/lex/data.dart';
 import 'package:arabic_lexicons/lex/report_dict_entry.dart';
+import 'package:arabic_lexicons/main_widgets.dart';
 import 'package:arabic_lexicons/theme.dart';
-import 'package:arabic_lexicons/utils.dart';
 import 'package:arabic_lexicons/utils/toast_snack.dart';
 import 'package:arabic_lexicons/widgets/dahsed_divider.dart';
 import 'package:arabic_lexicons/widgets/small_icon_btns.dart';
@@ -21,10 +22,18 @@ Widget definitonCard(
   // final colors = cs;
 
   final actions = Row(
-    textDirection: TextDirection.ltr,
-    mainAxisAlignment: MainAxisAlignment.end,
-    // spacing: 2,
+    // textDirection: TextDirection.rtl,
+    mainAxisAlignment: MainAxisAlignment.start,
+    spacing: 2,
     children: [
+      iconButtonSized(
+        context,
+        icon: Icons.open_in_full_rounded,
+        scheme: IconButtonSizedColor.primary,
+        tooltip: 'Open in fullscreen',
+        onPressed: fs,
+        iconSize: 18,
+      ),
       iconButtonSized(
         context,
         icon: Icons.copy_rounded,
@@ -34,12 +43,30 @@ Widget definitonCard(
           MsgSv.showSnackbarMsg("Definiton copied");
         },
       ),
+      Spacer(),
       iconButtonSized(
         context,
         icon: Icons.flag_outlined,
         tooltip: 'Report an issue',
         onPressed: () async {
-          dp("Trying to send report");
+          // d9p("Trying to send report");
+          final confirm = await showConfirmDialog(
+            context,
+            "Report an error?",
+            scroolable: true,
+            message:
+                'Would you like to report a possible mistake in the entry “${datas.selectedWord}”? '
+                '\n\n'
+                'Your email app will open with a prepared report. '
+                'If it can\'t be opened, a popup will let you copy the report and send it manually.'
+                '\n\n'
+                'Thank you for helping improve the lexicon!',
+            fontFam: L.arFont,
+            constraints: true,
+            confirmText: "Report",
+          );
+
+          if (confirm != true) return;
 
           final ok = await reportDefinition(
             datas.dbRes[index],
@@ -55,15 +82,6 @@ Widget definitonCard(
           );
         },
         scheme: IconButtonSizedColor.err,
-      ),
-      Spacer(),
-      iconButtonSized(
-        context,
-        icon: Icons.open_in_full_rounded,
-        scheme: IconButtonSizedColor.primary,
-        tooltip: 'Open in fullscreen',
-        onPressed: fs,
-        iconSize: 18,
       ),
     ],
   );

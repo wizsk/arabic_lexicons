@@ -293,7 +293,7 @@ Widget _showArEnRes(
   );
 }
 
-const _spaceBetweenDefs = SizedBox(height: 18);
+const spaceBetweenDefs = SizedBox(height: 18);
 
 Widget _hansLaneView(
   BuildContext context,
@@ -316,7 +316,7 @@ Widget _hansLaneView(
 
   return SliverList.separated(
     itemCount: datas.dbRes.length,
-    separatorBuilder: (_, _) => _spaceBetweenDefs,
+    separatorBuilder: (_, _) => spaceBetweenDefs,
     itemBuilder: (context, index) {
       final row = datas.dbRes[index];
       String txt = row.meanings;
@@ -326,8 +326,8 @@ Widget _hansLaneView(
         index: index,
         child: definitonCard(
           context,
-          index,
-          datas,
+          datas.selectedDict,
+          datas.dbRes[index],
           SelectionArea(
             magnifierConfiguration: TextMagnifierConfiguration.disabled,
             child: _engMeaningView(
@@ -341,6 +341,9 @@ Widget _hansLaneView(
             ),
           ),
           text: () => htmlToPlainTextWithLineBr(txt),
+          rebuild: () {
+            if (context.mounted) datas.rebuild();
+          },
           fs: () {
             SelectableTextScreen.show(
               context,
@@ -371,7 +374,7 @@ Widget _arabicLexView(TextStyle ts, SearchLexiconsDatas datas) {
 
   return SliverList.separated(
     itemCount: datas.dbRes.length,
-    separatorBuilder: (_, _) => _spaceBetweenDefs,
+    separatorBuilder: (_, _) => spaceBetweenDefs,
     itemBuilder: (context, index) {
       final row = datas.dbRes[index];
 
@@ -398,12 +401,15 @@ Widget _arabicLexView(TextStyle ts, SearchLexiconsDatas datas) {
 
       return definitonCard(
         context,
-        index,
-        datas,
+        datas.selectedDict,
+        datas.dbRes[index],
         SelectionArea(
           magnifierConfiguration: TextMagnifierConfiguration.disabled,
           child: child,
         ),
+        rebuild: () {
+          if (context.mounted) datas.rebuild();
+        },
         text: () => meanings,
         fs: () {
           SelectableTextScreen.show(

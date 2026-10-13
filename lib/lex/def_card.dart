@@ -19,61 +19,16 @@ Widget definitonCard(
   required String Function() text,
   required VoidCallback fs,
   required VoidCallback rebuild,
+  VoidCallback? onRemove,
 }) {
   final cs = Theme.of(context).colorScheme;
 
   final ebm = LexEntryBm.contains(d, r);
 
   final actions = Row(
-    // textDirection: TextDirection.rtl,
-    mainAxisAlignment: MainAxisAlignment.start,
+    textDirection: TextDirection.ltr,
     spacing: 2,
     children: [
-      iconButtonSized(
-        context,
-        icon: Icons.open_in_full_rounded,
-        scheme: IconButtonSizedColor.primary,
-        tooltip: 'Open in fullscreen',
-        onPressed: fs,
-        iconSize: 18,
-      ),
-      iconButtonSized(
-        context,
-        icon: Icons.copy_rounded,
-        tooltip: 'Copy',
-        onPressed: () async {
-          await Clipboard.setData(ClipboardData(text: text()));
-          MsgSv.showSnackbarMsg("Definiton copied");
-        },
-      ),
-      Spacer(),
-      iconButtonSized(
-        context,
-        icon: ebm ? Icons.bookmark_remove_rounded : Icons.bookmark_add_outlined,
-        scheme: ebm ? IconButtonSizedColor.err : IconButtonSizedColor.normal,
-        tooltip: 'Report an issue',
-        onPressed: () async {
-          if (ebm) {
-            final confirm = await showConfirmDialog(
-              context,
-              "Remove Bookmark",
-              scroolable: true,
-              message:
-                  'Do you want remove to lexcion entry “${r.word}” from bookmarks?',
-              confirmText: 'Remove',
-              destructive: true,
-              constraints: true,
-              fontFam: L.arFont,
-            );
-            if (confirm != true) return;
-
-            await LexEntryBm.remove(d, r);
-          } else {
-            await LexEntryBm.add(d, r);
-          }
-          rebuild();
-        },
-      ),
       iconButtonSized(
         context,
         icon: Icons.flag_outlined,
@@ -109,6 +64,52 @@ Widget definitonCard(
           );
         },
         scheme: IconButtonSizedColor.err,
+      ),
+      iconButtonSized(
+        context,
+        icon: ebm ? Icons.bookmark_remove_rounded : Icons.bookmark_add_outlined,
+        scheme: ebm ? IconButtonSizedColor.err : IconButtonSizedColor.normal,
+        tooltip: 'Report an issue',
+        onPressed: () async {
+          if (ebm) {
+            final confirm = await showConfirmDialog(
+              context,
+              "Remove Bookmark",
+              scroolable: true,
+              message:
+                  'Do you want remove to lexcion entry “${r.word}” from bookmarks?',
+              confirmText: 'Remove',
+              destructive: true,
+              constraints: true,
+              fontFam: L.arFont,
+            );
+            if (confirm != true) return;
+
+            await LexEntryBm.remove(d, r);
+            onRemove?.call();
+          } else {
+            await LexEntryBm.add(d, r);
+          }
+          rebuild();
+        },
+      ),
+      const Spacer(),
+      iconButtonSized(
+        context,
+        icon: Icons.copy_rounded,
+        tooltip: 'Copy',
+        onPressed: () async {
+          await Clipboard.setData(ClipboardData(text: text()));
+          MsgSv.showSnackbarMsg("Definiton copied");
+        },
+      ),
+      iconButtonSized(
+        context,
+        icon: Icons.open_in_full_rounded,
+        scheme: IconButtonSizedColor.primary,
+        tooltip: 'Open in fullscreen',
+        onPressed: fs,
+        iconSize: 18,
       ),
     ],
   );

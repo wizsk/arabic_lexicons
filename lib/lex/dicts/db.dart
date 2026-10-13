@@ -344,8 +344,46 @@ class DbService {
           ),
         );
       }
-      return results;
+      if (results.isNotEmpty) return results;
     }
+
+    for (final q in words) {
+      if (q.length >= 3 && !ArabicNormalizer.english.hasMatch(q)) continue;
+
+      final query = q.replaceAll("_", " ");
+      final res = await db.rawQuery(
+        '''
+        SELECT id, word, meanings, is_root
+        FROM lanelexcon
+        WHERE meanings LIKE ?
+        LIMIT 40
+      ''',
+        ['%$query%'],
+      );
+
+      if (res.isEmpty) continue;
+
+      for (final row in res) {
+        final w = row['word'] as String? ?? '';
+        var m = row['meanings'] as String? ?? '';
+
+        // Highlight query inside meanings
+        final highlighted = m.replaceAll(
+          query,
+          '<span class="high">$query</span>',
+        );
+
+        results.add(
+          DbRow(
+            id: row["id"] as int,
+            word: w,
+            meanings: highlighted,
+            isRoot: (row['is_root'] as int? ?? 0) == 1,
+          ),
+        );
+      }
+    }
+
     return results;
   }
 

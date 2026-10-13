@@ -4,6 +4,7 @@ import 'package:arabic_lexicons/history/page.dart';
 import 'package:arabic_lexicons/pages/fams/fams.dart';
 import 'package:arabic_lexicons/pages/foreings_all.dart';
 import 'package:arabic_lexicons/pages/help/help.dart';
+import 'package:arabic_lexicons/pages/lex_bm/lex_bm.dart';
 import 'package:arabic_lexicons/pages/settings/settings.dart';
 import 'package:arabic_lexicons/utils.dart';
 import 'package:flutter/material.dart';
@@ -91,6 +92,8 @@ Widget buildDrawer(BuildContext context) {
             context,
             MaterialPageRoute(builder: (_) => HelpPage()),
           );
+        case 9:
+          LexDefBmPage.open(context);
       }
     },
     children: [
@@ -147,6 +150,10 @@ Widget buildDrawer(BuildContext context) {
       NavigationDrawerDestination(
         label: const Text("Help"),
         icon: const Icon(Icons.help_outline),
+      ),
+      NavigationDrawerDestination(
+        label: const Text("Def bm"),
+        icon: const Icon(Icons.list_outlined),
       ),
     ],
   );

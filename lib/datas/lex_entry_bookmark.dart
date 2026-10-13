@@ -37,9 +37,11 @@ abstract final class LexEntryBm {
       meaning = r.meanings;
     }
 
+    final word = r.word.replaceAll("_", " ");
+
     await _db.insert(t, {
       "id": r.id,
-      "word": r.word,
+      "word": word,
       "lex_table": d.table,
       "meanings": meaning,
       'created_at': DateTime.now().millisecondsSinceEpoch,

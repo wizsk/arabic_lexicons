@@ -3,9 +3,9 @@ import 'package:arabic_lexicons/datas/lex_entry_bookmark.dart';
 import 'package:arabic_lexicons/lex/def_card.dart';
 import 'package:arabic_lexicons/lex/res.dart';
 import 'package:arabic_lexicons/multi_selection.dart';
+import 'package:arabic_lexicons/pages/lex_bm/def.dart';
 import 'package:arabic_lexicons/theme.dart';
 import 'package:arabic_lexicons/utils.dart';
-import 'package:arabic_lexicons/widgets/selectable_text_screen.dart';
 import 'package:flutter/material.dart';
 
 class LexDefBmPage extends StatefulWidget {
@@ -171,11 +171,15 @@ class _LexDefBmPageState extends State<LexDefBmPage> {
                                     cs,
                                     false,
                                     hiColor,
+                                    maxlines: 1,
+                                    textOverFlow: TextOverflow.ellipsis,
                                   )
                                 : def.r.arMeaningView(
                                     context,
                                     ts: ts,
                                     hasRefs: def.dict.hasRefs,
+                                    maxlines: 1,
+                                    textOverFlow: TextOverflow.ellipsis,
                                   );
 
                             final dir = isEng
@@ -192,11 +196,7 @@ class _LexDefBmPageState extends State<LexDefBmPage> {
                                 context,
                                 def.dict,
                                 def.r,
-                                SelectionArea(
-                                  magnifierConfiguration:
-                                      TextMagnifierConfiguration.disabled,
-                                  child: child,
-                                ),
+                                child,
                                 text: () =>
                                     htmlToPlainTextWithLineBr(def.meanings),
                                 rebuild: () {
@@ -204,25 +204,28 @@ class _LexDefBmPageState extends State<LexDefBmPage> {
                                 },
                                 onRemove: () => _defList.removeAt(index),
                                 fs: () {
-                                  SelectableTextScreen.show(
+                                  final child = isEng
+                                      ? engMeaningView(
+                                          def.meanings,
+                                          fontSize,
+                                          fontHeight,
+                                          fontFam,
+                                          cs,
+                                          false,
+                                          hiColor,
+                                        )
+                                      : def.r.arMeaningView(
+                                          context,
+                                          ts: ts,
+                                          hasRefs: def.dict.hasRefs,
+                                        );
+
+                                  LexBnDefPage.open(
                                     context,
-                                    title: def.word,
-                                    fullTextFunc: (_) =>
-                                        htmlToPlainTextWithLineBr(def.meanings),
-                                    textAlign: align,
+                                    en: def,
+                                    align: align,
                                     dir: dir,
-                                    textStyleBodyMedium: !isEng
-                                        ? ts
-                                        : ts.copyWith(
-                                            fontFamily: fontFam,
-                                            // the html renderer and normal renderer not the same :)
-                                            height:
-                                                appConf.useHansLaneDefRDStyle
-                                                ? htmlFontHeight + 0.3
-                                                : fontHeight,
-                                          ),
-                                    start: 0,
-                                    length: 1,
+                                    def: child,
                                   );
                                 },
                               ),

@@ -416,6 +416,8 @@ extension X on DbRow {
     BuildContext context, {
     required bool hasRefs,
     required TextStyle ts,
+    final int? maxlines,
+    final TextOverflow? textOverFlow,
   }) {
     final txt = formatMeanings;
 
@@ -427,6 +429,8 @@ extension X on DbRow {
             style: ts.copyWith(
               leadingDistribution: TextLeadingDistribution.even,
             ),
+            maxLines: maxlines,
+            overflow: textOverFlow,
           )
         : Text(
             txt,
@@ -435,6 +439,8 @@ extension X on DbRow {
             style: ts.copyWith(
               leadingDistribution: TextLeadingDistribution.even,
             ),
+            maxLines: maxlines,
+            overflow: textOverFlow,
           );
   }
 }
@@ -447,8 +453,10 @@ Widget engMeaningView(
   String fontFam,
   ColorScheme cs,
   bool isHighResult,
-  Color hiColor,
-) {
+  Color hiColor, {
+  final int? maxlines,
+  final TextOverflow? textOverFlow,
+}) {
   return Html(
     data: html,
     style: {
@@ -459,6 +467,8 @@ Widget engMeaningView(
         textAlign: TextAlign.left,
         fontSize: FontSize(fontSize),
         color: isHighResult ? cs.primary : null,
+        maxLines: maxlines,
+        textOverflow: textOverFlow,
       ),
       'strong': Style(fontWeight: FontWeight.bold),
       'i': Style(fontStyle: FontStyle.italic),

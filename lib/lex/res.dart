@@ -3,6 +3,7 @@ import 'package:arabic_lexicons/conf.dart';
 import 'package:arabic_lexicons/data.dart';
 import 'package:arabic_lexicons/lex/data.dart';
 import 'package:arabic_lexicons/lex/def_card.dart';
+import 'package:arabic_lexicons/lex/dicts/db.dart';
 import 'package:arabic_lexicons/lex/ref.dart';
 import 'package:arabic_lexicons/theme.dart';
 import 'package:arabic_lexicons/utils.dart';
@@ -330,7 +331,7 @@ Widget _hansLaneView(
           datas.dbRes[index],
           SelectionArea(
             magnifierConfiguration: TextMagnifierConfiguration.disabled,
-            child: _engMeaningView(
+            child: engMeaningView(
               txt,
               fontSize,
               fontHeight,
@@ -369,35 +370,17 @@ Widget _hansLaneView(
 }
 
 Widget _arabicLexView(TextStyle ts, SearchLexiconsDatas datas) {
-  final showWordTitle = datas.selectedDict.showTitle;
-  final spaces = appConf.wordSpacing > 1 ? " " * appConf.wordSpacing : " ";
-
   return SliverList.separated(
     itemCount: datas.dbRes.length,
     separatorBuilder: (_, _) => spaceBetweenDefs,
     itemBuilder: (context, index) {
       final row = datas.dbRes[index];
 
-      final meanings = row.formatMeanings;
-
-      final txt = showWordTitle ? '${row.word}:$spaces$meanings' : meanings;
-      final child = datas.selectedDict.hasRefs
-          ? Text.rich(
-              ReferenceProcessor.processRich(context, meanings, ts),
-              textDirection: TextDirection.rtl,
-              textAlign: TextAlign.right,
-              style: ts.copyWith(
-                leadingDistribution: TextLeadingDistribution.even,
-              ),
-            )
-          : Text(
-              txt,
-              textDirection: TextDirection.rtl,
-              textAlign: TextAlign.right,
-              style: ts.copyWith(
-                leadingDistribution: TextLeadingDistribution.even,
-              ),
-            );
+      final child = row.arMeaningView(
+        context,
+        ts: ts,
+        hasRefs: datas.selectedDict.hasRefs,
+      );
 
       return definitonCard(
         context,
@@ -410,12 +393,12 @@ Widget _arabicLexView(TextStyle ts, SearchLexiconsDatas datas) {
         rebuild: () {
           if (context.mounted) datas.rebuild();
         },
-        text: () => meanings,
+        text: () => row.formatMeanings,
         fs: () {
           SelectableTextScreen.show(
             context,
             title: datas.selectedWord,
-            fullTextFunc: (_) => meanings,
+            fullTextFunc: (_) => row.formatMeanings,
             textAlign: TextAlign.right,
             dir: TextDirection.rtl,
             textStyleBodyMedium: ts,
@@ -428,7 +411,35 @@ Widget _arabicLexView(TextStyle ts, SearchLexiconsDatas datas) {
   );
 }
 
-Widget _engMeaningView(
+extension X on DbRow {
+  Widget arMeaningView(
+    BuildContext context, {
+    required bool hasRefs,
+    required TextStyle ts,
+  }) {
+    final txt = formatMeanings;
+
+    return hasRefs
+        ? Text.rich(
+            ReferenceProcessor.processRich(context, meanings, ts),
+            textDirection: TextDirection.rtl,
+            textAlign: TextAlign.right,
+            style: ts.copyWith(
+              leadingDistribution: TextLeadingDistribution.even,
+            ),
+          )
+        : Text(
+            txt,
+            textDirection: TextDirection.rtl,
+            textAlign: TextAlign.right,
+            style: ts.copyWith(
+              leadingDistribution: TextLeadingDistribution.even,
+            ),
+          );
+  }
+}
+
+Widget engMeaningView(
   String html,
   // String fontFam,
   double fontSize,

@@ -16,8 +16,11 @@ Future<List<DbRow>> getGoniRes(Database db, String word) async {
     for (final r in rows) {
       acc.putIfAbsent(
         r['id'] as int,
-        () =>
-            DbRow(word: r['word'] as String, meanings: r['meanings'] as String),
+        () => DbRow(
+          id: r['id'] as int,
+          word: r['word'] as String,
+          meanings: r['meanings'] as String,
+        ),
       );
     }
   }

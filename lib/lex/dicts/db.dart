@@ -14,6 +14,7 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 const String dbFileName = 'arabic_lexicons_db_v4_beta.sqlite';
 
 class DbRow {
+  final int id;
   final String word;
   final String meanings;
   final bool isRoot;
@@ -43,6 +44,7 @@ class DbRow {
   }
 
   DbRow({
+    required this.id,
     required this.word,
     required this.meanings,
     this.isRoot = false,
@@ -159,7 +161,13 @@ class DbService {
     for (final row in res) {
       final meaningsRaw = row['meanings'] as String? ?? '';
       String m = meaningsRaw.replaceAll('|', '\n').replaceAll('<br>', '\n');
-      entries.add(DbRow(word: row['word'] as String? ?? '', meanings: m));
+      entries.add(
+        DbRow(
+          id: row["id"] as int,
+          word: row['word'] as String? ?? '',
+          meanings: m,
+        ),
+      );
     }
 
     return entries;
@@ -190,7 +198,7 @@ class DbService {
     for (var query in words) {
       var res = await db.rawQuery(
         '''
-      SELECT word, meanings, is_root
+      SELECT id, word, meanings, is_root
       FROM hanswehr
       WHERE parent_id IN (
         SELECT parent_id FROM hanswehr WHERE is_root AND word = ?
@@ -204,6 +212,7 @@ class DbService {
         for (final r in res) {
           results.add(
             DbRow(
+              id: r["id"] as int,
               word: r['word'] as String? ?? "",
               meanings: r['meanings'] as String? ?? "",
               isRoot: (r['is_root'] as int? ?? 0) == 1,
@@ -216,7 +225,7 @@ class DbService {
       if (res.isEmpty) {
         res = await db.rawQuery(
           '''
-      SELECT word, meanings, is_root
+      SELECT id, word, meanings, is_root
       FROM hanswehr
       WHERE parent_id IN (
         SELECT parent_id FROM hanswehr WHERE word = ?
@@ -232,6 +241,7 @@ class DbService {
           final w = r['word'] as String? ?? "";
           results.add(
             DbRow(
+              id: r["id"] as int,
               word: w,
               meanings: r['meanings'] as String? ?? "",
               isRoot: (r['is_root'] as int? ?? 0) == 1,
@@ -246,7 +256,7 @@ class DbService {
         query = query.replaceAll("_", " ");
         res = await db.rawQuery(
           '''
-        SELECT word, meanings, is_root
+        SELECT id, word, meanings, is_root
         FROM hanswehr
         WHERE meanings LIKE ?
         LIMIT 40
@@ -268,6 +278,7 @@ class DbService {
 
           results.add(
             DbRow(
+              id: row["id"] as int,
               word: w,
               meanings: highlighted,
               isRoot: (row['is_root'] as int? ?? 0) == 1,
@@ -295,7 +306,7 @@ class DbService {
     final words = [wordArg, if (wordArg != secondary) secondary];
 
     for (final word in words) {
-      var q = '''SELECT word, meanings, is_root FROM lanelexcon
+      var q = '''SELECT id, word, meanings, is_root FROM lanelexcon
 	WHERE parent_id IN (SELECT parent_id FROM lanelexcon WHERE is_root AND WORD = ?)
 	ORDER BY id''';
       var res = await db.rawQuery(q, [word]);
@@ -304,6 +315,7 @@ class DbService {
         for (final r in res) {
           results.add(
             DbRow(
+              id: r["id"] as int,
               word: r['word'] as String? ?? "",
               meanings: r['meanings'] as String? ?? "",
               isRoot: (r['is_root'] as int? ?? 0) == 1,
@@ -313,7 +325,7 @@ class DbService {
         return results;
       }
 
-      q = '''SELECT word, meanings, is_root FROM lanelexcon
+      q = '''SELECT id, word, meanings, is_root FROM lanelexcon
        WHERE parent_id IN (SELECT parent_id FROM lanelexcon WHERE WORD = ?)
        ORDER BY id''';
       res = await db.rawQuery(q, [word]);
@@ -324,6 +336,7 @@ class DbService {
         final w = r['word'] as String? ?? "";
         results.add(
           DbRow(
+            id: r['id'] as int,
             word: w,
             meanings: r['meanings'] as String? ?? "",
             isRoot: (r['is_root'] as int? ?? 0) == 1,

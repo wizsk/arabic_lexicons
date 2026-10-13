@@ -329,17 +329,14 @@ Widget _hansLaneView(
           context,
           datas.selectedDict,
           datas.dbRes[index],
-          SelectionArea(
-            magnifierConfiguration: TextMagnifierConfiguration.disabled,
-            child: engMeaningView(
-              txt,
-              fontSize,
-              fontHeight,
-              fontFam,
-              cs,
-              row.isHi,
-              hiColor,
-            ),
+          engMeaningView(
+            txt,
+            fontSize,
+            fontHeight,
+            fontFam,
+            cs,
+            row.isHi,
+            hiColor,
           ),
           text: () => htmlToPlainTextWithLineBr(txt),
           rebuild: () {
@@ -411,7 +408,7 @@ Widget _arabicLexView(TextStyle ts, SearchLexiconsDatas datas) {
   );
 }
 
-extension X on DbRow {
+extension DbRowWidget on DbRow {
   Widget arMeaningView(
     BuildContext context, {
     required bool hasRefs,

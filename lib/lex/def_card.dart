@@ -145,5 +145,8 @@ Widget definitonCard(
     ],
   );
 
-  return DecoratedBox(decoration: decoration, child: textWidget);
+  return GestureDetector(
+    onTap: fs,
+    child: DecoratedBox(decoration: decoration, child: textWidget),
+  );
 }

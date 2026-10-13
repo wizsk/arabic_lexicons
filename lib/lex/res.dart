@@ -383,10 +383,11 @@ Widget _arabicLexView(TextStyle ts, SearchLexiconsDatas datas) {
         context,
         datas.selectedDict,
         datas.dbRes[index],
-        SelectionArea(
-          magnifierConfiguration: TextMagnifierConfiguration.disabled,
-          child: child,
-        ),
+        // SelectionArea(
+        //   magnifierConfiguration: TextMagnifierConfiguration.disabled,
+        //   child:
+        child,
+        // ),
         rebuild: () {
           if (context.mounted) datas.rebuild();
         },

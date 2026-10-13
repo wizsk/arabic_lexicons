@@ -105,6 +105,7 @@ class _WordListPageState extends State<WordListPage> {
 
   @override
   void dispose() {
+    _tc.dispose();
     _scrollController.dispose();
     super.dispose();
   }

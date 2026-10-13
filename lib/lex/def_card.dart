@@ -1,7 +1,7 @@
 import 'package:arabic_lexicons/conf.dart';
 import 'package:arabic_lexicons/data.dart';
 import 'package:arabic_lexicons/datas/lex_entry_bookmark.dart';
-import 'package:arabic_lexicons/lex/data.dart';
+import 'package:arabic_lexicons/lex/dicts/db.dart';
 import 'package:arabic_lexicons/lex/report_dict_entry.dart';
 import 'package:arabic_lexicons/main_widgets.dart';
 import 'package:arabic_lexicons/theme.dart';
@@ -13,15 +13,14 @@ import 'package:flutter/services.dart';
 
 Widget definitonCard(
   BuildContext context,
-  int index,
-  SearchLexiconsDatas datas,
+  Dict d,
+  DbRow r,
   Widget child, {
   required String Function() text,
   required VoidCallback fs,
+  required VoidCallback rebuild,
 }) {
   final cs = Theme.of(context).colorScheme;
-  final d = datas.selectedDict;
-  final r = datas.dbRes[index];
 
   final ebm = LexEntryBm.contains(d, r);
 
@@ -60,7 +59,7 @@ Widget definitonCard(
               "Remove Bookmark",
               scroolable: true,
               message:
-                  'Do you want remove to lexcion entry “${datas.selectedWord}” from bookmarks?',
+                  'Do you want remove to lexcion entry “${r.word}” from bookmarks?',
               confirmText: 'Remove',
               destructive: true,
               constraints: true,
@@ -72,7 +71,7 @@ Widget definitonCard(
           } else {
             await LexEntryBm.add(d, r);
           }
-          datas.rebuild();
+          rebuild();
         },
       ),
       iconButtonSized(
@@ -86,7 +85,7 @@ Widget definitonCard(
             "Report an error?",
             scroolable: true,
             message:
-                'Would you like to report a possible mistake in the entry “${datas.selectedWord}”? '
+                'Would you like to report a possible mistake in the entry “${r.word}”? '
                 '\n\n'
                 'Your email app will open with a prepared report. '
                 'If it can\'t be opened, a popup will let you copy the report and send it manually.'
@@ -99,16 +98,13 @@ Widget definitonCard(
 
           if (confirm != true) return;
 
-          final ok = await reportDefinition(
-            datas.dbRes[index],
-            datas.selectedDict,
-          );
+          final ok = await reportDefinition(r, d);
           if (ok || !context.mounted) return;
 
           await showEmailFallbackDialog(
             context,
-            row: datas.dbRes[index],
-            dict: datas.selectedDict,
+            row: r,
+            dict: d,
             email: emailAddr,
           );
         },

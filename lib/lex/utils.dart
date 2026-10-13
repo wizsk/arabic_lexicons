@@ -60,7 +60,7 @@ Future<void> onTextChanged(
   if (query.isEmpty) {
     return (res, null);
   } else if (query.length == curPos || !query.contains(" ")) {
-    res = ArabicNormalizer.keepOnlyArListUnique(query);
+    res = ArabicNormalizer.removeTashkilAndNomarizeListUnique(query);
     if (res.isNotEmpty) return (res, res.last);
     return (res, null);
   }
@@ -89,7 +89,7 @@ Future<void> onTextChanged(
       i++;
     }
 
-    final cw = ArabicNormalizer.keepOnlyAr(curWord);
+    final cw = ArabicNormalizer.removeTashkilAndNomarize(curWord);
 
     if (cw != "") {
       res.remove(cw);

@@ -616,7 +616,7 @@ class _SearchLexiconsState extends State<SearchLexicons>
                 ? EdgeInsets.zero
                 : willShowSugg
                 ? padd.copyWith(bottom: 0)
-                : padd,
+                : padd.copyWith(top: 12),
             sliver: _mainDict(context, cs, arTxtTheme),
           ),
         ],

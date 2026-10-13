@@ -61,6 +61,8 @@ class _StartupScreenState extends State<StartupScreen> {
           'Fetal error',
           message: 'Could not read resources: $e',
           confirmText: 'Exit',
+          scroolable: true,
+          constraints: true,
         );
       }
       SystemNavigator.pop();

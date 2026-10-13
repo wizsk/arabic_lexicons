@@ -13,6 +13,8 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 /// db is saved in data directory
 const String dbFileName = 'arabic_lexicons_db_v4_beta.sqlite';
 
+const engDictHighClass = 'class="high"';
+
 class DbRow {
   final int id;
   final String word;
@@ -273,7 +275,7 @@ class DbService {
           // Highlight query inside meanings
           final highlighted = m.replaceAll(
             query,
-            '<span class="high">$query</span>',
+            '<span $engDictHighClass>$query</span>',
           );
 
           results.add(
@@ -370,7 +372,7 @@ class DbService {
         // Highlight query inside meanings
         final highlighted = m.replaceAll(
           query,
-          '<span class="high">$query</span>',
+          '<span $engDictHighClass>$query</span>',
         );
 
         results.add(

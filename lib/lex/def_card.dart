@@ -1,5 +1,6 @@
 import 'package:arabic_lexicons/conf.dart';
 import 'package:arabic_lexicons/data.dart';
+import 'package:arabic_lexicons/datas/lex_entry_bookmark.dart';
 import 'package:arabic_lexicons/lex/data.dart';
 import 'package:arabic_lexicons/lex/report_dict_entry.dart';
 import 'package:arabic_lexicons/main_widgets.dart';
@@ -19,7 +20,10 @@ Widget definitonCard(
   required VoidCallback fs,
 }) {
   final cs = Theme.of(context).colorScheme;
-  // final colors = cs;
+  final d = datas.selectedDict;
+  final r = datas.dbRes[index];
+
+  final ebm = LexEntryBm.contains(d, r);
 
   final actions = Row(
     // textDirection: TextDirection.rtl,
@@ -44,6 +48,33 @@ Widget definitonCard(
         },
       ),
       Spacer(),
+      iconButtonSized(
+        context,
+        icon: ebm ? Icons.bookmark_remove_rounded : Icons.bookmark_add_outlined,
+        scheme: ebm ? IconButtonSizedColor.err : IconButtonSizedColor.normal,
+        tooltip: 'Report an issue',
+        onPressed: () async {
+          if (ebm) {
+            final confirm = await showConfirmDialog(
+              context,
+              "Remove Bookmark",
+              scroolable: true,
+              message:
+                  'Do you want remove to lexcion entry “${datas.selectedWord}” from bookmarks?',
+              confirmText: 'Remove',
+              destructive: true,
+              constraints: true,
+              fontFam: L.arFont,
+            );
+            if (confirm != true) return;
+
+            await LexEntryBm.remove(d, r);
+          } else {
+            await LexEntryBm.add(d, r);
+          }
+          datas.rebuild();
+        },
+      ),
       iconButtonSized(
         context,
         icon: Icons.flag_outlined,

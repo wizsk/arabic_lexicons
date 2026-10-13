@@ -166,7 +166,7 @@ enum Dict {
   ),
 
   mujamulGhoni(
-    table: "mujamul_ghoni",
+    table: "ghani",
     ar: "غني",
     en: "Ghani",
     enLong: "Al-Muʿjam al-Ghani",

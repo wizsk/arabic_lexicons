@@ -2,6 +2,7 @@ import 'package:arabic_lexicons/alphabets.dart';
 import 'package:arabic_lexicons/conf.dart';
 import 'package:arabic_lexicons/data.dart';
 import 'package:arabic_lexicons/lex/data.dart';
+import 'package:arabic_lexicons/lex/def_card.dart';
 import 'package:arabic_lexicons/lex/ref.dart';
 import 'package:arabic_lexicons/theme.dart';
 import 'package:arabic_lexicons/utils.dart';
@@ -292,6 +293,8 @@ Widget _showArEnRes(
   );
 }
 
+const _spaceBetweenDefs = SizedBox(height: 18);
+
 Widget _hansLaneView(
   BuildContext context,
   TextStyle ts,
@@ -313,8 +316,7 @@ Widget _hansLaneView(
 
   return SliverList.separated(
     itemCount: datas.dbRes.length,
-    separatorBuilder: (context, index) =>
-        const Divider(height: 0, thickness: 0.5),
+    separatorBuilder: (_, _) => _spaceBetweenDefs,
     itemBuilder: (context, index) {
       final row = datas.dbRes[index];
       String txt = row.meanings;
@@ -322,17 +324,30 @@ Widget _hansLaneView(
         key: ValueKey(index),
         controller: datas.scrollController,
         index: index,
-        child: GestureDetector(
-          behavior: HitTestBehavior.translucent,
-          onLongPress: () {
-            // final cleanTxt = htmlToPlainText(txt);
-            final cleanTxtBr = htmlToPlainTextWithLineBr(txt);
+        child: definitonCard(
+          context,
+          index,
+          datas,
+          SelectionArea(
+            magnifierConfiguration: TextMagnifierConfiguration.disabled,
+            child: _engMeaningView(
+              txt,
+              fontSize,
+              fontHeight,
+              fontFam,
+              cs,
+              row.isHi,
+              hiColor,
+            ),
+          ),
+          text: () => htmlToPlainTextWithLineBr(txt),
+          fs: () {
             SelectableTextScreen.show(
               context,
-              fullTextFunc: (_) => cleanTxtBr,
+              title: datas.selectedWord,
+              fullTextFunc: (_) => htmlToPlainTextWithLineBr(txt),
               textAlign: TextAlign.left,
               dir: TextDirection.ltr,
-              // ts,
               textStyleBodyMedium: ts.copyWith(
                 fontFamily: fontFam,
                 // the html renderer and normal renderer not the same :)
@@ -344,18 +359,6 @@ Widget _hansLaneView(
               length: 1,
             );
           },
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            child: _engMeaningView(
-              txt,
-              fontSize,
-              fontHeight,
-              fontFam,
-              cs,
-              row.isHi,
-              hiColor,
-            ),
-          ),
         ),
       );
     },
@@ -368,8 +371,7 @@ Widget _arabicLexView(TextStyle ts, SearchLexiconsDatas datas) {
 
   return SliverList.separated(
     itemCount: datas.dbRes.length,
-    separatorBuilder: (context, index) =>
-        const Divider(height: 0, thickness: 0.5),
+    separatorBuilder: (_, _) => _spaceBetweenDefs,
     itemBuilder: (context, index) {
       final row = datas.dbRes[index];
 
@@ -394,12 +396,27 @@ Widget _arabicLexView(TextStyle ts, SearchLexiconsDatas datas) {
               ),
             );
 
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        child: SelectionArea(
+      return definitonCard(
+        context,
+        index,
+        datas,
+        SelectionArea(
           magnifierConfiguration: TextMagnifierConfiguration.disabled,
           child: child,
         ),
+        text: () => meanings,
+        fs: () {
+          SelectableTextScreen.show(
+            context,
+            title: datas.selectedWord,
+            fullTextFunc: (_) => meanings,
+            textAlign: TextAlign.right,
+            dir: TextDirection.rtl,
+            textStyleBodyMedium: ts,
+            start: 0,
+            length: 1,
+          );
+        },
       );
     },
   );

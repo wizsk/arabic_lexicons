@@ -1,3 +1,4 @@
+import 'package:arabic_lexicons/alphabets.dart';
 import 'package:arabic_lexicons/data.dart';
 import 'package:arabic_lexicons/datas/app_db.dart';
 import 'package:arabic_lexicons/lex/dicts/db.dart';
@@ -63,7 +64,7 @@ abstract final class LexEntryBm {
     _entries.remove(k);
   }
 
-  Future<List<LexEntryBmEnty>> getAll() async {
+  static Future<List<LexEntryBmEnty>> getAll() async {
     final rows = await _db.query(t, orderBy: 'created_at ASC');
 
     return rows.map(LexEntryBmEnty.fromMap).toList();
@@ -71,32 +72,37 @@ abstract final class LexEntryBm {
 }
 
 class LexEntryBmEnty {
-  final int id;
-  final String word;
+  final DbRow r;
   final String lexTable;
-  final Dict? dict;
-  final String meanings;
+  final Dict dict;
 
   const LexEntryBmEnty({
-    required this.id,
-    required this.word,
+    required this.r,
     required this.lexTable,
-    required this.meanings,
-    this.dict,
+    required this.dict,
   });
 
+  int get id => r.id;
+  String get word => r.word;
+  String get meanings => r.meanings;
+
   factory LexEntryBmEnty.fromMap(Map<String, Object?> map) {
+    final meanings = map['meanings'] as String;
     final tbl = map['lex_table'] as String;
     final dIdx = allDicts.indexWhere((d) => d.table == tbl);
-    final d = dIdx == -1 ? null : allDicts[dIdx];
+    final d = dIdx == -1
+        ? ArabicNormalizer.englishWord.hasMatch(meanings)
+              ? Dict.hanswehr
+              : Dict.mujamulGhoni
+        : allDicts[dIdx];
 
-    return LexEntryBmEnty(
+    final r = DbRow(
       id: map['id'] as int,
       word: map['word'] as String,
-      lexTable: tbl,
-      meanings: map['meanings'] as String,
-      dict: d,
+      meanings: meanings,
     );
+
+    return LexEntryBmEnty(r: r, lexTable: tbl, dict: d);
   }
 
   Map<String, Object?> toMap() => {

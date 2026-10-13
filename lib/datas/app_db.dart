@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:arabic_lexicons/datas/lex_entry_bookmark.dart';
 import 'package:arabic_lexicons/datas/word_store.dart';
 import 'package:path/path.dart' as path;
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
@@ -55,8 +56,20 @@ abstract final class AppDb {
         created_at INTEGER NOT NULL
         );
         ''');
+
+      await txn.execute('''
+        CREATE TABLE IF NOT EXISTS ${LexEntryBm.t} (
+          id INTEGER NOT NULL,
+          lex_table TEXT NOT NULL,
+          word TEXT NOT NULL,
+          meanings TEXT NOT NULL,
+          created_at INTEGER NOT NULL,
+          PRIMARY KEY (id, lex_table)
+        );
+      ''');
     });
     _inited = true;
     WordStore.init();
+    LexEntryBm.init();
   }
 }

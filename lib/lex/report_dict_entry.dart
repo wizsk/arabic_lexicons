@@ -7,14 +7,8 @@ import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 Future<bool> reportDefinition(DbRow row, Dict dict) async {
-  final uri = Uri(
-    scheme: 'mailto',
-    path: 'support@example.com',
-    queryParameters: {
-      'subject': 'Dictionary Error Report: ${row.word}',
-      'body':
-          '''
-DICTIONARY
+  final body =
+      '''DICTIONARY
 Name: ${dict.enLong}
 Arabic name: ${dict.ar}
 Short name: ${dict.en}
@@ -32,8 +26,12 @@ Reported mistake:
 
 Suggested correction:
 [Enter the corrected definition, if known]
-''',
-    },
+''';
+
+  final uri = Uri.parse(
+    'mailto:$emailAddr'
+    '?subject=${Uri.encodeComponent('Dictionary Report: ${dict.table} ${row.word}')}'
+    '&body=${Uri.encodeComponent(body)}',
   );
 
   if (!await canLaunchUrl(uri)) return false;

@@ -7,6 +7,8 @@ class ArabicNormalizer {
   static final arabicDigits = RegExp(r'^[\u0660-\u0669]+$');
   static final spaces = RegExp(r'\s');
 
+  static final englishWord = RegExp(r'\b[a-zA-Z]{2,}\b');
+
   static final english = RegExp(r'[a-zA-Z]');
 
   static bool isArabicNum(String s) => arabicDigits.hasMatch(s);

@@ -88,8 +88,10 @@ Widget definitonCard(
 
             await LexEntryBm.remove(d, r);
             onRemove?.call();
+            MsgSv.showSnackbarMsg("Definiton removed: ${r.word}");
           } else {
             await LexEntryBm.add(d, r);
+            MsgSv.showSnackbarMsg("Definiton added: ${r.word}");
           }
           rebuild();
         },

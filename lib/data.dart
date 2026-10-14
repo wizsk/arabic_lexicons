@@ -9,6 +9,7 @@ const emailAddr = 'sakibul706@gmail.com';
 
 const maxUiWidth = BoxConstraints(maxWidth: 600);
 
+const fontInter = 'Inter';
 const fontAmiri = 'Amiri';
 const fontKitab = 'Kitab';
 const fontNotoSansArabic = 'NotoSansArabic';

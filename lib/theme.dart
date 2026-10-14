@@ -41,6 +41,17 @@ class ReaderColors {
       Theme.of(c).brightness == Brightness.light
       ? readerColorsLight
       : readerColorsDark;
+
+  static ReaderColors m3(BuildContext c) {
+    final cs = Theme.of(c).colorScheme;
+    return ReaderColors(
+      onSurface: cs.onSurface,
+      surface: cs.surface,
+      definitionSurface: cs.surfaceContainerLowest,
+      outline: cs.outline.withAlpha(180),
+      shadow: cs.shadow.withAlpha(30),
+    );
+  }
 }
 
 const readerColorsLight = ReaderColors(

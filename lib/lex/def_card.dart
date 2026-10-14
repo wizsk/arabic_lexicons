@@ -20,6 +20,7 @@ Widget definitonCard(
   required VoidCallback fs,
   required VoidCallback rebuild,
   VoidCallback? onRemove,
+  final bool useM3Colors = false,
 }) {
   final cs = Theme.of(context).colorScheme;
 
@@ -128,7 +129,10 @@ Widget definitonCard(
     ),
   );
 
-  final rc = ReaderColors.curr(context);
+  final rc = useM3Colors
+      ? ReaderColors.m3(context)
+      : ReaderColors.curr(context);
+
   final borderRadius = BorderRadius.circular(12);
 
   final decoration = BoxDecoration(

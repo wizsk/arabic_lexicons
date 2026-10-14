@@ -130,7 +130,7 @@ class _LexDefBmPageState extends State<LexDefBmPage> {
                         floating: true,
                         snap: appConf.hideAppbar,
                         pinned: !appConf.hideAppbar,
-                        title: _selection.appBarTitle("Lex def bookmarks"),
+                        title: _selection.appBarTitle("Saved Definitions"),
                       ),
                     ),
                     if (!_inited)
@@ -197,6 +197,7 @@ class _LexDefBmPageState extends State<LexDefBmPage> {
                                 def.dict,
                                 def.r,
                                 child,
+                                useM3Colors: true,
                                 text: () =>
                                     htmlToPlainTextWithLineBr(def.meanings),
                                 rebuild: () {

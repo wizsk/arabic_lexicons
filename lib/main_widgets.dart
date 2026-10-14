@@ -20,13 +20,16 @@ Widget buildDrawer(BuildContext context) {
     _ => -1,
   };
 
+  void push(Widget page) =>
+      Navigator.push(context, MaterialPageRoute(builder: (_) => page));
+
   return NavigationDrawer(
     selectedIndex: selectedIndex >= 0 ? selectedIndex : null,
     onDestinationSelected: (index) async {
       Navigator.pop(context);
 
       final isReading = currRoute == Routes.readerPage;
-      if (isReading && (index == 0 || index == 1 || index == 2)) {
+      if (isReading && index <= 2) {
         final res = await showConfirmDialog(
           context,
           'Exit Reader?',
@@ -37,63 +40,41 @@ Widget buildDrawer(BuildContext context) {
       }
 
       switch (index) {
+        //  Main
         case 0:
           if (currRoute != Routes.dictionary) {
             Navigator.pushReplacementNamed(context, Routes.dictionary);
             appConf.saveRoute(Routes.dictionary);
           }
-          break;
-
         case 1:
           if (currRoute != Routes.readerInput) {
             Navigator.pushReplacementNamed(context, Routes.readerInput);
           }
-          // appConf.saveRoute(Routes.readerInput);
-          break;
-
         case 2:
           if (currRoute != Routes.review) {
             Navigator.pushReplacementNamed(context, Routes.review);
             appConf.saveRoute(Routes.review);
           }
 
+        //  Saved
         case 3:
           if (currRoute != Routes.bookMarks) {
             Navigator.pushNamed(context, Routes.bookMarks);
           }
-          break;
-
         case 4:
-          ForeignWordsPage.open(context);
-          break;
-
-        case 5:
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => HistPage()),
-          );
-          break;
-
-        case 6:
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => SettingsPage()),
-          );
-
-        case 7:
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => ArabicFamilyList()),
-          );
-          break;
-
-        case 8:
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => HelpPage()),
-          );
-        case 9:
           LexDefBmPage.open(context);
+        case 5:
+          ForeignWordsPage.open(context);
+        case 6:
+          push(HistPage());
+
+        //  Tools & app
+        case 7:
+          push(ArabicFamilyList());
+        case 8:
+          push(SettingsPage());
+        case 9:
+          push(HelpPage());
       }
     },
     children: [
@@ -109,51 +90,57 @@ Widget buildDrawer(BuildContext context) {
         ),
       ),
 
-      NavigationDrawerDestination(
-        icon: Icon(Icons.book),
+      //  Main
+      const NavigationDrawerDestination(
+        icon: Icon(Icons.library_books_outlined),
+        selectedIcon: Icon(Icons.library_books),
         label: Text("Lexicons"),
       ),
-      NavigationDrawerDestination(
-        icon: Icon(Icons.menu_book_rounded),
+      const NavigationDrawerDestination(
+        icon: Icon(Icons.auto_stories_outlined),
+        selectedIcon: Icon(Icons.auto_stories),
         label: Text("Reader"),
       ),
-
-      const Divider(),
-      NavigationDrawerDestination(
-        label: const Text("Review Words"),
-        icon: const Icon(Icons.style_outlined),
+      const NavigationDrawerDestination(
+        icon: Icon(Icons.style_outlined),
+        selectedIcon: Icon(Icons.style),
+        label: Text("Review"), // flashcard-style review
       ),
-      NavigationDrawerDestination(
+
+      const Divider(indent: 28, endIndent: 28),
+
+      //  Saved
+      const NavigationDrawerDestination(
         icon: Icon(Icons.bookmark_outline),
-        label: Text("BookMarks"),
+        label: Text("Saved Words"), // bookmarked words only
       ),
-      NavigationDrawerDestination(
-        label: const Text("Foreign Words"),
-        icon: const Icon(Icons.g_translate),
+      const NavigationDrawerDestination(
+        icon: Icon(Icons.collections_bookmark_outlined),
+        label: Text("Saved Definitions"), // was "Def bm"
       ),
-      NavigationDrawerDestination(
-        label: const Text("Search History"),
-        icon: const Icon(Icons.history),
+      const NavigationDrawerDestination(
+        icon: Icon(Icons.manage_search),
+        label: Text("Reader Lookups"), // was "Foreign Words"
       ),
-
-      const Divider(),
-      NavigationDrawerDestination(
-        label: const Text("Settings"),
-        icon: const Icon(Icons.settings_outlined),
+      const NavigationDrawerDestination(
+        icon: Icon(Icons.history),
+        label: Text("Search History"),
       ),
 
-      // const Divider(),
-      NavigationDrawerDestination(
-        label: const Text("Verb Families"),
-        icon: const Icon(Icons.info_outline),
+      const Divider(indent: 28, endIndent: 28),
+
+      //  Tools & app
+      const NavigationDrawerDestination(
+        icon: Icon(Icons.account_tree_outlined),
+        label: Text("Verb Families"),
       ),
-      NavigationDrawerDestination(
-        label: const Text("Help"),
-        icon: const Icon(Icons.help_outline),
+      const NavigationDrawerDestination(
+        icon: Icon(Icons.settings_outlined),
+        label: Text("Settings"),
       ),
-      NavigationDrawerDestination(
-        label: const Text("Def bm"),
-        icon: const Icon(Icons.list_outlined),
+      const NavigationDrawerDestination(
+        icon: Icon(Icons.help_outline),
+        label: Text("Help"),
       ),
     ],
   );

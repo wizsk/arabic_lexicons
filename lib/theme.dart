@@ -105,7 +105,19 @@ ThemeData buildTheme(
 ) {
   final cs = ColorScheme.fromSeed(seedColor: an.seedColor, brightness: b);
   var td = ThemeData.from(colorScheme: cs, useMaterial3: true);
+
+  const uiEngFont = fontInter;
+  const uiArFont = fontNotoSansArabic;
   td = td.copyWith(
+    textTheme: td.textTheme.apply(
+      fontFamily: uiEngFont,
+      fontFamilyFallback: [uiArFont],
+    ),
+    primaryTextTheme: td.primaryTextTheme.apply(
+      fontFamily: uiEngFont,
+      fontFamilyFallback: [uiArFont],
+    ),
+
     appBarTheme: td.appBarTheme.copyWith(
       centerTitle: true,
       actionsPadding: const EdgeInsets.only(right: 8),

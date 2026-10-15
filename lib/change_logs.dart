@@ -6,15 +6,15 @@ final releases = [
     version: 'v3.6.0',
     changes:
         '''
-    Fixed many issues ghani dataset
+    Fixed many issues ghani lexicons dataset
+    Add save definitoins of lexicons
     Add Review Words page
     Lisanul Arab lexicon show refferences on click no need to scrool to the bottom
-    Remove unwanted dictionaries from reording menu
+    Added ability to remove unwanted lexcions
     Directly selectable text in (${Dict.arEn.en})
-    Find words
+    Find matching words from All the book entries. (tab and hold on the search suggestion icon)
     Adjust word Spacing in the reader
-    Change highligh style for bookmarks and foreign words
-    Use background color hightligted words
+    Change highligh style for bookmarks and foreign words. Use background color hightligted words
     Add scroll to top in the lexicon page (long press to go bottom)
   ''',
   ),

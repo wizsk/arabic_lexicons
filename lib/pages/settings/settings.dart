@@ -116,7 +116,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         value: WakelockController.isEnabled,
                         onChanged: (value) async {
                           await WakelockController.saveWakeLock(value);
-                          setState(() {});
+                          if (context.mounted) setState(() {});
                         },
                       ),
 
@@ -127,8 +127,9 @@ class _SettingsPageState extends State<SettingsPage> {
                           'Hide top-bar and bottom controls while scrolling',
                         ),
                         value: appConf.hideAppbar,
-                        onChanged: (value) {
-                          appConf.saveHideAppbar(value);
+                        onChanged: (value) async {
+                          await appConf.saveHideAppbar(value);
+                          if (context.mounted) setState(() {});
                         },
                       ),
 
@@ -137,8 +138,9 @@ class _SettingsPageState extends State<SettingsPage> {
                         title: Text('Full screen mode'),
                         subtitle: Text('Hides status bar and navigation bar'),
                         value: appConf.fullScreen,
-                        onChanged: (value) {
-                          appConf.saveFullScreen(value);
+                        onChanged: (value) async {
+                          await appConf.saveFullScreen(value);
+                          if (context.mounted) setState(() {});
                         },
                       ),
                       SwitchListTile(
@@ -148,8 +150,9 @@ class _SettingsPageState extends State<SettingsPage> {
                         value: appConf.hideStatusbar,
                         onChanged: appConf.fullScreen
                             ? null
-                            : (value) {
-                                appConf.saveHideStatusBar(value);
+                            : (value) async {
+                                await appConf.saveHideStatusBar(value);
+                                if (context.mounted) setState(() {});
                               },
                       ),
                     ],
@@ -262,7 +265,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         value: appConf.readerIsOpenLexiconDirecly,
                         onChanged: (v) async {
                           await appConf.saveReaderIsOpenLexiconDirecly(v);
-                          setState(() {});
+                          if (context.mounted) setState(() {});
                         },
                       ),
                       SwitchListTile(
@@ -274,8 +277,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         value: appConf.luwColored,
                         onChanged: (v) {
                           appConf.saveLuwColored(v).then((_) {
-                            if (!context.mounted) return;
-                            setState(() {});
+                            if (context.mounted) setState(() {});
                           });
                         },
                       ),

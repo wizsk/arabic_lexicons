@@ -2,8 +2,7 @@ import 'package:arabic_lexicons/conf.dart';
 import 'package:arabic_lexicons/data.dart';
 import 'package:flutter/material.dart';
 
-const double mediumFontSize = 18;
-const double defaultReaderArabicFontSize = 18;
+const double defaultReaderArabicFontSize = 20;
 const String defaultReaderArabicFont = fontKitab;
 const double defArabicFontHeihgt = 2.00;
 

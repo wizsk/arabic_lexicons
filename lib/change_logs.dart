@@ -1,11 +1,10 @@
-import 'package:arabic_lexicons/data.dart';
 import 'package:arabic_lexicons/key_shortcuts.dart';
 
 final releases = [
   Release(
     version: 'v3.6.0',
-    changes:
-        '''
+    changes: '''
+    App app tour video in the help page
     Fixed many issues ghani lexicons dataset
     Add save definitions of lexicons
     Add Review Words page

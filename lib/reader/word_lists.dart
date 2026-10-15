@@ -6,8 +6,10 @@ import 'package:arabic_lexicons/pages/selectable_word_list_title_widget.dart';
 import 'package:arabic_lexicons/reader/data.dart';
 import 'package:arabic_lexicons/reader/settings_class.dart';
 import 'package:arabic_lexicons/utils.dart';
+import 'package:arabic_lexicons/utils/toast_snack.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 
 /// CB - Current Book
 class CBWordList extends StatefulWidget {
@@ -131,7 +133,17 @@ class _CBWordListState extends State<CBWordList> {
                         : 'Foreign${_fws.isEmpty ? "" : " ${_fws.length}"}',
                   ),
                   actions: [
-                    if (_bookmarkedShowing && _bookmarked.isNotEmpty)
+                    if (_bookmarkedShowing && _bookmarked.isNotEmpty) ...[
+                      IconButton(
+                        icon: const Icon(Icons.copy_all_outlined),
+                        tooltip: 'Copy all words',
+                        onPressed: () async {
+                          await Clipboard.setData(
+                            ClipboardData(text: _bookmarked.join("\n")),
+                          );
+                          MsgSv.showSnackbarMsg("Copied!");
+                        },
+                      ),
                       IconButton(
                         icon: const Icon(Icons.delete_sweep),
                         tooltip: 'Clear Current books bookmarks',
@@ -153,8 +165,19 @@ class _CBWordListState extends State<CBWordList> {
                           if (context.mounted) setState(() {});
                         },
                       ),
+                    ],
 
-                    if (_fws.isNotEmpty && !_bookmarkedShowing)
+                    if (_fws.isNotEmpty && !_bookmarkedShowing) ...[
+                      IconButton(
+                        icon: const Icon(Icons.copy_all_outlined),
+                        tooltip: 'Copy all words',
+                        onPressed: () async {
+                          await Clipboard.setData(
+                            ClipboardData(text: _fws.join("\n")),
+                          );
+                          MsgSv.showSnackbarMsg("Copied!");
+                        },
+                      ),
                       IconButton(
                         icon: const Icon(Icons.delete_sweep),
                         tooltip: 'Clear history',
@@ -176,6 +199,7 @@ class _CBWordListState extends State<CBWordList> {
                           if (context.mounted) setState(() {});
                         },
                       ),
+                    ],
                     if (!_bookmarkedShowing)
                       IconButton(
                         icon: const Icon(Icons.info_outlined),

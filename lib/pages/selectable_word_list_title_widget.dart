@@ -149,8 +149,8 @@ class SelectableWordListTitle extends StatelessWidget {
 
       leading: IconButton(
         icon: bm
-            ? Icon(Icons.bookmark, color: cs.error)
-            : const Icon(Icons.bookmark_outline),
+            ? Icon(Icons.bookmark_remove, color: cs.error)
+            : const Icon(Icons.bookmark_add_outlined),
         onPressed: selecting
             ? null
             : () async {

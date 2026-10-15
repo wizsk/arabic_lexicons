@@ -70,8 +70,8 @@ Widget lexAppBar(
     ),
     IconButton(
       icon: bm
-          ? Icon(Icons.bookmark, color: cs.error)
-          : Icon(Icons.bookmark_border),
+          ? Icon(Icons.bookmark_remove, color: cs.error)
+          : Icon(Icons.bookmark_add_outlined),
       tooltip: bm ? 'Unbookmark' : 'BookMark',
       onPressed: datas.selectedWord.isEmpty
           ? null

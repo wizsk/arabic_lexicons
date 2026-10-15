@@ -131,7 +131,9 @@ Future<void> showWordReadeActionsDialog(
                     width: double.infinity,
                     child: FilledButton.icon(
                       icon: Icon(
-                        isBookmarked ? Icons.bookmark : Icons.bookmark_border,
+                        isBookmarked
+                            ? Icons.bookmark_remove
+                            : Icons.bookmark_add_outlined,
                       ),
                       label: Text(
                         isBookmarked ? "Remove Bookmark" : "Add to Bookmark",

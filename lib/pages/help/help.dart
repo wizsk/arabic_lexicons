@@ -1,14 +1,16 @@
 import 'dart:io';
 
+import 'package:arabic_lexicons/data.dart';
 import 'package:arabic_lexicons/key_shortcuts.dart';
+import 'package:arabic_lexicons/pages/help/help_utils.dart';
 import 'package:arabic_lexicons/pages/width_padd.dart';
 import 'package:arabic_lexicons/play_rate.dart';
 import 'package:arabic_lexicons/utils.dart';
+import 'package:arabic_lexicons/utils/toast_snack.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
-
-import 'package:arabic_lexicons/data.dart';
-import 'package:arabic_lexicons/pages/help/help_utils.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 class HelpPage extends StatelessWidget {
   const HelpPage({super.key});
@@ -30,8 +32,49 @@ class HelpPage extends StatelessWidget {
     final cs = theme.colorScheme;
     final textTheme = theme.textTheme;
     final tt = textTheme;
+    const appTourVidLink = 'https://youtu.be/JIsPwLv68uM';
 
     return [
+      _Section(
+        title: 'App Tour Video',
+        crossAxisAlignment: CrossAxisAlignment.center,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: () async {
+            final ok = await launchUrlString(appTourVidLink);
+            if (ok) return;
+            await Clipboard.setData(const ClipboardData(text: appTourVidLink));
+            MsgSv.showSnackbarMsg("Link copied");
+          },
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 12.0,
+              vertical: 16.0,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                elevatedIcon(
+                  cs,
+                  Icons.video_file,
+                  bg: cs.primary,
+                  fg: cs.onPrimary,
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  appTourVidLink,
+                  textAlign: TextAlign.center,
+                  style: textTheme.labelLarge?.copyWith(
+                    color: cs.primary,
+                    decoration: TextDecoration.underline,
+                    decorationColor: cs.primary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
       _Section(
         title: 'Lexicons Screen',
         child: Column(
@@ -280,8 +323,13 @@ class HelpPage extends StatelessWidget {
 class _Section extends StatelessWidget {
   final String? title;
   final Widget child;
+  final CrossAxisAlignment crossAxisAlignment;
 
-  const _Section({this.title, required this.child});
+  const _Section({
+    this.title,
+    required this.child,
+    this.crossAxisAlignment = CrossAxisAlignment.start,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -294,7 +342,7 @@ class _Section extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: crossAxisAlignment,
           children: [
             if (title != null) ...[
               Center(

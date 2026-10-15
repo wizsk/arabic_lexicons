@@ -148,7 +148,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                               value: WakelockController.isEnabled,
                               onChanged: (value) async {
                                 await WakelockController.saveWakeLock(value);
-                                setState(() {});
+                                if (context.mounted) setState(() {});
                               },
                             ),
 
@@ -159,9 +159,22 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                                 'Hides status bar and navigation bar',
                               ),
                               value: appConf.fullScreen,
-                              onChanged: (value) {
-                                appConf.saveFullScreen(value);
+                              onChanged: (value) async {
+                                await appConf.saveFullScreen(value);
+                                if (context.mounted) setState(() {});
                               },
+                            ),
+                            SwitchListTile(
+                              secondary: const FilledIcon(Icons.visibility_off),
+                              title: Text('Hide status bar'),
+                              subtitle: Text('Hides only the status bar'),
+                              value: appConf.hideStatusbar,
+                              onChanged: appConf.fullScreen
+                                  ? null
+                                  : (value) async {
+                                      await appConf.saveHideStatusBar(value);
+                                      if (context.mounted) setState(() {});
+                                    },
                             ),
                           ],
                         ),

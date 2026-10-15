@@ -18,6 +18,7 @@ import 'package:arabic_lexicons/word_list/utils.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 
@@ -398,6 +399,20 @@ class _WordListPageState extends State<WordListPage> {
               stopSpinner?.call();
             }
             break;
+
+          case 'copy_all':
+          case 'copy_selected':
+            final words = getWords(value == 'copy_all');
+            if (words == null || words.isEmpty) {
+              MsgSv.showSnackbarMsg('No words or selections');
+              return;
+            }
+            stateChanged();
+
+            Clipboard.setData(ClipboardData(text: words.join("\n")));
+            MsgSv.showSnackbarMsg('Copied!');
+
+            break;
         }
       },
       itemBuilder: (context) => [
@@ -487,6 +502,28 @@ class _WordListPageState extends State<WordListPage> {
               Icon(Icons.delete),
               SizedBox(width: 10),
               Text('Delete Selected'),
+            ],
+          ),
+        ),
+
+        const PopupMenuDivider(),
+        const PopupMenuItem(
+          value: 'copy_all',
+          child: Row(
+            children: [
+              Icon(Icons.copy_all),
+              SizedBox(width: 10),
+              Text('Copy (All)'),
+            ],
+          ),
+        ),
+        const PopupMenuItem(
+          value: 'copy_selected',
+          child: Row(
+            children: [
+              Icon(Icons.copy),
+              SizedBox(width: 10),
+              Text('Copy (Selected)'),
             ],
           ),
         ),

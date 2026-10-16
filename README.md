@@ -21,6 +21,8 @@
 
 #### Arabic Lexicons provides access to 8 classical Arabic lexicons, 2 Arabic-English lexicons, and 1 Arabic-English dictionary - all working completely offline.
 
+**Wacth intro video [https://youtu.be/JIsPwLv68uM](https://youtu.be/JIsPwLv68uM)**
+
 [<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/0.png"  width=300>](fastlane/metadata/android/en-US/images/phoneScreenshots/0.png)
 [<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/1.png"  width=300>](fastlane/metadata/android/en-US/images/phoneScreenshots/1.png)
 [<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/2.png"  width=300>](fastlane/metadata/android/en-US/images/phoneScreenshots/2.png)
@@ -44,7 +46,7 @@ SHA-1: 7bfafacbccbb383f219bf2c4aed819882a73eee8
 
 ## Available Dictionaries
 
-The app includes 9 comprehensive dictionaries - 2 English-Arabic dictionaries and 7 Arabic-only dictionaries:
+The app includes 11 comprehensive dictionaries - 3 English-Arabic dictionaries and 7 Arabic-only dictionaries:
 
 **English-Arabic Dictionaries:**
 

@@ -10,7 +10,7 @@ final releases = [
     Add Review Words page
     Lisanul Arab lexicon show references on click no need to scrool to the bottom
     Added ability to remove unwanted lexicons
-    Directly delectable text "Direct" dictionary
+    Directly selectable text "Direct" dictionary
     Find matching words from All the book entries. (tab and hold on the search suggestion icon)
     Adjust word Spacing in the reader
     Change highlight style for bookmarks and foreign words. Use background color highlighted words

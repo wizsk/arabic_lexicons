@@ -2,6 +2,12 @@ import 'package:arabic_lexicons/key_shortcuts.dart';
 
 final releases = [
   Release(
+    version: 'v3.7.0',
+    changes: '''
+    Ghani sort result by closest mach to the word
+  ''',
+  ),
+  Release(
     version: 'v3.6.0',
     changes: '''
     App app tour video in the help page

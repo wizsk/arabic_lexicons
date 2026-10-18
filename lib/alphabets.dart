@@ -20,6 +20,10 @@ class ArabicNormalizer {
     r'[\u064B-\u0652]', // Covers all 8: fathatan, dammatan, kasratan, fatha, damma, kasra, shadda, sukun
   );
 
+  static final RegExp _tashkilExt = RegExp(
+    r'[\u064B-\u065F\u0670\u0640]', // harakat, tatweel
+  );
+
   // Comprehensive tashkil pattern
   // static final RegExp _tashkil = RegExp(r'[\u064B-\u065F\u0670\u06D6-\u06ED]' );
 
@@ -83,7 +87,7 @@ class ArabicNormalizer {
     if (word.isEmpty) return word;
 
     return word
-        .replaceAll(_tashkil, '')
+        .replaceAll(_tashkilExt, '')
         .replaceAll(_farsiYaEnd, 'ى')
         .replaceAll(_farsiYaMiddle, 'ي')
         .replaceAll(_whiteSpace, ' ')
@@ -117,7 +121,7 @@ class ArabicNormalizer {
     title = title.trim();
     if (title.isEmpty) return '';
     final res = title
-        .replaceAll(_tashkil, '')
+        .replaceAll(_tashkilExt, '')
         .replaceAll(_multiSpace, ' ')
         .trim();
     return res;

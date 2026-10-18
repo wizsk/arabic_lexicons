@@ -5,6 +5,7 @@ final releases = [
     version: 'v3.7.0',
     changes: '''
     Ghani sort result by closest mach to the word
+    Ghani dataset fix more issues
   ''',
   ),
   Release(

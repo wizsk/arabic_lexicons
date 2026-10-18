@@ -7,26 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 Future<bool> reportDefinition(DbRow row, Dict dict) async {
-  final body =
-      '''DICTIONARY
-Name: ${dict.enLong}
-Arabic name: ${dict.ar}
-Short name: ${dict.en}
-Table: ${dict.table}
-
-ENTRY
-ID: ${row.id}
-Word: ${row.word}
-
-Current definition:
-${row.meanings}
-
-Reported mistake:
-[Describe the mistake here]
-
-Suggested correction:
-[Enter the corrected definition, if known]
-''';
+  final body = _reportTxt(dict, row);
 
   final uri = Uri.parse(
     'mailto:$emailAddr'
@@ -47,24 +28,10 @@ Future<void> showEmailFallbackDialog(
 }) async {
   final controller = TextEditingController(
     text:
-        '''
-To: $email
+        '''To: $email
 Subject: Dictionary Error Report: ${row.word}
 
-DICTIONARY
-Name: ${dict.enLong}
-Arabic name: ${dict.ar}
-Short name: ${dict.en}
-Table: ${dict.table}
-
-Current definition:
-${row.meanings}
-
-Reported mistake:
-[Describe the mistake here.]
-
-Suggested correction:
-[Enter the corrected definition, if known.]''',
+${_reportTxt(dict, row)}''',
   );
 
   await showDialog<void>(
@@ -106,4 +73,26 @@ Suggested correction:
   );
 
   controller.dispose();
+}
+
+String _reportTxt(Dict dict, DbRow row) {
+  return '''DICTIONARY
+Name: ${dict.enLong}
+Arabic name: ${dict.ar}
+Short name: ${dict.en}
+
+ENTRY
+ID: ${row.id}
+Word: ${row.word}
+Table: ${dict.table}
+
+Current definition:
+${row.meanings}
+
+Reported mistake:
+[Describe the mistake here]
+
+Suggested correction:
+[Enter the corrected definition, if known]
+''';
 }

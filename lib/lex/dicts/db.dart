@@ -11,7 +11,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 /// db is saved in data directory
-const String dbFileName = 'arabic_lexicons_db_v4_beta.sqlite';
+const String dbFileName = 'arabic_lexicons_db_v4_beta_2.sqlite';
 
 const engDictHighClass = 'class="high"';
 
@@ -59,6 +59,7 @@ class DbService {
   static const _oldDbFileNames = [
     'db_v3.sqlite', // v3.5.0
     'arabic_lexicons_db_v3.sqlite', // v3.6.0
+    'arabic_lexicons_db_v4_beta.sqlite', // v3.7.0
   ];
 
   static Database? _db;

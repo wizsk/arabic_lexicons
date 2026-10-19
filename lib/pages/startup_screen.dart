@@ -56,14 +56,19 @@ class _StartupScreenState extends State<StartupScreen> {
       Navigator.pushReplacementNamed(context, r);
     } catch (e) {
       if (mounted) {
-        await showInfoDialog(
+        final msg = 'Could not read resources: \n$e';
+        final res = await showConfirmDialog(
           context,
           'Fetal error',
-          message: 'Could not read resources: $e',
-          confirmText: 'Exit',
+          message: msg,
+          confirmText: 'Exit & Copy',
           scroolable: true,
           constraints: true,
+          fontFam: 'monospace',
         );
+        if (res == true) {
+          await Clipboard.setData(ClipboardData(text: msg));
+        }
       }
       SystemNavigator.pop();
     }

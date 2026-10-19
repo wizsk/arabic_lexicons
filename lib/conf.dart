@@ -130,7 +130,7 @@ class AppSettingsController extends ChangeNotifier {
   static const bool _hideStatusbarDef = false;
   bool _hideStatusbar = _hideStatusbarDef;
 
-  static const bool _arEnDefShowCardDef = true;
+  static const bool _arEnDefShowCardDef = false;
   bool _arEnDefShowCard = _arEnDefShowCardDef;
 
   static const int readerScrollPersentDef = 65;

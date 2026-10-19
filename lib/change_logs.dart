@@ -4,6 +4,7 @@ final releases = [
   Release(
     version: 'v3.7.0',
     changes: '''
+    The old settings settings options has issues. Sorry for the reset
     Ghani sort result by closest mach to the word
     Ghani dataset fix more issues
     Add bookmark function to Direct dictionary

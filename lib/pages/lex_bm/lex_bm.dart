@@ -158,11 +158,20 @@ class _LexDefBmPageState extends State<LexDefBmPage> {
 
                             final def = _defList[index];
 
-                            final isEng =
-                                def.dict == Dict.hanswehr ||
-                                def.dict == Dict.laneLexicon;
+                            final isEng = def.dict.isEng;
 
-                            final child = isEng
+                            final child = def.dict.isArEn
+                                ? Directionality(
+                                    textDirection: TextDirection.ltr,
+                                    child: Text(
+                                      def.meanings,
+                                      style: ts,
+                                      textAlign: TextAlign.left,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  )
+                                : isEng
                                 ? engMeaningView(
                                     def.meanings,
                                     fontSize,

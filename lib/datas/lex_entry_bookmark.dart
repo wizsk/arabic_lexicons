@@ -17,7 +17,9 @@ abstract final class LexEntryBm {
 
   static final Set<LexEntryBookmarkKey> _entries = {};
 
-  static bool contains(Dict d, DbRow r) => _entries.contains(d.key(r.id));
+  static bool contains(Dict d, DbRow r) => containsId(d, r.id);
+
+  static bool containsId(Dict d, int id) => _entries.contains(d.key(id));
 
   static Future<void> init() async {
     final rows = await _db.query(t, columns: ['id', 'lex_table']);
@@ -28,7 +30,7 @@ abstract final class LexEntryBm {
     }
   }
 
-  static Future<void> add(Dict d, DbRow r) async {
+  static Future<void> addDbRow(Dict d, DbRow r) async {
     final String meaning;
     if ((d == Dict.hanswehr || d == Dict.laneLexicon) &&
         r.meanings.contains(engDictHighClass)) {
@@ -39,15 +41,24 @@ abstract final class LexEntryBm {
 
     final word = r.word.replaceAll("_", " ");
 
+    return add(d: d, id: r.id, word: word, meaning: meaning);
+  }
+
+  static Future<void> add({
+    required Dict d,
+    required int id,
+    required String word,
+    required String meaning,
+  }) async {
     await _db.insert(t, {
-      "id": r.id,
+      "id": id,
       "word": word,
       "lex_table": d.table,
       "meanings": meaning,
       'created_at': DateTime.now().millisecondsSinceEpoch,
     }, conflictAlgorithm: ConflictAlgorithm.ignore);
 
-    _entries.add(d.key(r.id));
+    _entries.add(d.key(id));
   }
 
   static Future<void> remove(Dict d, DbRow r) async {

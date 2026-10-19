@@ -51,9 +51,14 @@ class LexBnDefPage extends StatelessWidget {
     final hiColor = isDark ? bookmarkWordBgDark : bookmarkWordBg;
 
     final def = en;
-    final isEng = def.dict == Dict.hanswehr || def.dict == Dict.laneLexicon;
+    final isEng = def.dict.isEng;
 
-    final child = isEng
+    final child = def.dict.isArEn
+        ? Directionality(
+            textDirection: TextDirection.ltr,
+            child: Text(def.meanings, style: ts, textAlign: TextAlign.left),
+          )
+        : isEng
         ? engMeaningView(
             def.meanings,
             fontSize,

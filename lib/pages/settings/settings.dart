@@ -52,7 +52,9 @@ class _SettingsPageState extends State<SettingsPage> {
                   // const SizedBox(height: 12),
                   const SettingsSectionTitle(title: 'Appearance'),
                   SettingsSectionSurface(
-                    children: themeColorFontSettings(context),
+                    children: themeColorFontSettings(context, () {
+                      if (context.mounted) setState(() {});
+                    }),
                   ),
 
                   const SizedBox(height: 12),

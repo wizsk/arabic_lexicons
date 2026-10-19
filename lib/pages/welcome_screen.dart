@@ -101,7 +101,9 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                         const SizedBox(height: 12),
 
                         SettingsSectionSurface(
-                          children: themeColorFontSettings(context),
+                          children: themeColorFontSettings(context, () {
+                            if (context.mounted) setState(() {});
+                          }),
                         ),
 
                         const SizedBox(height: 16),
@@ -147,7 +149,10 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                               ),
                               value: WakelockController.isEnabled,
                               onChanged: (value) async {
-                                await WakelockController.saveWakeLock(value);
+                                await WakelockController.saveWakeLock(
+                                  value,
+                                  appConf.prefs,
+                                );
                                 if (context.mounted) setState(() {});
                               },
                             ),

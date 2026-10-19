@@ -61,11 +61,11 @@ abstract final class LexEntryBm {
     _entries.add(d.key(id));
   }
 
-  static Future<void> remove(Dict d, DbRow r) async {
-    return removeRaw(d.table, r.id);
+  static Future<void> removeDbRow(Dict d, DbRow r) async {
+    return remove(d.table, r.id);
   }
 
-  static Future<void> removeRaw(String lexTable, int id) async {
+  static Future<void> remove(String lexTable, int id) async {
     final LexEntryBookmarkKey k = (lexTable, id);
 
     await _db.delete(
@@ -125,5 +125,5 @@ class LexEntryBmEnty {
     'meanings': meanings,
   };
 
-  Future<void> remove() async => LexEntryBm.removeRaw(lexTable, id);
+  Future<void> remove() async => LexEntryBm.remove(lexTable, id);
 }

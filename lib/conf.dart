@@ -119,7 +119,7 @@ class AppSettingsController extends ChangeNotifier {
   static const bool _firstRunDef = true;
   bool _firstRun = _firstRunDef;
 
-  static const bool _fullScreenDef = true;
+  static const bool _fullScreenDef = false;
   bool _fullScreen = _fullScreenDef;
 
   double? _arUiFontSize;

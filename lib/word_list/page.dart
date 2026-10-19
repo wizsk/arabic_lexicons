@@ -119,7 +119,6 @@ class _WordListPageState extends State<WordListPage> {
   }
 
   void _onSearchChange(String s) {
-    if (!context.mounted) return;
     setState(() {
       _shearced = ArabicNormalizer.keepOnlyAr(s);
       if (_shearced.isEmpty) {
@@ -667,7 +666,7 @@ class _WordListPageState extends State<WordListPage> {
                         onPressed: () {
                           setState(() {
                             _tc.clear();
-                            _shearced = '';
+                            _onSearchChange("");
                           });
                         },
                         icon: Icon(Icons.clear),

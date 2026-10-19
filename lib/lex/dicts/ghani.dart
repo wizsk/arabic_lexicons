@@ -1,5 +1,4 @@
 import 'package:arabic_lexicons/lex/dicts/db.dart';
-import 'package:arabic_lexicons/lex/dicts/word_mach_sort.dart';
 import 'package:arabic_lexicons/utils.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -77,5 +76,11 @@ Future<List<DbRow>> getGoniRes(Database db, String word) async {
   dp(acc.length);
   dp();
 
-  return SortByMacth.sortByMatch(acc.values, q, (r) => r.word);
+  return acc.values.toList(growable: false)..mergeSort((a, b) {
+    if (a.word == q) return -1;
+    if (b.word == q) return 1;
+    return 0;
+  });
+
+  // return SortByMacth.sortByMatch(acc.values, q, (r) => r.word);
 }

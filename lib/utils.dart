@@ -1,6 +1,7 @@
 import 'package:arabic_lexicons/data.dart';
 import 'package:arabic_lexicons/lex/lexicons.dart';
 import 'package:arabic_lexicons/main.dart';
+import 'package:collection/collection.dart' as collection;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -386,4 +387,11 @@ Widget segmentedListItem({
   );
 
   return child;
+}
+
+
+extension MergeSortList<T> on List<T> {
+  void mergeSort(int Function(T a, T b) comp) {
+    collection.mergeSort<T>(this, compare: comp);
+  }
 }

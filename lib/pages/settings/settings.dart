@@ -238,7 +238,7 @@ class _SettingsPageState extends State<SettingsPage> {
                           secondary: const FilledIcon(
                             Icons.warning_amber_rounded,
                           ),
-                          title: const Text('Confirm Before Removing'),
+                          title: const Text('Confirm Remove'),
                           subtitle: const Text(
                             'Show a confirmation dialog before removing a word from lexicon selections',
                           ),
@@ -248,6 +248,19 @@ class _SettingsPageState extends State<SettingsPage> {
                             if (context.mounted) setState(() {});
                           },
                         ),
+
+                      SwitchListTile(
+                        secondary: const FilledIcon(Icons.table_chart_rounded),
+                        title: Text('${Dict.arEn.en} Dictionary Style'),
+                        subtitle: const Text(
+                          'Show resutls in a table, not in cards',
+                        ),
+                        value: !appConf.arEnDefShowCard,
+                        onChanged: (value) async {
+                          await appConf.saveArEnDefShowCard(!value);
+                          if (context.mounted) setState(() {});
+                        },
+                      ),
                     ],
                   ),
 

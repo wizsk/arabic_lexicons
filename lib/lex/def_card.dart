@@ -28,7 +28,7 @@ Widget definitonCard(
 
   final actions = Row(
     textDirection: TextDirection.ltr,
-    spacing: 2,
+    spacing: 4,
     children: [
       iconButtonSized(
         context,
@@ -66,11 +66,12 @@ Widget definitonCard(
         },
         scheme: IconButtonSizedColor.err,
       ),
+      const Spacer(),
       iconButtonSized(
         context,
         icon: ebm ? Icons.bookmark_remove_rounded : Icons.bookmark_add_outlined,
         scheme: ebm ? IconButtonSizedColor.err : IconButtonSizedColor.normal,
-        tooltip: 'Report an issue',
+        tooltip: ebm ? 'Remove' : 'Save',
         onPressed: () async {
           if (ebm) {
             final confirm = await showConfirmDialog(
@@ -96,7 +97,6 @@ Widget definitonCard(
           rebuild();
         },
       ),
-      const Spacer(),
       iconButtonSized(
         context,
         icon: Icons.copy_rounded,

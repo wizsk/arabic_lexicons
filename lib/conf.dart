@@ -105,6 +105,7 @@ class AppSettingsController extends ChangeNotifier {
   static const _arUiFontSizeKey = 'aruif';
   static const _wordSpacingKey = 'wspke';
   static const _reviewBookmarksFirstKey = 'revBMF';
+  static const _arEnDefShowCardKey = 'arEnDCar';
 
   int _playRate = 0;
   int get playRatelastShown => _playRate;
@@ -127,6 +128,9 @@ class AppSettingsController extends ChangeNotifier {
 
   static const bool _hideStatusbarDef = false;
   bool _hideStatusbar = _hideStatusbarDef;
+
+  static const bool _arEnDefShowCardDef = true;
+  bool _arEnDefShowCard = _arEnDefShowCardDef;
 
   static const int readerScrollPersentDef = 65;
   int _readerScrollPersent = readerScrollPersentDef;
@@ -220,6 +224,8 @@ class AppSettingsController extends ChangeNotifier {
     _fullScreen = prefs.getBool(_fullScreenKey) ?? _fullScreenDef;
 
     _hideStatusbar = prefs.getBool(_hideStatusbarKey) ?? _hideStatusbarDef;
+
+    _arEnDefShowCard = prefs.getBool(_arEnDefShowCardKey) ?? _arEnDefShowCardDef;
 
     _scrollLexSelection =
         prefs.getBool(_scrollLexSelectionKey) ?? _scrollLexSelectionDef;
@@ -456,6 +462,17 @@ class AppSettingsController extends ChangeNotifier {
 
   bool get hideStatusbar {
     return _hideStatusbar;
+  }
+
+  Future<void> saveArEnDefShowCard(bool v) async {
+    _arEnDefShowCard = v;
+    notify();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_arEnDefShowCardKey, v);
+  }
+
+  bool get arEnDefShowCard {
+    return _arEnDefShowCard;
   }
 
   Future<void> saveScrollLexSelection(bool v) async {

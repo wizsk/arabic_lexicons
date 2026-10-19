@@ -46,7 +46,7 @@ class ReaderColors {
     return ReaderColors(
       onSurface: cs.onSurface,
       surface: cs.surface,
-      definitionSurface: cs.surfaceContainerLowest,
+      definitionSurface: cs.surfaceContainerLow,
       outline: cs.outline.withAlpha(180),
       shadow: cs.shadow.withAlpha(30),
     );

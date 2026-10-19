@@ -117,7 +117,10 @@ class _SettingsPageState extends State<SettingsPage> {
                         ),
                         value: WakelockController.isEnabled,
                         onChanged: (value) async {
-                          await WakelockController.saveWakeLock(value);
+                          await WakelockController.saveWakeLock(
+                            value,
+                            appConf.prefs,
+                          );
                           if (context.mounted) setState(() {});
                         },
                       ),

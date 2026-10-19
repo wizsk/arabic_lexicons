@@ -9,10 +9,10 @@ import 'package:arabic_lexicons/play_rate.dart';
 import 'package:arabic_lexicons/reader/settings_class.dart';
 import 'package:arabic_lexicons/theme.dart';
 import 'package:arabic_lexicons/utils.dart';
+import 'package:arabic_lexicons/utils/prefs.dart';
 import 'package:arabic_lexicons/widgets/change_logs_widget.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
 enum AppLang { en, ar }
@@ -77,6 +77,7 @@ extension TextStyleIfAr on TextStyle {
 }
 
 class AppSettingsController extends ChangeNotifier {
+  static const wakeLockKey = 'wakeLock';
   static const _playRateKey = 'playRate';
   static const _appVersionKey = 'version';
   static const _firstRunKey = 'firstRun';
@@ -197,9 +198,15 @@ class AppSettingsController extends ChangeNotifier {
 
   VoidCallback? _refetchLexResults;
 
+  bool _prefLoaded = false;
+  late final Prefs prefs;
+
   /// Load saved theme & font size from memory
   Future<void> load() async {
-    final prefs = await SharedPreferences.getInstance();
+    if (!_prefLoaded) {
+      _prefLoaded = true;
+      prefs = await Prefs.al();
+    }
 
     _theme = ThemeMode.values.firstWhere(
       (e) => e.name == prefs.getString(_themeKey),
@@ -225,7 +232,8 @@ class AppSettingsController extends ChangeNotifier {
 
     _hideStatusbar = prefs.getBool(_hideStatusbarKey) ?? _hideStatusbarDef;
 
-    _arEnDefShowCard = prefs.getBool(_arEnDefShowCardKey) ?? _arEnDefShowCardDef;
+    _arEnDefShowCard =
+        prefs.getBool(_arEnDefShowCardKey) ?? _arEnDefShowCardDef;
 
     _scrollLexSelection =
         prefs.getBool(_scrollLexSelectionKey) ?? _scrollLexSelectionDef;
@@ -275,12 +283,11 @@ class AppSettingsController extends ChangeNotifier {
     _useMoreArabic = prefs.getBool(_useMoreArabicKey) ?? _useMoreArabic;
     L.set(_useMoreArabic ? AppLang.ar : AppLang.en);
 
-    await WakelockController.load();
+    await WakelockController.load(prefs.getBool(wakeLockKey));
   }
 
   Future<void> reset() async {
     final appVersion = _appVersion;
-    final prefs = await SharedPreferences.getInstance();
     await prefs.clear();
 
     // don't want it to be shown again; if already shown
@@ -289,7 +296,6 @@ class AppSettingsController extends ChangeNotifier {
     await saveFirstRun(false);
 
     await load();
-    await WakelockController.load();
 
     touggleFullScreen();
     notify();
@@ -303,7 +309,6 @@ class AppSettingsController extends ChangeNotifier {
     if (mode == _theme) return;
     _theme = mode;
     notifyListeners();
-    final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_themeKey, _theme.name);
   }
 
@@ -311,7 +316,6 @@ class AppSettingsController extends ChangeNotifier {
     if (_reviewBookmarksFirst == v) return;
 
     _reviewBookmarksFirst = v;
-    final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_reviewBookmarksFirstKey, v);
   }
 
@@ -320,7 +324,6 @@ class AppSettingsController extends ChangeNotifier {
   }
 
   Future<void> saveFirstRun(bool v) async {
-    final prefs = await SharedPreferences.getInstance();
     _firstRun = v;
     await prefs.setBool(_firstRunKey, v);
   }
@@ -336,10 +339,8 @@ class AppSettingsController extends ChangeNotifier {
     }
     _playRatingShonOnce = true;
 
-    final pref = await SharedPreferences.getInstance();
-
     if (_playRate == 0) {
-      await pref.setInt(_playRateKey, DateTime.now().millisecondsSinceEpoch);
+      await prefs.setInt(_playRateKey, DateTime.now().millisecondsSinceEpoch);
       return;
     }
 
@@ -352,17 +353,17 @@ class AppSettingsController extends ChangeNotifier {
     final res = await showRatePromptBottomSheet(context);
 
     if (res == null || RatePromptResult.later == res) {
-      await pref.setInt(_playRateKey, DateTime.now().millisecondsSinceEpoch);
+      await prefs.setInt(_playRateKey, DateTime.now().millisecondsSinceEpoch);
       return;
     }
 
     if (res == RatePromptResult.never || res == RatePromptResult.done) {
-      await pref.setInt(_playRateKey, -1);
+      await prefs.setInt(_playRateKey, -1);
       return;
     }
 
     await openRatingFlow();
-    await pref.setInt(_playRateKey, -1);
+    await prefs.setInt(_playRateKey, -1);
   }
 
   static final _currentVersion = releases.first.version;
@@ -373,15 +374,13 @@ class AppSettingsController extends ChangeNotifier {
 
     await showWhatsNewSheet(context);
 
-    final pref = await SharedPreferences.getInstance();
     _appVersion = _currentVersion;
-    await pref.setString(_appVersionKey, _currentVersion);
+    await prefs.setString(_appVersionKey, _currentVersion);
 
     return true;
   }
 
   Future<void> saveUseHansLaneDefStyle(bool v) async {
-    final prefs = await SharedPreferences.getInstance();
     _useHansLaneDefStyle = v;
     await prefs.setBool(_useHansLaneDefStyleKey, v);
   }
@@ -396,7 +395,6 @@ class AppSettingsController extends ChangeNotifier {
     _lexWordRmIcon = v;
     notify();
 
-    final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_lexWordRmIconKey, v);
   }
 
@@ -408,7 +406,6 @@ class AppSettingsController extends ChangeNotifier {
     if (v == _lexWordDelConfirm) return;
 
     _lexWordDelConfirm = v;
-    final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_lexWordDelConfirmKey, v);
   }
 
@@ -420,7 +417,6 @@ class AppSettingsController extends ChangeNotifier {
     if (_wordSpacing == p) return;
     _wordSpacing = p;
 
-    final prefs = await SharedPreferences.getInstance();
     await prefs.setInt(_wordSpacingKey, p);
   }
 
@@ -432,7 +428,6 @@ class AppSettingsController extends ChangeNotifier {
     if (_readerScrollPersent == p) return;
     _readerScrollPersent = p;
 
-    final prefs = await SharedPreferences.getInstance();
     await prefs.setInt(_readerScrollPersentKey, p);
   }
 
@@ -441,7 +436,6 @@ class AppSettingsController extends ChangeNotifier {
   }
 
   Future<void> saveFullScreen(bool v) async {
-    final prefs = await SharedPreferences.getInstance();
     _fullScreen = v;
     touggleFullScreen();
     notify();
@@ -453,7 +447,6 @@ class AppSettingsController extends ChangeNotifier {
   }
 
   Future<void> saveHideStatusBar(bool v) async {
-    final prefs = await SharedPreferences.getInstance();
     _hideStatusbar = v;
     touggleFullScreen();
     notify();
@@ -467,7 +460,6 @@ class AppSettingsController extends ChangeNotifier {
   Future<void> saveArEnDefShowCard(bool v) async {
     _arEnDefShowCard = v;
     notify();
-    final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_arEnDefShowCardKey, v);
   }
 
@@ -478,7 +470,6 @@ class AppSettingsController extends ChangeNotifier {
   Future<void> saveScrollLexSelection(bool v) async {
     _scrollLexSelection = v;
     notify();
-    final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_scrollLexSelectionKey, v);
   }
 
@@ -489,7 +480,6 @@ class AppSettingsController extends ChangeNotifier {
   Future<void> saveScrollLexSelectionAutoSc(bool v) async {
     _scrollLexSelectionAutoSc = v;
     notify();
-    final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_scrollLexSelectionAutoScKey, v);
   }
 
@@ -498,7 +488,6 @@ class AppSettingsController extends ChangeNotifier {
   }
 
   Future<void> saveHideAppbar(bool v) async {
-    final prefs = await SharedPreferences.getInstance();
     _hideAppbar = v;
     notify();
     await prefs.setBool(_hideAppbarKey, v);
@@ -509,7 +498,6 @@ class AppSettingsController extends ChangeNotifier {
   }
 
   Future<void> saveReaderIsOpenLexiconDirecly(bool v) async {
-    final prefs = await SharedPreferences.getInstance();
     _readerIsOpenLexiconDirecly = v;
     await prefs.setBool(_readerIsOpenLexiconDireclyKey, v);
   }
@@ -522,7 +510,6 @@ class AppSettingsController extends ChangeNotifier {
     if (v == _showSearchSugg) return;
     _showSearchSugg = v;
 
-    final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_showSearchSuggKey, v);
 
     if (v) await Isolates.initSugg();
@@ -535,7 +522,6 @@ class AppSettingsController extends ChangeNotifier {
 
   Future<void> saveLuwColored(bool v) async {
     _luwColored = v;
-    final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_luwColoredKey, v);
   }
 
@@ -551,7 +537,6 @@ class AppSettingsController extends ChangeNotifier {
 
     notify();
 
-    final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_useMoreArabicKey, v);
   }
 
@@ -560,7 +545,6 @@ class AppSettingsController extends ChangeNotifier {
   Future<void> saveRoute(String r, {String bookHash = ''}) async {
     if (_lastRoute == r && _lastBook == bookHash) return;
 
-    final prefs = await SharedPreferences.getInstance();
     if (routesToBeSavedInPref.contains(r)) {
       await prefs.setString(_lastRouteKey, r);
       _lastRoute = r;
@@ -589,36 +573,34 @@ class AppSettingsController extends ChangeNotifier {
   }
 
   Future<void> setReaderAdjustments(ReaderAdjustData d) async {
-    final pref = await SharedPreferences.getInstance();
-
     if (_readerFont != d.fontFam) {
       _readerFont = d.fontFam;
-      await pref.setString(_readerFontKey, _readerFont);
+      await prefs.setString(_readerFontKey, _readerFont);
     }
 
     if (_readerFontSize != d.fontSize) {
       _readerFontSize = d.fontSize;
-      await pref.setDouble(_readerFontSizeKey, _readerFontSize);
+      await prefs.setDouble(_readerFontSizeKey, _readerFontSize);
     }
 
     if (_readerFontHeight != d.fontHeight) {
       _readerFontHeight = d.fontHeight;
-      await pref.setDouble(_readerFontHeightKey, _readerFontHeight);
+      await prefs.setDouble(_readerFontHeightKey, _readerFontHeight);
     }
 
     if (_maxWidth != d.maxWidth) {
       _maxWidth = d.maxWidth;
-      await pref.setDouble(_maxWidthKey, _maxWidth);
+      await prefs.setDouble(_maxWidthKey, _maxWidth);
     }
 
     if (_padding != d.padding) {
       _padding = d.padding;
-      await pref.setDouble(_paddingKey, _padding);
+      await prefs.setDouble(_paddingKey, _padding);
     }
 
     if (_wordSpacing != d.wordSpacing) {
       _wordSpacing = d.wordSpacing;
-      await pref.setInt(_wordSpacingKey, d.wordSpacing);
+      await prefs.setInt(_wordSpacingKey, d.wordSpacing);
     }
 
     notify();
@@ -631,7 +613,6 @@ class AppSettingsController extends ChangeNotifier {
 
     notifyListeners();
 
-    final prefs = await SharedPreferences.getInstance();
     if (size != null) {
       await prefs.setDouble(_arUiFontSizeKey, size);
     } else {
@@ -645,7 +626,6 @@ class AppSettingsController extends ChangeNotifier {
 
     _readerFont = font;
     notifyListeners();
-    final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_readerFontKey, font);
   }
 
@@ -653,7 +633,6 @@ class AppSettingsController extends ChangeNotifier {
     if (_readerFontSize == size) return;
     _readerFontSize = size;
     notifyListeners();
-    final prefs = await SharedPreferences.getInstance();
     await prefs.setDouble(_readerFontSizeKey, size);
   }
 
@@ -663,7 +642,6 @@ class AppSettingsController extends ChangeNotifier {
     if (_maxWidth == size) return;
     _maxWidth = size;
     notifyListeners();
-    final prefs = await SharedPreferences.getInstance();
     await prefs.setDouble(_maxWidthKey, size);
   }
 
@@ -672,7 +650,6 @@ class AppSettingsController extends ChangeNotifier {
     if (_padding == size) return;
     _padding = size;
     notifyListeners();
-    final prefs = await SharedPreferences.getInstance();
     await prefs.setDouble(_paddingKey, size);
   }
 
@@ -683,7 +660,6 @@ class AppSettingsController extends ChangeNotifier {
     _seedColor = c;
     notifyListeners();
 
-    final prefs = await SharedPreferences.getInstance();
     await prefs.setInt(_seedColorKey, c.toARGB32());
   }
 
@@ -739,15 +715,13 @@ class AppSettingsController extends ChangeNotifier {
 const durationToScreenWake = 7;
 
 class WakelockController {
-  static const _wakeLockKey = 'wakeLock';
   static bool _enabled = true;
 
   static const Duration _timeout = Duration(minutes: durationToScreenWake);
   static Timer? _timer;
 
-  static Future<void> load() async {
-    final prefs = await SharedPreferences.getInstance();
-    _enabled = prefs.getBool(_wakeLockKey) ?? true;
+  static Future<void> load(bool? e) async {
+    _enabled = e ?? true;
     toggle();
   }
 
@@ -755,11 +729,10 @@ class WakelockController {
     return _enabled;
   }
 
-  static Future<void> saveWakeLock(bool enable) async {
+  static Future<void> saveWakeLock(bool enable, Prefs pref) async {
     _enabled = enable;
     toggle();
-    final prefs = await SharedPreferences.getInstance();
-    prefs.setBool(_wakeLockKey, enable);
+    await pref.setBool(AppSettingsController.wakeLockKey, enable);
     appConf.notify();
   }
 

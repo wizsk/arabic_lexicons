@@ -178,7 +178,7 @@ Widget definitonCardDbRow(
     fs: fs,
     isSaved: () => LexEntryBm.contains(d, r),
     save: () async {
-      await LexEntryBm.add(d, r);
+      await LexEntryBm.addDbRow(d, r);
     },
     remove: () async {
       await LexEntryBm.remove(d, r);

@@ -181,7 +181,7 @@ Widget definitonCardDbRow(
       await LexEntryBm.addDbRow(d, r);
     },
     remove: () async {
-      await LexEntryBm.remove(d, r);
+      await LexEntryBm.removeDbRow(d, r);
     },
     rebuild: rebuild,
     report: () => (d, r),

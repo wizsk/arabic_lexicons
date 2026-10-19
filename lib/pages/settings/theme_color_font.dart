@@ -1,8 +1,8 @@
 import 'package:arabic_lexicons/data.dart';
 import 'package:arabic_lexicons/pages/settings/settings.dart';
 import 'package:arabic_lexicons/pages/width_padd.dart';
-import 'package:arabic_lexicons/reader/reader_utils.dart';
 import 'package:arabic_lexicons/theme.dart';
+import 'package:arabic_lexicons/utils/toast_snack.dart';
 import 'package:flutter/material.dart';
 
 /// Color Picker
@@ -120,7 +120,10 @@ class _ThemeSwicherState extends State<ThemeSwicher> {
   }
 }
 
-List<Widget> themeColorFontSettings(BuildContext context) {
+List<Widget> themeColorFontSettings(
+  BuildContext context,
+  VoidCallback rebuild,
+) {
   return [
     Center(
       child: Padding(
@@ -136,7 +139,9 @@ List<Widget> themeColorFontSettings(BuildContext context) {
               children: uiSeedColors.map((c) {
                 final selected = c == appConf.seedColor;
                 return GestureDetector(
-                  onTap: () => appConf.setSeedColor(c),
+                  onTap: () {
+                    appConf.setSeedColor(c).then((_) => rebuild());
+                  },
                   child: Container(
                     width: themeColorOuter,
                     height: themeColorOuter,
@@ -177,7 +182,8 @@ List<Widget> themeColorFontSettings(BuildContext context) {
         }
         await appConf.setReaderAdjustments(res);
         if (context.mounted) {
-          showSnack(context, 'Default reader style applied and saved');
+          MsgSv.showSnackbarMsg('Default reader style applied and saved');
+          rebuild();
         }
       },
     ),

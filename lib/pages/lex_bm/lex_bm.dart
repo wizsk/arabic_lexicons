@@ -192,7 +192,7 @@ class _LexDefBmPageState extends State<LexDefBmPage> {
 
                             final d = Directionality(
                               textDirection: dir,
-                              child: definitonCard(
+                              child: definitonCardDbRow(
                                 context,
                                 def.dict,
                                 def.r,

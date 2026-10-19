@@ -13,59 +13,63 @@ import 'package:flutter/services.dart';
 
 Widget definitonCard(
   BuildContext context,
-  Dict d,
-  DbRow r,
   Widget child, {
+  required String word,
   required String Function() text,
-  required VoidCallback fs,
   required VoidCallback rebuild,
-  VoidCallback? onRemove,
+  required bool Function() isSaved,
+  required Future<void> Function() remove,
+  required Future<void> Function() save,
+  VoidCallback? fs,
+  (Dict, DbRow) Function()? report,
   final bool useM3Colors = false,
 }) {
   final cs = Theme.of(context).colorScheme;
 
-  final ebm = LexEntryBm.contains(d, r);
+  final ebm = isSaved();
 
   final actions = Row(
     textDirection: TextDirection.ltr,
     spacing: 4,
     children: [
-      iconButtonSized(
-        context,
-        icon: Icons.flag_outlined,
-        tooltip: 'Report an issue',
-        onPressed: () async {
-          // d9p("Trying to send report");
-          final confirm = await showConfirmDialog(
-            context,
-            "Report an error?",
-            scroolable: true,
-            message:
-                'Would you like to report a possible mistake in the entry “${r.word}”? '
-                '\n\n'
-                'Your email app will open with a prepared report. '
-                'If it can\'t be opened, a popup will let you copy the report and send it manually.'
-                '\n\n'
-                'Thank you for helping improve the lexicon!',
-            fontFam: L.arFont,
-            constraints: true,
-            confirmText: "Report",
-          );
+      if (report != null)
+        iconButtonSized(
+          context,
+          icon: Icons.flag_outlined,
+          tooltip: 'Report an issue',
+          onPressed: () async {
+            final (d, r) = report();
 
-          if (confirm != true) return;
+            final confirm = await showConfirmDialog(
+              context,
+              "Report an error?",
+              scroolable: true,
+              message:
+                  'Would you like to report a possible mistake in the entry “${r.word}”? '
+                  '\n\n'
+                  'Your email app will open with a prepared report. '
+                  'If it can\'t be opened, a popup will let you copy the report and send it manually.'
+                  '\n\n'
+                  'Thank you for helping improve the lexicon!',
+              fontFam: L.arFont,
+              constraints: true,
+              confirmText: "Report",
+            );
 
-          final ok = await reportDefinition(r, d);
-          if (ok || !context.mounted) return;
+            if (confirm != true) return;
 
-          await showEmailFallbackDialog(
-            context,
-            row: r,
-            dict: d,
-            email: emailAddr,
-          );
-        },
-        scheme: IconButtonSizedColor.err,
-      ),
+            final ok = await reportDefinition(r, d);
+            if (ok || !context.mounted) return;
+
+            await showEmailFallbackDialog(
+              context,
+              row: r,
+              dict: d,
+              email: emailAddr,
+            );
+          },
+          scheme: IconButtonSizedColor.err,
+        ),
       const Spacer(),
       iconButtonSized(
         context,
@@ -79,7 +83,7 @@ Widget definitonCard(
               "Remove Bookmark",
               scroolable: true,
               message:
-                  'Do you want remove to lexcion entry “${r.word}” from bookmarks?',
+                  'Do you want remove to lexcion entry “$word” from bookmarks?',
               confirmText: 'Remove',
               destructive: true,
               constraints: true,
@@ -87,12 +91,11 @@ Widget definitonCard(
             );
             if (confirm != true) return;
 
-            await LexEntryBm.remove(d, r);
-            onRemove?.call();
-            MsgSv.showSnackbarMsg("Definiton removed: ${r.word}");
+            await remove();
+            MsgSv.showSnackbarMsg("Definiton removed: $word");
           } else {
-            await LexEntryBm.add(d, r);
-            MsgSv.showSnackbarMsg("Definiton added: ${r.word}");
+            await save();
+            MsgSv.showSnackbarMsg("Definiton added: $word");
           }
           rebuild();
         },
@@ -106,14 +109,15 @@ Widget definitonCard(
           MsgSv.showSnackbarMsg("Definiton copied");
         },
       ),
-      iconButtonSized(
-        context,
-        icon: Icons.open_in_full_rounded,
-        scheme: IconButtonSizedColor.primary,
-        tooltip: 'Open in fullscreen',
-        onPressed: fs,
-        iconSize: 18,
-      ),
+      if (fs != null)
+        iconButtonSized(
+          context,
+          icon: Icons.open_in_full_rounded,
+          scheme: IconButtonSizedColor.primary,
+          tooltip: 'Open in fullscreen',
+          onPressed: fs,
+          iconSize: 18,
+        ),
     ],
   );
   const sidesPadd = 12.0;
@@ -151,8 +155,37 @@ Widget definitonCard(
     ],
   );
 
-  return GestureDetector(
-    onTap: fs,
-    child: DecoratedBox(decoration: decoration, child: textWidget),
+  final b = DecoratedBox(decoration: decoration, child: textWidget);
+  return fs == null ? b : GestureDetector(onTap: fs, child: b);
+}
+
+Widget definitonCardDbRow(
+  BuildContext context,
+  Dict d,
+  DbRow r,
+  Widget child, {
+  required String Function() text,
+  required VoidCallback fs,
+  required VoidCallback rebuild,
+  VoidCallback? onRemove,
+  final bool useM3Colors = false,
+}) {
+  final res = definitonCard(
+    context,
+    child,
+    text: text,
+    word: r.word,
+    fs: fs,
+    isSaved: () => LexEntryBm.contains(d, r),
+    save: () async {
+      await LexEntryBm.add(d, r);
+    },
+    remove: () async {
+      await LexEntryBm.remove(d, r);
+    },
+    rebuild: rebuild,
+    report: () => (d, r),
   );
+
+  return res;
 }

@@ -325,7 +325,7 @@ Widget _hansLaneView(
         key: ValueKey(index),
         controller: datas.scrollController,
         index: index,
-        child: definitonCard(
+        child: definitonCardDbRow(
           context,
           datas.selectedDict,
           datas.dbRes[index],
@@ -379,7 +379,7 @@ Widget _arabicLexView(TextStyle ts, SearchLexiconsDatas datas) {
         hasRefs: datas.selectedDict.hasRefs,
       );
 
-      return definitonCard(
+      return definitonCardDbRow(
         context,
         datas.selectedDict,
         datas.dbRes[index],

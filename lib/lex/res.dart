@@ -1,13 +1,17 @@
 import 'package:arabic_lexicons/alphabets.dart';
 import 'package:arabic_lexicons/conf.dart';
 import 'package:arabic_lexicons/data.dart';
+import 'package:arabic_lexicons/datas/lex_entry_bookmark.dart';
 import 'package:arabic_lexicons/lex/data.dart';
 import 'package:arabic_lexicons/lex/def_card.dart';
 import 'package:arabic_lexicons/lex/dicts/db.dart';
 import 'package:arabic_lexicons/lex/ref.dart';
 import 'package:arabic_lexicons/theme.dart';
 import 'package:arabic_lexicons/utils.dart';
+import 'package:arabic_lexicons/utils/toast_snack.dart';
 import 'package:arabic_lexicons/widgets/selectable_text_screen.dart';
+import 'package:arabic_lexicons/widgets/small_icon_btns.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
@@ -190,6 +194,81 @@ Widget _showArEnRes(
   BuildContext context,
   TextStyle tsOg,
   SearchLexiconsDatas datas,
+) => appConf.arEnDefShowCard
+    ? _showArEnResCard(context, tsOg, datas)
+    : _showArEnResTbl(context, tsOg, datas);
+
+Widget _showArEnResCard(
+  BuildContext context,
+  TextStyle tsOg,
+  SearchLexiconsDatas datas,
+) {
+  final cs = Theme.of(context).colorScheme;
+  final ts = tsOg.copyWith(height: defArabicFontHeihgt);
+  final list = datas.arEnRes;
+
+  return SliverList.separated(
+    itemCount: list.length,
+    separatorBuilder: (_, _) => spaceBetweenDefs,
+    itemBuilder: (context, i) {
+      final e = list[i];
+
+      void onRootTap() {
+        final t = ArabicNormalizer.keepOnlyAr(e.root.split('/').first);
+        if (t.isNotEmpty) datas.onChangeTxt(appendTxt: t);
+      }
+
+      const ltr = '\u202A';
+      const pop = '\u202C';
+
+      final txt = TextSpan(
+        children: [
+          TextSpan(text: '$ltr${e.word}$pop '),
+          if (e.root.isNotEmpty)
+            TextSpan(
+              text: '$ltr(${e.root})$pop ',
+              style: ts.copyWith(
+                // fontSize: (ts.fontSize ?? appConf.readerFontSize) * 0.85,
+                color: cs.secondary,
+              ),
+              recognizer: TapGestureRecognizer()..onTap = onRootTap,
+            ),
+          // const TextSpan(text: ' : '),
+          TextSpan(text: e.def),
+        ],
+      );
+
+      final child = SelectableText.rich(
+        txt,
+        textDirection: TextDirection.ltr,
+        style: ts,
+      );
+
+      return definitonCard(
+        context,
+        child,
+        id: e.id,
+        d: Dict.arEn,
+        rebuild: datas.rebuild,
+        save: () async {
+          await LexEntryBm.add(
+            id: e.id,
+            d: Dict.arEn,
+            word: ArabicNormalizer.removeTashkilAndNomarize(e.word),
+            meaning: e.toJsonString(),
+          );
+        },
+        text: () => e.def,
+        word: e.word,
+      );
+    },
+  );
+}
+
+Widget _showArEnResTbl(
+  BuildContext context,
+  TextStyle tsOg,
+  SearchLexiconsDatas datas,
 ) {
   final cs = Theme.of(context).colorScheme;
   final ts = tsOg.copyWith(height: defArabicFontHeihgt);
@@ -270,6 +349,8 @@ Widget _showArEnRes(
                 child: Center(child: Text(e.root, style: ts)),
               );
 
+              final isBm = LexEntryBm.containsId(Dict.arEn, e.id);
+
               return TableRow(
                 decoration: isHi ? tblHDec : null,
                 children: [
@@ -280,7 +361,44 @@ Widget _showArEnRes(
 
                   Padding(
                     padding: tp,
-                    child: SelectableText(e.def, style: ts),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      spacing: 6,
+                      children: [
+                        Expanded(child: SelectableText(e.def, style: ts)),
+                        iconButtonSized(
+                          context,
+                          icon: isBm
+                              ? Icons.bookmark_remove
+                              : Icons.bookmark_add_outlined,
+                          scheme: isBm
+                              ? IconButtonSizedColor.err
+                              : IconButtonSizedColor.normal,
+                          onPressed: () async {
+                            if (isBm) {
+                              await LexEntryBm.remove(Dict.arEn.table, e.id);
+                              MsgSv.showSnackbarMsg(
+                                "Definition removed: ${e.word}",
+                              );
+                              if (context.mounted) datas.rebuild();
+                            } else {
+                              await LexEntryBm.add(
+                                id: e.id,
+                                d: Dict.arEn,
+                                word: ArabicNormalizer.removeTashkilAndNomarize(
+                                  e.word,
+                                ),
+                                meaning: e.toJsonString(),
+                              );
+                              MsgSv.showSnackbarMsg(
+                                "Definition saved: ${e.word}",
+                              );
+                              if (context.mounted) datas.rebuild();
+                            }
+                          },
+                        ),
+                      ],
+                    ),
                   ),
 
                   InkWell(onTap: rootOnTap, child: rootW),

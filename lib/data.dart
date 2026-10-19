@@ -271,6 +271,10 @@ enum Dict {
     this.hasRefs = false,
   });
 
+  bool get isEng => this == arEn || this == hanswehr || this == laneLexicon;
+
+  bool get isArEn => this == arEn;
+
   static String get reOrdLabel => L.p('Reorder', 'ترتيب');
   // bool get showTitle => false;
 }

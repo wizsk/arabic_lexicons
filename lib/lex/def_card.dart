@@ -183,6 +183,7 @@ Widget definitonCardDbRow(
     },
     rebuild: rebuild,
     report: () => (d, r),
+    useM3Colors: useM3Colors,
   );
 
   return res;

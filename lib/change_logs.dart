@@ -6,6 +6,8 @@ final releases = [
     changes: '''
     Ghani sort result by closest mach to the word
     Ghani dataset fix more issues
+    Add bookmark function to Direct dictioanry
+    Use card to show Direct dictioanry results by default (to use table go to settion and Lextion section and touggle show table)
   ''',
   ),
   Release(

@@ -1,6 +1,7 @@
 import 'package:arabic_lexicons/alphabets.dart';
 import 'package:arabic_lexicons/data.dart';
 import 'package:arabic_lexicons/datas/app_db.dart';
+import 'package:arabic_lexicons/lex/dicts/ar_en/ar_en.dart';
 import 'package:arabic_lexicons/lex/dicts/db.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -100,14 +101,28 @@ class LexEntryBmEnty {
   String get meanings => r.meanings;
 
   factory LexEntryBmEnty.fromMap(Map<String, Object?> map) {
-    final meanings = map['meanings'] as String;
     final tbl = map['lex_table'] as String;
     final dIdx = allDicts.indexWhere((d) => d.table == tbl);
+    final m = map['meanings'] as String;
+
     final d = dIdx == -1
-        ? ArabicNormalizer.englishWord.hasMatch(meanings)
+        ? ArabicNormalizer.englishWord.hasMatch(m)
               ? Dict.hanswehr
               : Dict.mujamulGhoni
         : allDicts[dIdx];
+
+    final String meanings;
+    if (d == Dict.arEn) {
+      final e = ArEnEntry.fromJsonString(m);
+
+      const ltr = '\u202A';
+      const pop = '\u202C';
+
+      meanings =
+          '$ltr${e.word}${e.root.isEmpty ? "" : " ($ltr${e.root}$pop)"}$pop ${e.def}';
+    } else {
+      meanings = m;
+    }
 
     final r = DbRow(
       id: map['id'] as int,
@@ -117,13 +132,6 @@ class LexEntryBmEnty {
 
     return LexEntryBmEnty(r: r, lexTable: tbl, dict: d);
   }
-
-  Map<String, Object?> toMap() => {
-    'id': id,
-    'word': word,
-    'lex_table': lexTable,
-    'meanings': meanings,
-  };
 
   Future<void> remove() async => LexEntryBm.remove(lexTable, id);
 }

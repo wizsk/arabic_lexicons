@@ -5,11 +5,106 @@ import 'dart:typed_data';
 import 'package:arabic_lexicons/lex/dicts/ar_en/ar_en_utils.dart';
 
 class ArEnEntry {
+  final int id;
   final String root;
   final String word;
   final String def;
 
-  ArEnEntry({required this.root, required this.word, required this.def});
+  const ArEnEntry._(this.id, this.root, this.word, this.def);
+
+  factory ArEnEntry({
+    required String root,
+    required String word,
+    required String def,
+  }) {
+    return ArEnEntry._(_hash(root, word, def), root, word, def);
+  }
+
+  factory ArEnEntry.withId({
+    required int id,
+    required String root,
+    required String word,
+    required String def,
+  }) {
+    return ArEnEntry._(id, root, word, def);
+
+    // final r = ArEnEntry(root: root, def: def, word: word);
+    // assert(r.id == id, "Hash Id don't match!!");
+    // return r;
+  }
+
+  factory ArEnEntry.fromJson(Map<String, dynamic> json) {
+    final root = (json['root'] as String?) ?? ''; // root may be empty
+    final word = json['word'] as String;
+    final def = json['def'] as String;
+    final id = (json['id'] as num?)?.toInt();
+
+    // Use the stored id if present, otherwise compute it.
+    return ArEnEntry._(id ?? _hash(root, word, def), root, word, def);
+  }
+
+  factory ArEnEntry.fromJsonString(String source) =>
+      ArEnEntry.fromJson(jsonDecode(source) as Map<String, dynamic>);
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'root': root,
+    'word': word,
+    'def': def,
+  };
+
+  String toJsonString() => jsonEncode(toJson());
+
+  // FNV-1a 64-bit constants.
+  static const int _offset = 0xcbf29ce484222325;
+  static const int _prime = 0x100000001b3;
+
+  // Field terminator. Not a valid UTF-16 code unit (max 0xFFFF), so field
+  // boundaries can never be confused with field content.
+  static const int _sep = 0x10000;
+
+  static int _mix(int h, String s) {
+    final len = s.length;
+    for (var i = 0; i < len; i++) {
+      h = (h ^ s.codeUnitAt(i)) * _prime;
+    }
+    return (h ^ _sep) * _prime;
+  }
+
+  static int _hash(String root, String word, String def) {
+    var h = _offset;
+    h = _mix(h, root);
+    h = _mix(h, word);
+    h = _mix(h, def);
+
+    // MurmurHash3 fmix64 finalizer.
+    h ^= h >>> 33;
+    h *= 0xff51afd7ed558ccd;
+    h ^= h >>> 33;
+    h *= 0xc4ceb9fe1a85ec53;
+    h ^= h >>> 33;
+
+    // half of all ids come out negative
+    // to make positive do, but we will have 63bit
+    // sqlite handels it fine, we don't need to worry
+    // return h & 0x7FFFFFFFFFFFFFFF;
+
+    return h;
+  }
+
+  // Compare fields too, so an (astronomically unlikely) id collision
+  // can't make two different entries equal.
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ArEnEntry &&
+          id == other.id &&
+          root == other.root &&
+          word == other.word &&
+          def == other.def;
+
+  @override
+  int get hashCode => id;
 }
 
 class _Entry {

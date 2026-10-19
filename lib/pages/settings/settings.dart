@@ -253,7 +253,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         secondary: const FilledIcon(Icons.table_chart_rounded),
                         title: Text('${Dict.arEn.en} Dictionary Style'),
                         subtitle: const Text(
-                          'Show resutls in a table, not in cards',
+                          'Show results in a table, not in cards',
                         ),
                         value: !appConf.arEnDefShowCard,
                         onChanged: (value) async {

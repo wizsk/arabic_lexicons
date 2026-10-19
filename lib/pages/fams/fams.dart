@@ -14,7 +14,6 @@ class ArabicFamilyList extends StatefulWidget {
 class _ArabicFamilyListState extends State<ArabicFamilyList> {
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     touggleFullScreen();
   }

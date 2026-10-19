@@ -14,11 +14,11 @@ import 'package:flutter/services.dart';
 Widget definitonCard(
   BuildContext context,
   Widget child, {
+  required int id,
+  required Dict d,
   required String word,
   required String Function() text,
   required VoidCallback rebuild,
-  required bool Function() isSaved,
-  required Future<void> Function() remove,
   required Future<void> Function() save,
   VoidCallback? fs,
   (Dict, DbRow) Function()? report,
@@ -26,13 +26,13 @@ Widget definitonCard(
 }) {
   final cs = Theme.of(context).colorScheme;
 
-  final ebm = isSaved();
+  final ebm = LexEntryBm.containsId(d, id);
 
   final actions = Row(
     textDirection: TextDirection.ltr,
     spacing: 4,
     children: [
-      if (report != null)
+      if (!d.isArEn && report != null)
         iconButtonSized(
           context,
           icon: Icons.flag_outlined,
@@ -91,7 +91,7 @@ Widget definitonCard(
             );
             if (confirm != true) return;
 
-            await remove();
+            await LexEntryBm.remove(d.table, id);
             MsgSv.showSnackbarMsg("Definiton removed: $word");
           } else {
             await save();
@@ -173,15 +173,13 @@ Widget definitonCardDbRow(
   final res = definitonCard(
     context,
     child,
+    d: d,
+    id: r.id,
     text: text,
     word: r.word,
     fs: fs,
-    isSaved: () => LexEntryBm.contains(d, r),
     save: () async {
       await LexEntryBm.addDbRow(d, r);
-    },
-    remove: () async {
-      await LexEntryBm.removeDbRow(d, r);
     },
     rebuild: rebuild,
     report: () => (d, r),

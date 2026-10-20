@@ -11,6 +11,7 @@ final releases = [
     Use card to show Direct dictionary results by default (to use table go to settings and Lexicon section and toggle show table)
     Update verb family info
     Set max UI-Width
+    Improve book inspect functionalities
   ''',
   ),
   Release(

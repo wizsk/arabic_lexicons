@@ -38,6 +38,11 @@ enum AppShortcut {
     description: 'Toggle use-more-Arabic',
   ),
 
+  closePopup(
+    key: LogicalKeyboardKey.semicolon,
+    description: 'Close Lexicon popup page',
+  ),
+
   showHelp(
     key: LogicalKeyboardKey.slash,
     description: 'Toggle keyboard shortcuts help overlay',
@@ -79,6 +84,7 @@ List<KeyBinding> keybindingsGen({
   required VoidCallback tglAr,
   required VoidCallback clearWords,
   required VoidCallback delCurr,
+  required VoidCallback closePopup,
   required VoidCallback help,
 }) {
   final res = [
@@ -91,21 +97,24 @@ List<KeyBinding> keybindingsGen({
     KeyBinding(AppShortcut.toggleArabic.key, tglAr),
     KeyBinding(AppShortcut.rmCurrentlySelectedWord.key, delCurr),
     KeyBinding(AppShortcut.clearWords.key, clearWords),
+    KeyBinding(AppShortcut.closePopup.key, closePopup),
     KeyBinding(AppShortcut.showHelp.key, help),
   ];
 
-  final seen = <LogicalKeyboardKey>{};
-  for (final r in res) {
+  if (kDebugMode) {
+    final seen = <LogicalKeyboardKey>{};
+    for (final r in res) {
+      assert(
+        seen.add(r.key),
+        'Duplicate shortcut key "${r.key.keyLabel}" on has dubpilcates',
+      );
+    }
+
     assert(
-      seen.add(r.key),
-      'Duplicate shortcut key "${r.key.keyLabel}" on has dubpilcates',
+      res.length == AppShortcut.values.length,
+      "The total key binds enum and total applied not same",
     );
   }
-
-  assert(
-    res.length == AppShortcut.values.length,
-    "The total key binds enum and total applied not same",
-  );
 
   return List.unmodifiable(res);
 }

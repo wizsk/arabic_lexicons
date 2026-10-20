@@ -158,6 +158,10 @@ class _SearchLexiconsState extends State<SearchLexicons>
           });
         }
       },
+      closePopup: () {
+        if (!_isPopup) return;
+        if (mounted) Navigator.of(context).pop();
+      },
       help: () {
         if (!mounted) return;
         showShortcutsHelpOverlay(context);

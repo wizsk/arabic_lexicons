@@ -42,6 +42,7 @@ Future<int?> showNavigateBook(
     backgroundColor: Colors.transparent,
     useSafeArea: true,
     isScrollControlled: true,
+    constraints: maxBottomSheetWidth,
     builder: (context) {
       return _PeraPickerSheet(rs: rs, peras: peras, currPeraIdx: currPeraIdx);
     },

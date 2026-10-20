@@ -26,11 +26,6 @@ class _ArabicFamilyListState extends State<ArabicFamilyList> {
 
   @override
   Widget build(BuildContext context) {
-    final titleTextStyle = Theme.of(context).textTheme.titleMedium!.copyWith(
-      fontSize: L.fontSize,
-      fontWeight: FontWeight.bold,
-    );
-
     final colorScheme = Theme.of(context).colorScheme;
     final cs = colorScheme;
 
@@ -93,12 +88,17 @@ class _ArabicFamilyListState extends State<ArabicFamilyList> {
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             color: cs.onPrimary,
-                            fontWeight: FontWeight.bold,
+                            fontWeight: FontWeight.w600,
                             fontSize: 14,
                           ),
                         ),
                       ),
-                      title: Text(family.pattern, style: titleTextStyle),
+                      title: Text(
+                        family.pattern,
+                        style: L.arStyleSized.copyWith(
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
                       trailing: Icon(Icons.arrow_forward_ios, size: 12),
                       onTap: () => showVerbFamilySheet(context, family),
                     );

@@ -5,6 +5,7 @@ import 'package:arabic_lexicons/lex/isolate.dart';
 import 'package:arabic_lexicons/lex/rearrange_dicts.dart';
 import 'package:arabic_lexicons/main_widgets.dart';
 import 'package:arabic_lexicons/pages/settings/theme_color_font.dart';
+import 'package:arabic_lexicons/pages/width_padd.dart';
 import 'package:arabic_lexicons/utils.dart';
 import 'package:arabic_lexicons/widgets/change_logs_widget.dart';
 import 'package:arabic_lexicons/widgets/scroll.dart';
@@ -46,7 +47,7 @@ class _SettingsPageState extends State<SettingsPage> {
               title: const Text('Settings'),
             ),
             SliverPadding(
-              padding: appConf.readerPadd(context),
+              padding: uiPadding(context),
               sliver: SliverList.list(
                 children: [
                   // const SizedBox(height: 12),

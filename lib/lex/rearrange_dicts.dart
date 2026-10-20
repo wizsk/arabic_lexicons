@@ -248,7 +248,7 @@ class _DictReorderSheetState extends State<DictReorderSheet> {
       body: SafeArea(
         child: Center(
           child: ConstrainedBox(
-            constraints: maxUiWidth,
+            constraints: maxBottomSheetWidth,
             child: Directionality(
               textDirection: L.dir,
               child: Column(

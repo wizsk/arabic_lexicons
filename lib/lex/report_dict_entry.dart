@@ -37,7 +37,7 @@ ${_reportTxt(dict, row)}''',
   await showDialog<void>(
     context: context,
     builder: (dialogContext) => AlertDialog(
-      constraints: maxUiWidth,
+      constraints: maxBottomSheetWidth,
       icon: const Icon(Icons.email_outlined),
       title: const Text('Report a dictionary error'),
       content: SizedBox(

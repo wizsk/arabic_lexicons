@@ -4,6 +4,7 @@ import 'package:arabic_lexicons/lex/def_card.dart';
 import 'package:arabic_lexicons/lex/res.dart';
 import 'package:arabic_lexicons/multi_selection.dart';
 import 'package:arabic_lexicons/pages/lex_bm/def.dart';
+import 'package:arabic_lexicons/pages/width_padd.dart';
 import 'package:arabic_lexicons/theme.dart';
 import 'package:arabic_lexicons/utils.dart';
 import 'package:flutter/material.dart';
@@ -90,7 +91,7 @@ class _LexDefBmPageState extends State<LexDefBmPage> {
 
   @override
   Widget build(BuildContext context) {
-    final padd = appConf.readerPadd(context);
+    final padd = uiPadding(context);
     final cs = Theme.of(context).colorScheme;
 
     final ts = appConf.readerTS(context);

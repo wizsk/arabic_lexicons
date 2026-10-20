@@ -1,6 +1,7 @@
 import 'package:arabic_lexicons/conf.dart';
 import 'package:arabic_lexicons/data.dart';
 import 'package:arabic_lexicons/main_widgets.dart';
+import 'package:arabic_lexicons/pages/width_padd.dart';
 import 'package:arabic_lexicons/reader/find_word.dart';
 import 'package:arabic_lexicons/review/list.dart';
 import 'package:arabic_lexicons/review/models.dart';
@@ -140,7 +141,7 @@ class _ReviewPageState extends State<ReviewPage> {
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : Padding(
-              padding: appConf.readerPadd(context).copyWith(bottom: 16),
+              padding: uiPadding(context, bottom: 16.0),
               child: Column(
                 children: [
                   Expanded(

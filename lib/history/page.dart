@@ -4,6 +4,7 @@ import 'package:arabic_lexicons/datas/word_store.dart';
 import 'package:arabic_lexicons/main_widgets.dart';
 import 'package:arabic_lexicons/multi_selection.dart';
 import 'package:arabic_lexicons/pages/selectable_word_list_title_widget.dart';
+import 'package:arabic_lexicons/pages/width_padd.dart';
 import 'package:arabic_lexicons/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -135,7 +136,7 @@ class _HistPageState extends State<HistPage> {
                   )
                 else
                   SliverPadding(
-                    padding: appConf.readerPadd(context),
+                    padding: uiPadding(context),
                     sliver: SliverList.separated(
                       itemCount: WordStore.histLen,
                       separatorBuilder: (_, _) => const SizedBox(height: 4),

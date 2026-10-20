@@ -1,6 +1,7 @@
 import 'package:arabic_lexicons/conf.dart';
 import 'package:arabic_lexicons/data.dart';
 import 'package:arabic_lexicons/pages/fams/fams_data.dart';
+import 'package:arabic_lexicons/pages/width_padd.dart';
 import 'package:arabic_lexicons/utils.dart';
 import 'package:flutter/material.dart';
 
@@ -60,7 +61,7 @@ class _ArabicFamilyListState extends State<ArabicFamilyList> {
                 ),
               ),
               SliverPadding(
-                padding: appConf.readerPadd(context),
+                padding: uiPadding(context),
                 sliver: SliverList.separated(
                   itemCount: verbFamilies.length,
                   separatorBuilder: (context, index) =>

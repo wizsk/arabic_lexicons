@@ -5,6 +5,7 @@ import 'package:arabic_lexicons/conf.dart';
 import 'package:arabic_lexicons/data.dart';
 import 'package:arabic_lexicons/main_widgets.dart';
 import 'package:arabic_lexicons/multi_selection.dart';
+import 'package:arabic_lexicons/pages/width_padd.dart';
 import 'package:arabic_lexicons/review/models.dart';
 import 'package:arabic_lexicons/review/provider.dart';
 import 'package:arabic_lexicons/review/set_day_popup_widget.dart';
@@ -75,7 +76,7 @@ class _RevWordListPageState extends State<RevWordListPage> {
       showDragHandle: true,
       isDismissible: true,
       useSafeArea: true,
-      constraints: maxUiWidth,
+      constraints: maxBottomSheetWidth,
       builder: (ctx) => Padding(
         padding: scrollPaddingBottmSheet(context, sides: 16),
         child: Column(
@@ -368,7 +369,7 @@ class _RevWordListPageState extends State<RevWordListPage> {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final padd = appConf.readerPadd(context);
+    final padd = uiPadding(context);
 
     return Scaffold(
       appBar: _appBar(),

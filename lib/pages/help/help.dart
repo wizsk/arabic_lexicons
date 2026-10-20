@@ -301,11 +301,7 @@ class HelpPage extends StatelessWidget {
               title: const Text('Help'),
             ),
             SliverPadding(
-              padding: readerPadding(
-                context,
-                maxWidth: appConf.maxWidth,
-                sidePadd: appConf.padding,
-              ),
+              padding: uiPadding(context),
               sliver: SliverList.list(
                 children: separatedList(
                   separatorBuilder: (_) => spaceBetweenSections,

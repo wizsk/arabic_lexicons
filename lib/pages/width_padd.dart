@@ -30,6 +30,20 @@ EdgeInsets readerPadding(
   );
 }
 
+EdgeInsets uiPadding(
+  BuildContext context, {
+  final double maxWidth = maxUiWidth,
+  final double side = scrollPaddingSides,
+  final double top = scrollPaddingTop,
+  final double bottom = scrollPaddingBottom,
+}) {
+  final double padd = ((MediaQuery.of(context).size.width - maxWidth) / 2)
+      .clamp(side, double.infinity)
+      .toDouble();
+
+  return EdgeInsets.fromLTRB(padd, top, padd, bottom);
+}
+
 class ReaderAdjustData {
   double padding;
   double maxWidth;

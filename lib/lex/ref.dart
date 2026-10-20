@@ -70,11 +70,7 @@ void showReferenceBottomSheet(
     builder: (context) {
       return Dialog(
         insetPadding: EdgeInsets.all(14.0),
-        constraints: BoxConstraints(
-          maxWidth: appConf.maxWidth > 0
-              ? appConf.maxWidth
-              : maxUiWidth.maxWidth,
-        ),
+        constraints: maxBottomSheetWidth,
         child: SafeArea(
           child: Padding(
             padding: EdgeInsets.symmetric(vertical: pad),

@@ -482,7 +482,7 @@ Future<void> _showScrollSheet(
     context: context,
     isScrollControlled: true,
     useSafeArea: true,
-    constraints: maxUiWidth,
+    constraints: maxBottomSheetWidth,
     builder: (sheetContext) {
       final scheme = Theme.of(sheetContext).colorScheme;
       return DraggableScrollableSheet(

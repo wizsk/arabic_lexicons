@@ -10,7 +10,7 @@ Future<RevOrdData?> showRevOrdSheet(BuildContext context, RevOrdData initial) {
     isScrollControlled: true,
     showDragHandle: true,
     useSafeArea: true,
-    constraints: maxUiWidth,
+    constraints: maxBottomSheetWidth,
     builder: (_) => _RevOrdSheet(initial: initial),
   );
 }

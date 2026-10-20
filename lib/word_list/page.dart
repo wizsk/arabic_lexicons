@@ -10,6 +10,7 @@ import 'package:arabic_lexicons/helper_widgets.dart';
 import 'package:arabic_lexicons/main_widgets.dart';
 import 'package:arabic_lexicons/multi_selection.dart';
 import 'package:arabic_lexicons/pages/selectable_word_list_title_widget.dart';
+import 'package:arabic_lexicons/pages/width_padd.dart';
 import 'package:arabic_lexicons/reader/reader_utils.dart';
 import 'package:arabic_lexicons/reader/word_lists.dart';
 import 'package:arabic_lexicons/utils.dart';
@@ -532,7 +533,7 @@ class _WordListPageState extends State<WordListPage> {
 
   @override
   Widget build(BuildContext context) {
-    final padd = appConf.readerPadd(context);
+    final padd = uiPadding(context);
 
     return PopScope(
       canPop: !_selection.hasSelection,

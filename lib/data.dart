@@ -7,7 +7,8 @@ const appName = 'Arabic Lexcions';
 
 const emailAddr = 'sakibul706@gmail.com';
 
-const maxUiWidth = BoxConstraints(maxWidth: 600);
+const maxUiWidth = 700.00;
+const maxBottomSheetWidth = BoxConstraints(maxWidth: maxUiWidth - 50.0);
 
 const fontInter = 'Inter';
 const fontAmiri = 'Amiri';
@@ -31,7 +32,16 @@ const arabicFonts = [
   // fontTajawal,
 ];
 
-const scrollPadding = EdgeInsets.only(left: 10, right: 10, top: 0, bottom: 140);
+const scrollPaddingTop = 0.0;
+const scrollPaddingBottom = 140.0;
+const scrollPaddingSides = 14.0;
+
+const scrollPadding = EdgeInsets.only(
+  left: scrollPaddingSides,
+  right: scrollPaddingSides,
+  top: scrollPaddingTop,
+  bottom: scrollPaddingBottom,
+);
 
 @pragma("vm:prefer-inline")
 EdgeInsets scrollPaddingW({

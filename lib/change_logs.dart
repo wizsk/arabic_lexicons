@@ -131,11 +131,17 @@ class Release {
   final String version;
   final List<String> changes;
 
-  Release({required this.version, required String changes})
-    : changes = changes
+  const Release._(this.version, this.changes);
+
+  factory Release({required String version, required String changes}) {
+    final List<String> changesList = List.unmodifiable(
+      changes
           .trim()
           .split('\n')
           .map((e) => e.trim())
-          .where((e) => e.isNotEmpty)
-          .toList();
+          .where((e) => e.isNotEmpty),
+    );
+
+    return Release._(version, changesList);
+  }
 }

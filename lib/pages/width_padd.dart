@@ -22,12 +22,7 @@ EdgeInsets readerPadding(
           double.infinity,
         );
 
-  return EdgeInsets.fromLTRB(
-    padd,
-    scrollPadding.top,
-    padd,
-    scrollPadding.bottom,
-  );
+  return EdgeInsets.fromLTRB(padd, scrollPaddingTop, padd, scrollPaddingBottom);
 }
 
 EdgeInsets uiPadding(

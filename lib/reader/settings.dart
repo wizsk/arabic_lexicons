@@ -6,6 +6,7 @@ import 'package:arabic_lexicons/pages/width_padd.dart';
 import 'package:arabic_lexicons/reader/data.dart';
 import 'package:arabic_lexicons/reader/reader_utils.dart';
 import 'package:arabic_lexicons/reader/settings_class.dart';
+import 'package:arabic_lexicons/utils/toast_snack.dart';
 import 'package:flutter/material.dart';
 
 class ReaderModeSettingsSheet extends StatefulWidget {
@@ -60,7 +61,7 @@ class _ReaderModeSettingsSheetState extends State<ReaderModeSettingsSheet> {
       appBar: AppBar(title: Text('Reader Settings')),
       body: SafeArea(
         child: ListView(
-          padding: appConf.readerPadd(context),
+          padding: uiPadding(context),
           children: [
             // GLOBAL
             const SettingsSectionTitle(title: 'Global Settings'),
@@ -73,14 +74,11 @@ class _ReaderModeSettingsSheetState extends State<ReaderModeSettingsSheet> {
                   value: appConf.readerIsOpenLexiconDirecly,
                   onChanged: (v) async {
                     await appConf.saveReaderIsOpenLexiconDirecly(v);
-                    setState(() {});
+                    if (context.mounted) setState(() {});
 
-                    if (context.mounted) {
-                      showSnack(
-                        context,
-                        "Bookmark popup ${v ? "won't" : 'will'} be shown",
-                      );
-                    }
+                    MsgSv.showSnackbarMsg(
+                      "Bookmark popup ${v ? "won't" : 'will'} be shown",
+                    );
                   },
                 ),
               ],

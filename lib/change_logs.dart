@@ -10,6 +10,7 @@ final releases = [
     Add bookmark function to Direct dictionary
     Use card to show Direct dictionary results by default (to use table go to settings and Lexicon section and toggle show table)
     Update verb family info
+    Set max Ui-Width
   ''',
   ),
   Release(

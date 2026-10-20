@@ -223,10 +223,9 @@ class _PeraPickerSheetState extends State<_PeraPickerSheet>
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final arFont = Theme.of(context).textTheme.titleMedium!.ar.copyWith(
-      fontWeight: FontWeight.normal,
-      fontSize: L.fontSize,
-    );
+    final arFont = L.arStyleSized;
+    final arFontHigh = arFont.copyWith(color: cs.onSecondaryContainer);
+    final arFontNorm = arFont.copyWith(color: cs.onSurfaceVariant);
 
     return Material(
       color: cs.surface,
@@ -315,24 +314,27 @@ class _PeraPickerSheetState extends State<_PeraPickerSheet>
                               sc: _sc,
                               items: _filteredLines,
                               emptyText: 'No peras found',
-                              arFont: arFont,
                               onTapItem: (item) =>
                                   Navigator.of(context).pop(item.index),
                               itemBuilder: (item) {
+                                final isHi = item.index == _currPeraIdx;
+
                                 if (_filteredLines.length == _allLines.length) {
-                                  return Text(
+                                  final child = Text(
                                     item.arPera,
                                     overflow: TextOverflow.ellipsis,
                                     maxLines: 1,
-                                    style: arFont,
+                                    style: isHi ? arFontHigh : arFontNorm,
                                   );
+
+                                  return (isHi, child);
                                 }
 
                                 final (:pre, :suf) = item.clPera.splitOnce(
                                   _query,
                                 );
 
-                                return Text.rich(
+                                final child = Text.rich(
                                   TextSpan(
                                     children: [
                                       if (pre != null) TextSpan(text: pre),
@@ -346,10 +348,10 @@ class _PeraPickerSheetState extends State<_PeraPickerSheet>
                                       if (suf != null) TextSpan(text: suf),
                                     ],
                                   ),
-                                  style: arFont,
+                                  style: isHi ? arFontHigh : arFontNorm,
                                 );
+                                return (isHi, child);
                               },
-                              isHigh: (_, itm) => itm.index == _currPeraIdx,
                             ),
                           ),
                         ],
@@ -360,16 +362,16 @@ class _PeraPickerSheetState extends State<_PeraPickerSheet>
                         emptyText:
                             'No chapters found\n\n'
                             'Chapter numbers written with Arabic numerals (١٢٣) are automatically detected as chapters',
-                        arFont: arFont,
                         onTapItem: (item) =>
                             Navigator.of(context).pop(item.index),
                         itemBuilder: (item) {
                           final chapterWord = widget.peras[item.index].first.ar;
                           final chapter = 'الباب  ${chapterWord.padRight(2)}';
-                          final font = item.index == _currPeraIdx
-                              ? arFont.copyWith(color: cs.onPrimaryContainer)
-                              : arFont;
-                          return Row(
+                          final isHi = item.index == _currChapterIdx;
+
+                          final font = isHi ? arFontHigh : arFontNorm;
+
+                          final child = Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(chapter, style: font),
@@ -384,8 +386,8 @@ class _PeraPickerSheetState extends State<_PeraPickerSheet>
                               ),
                             ],
                           );
+                          return (isHi, child);
                         },
-                        isHigh: (_, itm) => itm.index == _currChapterIdx,
                       ),
                     ],
                   ),
@@ -401,11 +403,9 @@ class _PeraPickerSheetState extends State<_PeraPickerSheet>
   Widget _buildList({
     required ScrollController? sc,
     required List<_PeraLine> items,
-    required String emptyText,
-    required TextStyle arFont,
     required ValueChanged<_PeraLine> onTapItem,
-    required Widget Function(_PeraLine item) itemBuilder,
-    required bool Function(int index, _PeraLine itm) isHigh,
+    required (bool, Widget) Function(_PeraLine item) itemBuilder,
+    required String emptyText,
   }) {
     if (items.isEmpty) {
       return Padding(
@@ -422,39 +422,37 @@ class _PeraPickerSheetState extends State<_PeraPickerSheet>
 
     final cs = Theme.of(context).colorScheme;
 
-    final highDecor = BoxDecoration(color: cs.primaryContainer);
+    return ListView.separated(
+      controller: sc,
+      physics: const AlwaysScrollableScrollPhysics(),
+      padding: scrollPadding,
+      itemCount: items.length,
+      separatorBuilder: (_, _) => const SizedBox(height: 4),
+      itemBuilder: (context, index) {
+        final item = items[index];
+        final (hi, child) = itemBuilder(item);
 
-    return Material(
-      color: cs.surface,
-      child: ListView.separated(
-        controller: sc,
-        physics: const AlwaysScrollableScrollPhysics(),
-        padding: scrollPadding,
-        itemCount: items.length,
-        separatorBuilder: (_, _) => const Divider(height: 0),
-        itemBuilder: (context, index) {
-          final item = items[index];
-          final hi = isHigh(index, item);
-          return AutoScrollTag(
-            controller: _sc,
-            key: ValueKey(item.index),
-            index: item.index,
-            child: Ink(
-              decoration: hi ? highDecor : null,
-              child: InkWell(
-                onTap: () => onTapItem(item),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 8,
-                    horizontal: 12,
-                  ),
-                  child: itemBuilder(item),
+        return AutoScrollTag(
+          controller: _sc,
+          key: ValueKey(item.index),
+          index: item.index,
+          child: segmentedListItem(
+            bg: hi ? cs.secondaryContainer : cs.surfaceContainer,
+            index: index,
+            length: items.length,
+            item: InkWell(
+              onTap: () => onTapItem(item),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  vertical: 8,
+                  horizontal: 12,
                 ),
+                child: child,
               ),
             ),
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
   }
 }

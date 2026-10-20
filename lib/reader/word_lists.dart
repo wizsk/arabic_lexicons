@@ -3,6 +3,7 @@ import 'package:arabic_lexicons/data.dart';
 import 'package:arabic_lexicons/datas/word_store.dart';
 import 'package:arabic_lexicons/main_widgets.dart';
 import 'package:arabic_lexicons/pages/selectable_word_list_title_widget.dart';
+import 'package:arabic_lexicons/pages/width_padd.dart';
 import 'package:arabic_lexicons/reader/data.dart';
 import 'package:arabic_lexicons/reader/settings_class.dart';
 import 'package:arabic_lexicons/utils.dart';
@@ -222,7 +223,7 @@ class _CBWordListState extends State<CBWordList> {
                 )
               else
                 SliverPadding(
-                  padding: appConf.readerPadd(context),
+                  padding: uiPadding(context),
                   sliver: SliverList.separated(
                     itemCount: curr.length,
                     separatorBuilder: (_, _) => const SizedBox(height: 4),

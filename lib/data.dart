@@ -7,6 +7,8 @@ const appName = 'Arabic Lexcions';
 
 const emailAddr = 'sakibul706@gmail.com';
 
+const ellipsis = '…';
+
 const maxUiWidth = 700.00;
 const maxBottomSheetWidth = BoxConstraints(maxWidth: maxUiWidth - 50.0);
 

@@ -57,69 +57,58 @@ Future<int?> showStoryPicker(BuildContext context) {
             ),
 
             // Stories
-            ...separatedListBuilder(
-              items: stories,
-              separatorBuilder: (_) => const SizedBox(height: 8),
-              itemBuilder: (s, index) {
-                return Material(
-                  color: cs.surfaceContainerHigh,
-                  borderRadius: BorderRadius.circular(20),
-                  clipBehavior: Clip.antiAlias,
-                  child: InkWell(
-                    onTap: () => Navigator.pop(context, index),
-                    child: Padding(
-                      padding: const EdgeInsets.all(14),
-                      child: Row(
-                        textDirection: TextDirection.rtl,
-                        children: [
-                          // Story number
-                          Container(
-                            width: 44,
-                            height: 44,
-                            decoration: BoxDecoration(
-                              color: cs.primary,
-                              shape: BoxShape.circle,
-                            ),
-                            alignment: Alignment.center,
-                            child: Text(
-                              enToArNum(index + 1),
-                              style: TextStyle(
-                                color: cs.onPrimary,
-                                fontWeight: FontWeight.bold,
-                                fontFamily: L.arFont,
-                              ),
+            Directionality(
+              textDirection: TextDirection.rtl,
+              child: segmentedList(
+                bg: cs.surfaceContainerHigh,
+                list: stories.indexed
+                    .map((en) {
+                      final (index, s) = en;
+
+                      return ListTile(
+                        onTap: () => Navigator.pop(context, index),
+                        leading: Container(
+                          width: 44,
+                          height: 44,
+                          decoration: BoxDecoration(
+                            color: cs.primary,
+                            shape: BoxShape.circle,
+                          ),
+                          alignment: Alignment.center,
+                          child: Text(
+                            enToArNum(index + 1),
+                            style: TextStyle(
+                              color: cs.onPrimary,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: L.arFont,
+                              fontSize: 15,
                             ),
                           ),
-
-                          const SizedBox(width: 14),
-
-                          // Story details
-                          Expanded(
-                            child: Text(
-                              s.txt.first,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              textDirection: TextDirection.rtl,
-                              style: Theme.of(context).textTheme.titleMedium
-                                  ?.copyWith(
-                                    fontFamily: L.arFont,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                            ),
-                          ),
-
-                          const SizedBox(width: 8),
-
-                          Icon(
-                            Icons.chevron_left_rounded,
+                        ),
+                        title: Text(
+                          s.text.first,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          textDirection: TextDirection.rtl,
+                          style: TextStyle(
                             color: cs.onSurfaceVariant,
+                            height: 1.8,
                           ),
-                        ],
-                      ),
-                    ),
-                  ),
-                );
-              },
+                        ),
+
+                        subtitle: Text(
+                          s.type.name,
+                          style: TextStyle(color: cs.onSurfaceVariant),
+                        ),
+
+                        trailing: Icon(
+                          Icons.chevron_right_rounded,
+                          color: cs.onSurfaceVariant,
+                        ),
+                      );
+                    })
+                    .toList(growable: false),
+              ),
             ),
           ],
         ),

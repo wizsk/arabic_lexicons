@@ -343,6 +343,7 @@ Widget segmentedList({
   final MainAxisSize mainAxisSize = MainAxisSize.min,
   final double firstLastRadious = 20.00,
   final double middleRadious = 4.00,
+  final TextDirection? textDirection,
 }) {
   final children = <Widget>[];
 
@@ -360,6 +361,7 @@ Widget segmentedList({
   }
 
   return Column(
+    textDirection: textDirection,
     mainAxisSize: mainAxisSize,
     spacing: spacing,
     children: children,
@@ -388,7 +390,6 @@ Widget segmentedListItem({
 
   return child;
 }
-
 
 extension MergeSortList<T> on List<T> {
   void mergeSort(int Function(T a, T b) comp) {

@@ -92,10 +92,10 @@ class _PeraPickerSheetState extends State<_PeraPickerSheet>
       final isSub = e.$2.length > takeWordsCount;
       final words = isSub ? e.$2.sublist(0, takeWordsCount) : e.$2;
 
-      var arPera = words.map((w) => w.ar).join(' ');
-      final clPera = cleanBookTitle(words.map((w) => w.ar).join(' '));
-
-      if (isSub) arPera = '$arPera...';
+      final arPera =
+          '${words.map((w) => w.ar).join(' ')}${isSub ? ellipsis : ""}';
+      final clPera =
+          '${cleanBookTitle(words.map((w) => w.ar).join(' '))}${isSub ? ellipsis : ""}';
 
       return _PeraLine(index: e.$1, arPera: arPera, clPera: clPera);
     }).toList();

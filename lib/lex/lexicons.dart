@@ -552,16 +552,17 @@ class _SearchLexiconsState extends State<SearchLexicons>
       iconSize: 25,
     );
 
+    final divs = SizedBox(
+      height: 30,
+      child: VerticalDivider(
+        indent: 2,
+        thickness: 1.5,
+        color: cs.outlineVariant,
+      ),
+    );
     final btns = separatedList(
       separatorBuilder: (_) {
-        return SizedBox(
-          height: 30,
-          child: VerticalDivider(
-            indent: 2,
-            thickness: 1.5,
-            color: cs.outlineVariant,
-          ),
-        );
+        return divs;
       },
       list: [
         b(
@@ -615,19 +616,23 @@ class _SearchLexiconsState extends State<SearchLexicons>
         ),
         b(
           icon: willShowSugg ? Icons.arrow_downward : Icons.arrow_upward,
-          tooltip: 'Go top (or long press to go to bottom)',
-          onPressed: () {
-            postFrame((_) {
-              final sc = _datas.scrollController;
-              if (!sc.hasClients) return;
+          tooltip: willShowSugg
+              ? 'Go bottom (or long press to go to top)'
+              : 'Go top (or long press to go to bottom)',
+          onPressed: !willShowSugg && datas.resultsAreEmpty
+              ? null
+              : () {
+                  postFrame((_) {
+                    final sc = _datas.scrollController;
+                    if (!sc.hasClients) return;
 
-              sc.animateTo(
-                0.0,
-                duration: const Duration(milliseconds: 400),
-                curve: Curves.easeOut,
-              );
-            });
-          },
+                    sc.animateTo(
+                      0.0,
+                      duration: const Duration(milliseconds: 400),
+                      curve: Curves.easeOut,
+                    );
+                  });
+                },
           onLongPress: () {
             scrollToBottomSmooth(_datas.scrollController);
           },

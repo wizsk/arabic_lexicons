@@ -519,17 +519,29 @@ class _SearchLexiconsState extends State<SearchLexicons>
     }
   }
 
-  Widget _scrollToTopFloatingBtn(
+  bool _floatingBtnExpanded = true;
+
+  (bool, Widget) _floatingBtn(
     BuildContext context,
     ColorScheme cs,
     bool willShowSugg,
+    EdgeInsets padd,
   ) {
-    if (_datas.selectedWord.isEmpty) return SizedBox.shrink();
-    final shouldShow =
-        true ||
-        _datas.shouldShowUpDownArrow &&
-            !_datas.resultsAreEmpty &&
-            !willShowSugg;
+    if (_datas.selectedWord.isEmpty) return (false, SizedBox.shrink());
+
+    final iconBtnSize = (L.fontSize == null ? 40.0 : L.fontSize! * 1.8).clamp(
+      40.0,
+      50.0,
+    );
+
+    final totalIconListSize = iconBtnSize + 40;
+
+    final hasSpaceinSides =
+        padd.right > (appConf.readerSidePadd + totalIconListSize);
+
+    if (!hasSpaceinSides && !_floatingBtnExpanded) {
+      return (false, SizedBox.shrink());
+    }
 
     final datas = _datas;
     final bm =
@@ -540,145 +552,159 @@ class _SearchLexiconsState extends State<SearchLexicons>
       required VoidCallback? onPressed,
       VoidCallback? onLongPress,
       required String tooltip,
-      final bool err = false,
+      final IconButtonSizedColor scheme = IconButtonSizedColor.normal,
     }) => iconButtonSized(
       context,
       icon: icon,
       tooltip: tooltip,
       onPressed: onPressed,
       onLongPress: onLongPress,
-      scheme: err ? IconButtonSizedColor.err : IconButtonSizedColor.normal,
-      size: 45,
-      iconSize: 25,
+      scheme: scheme,
+      size: iconBtnSize,
+      iconSize: iconBtnSize / 2,
     );
 
-    final divs = SizedBox(
-      height: 30,
-      child: VerticalDivider(
-        indent: 2,
-        thickness: 1.5,
-        color: cs.outlineVariant,
+    final divs = ConstrainedBox(
+      constraints: BoxConstraints(
+        maxWidth: iconBtnSize / 2,
+        maxHeight: iconBtnSize / 2,
       ),
+      child: hasSpaceinSides
+          ? Divider(indent: 2, thickness: 1.5)
+          : VerticalDivider(
+              indent: 2,
+              width: 6,
+              thickness: 1.5,
+              color: cs.outlineVariant,
+            ),
     );
+
     final btns = separatedList(
       separatorBuilder: (_) {
         return divs;
       },
       list: [
-        b(
-          icon: datas.state.isSug ? Icons.directions : Icons.auto_awesome,
-          tooltip: 'Toggle search suggestions',
-          onPressed:
-              datas.selectedWord.isNotEmpty &&
-                  appConf.showSearchSugg &&
-                  !datas.state.isQuering
-              ? () async {
-                  final ss = datas.state.isSug;
-                  await datas.getAndShowResORSugg(
-                    context,
-                    forceSugg: !ss,
-                    forceRes: ss,
-                  );
-                }
-              : null,
-        ),
-        b(
-          icon: Icons.image_search_outlined,
-          tooltip: 'Search current word in saved book entries',
-          onPressed: datas.selectedWord.isEmpty
-              ? null
-              : () {
-                  FindWordReaderPage.open(context, datas.selectedWord);
-                },
-        ),
-        b(
-          icon: bm ? Icons.bookmark_remove : Icons.bookmark_add_outlined,
-          err: bm,
-          tooltip: bm ? 'Unbookmark' : 'BookMark',
-          onPressed: datas.selectedWord.isEmpty
-              ? null
-              : () async {
-                  if (bm) {
-                    final confirm = await showConfirmDialog(
+        if (_floatingBtnExpanded || hasSpaceinSides) ...[
+          b(
+            icon: datas.state.isSug ? Icons.directions : Icons.auto_awesome,
+            tooltip: 'Toggle search suggestions',
+            onPressed:
+                datas.selectedWord.isNotEmpty &&
+                    appConf.showSearchSugg &&
+                    !datas.state.isQuering
+                ? () async {
+                    final ss = datas.state.isSug;
+                    await datas.getAndShowResORSugg(
                       context,
-                      'Remove Bookmark',
-                      message: 'Remove: ${datas.selectedWord}',
-                      destructive: true,
-                      confirmText: 'Remove',
+                      forceSugg: !ss,
+                      forceRes: ss,
                     );
-                    if (confirm != true) return;
-                    await WordStore.rmBM(datas.selectedWord);
-                  } else {
-                    await WordStore.addBM(datas.selectedWord);
                   }
-                  if (mounted) setState(() {});
-                },
-        ),
-        b(
-          icon: willShowSugg ? Icons.arrow_downward : Icons.arrow_upward,
-          tooltip: willShowSugg
-              ? 'Go bottom (or long press to go to top)'
-              : 'Go top (or long press to go to bottom)',
-          onPressed: !willShowSugg && datas.resultsAreEmpty
-              ? null
-              : () {
-                  postFrame((_) {
-                    final sc = _datas.scrollController;
-                    if (!sc.hasClients) return;
+                : null,
+          ),
+          b(
+            icon: Icons.image_search_outlined,
+            tooltip: 'Search current word in saved book entries',
+            onPressed: datas.selectedWord.isEmpty
+                ? null
+                : () {
+                    FindWordReaderPage.open(context, datas.selectedWord);
+                  },
+          ),
+          b(
+            icon: bm ? Icons.bookmark_remove : Icons.bookmark_add_outlined,
+            scheme: bm ? IconButtonSizedColor.err : IconButtonSizedColor.normal,
+            tooltip: bm ? 'Unbookmark' : 'BookMark',
+            onPressed: datas.selectedWord.isEmpty
+                ? null
+                : () async {
+                    if (bm) {
+                      final confirm = await showConfirmDialog(
+                        context,
+                        'Remove Bookmark',
+                        message: 'Remove: ${datas.selectedWord}',
+                        destructive: true,
+                        confirmText: 'Remove',
+                      );
+                      if (confirm != true) return;
+                      await WordStore.rmBM(datas.selectedWord);
+                    } else {
+                      await WordStore.addBM(datas.selectedWord);
+                    }
+                    if (mounted) setState(() {});
+                  },
+          ),
+          b(
+            icon: willShowSugg ? Icons.arrow_downward : Icons.arrow_upward,
+            tooltip: willShowSugg
+                ? 'Go bottom (or long press to go to top)'
+                : 'Go top (or long press to go to bottom)',
+            onPressed: !willShowSugg && datas.resultsAreEmpty
+                ? null
+                : () {
+                    postFrame((_) {
+                      final sc = _datas.scrollController;
+                      if (!sc.hasClients) return;
 
-                    sc.animateTo(
-                      0.0,
-                      duration: const Duration(milliseconds: 400),
-                      curve: Curves.easeOut,
-                    );
-                  });
-                },
-          onLongPress: () {
-            scrollToBottomSmooth(_datas.scrollController);
-          },
-        ),
+                      sc.animateTo(
+                        0.0,
+                        duration: const Duration(milliseconds: 400),
+                        curve: Curves.easeOut,
+                      );
+                    });
+                  },
+            onLongPress: () {
+              scrollToBottomSmooth(_datas.scrollController);
+            },
+          ),
+        ],
+
+        if (!hasSpaceinSides)
+          b(
+            icon: Icons.cancel_outlined,
+            tooltip: 'Minimize',
+            onPressed: () {
+              setState(() {
+                _floatingBtnExpanded = !_floatingBtnExpanded;
+              });
+            },
+          ),
       ],
     );
 
-    return Align(
-      alignment: Alignment.bottomCenter,
-      child: Padding(
-        padding: const EdgeInsets.only(bottom: 16),
-        child: AnimatedSwitcher(
-          duration: const Duration(milliseconds: 200),
-          switchInCurve: Curves.easeOutBack,
-          switchOutCurve: Curves.easeIn,
-          transitionBuilder: (child, animation) =>
-              ScaleTransition(scale: animation, child: child),
-          child: (shouldShow)
-              ? Container(
-                  key: const ValueKey('floating-options'),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    color: cs.surfaceContainerHigh,
-                    // shape: BoxShape.rectangle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: cs.shadow.withValues(alpha: 0.20),
-                        blurRadius: 12,
-                      ),
-                    ],
-                    border: BoxBorder.all(color: cs.outlineVariant, width: 1.5),
-                  ),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 6,
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    // spacing: 4,
-                    children: btns,
-                  ),
-                )
-              : const SizedBox.shrink(),
+    final child = Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: padd.right + (hasSpaceinSides ? -totalIconListSize : 12.0),
+      ),
+      child: Align(
+        alignment: hasSpaceinSides
+            ? Alignment.bottomRight
+            : _floatingBtnExpanded
+            ? Alignment.bottomCenter
+            : Alignment.bottomRight,
+        child: Container(
+          margin: EdgeInsetsGeometry.only(bottom: 16),
+          key: const ValueKey('floating-options'),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            color: cs.surfaceContainer,
+            boxShadow: [
+              BoxShadow(
+                color: cs.shadow.withValues(alpha: 0.20),
+                blurRadius: 18,
+              ),
+            ],
+            border: BoxBorder.all(color: cs.outlineVariant, width: 1.5),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 2),
+          child: hasSpaceinSides
+              ? Column(mainAxisSize: MainAxisSize.min, children: btns)
+              : Row(mainAxisSize: MainAxisSize.min, children: btns),
         ),
       ),
     );
+
+    return (hasSpaceinSides, child);
   }
 
   Widget _dictView(
@@ -687,6 +713,7 @@ class _SearchLexiconsState extends State<SearchLexicons>
     bool willShowSugg,
     EdgeInsets padd,
     ColorScheme cs,
+    bool floatingBtnOnSides,
   ) {
     final arTxtTheme = appConf.readerTS(context);
     return Directionality(
@@ -704,7 +731,11 @@ class _SearchLexiconsState extends State<SearchLexicons>
             padding: _datas.sugg.isEmpty && _datas.resultsAreEmpty
                 ? EdgeInsets.zero
                 : willShowSugg
-                ? padd.copyWith(bottom: 68)
+                ? padd.copyWith(
+                    bottom: floatingBtnOnSides || !_floatingBtnExpanded
+                        ? 0
+                        : 68,
+                  )
                 : padd.copyWith(top: 12),
             sliver: _mainDict(context, cs, arTxtTheme),
           ),
@@ -713,7 +744,12 @@ class _SearchLexiconsState extends State<SearchLexicons>
     );
   }
 
-  Widget _searchSectin(BuildContext context, EdgeInsets padd, Color bg) {
+  Widget _searchSectin(
+    BuildContext context,
+    EdgeInsets padd,
+    Color bg,
+    bool floatingBtnOnSides,
+  ) {
     final children = [
       Divider(thickness: 0.5, height: 0),
       if (_showingScrollableSelection && appConf.scrollLexSelection)
@@ -810,6 +846,17 @@ class _SearchLexiconsState extends State<SearchLexicons>
                 decoration: InputDecoration(
                   hintText: L.p('Search Words', 'ابحث'),
                   hintTextDirection: L.dir,
+                  suffixIcon: _floatingBtnExpanded || floatingBtnOnSides
+                      ? null
+                      : IconButton(
+                          tooltip: 'Show floating action buttons',
+                          icon: Icon(Icons.apps),
+                          onPressed: () {
+                            setState(() {
+                              _floatingBtnExpanded = true;
+                            });
+                          },
+                        ),
                   prefixIcon: IconButton(
                     onPressed: () {
                       setState(() {
@@ -856,6 +903,13 @@ class _SearchLexiconsState extends State<SearchLexicons>
 
     final padd = appConf.readerPadd(context, bottom: scrollPaddingBottom + 68);
 
+    final (floatingBtnOnSides, floatingBtn) = _floatingBtn(
+      context,
+      cs,
+      willShowSugg,
+      padd,
+    );
+
     // if (kDebugMode) debugPrint('rebuild at: ${formatDateTime(context)}');
     return ReaderThemed(
       child: Scaffold(
@@ -879,12 +933,19 @@ class _SearchLexiconsState extends State<SearchLexicons>
                 Expanded(
                   child: Stack(
                     children: [
-                      _dictView(context, dir, willShowSugg, padd, cs),
-                      _scrollToTopFloatingBtn(context, cs, willShowSugg),
+                      _dictView(
+                        context,
+                        dir,
+                        willShowSugg,
+                        padd,
+                        cs,
+                        floatingBtnOnSides,
+                      ),
+                      floatingBtn,
                     ],
                   ),
                 ),
-                _searchSectin(context, padd, bg),
+                _searchSectin(context, padd, bg, floatingBtnOnSides),
               ],
             ),
           ),

@@ -3,6 +3,8 @@ import 'dart:math';
 import 'package:arabic_lexicons/conf.dart';
 import 'package:arabic_lexicons/data.dart';
 import 'package:arabic_lexicons/reader/reader_utils.dart';
+import 'package:arabic_lexicons/utils/toast_snack.dart';
+import 'package:arabic_lexicons/widgets/reader_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -116,89 +118,92 @@ class _SelectableTextScreenState extends State<SelectableTextScreen> {
 
     final sidePadd = max(24.0, readerPadd.right);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          widget.title ?? L.p('Select Text', /* txt */ 'حدد النص'),
-          style: L.arStyle,
-        ),
-        actions: [
-          IconButton(
-            tooltip: 'Copy All',
-            icon: const Icon(Icons.copy_all),
-            onPressed: () async {
-              await Clipboard.setData(ClipboardData(text: _txt));
-
-              if (!context.mounted) return;
-              showSnack(context, 'Text copied');
-            },
+    return ReaderThemed(
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(
+            widget.title ?? L.p('Select Text', /* txt */ 'حدد النص'),
+            textDirection: L.dir,
           ),
-          if (_length > 1)
+          actions: [
             IconButton(
-              tooltip: 'Select range',
-              icon: Icon(Icons.tune),
+              tooltip: 'Copy All',
+              icon: const Icon(Icons.copy_all),
               onPressed: () async {
-                final result = await _ParaRangeDialouge.show(
-                  context,
-                  curr: _curr,
-                  def: _def,
-                  length: _length,
-                );
-
-                if (result == null) return;
+                await Clipboard.setData(ClipboardData(text: _txt));
 
                 if (!context.mounted) return;
-
-                setState(() {
-                  _curr = result;
-                  _setTxt();
-                });
-                showSnack(
-                  context,
-                  result.count == 1
-                      ? 'Showing a single para ${result.start + 1}'
-                      : 'Showing paras from ${result.start + 1} to ${result.end} '
-                            '(total: ${result.count})',
-                  duration: const Duration(seconds: 3),
-                );
+                MsgSv.showSnackbarMsg('Text copied');
               },
             ),
-        ],
-      ),
-      body: SafeArea(
-        child: Directionality(
-          textDirection: widget.dir,
-          child: Padding(
-            padding: EdgeInsets.only(
-              bottom: MediaQuery.of(context).padding.bottom,
-            ),
-            child: ListView(
-              padding: EdgeInsetsGeometry.fromLTRB(
-                sidePadd,
-                12,
-                sidePadd,
-                readerPadd.bottom,
+            if (_length > 1)
+              IconButton(
+                tooltip: 'Select range',
+                icon: Icon(Icons.tune),
+                onPressed: () async {
+                  final result = await _ParaRangeDialouge.show(
+                    context,
+                    curr: _curr,
+                    def: _def,
+                    length: _length,
+                  );
+
+                  if (result == null) return;
+
+                  if (!context.mounted) return;
+
+                  setState(() {
+                    _curr = result;
+                    _setTxt();
+                  });
+                  showSnack(
+                    context,
+                    result.count == 1
+                        ? 'Showing a single para ${result.start + 1}'
+                        : 'Showing paras from ${result.start + 1} to ${result.end} '
+                              '(total: ${result.count})',
+                    duration: const Duration(seconds: 3),
+                  );
+                },
               ),
-              children: [
-                SelectionArea(
-                  magnifierConfiguration: TextMagnifierConfiguration.disabled,
-                  contextMenuBuilder: (context, selectableRegionState) {
-                    return AdaptiveTextSelectionToolbar.buttonItems(
-                      anchors: selectableRegionState.contextMenuAnchors,
-                      buttonItems: selectableRegionState.contextMenuButtonItems,
-                    );
-                  },
-                  child: Text(
-                    _txt,
-                    textAlign: widget.textAlign,
-                    style: widget.textStyleBodyMedium.copyWith(
-                      // height: 2.0,
-                      leadingDistribution: TextLeadingDistribution.even,
-                      color: cs.onSurface,
+          ],
+        ),
+        body: SafeArea(
+          child: Directionality(
+            textDirection: widget.dir,
+            child: Padding(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).padding.bottom,
+              ),
+              child: ListView(
+                padding: EdgeInsetsGeometry.fromLTRB(
+                  sidePadd,
+                  12,
+                  sidePadd,
+                  readerPadd.bottom,
+                ),
+                children: [
+                  SelectionArea(
+                    magnifierConfiguration: TextMagnifierConfiguration.disabled,
+                    contextMenuBuilder: (context, selectableRegionState) {
+                      return AdaptiveTextSelectionToolbar.buttonItems(
+                        anchors: selectableRegionState.contextMenuAnchors,
+                        buttonItems:
+                            selectableRegionState.contextMenuButtonItems,
+                      );
+                    },
+                    child: Text(
+                      _txt,
+                      textAlign: widget.textAlign,
+                      style: widget.textStyleBodyMedium.copyWith(
+                        // height: 2.0,
+                        leadingDistribution: TextLeadingDistribution.even,
+                        color: cs.onSurface,
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

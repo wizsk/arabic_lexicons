@@ -214,7 +214,13 @@ class AppSettingsController extends ChangeNotifier {
     );
 
     final seedColorInt = prefs.getInt(_seedColorKey);
-    _seedColor = seedColorInt == null ? _seedColorDef : Color(seedColorInt);
+
+    if (seedColorInt == null) {
+      _seedColor = _seedColorDef;
+    } else {
+      final c = Color(seedColorInt);
+      _seedColor = uiSeedColors.contains(c) ? c : _seedColorDef;
+    }
 
     _playRate = prefs.getInt(_playRateKey) ?? 0;
 

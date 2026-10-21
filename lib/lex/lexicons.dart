@@ -16,6 +16,7 @@ import 'package:arabic_lexicons/main_widgets.dart';
 import 'package:arabic_lexicons/utils.dart';
 import 'package:arabic_lexicons/utils/scroll_funcs.dart';
 import 'package:arabic_lexicons/widgets/lex_word_confirm.dart';
+import 'package:arabic_lexicons/widgets/reader_theme.dart';
 import 'package:arabic_lexicons/widgets/selection_chip.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -82,17 +83,11 @@ class _SearchLexiconsState extends State<SearchLexicons>
       scrollableSelectionDict: _scrollableSelectionDictSc,
     );
 
-    // this is mainly for the appbar
-
     sc.addListener(() {
-      final appbarColor = readerAppBarColorBg(sc.offset);
-
       final shouldShowUpDownArrow = sc.offset > 100;
 
-      if (_datas.appbarReaderBg != appbarColor ||
-          shouldShowUpDownArrow != _datas.shouldShowUpDownArrow) {
+      if (shouldShowUpDownArrow != _datas.shouldShowUpDownArrow) {
         setState(() {
-          _datas.appbarReaderBg = appbarColor;
           _datas.shouldShowUpDownArrow = shouldShowUpDownArrow;
         });
       }
@@ -772,40 +767,42 @@ class _SearchLexiconsState extends State<SearchLexicons>
     final padd = appConf.readerPadd(context);
 
     // if (kDebugMode) debugPrint('rebuild at: ${formatDateTime(context)}');
-    return Scaffold(
-      appBar: willShowSugg
-          ? lexAppBar(context, _datas, _setSate) as AppBar
-          : null,
-      drawer: _isPopup ? null : buildDrawer(context),
-      backgroundColor: bg,
-      body: SafeArea(
-        top: willShowSugg,
-        bottom: !appConf.fullScreen,
-        child: GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: () {
-            if (_focusNode.hasFocus) {
-              FocusManager.instance.primaryFocus?.unfocus();
-            }
-          },
-          child: Column(
-            children: [
-              Expanded(
-                child: Stack(
-                  children: [
-                    _dictView(context, dir, willShowSugg, padd, cs),
-                    _scrollToTopFloatingBtn(context, cs, willShowSugg),
-                  ],
+    return ReaderThemed(
+      child: Scaffold(
+        appBar: willShowSugg
+            ? lexAppBar(context, _datas, _setSate) as AppBar
+            : null,
+        drawer: _isPopup ? null : buildDrawer(context),
+        backgroundColor: bg,
+        body: SafeArea(
+          top: willShowSugg,
+          bottom: !appConf.fullScreen,
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () {
+              if (_focusNode.hasFocus) {
+                FocusManager.instance.primaryFocus?.unfocus();
+              }
+            },
+            child: Column(
+              children: [
+                Expanded(
+                  child: Stack(
+                    children: [
+                      _dictView(context, dir, willShowSugg, padd, cs),
+                      _scrollToTopFloatingBtn(context, cs, willShowSugg),
+                    ],
+                  ),
                 ),
-              ),
-              _searchSectin(context, padd, bg),
-            ],
+                _searchSectin(context, padd, bg),
+              ],
+            ),
           ),
         ),
+        // floatingActionButton: FloatingActionButton(
+        //   onPressed: () => showDictReorderSheet(context),
+        // ),
       ),
-      // floatingActionButton: FloatingActionButton(
-      //   onPressed: () => showDictReorderSheet(context),
-      // ),
     );
   }
 }

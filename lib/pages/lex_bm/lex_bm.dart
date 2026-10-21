@@ -7,6 +7,7 @@ import 'package:arabic_lexicons/pages/lex_bm/def.dart';
 import 'package:arabic_lexicons/pages/width_padd.dart';
 import 'package:arabic_lexicons/theme.dart';
 import 'package:arabic_lexicons/utils.dart';
+import 'package:arabic_lexicons/widgets/reader_theme.dart';
 import 'package:flutter/material.dart';
 
 class LexDefBmPage extends StatefulWidget {
@@ -115,176 +116,176 @@ class _LexDefBmPageState extends State<LexDefBmPage> {
         }
         Navigator.pop(context);
       },
-      child: Scaffold(
-        // appBar: AppBar(),
-        // drawer: buildDrawer(context),
-        body: GestureStack(
-          child: Column(
-            children: [
-              Expanded(
-                child: CustomScrollView(
-                  controller: _scrollController,
-                  slivers: [
-                    Directionality(
-                      textDirection: TextDirection.ltr,
-                      child: SliverAppBar(
-                        floating: true,
-                        snap: appConf.hideAppbar,
-                        pinned: !appConf.hideAppbar,
-                        title: _selection.appBarTitle("Saved Definitions"),
-                      ),
-                    ),
-                    if (!_inited)
-                      SliverFillRemaining(
-                        hasScrollBody: false,
-                        child: Center(child: CircularProgressIndicator()),
-                      )
-                    else if (_defList.isEmpty)
-                      SliverFillRemaining(
-                        hasScrollBody: false,
-                        child: Center(child: Text("Emtpty")),
-                      )
-                    else
-                      SliverPadding(
-                        padding: padd,
-                        sliver: SliverList.separated(
-                          itemCount: _defList.length,
-                          separatorBuilder: (_, _) {
-                            return spaceBetweenDefs;
-                          },
-                          itemBuilder: (context, visualIndex) {
-                            final index = _isShowNewToOld
-                                ? _defList.length - 1 - visualIndex
-                                : visualIndex;
-
-                            final def = _defList[index];
-
-                            final isEng = def.dict.isEng;
-
-                            final child = def.dict.isArEn
-                                ? Directionality(
-                                    textDirection: TextDirection.ltr,
-                                    child: Text(
-                                      def.meanings,
-                                      style: ts,
-                                      textAlign: TextAlign.left,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  )
-                                : isEng
-                                ? engMeaningView(
-                                    def.meanings,
-                                    fontSize,
-                                    fontHeight,
-                                    fontFam,
-                                    cs,
-                                    false,
-                                    hiColor,
-                                    maxlines: 1,
-                                    textOverFlow: TextOverflow.ellipsis,
-                                  )
-                                : def.r.arMeaningView(
-                                    context,
-                                    ts: ts,
-                                    hasRefs: def.dict.hasRefs,
-                                    maxlines: 1,
-                                    textOverFlow: TextOverflow.ellipsis,
-                                  );
-
-                            final dir = isEng
-                                ? TextDirection.ltr
-                                : TextDirection.rtl;
-
-                            final align = isEng
-                                ? TextAlign.left
-                                : TextAlign.right;
-
-                            final d = Directionality(
-                              textDirection: dir,
-                              child: definitonCardDbRow(
-                                context,
-                                def.dict,
-                                def.r,
-                                child,
-                                useM3Colors: true,
-                                text: () =>
-                                    htmlToPlainTextWithLineBr(def.meanings),
-                                rebuild: () {
-                                  if (context.mounted) setState(() {});
-                                },
-                                onRemove: () => _defList.removeAt(index),
-                                fs: () {
-                                  final child = isEng
-                                      ? engMeaningView(
-                                          def.meanings,
-                                          fontSize,
-                                          fontHeight,
-                                          fontFam,
-                                          cs,
-                                          false,
-                                          hiColor,
-                                        )
-                                      : def.r.arMeaningView(
-                                          context,
-                                          ts: ts,
-                                          hasRefs: def.dict.hasRefs,
-                                        );
-
-                                  LexBnDefPage.open(
-                                    context,
-                                    en: def,
-                                    align: align,
-                                    dir: dir,
-                                    def: child,
-                                  );
-                                },
-                              ),
-                            );
-
-                            return d;
-                          },
+      child: ReaderThemed(
+        child: Scaffold(
+          body: GestureStack(
+            child: Column(
+              children: [
+                Expanded(
+                  child: CustomScrollView(
+                    controller: _scrollController,
+                    slivers: [
+                      Directionality(
+                        textDirection: TextDirection.ltr,
+                        child: SliverAppBar(
+                          floating: true,
+                          snap: appConf.hideAppbar,
+                          pinned: !appConf.hideAppbar,
+                          title: _selection.appBarTitle("Saved Definitions"),
                         ),
                       ),
-                  ],
-                ),
-              ),
+                      if (!_inited)
+                        SliverFillRemaining(
+                          hasScrollBody: false,
+                          child: Center(child: CircularProgressIndicator()),
+                        )
+                      else if (_defList.isEmpty)
+                        SliverFillRemaining(
+                          hasScrollBody: false,
+                          child: Center(child: Text("Emtpty")),
+                        )
+                      else
+                        SliverPadding(
+                          padding: padd,
+                          sliver: SliverList.separated(
+                            itemCount: _defList.length,
+                            separatorBuilder: (_, _) {
+                              return spaceBetweenDefs;
+                            },
+                            itemBuilder: (context, visualIndex) {
+                              final index = _isShowNewToOld
+                                  ? _defList.length - 1 - visualIndex
+                                  : visualIndex;
 
-              // Padding(
-              //   padding: EdgeInsetsGeometry.symmetric(horizontal: padd.right),
-              //   child: const Divider(height: 0),
-              // ),
-              // SizedBox(width: 8),
-              // Padding(
-              //   padding: EdgeInsetsGeometry.symmetric(
-              //     horizontal: padd.right,
-              //     vertical: 8,
-              //   ),
-              //   child: TextField(
-              //     controller: _tc,
-              //     // focusNode: _focusNode,
-              //     textDirection: TextDirection.rtl,
-              //     textAlign: TextAlign.start,
-              //     onChanged: _onSearchChange,
-              //     // style: arTxtTheme,
-              //     style: L.arStyleSized,
-              //     decoration: InputDecoration(
-              //       hintText: L.p('Search Words', 'ابحث'),
-              //       hintTextDirection: L.dir,
-              //       suffixIcon: IconButton(
-              //         onPressed: () {
-              //           setState(() {
-              //             _tc.clear();
-              //             _shearced = '';
-              //           });
-              //         },
-              //         icon: Icon(Icons.clear),
-              //       ),
-              //     ),
-              //   ),
-              // ),
-              // if (appConf.fullScreen) const SizedBox(height: 10),
-            ],
+                              final def = _defList[index];
+
+                              final isEng = def.dict.isEng;
+
+                              final child = def.dict.isArEn
+                                  ? Directionality(
+                                      textDirection: TextDirection.ltr,
+                                      child: Text(
+                                        def.meanings,
+                                        style: ts,
+                                        textAlign: TextAlign.left,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    )
+                                  : isEng
+                                  ? engMeaningView(
+                                      def.meanings,
+                                      fontSize,
+                                      fontHeight,
+                                      fontFam,
+                                      cs,
+                                      false,
+                                      hiColor,
+                                      maxlines: 1,
+                                      textOverFlow: TextOverflow.ellipsis,
+                                    )
+                                  : def.r.arMeaningView(
+                                      context,
+                                      ts: ts,
+                                      hasRefs: def.dict.hasRefs,
+                                      maxlines: 1,
+                                      textOverFlow: TextOverflow.ellipsis,
+                                    );
+
+                              final dir = isEng
+                                  ? TextDirection.ltr
+                                  : TextDirection.rtl;
+
+                              final align = isEng
+                                  ? TextAlign.left
+                                  : TextAlign.right;
+
+                              final d = Directionality(
+                                textDirection: dir,
+                                child: definitonCardDbRow(
+                                  context,
+                                  def.dict,
+                                  def.r,
+                                  child,
+                                  // useM3Colors: true,
+                                  text: () =>
+                                      htmlToPlainTextWithLineBr(def.meanings),
+                                  rebuild: () {
+                                    if (context.mounted) setState(() {});
+                                  },
+                                  onRemove: () => _defList.removeAt(index),
+                                  fs: () {
+                                    final child = isEng
+                                        ? engMeaningView(
+                                            def.meanings,
+                                            fontSize,
+                                            fontHeight,
+                                            fontFam,
+                                            cs,
+                                            false,
+                                            hiColor,
+                                          )
+                                        : def.r.arMeaningView(
+                                            context,
+                                            ts: ts,
+                                            hasRefs: def.dict.hasRefs,
+                                          );
+
+                                    LexBnDefPage.open(
+                                      context,
+                                      en: def,
+                                      align: align,
+                                      dir: dir,
+                                      def: child,
+                                    );
+                                  },
+                                ),
+                              );
+
+                              return d;
+                            },
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+
+                // Padding(
+                //   padding: EdgeInsetsGeometry.symmetric(horizontal: padd.right),
+                //   child: const Divider(height: 0),
+                // ),
+                // SizedBox(width: 8),
+                // Padding(
+                //   padding: EdgeInsetsGeometry.symmetric(
+                //     horizontal: padd.right,
+                //     vertical: 8,
+                //   ),
+                //   child: TextField(
+                //     controller: _tc,
+                //     // focusNode: _focusNode,
+                //     textDirection: TextDirection.rtl,
+                //     textAlign: TextAlign.start,
+                //     onChanged: _onSearchChange,
+                //     // style: arTxtTheme,
+                //     style: L.arStyleSized,
+                //     decoration: InputDecoration(
+                //       hintText: L.p('Search Words', 'ابحث'),
+                //       hintTextDirection: L.dir,
+                //       suffixIcon: IconButton(
+                //         onPressed: () {
+                //           setState(() {
+                //             _tc.clear();
+                //             _shearced = '';
+                //           });
+                //         },
+                //         icon: Icon(Icons.clear),
+                //       ),
+                //     ),
+                //   ),
+                // ),
+                // if (appConf.fullScreen) const SizedBox(height: 10),
+              ],
+            ),
           ),
         ),
       ),

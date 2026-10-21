@@ -94,21 +94,16 @@ Widget lexAppBar(
     ),
   ];
 
-  final bg = datas.appbarReaderBg ? appConf.readerSurface(context) : null;
-
   return datas.state.isSug
       ? AppBar(
           title: title,
           forceMaterialTransparency: true,
-          // most likely unnessesary
-          backgroundColor: appConf.readerSurface(context),
           actions: actions,
         )
       : Directionality(
           textDirection: TextDirection.ltr,
           child: SliverAppBar(
             title: title,
-            backgroundColor: bg,
             titleSpacing: 0.0,
             floating: true,
             snap: appConf.hideAppbar,

@@ -3,6 +3,7 @@ import 'package:arabic_lexicons/data.dart';
 import 'package:arabic_lexicons/datas/lex_entry_bookmark.dart';
 import 'package:arabic_lexicons/lex/res.dart';
 import 'package:arabic_lexicons/theme.dart';
+import 'package:arabic_lexicons/widgets/reader_theme.dart';
 import 'package:flutter/material.dart';
 
 class LexBnDefPage extends StatelessWidget {
@@ -72,26 +73,28 @@ class LexBnDefPage extends StatelessWidget {
 
     final dir = isEng ? TextDirection.ltr : TextDirection.rtl;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          '${en.dict.name}: ${en.word}',
-          textDirection: L.dir,
-          style: L.arStyle,
+    return ReaderThemed(
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(
+            '${en.dict.name}: ${en.word}',
+            textDirection: L.dir,
+            style: L.arStyle,
+          ),
         ),
-      ),
-      body: Directionality(
-        textDirection: dir,
-        child: SingleChildScrollView(
-          padding: padd,
-          child: Column(
-            children: [
-              const SizedBox(height: 12),
-              SelectionArea(
-                magnifierConfiguration: TextMagnifierConfiguration.disabled,
-                child: child,
-              ),
-            ],
+        body: Directionality(
+          textDirection: dir,
+          child: SingleChildScrollView(
+            padding: padd,
+            child: Column(
+              children: [
+                const SizedBox(height: 12),
+                SelectionArea(
+                  magnifierConfiguration: TextMagnifierConfiguration.disabled,
+                  child: child,
+                ),
+              ],
+            ),
           ),
         ),
       ),

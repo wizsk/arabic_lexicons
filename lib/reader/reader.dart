@@ -17,6 +17,7 @@ import 'package:arabic_lexicons/reader/word_lists.dart';
 import 'package:arabic_lexicons/theme.dart';
 import 'package:arabic_lexicons/utils.dart';
 import 'package:arabic_lexicons/utils/toast_snack.dart';
+import 'package:arabic_lexicons/widgets/reader_theme.dart';
 import 'package:arabic_lexicons/widgets/scroll.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -217,13 +218,7 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
   }
 
   Timer? _scrollPosBuf;
-  bool _readerAppBarColorBg = true;
   void _onScroll() {
-    final appbarColor = readerAppBarColorBg(_sc.offset);
-    if (_readerAppBarColorBg != appbarColor) {
-      setState(() => _readerAppBarColorBg = appbarColor);
-    }
-
     final sd = _sc.position.userScrollDirection;
     if (sd == ScrollDirection.reverse && _isFabVisable) {
       setState(() {
@@ -599,9 +594,6 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
         floating: true,
         snap: appConf.hideAppbar,
         pinned: !appConf.hideAppbar,
-        backgroundColor: _readerAppBarColorBg
-            ? appConf.readerSurface(context)
-            : null,
         title: Text(
           _title,
           textDirection: TextDirection.rtl,
@@ -745,62 +737,64 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
         if (didPop) return;
         exitReaderPage(context);
       },
-      child: Scaffold(
-        appBar: _inited
-            ? null
-            : AppBar(
-                title: Text(
-                  L.p('Loading...', 'جارٍ التحميل...'),
-                  textDirection: L.dir,
-                  style: L.arStyleIf,
-                ),
-                backgroundColor: appConf.readerSurface(context),
-              ),
-        drawer: buildDrawer(context),
-        backgroundColor: appConf.readerSurface(context),
-        body: GestureStack(
-          child: Directionality(
-            textDirection: TextDirection.rtl,
-            child: !_inited
-                ? const Center(child: CircularProgressIndicator())
-                : CustomScrollView(
-                    controller: _sc,
-                    slivers: [
-                      _buildSliverAppBar(context, style),
-                      SliverPadding(
-                        padding: padd,
-                        sliver: _rs.isQasidah
-                            ? _buildQasidahSliver(
-                                context,
-                                style,
-                                styleLU,
-                                highStyle,
-                              )
-                            : _buildParagraphSliver(
-                                context,
-                                style,
-                                styleLU,
-                                highStyle,
-                              ),
-                      ),
-                    ],
+      child: ReaderThemed(
+        child: Scaffold(
+          appBar: _inited
+              ? null
+              : AppBar(
+                  title: Text(
+                    L.p('Loading...', 'جارٍ التحميل...'),
+                    textDirection: L.dir,
+                    style: L.arStyleIf,
                   ),
+                  backgroundColor: appConf.readerSurface(context),
+                ),
+          drawer: buildDrawer(context),
+          backgroundColor: appConf.readerSurface(context),
+          body: GestureStack(
+            child: Directionality(
+              textDirection: TextDirection.rtl,
+              child: !_inited
+                  ? const Center(child: CircularProgressIndicator())
+                  : CustomScrollView(
+                      controller: _sc,
+                      slivers: [
+                        _buildSliverAppBar(context, style),
+                        SliverPadding(
+                          padding: padd,
+                          sliver: _rs.isQasidah
+                              ? _buildQasidahSliver(
+                                  context,
+                                  style,
+                                  styleLU,
+                                  highStyle,
+                                )
+                              : _buildParagraphSliver(
+                                  context,
+                                  style,
+                                  styleLU,
+                                  highStyle,
+                                ),
+                        ),
+                      ],
+                    ),
+            ),
           ),
-        ),
-        floatingActionButton: !_inited
-            ? null
-            : AnimatedSlide(
-                duration: Duration(milliseconds: 300),
-                offset: isFabVisable ? Offset.zero : Offset(0, 2),
-                child: AnimatedOpacity(
+          floatingActionButton: !_inited
+              ? null
+              : AnimatedSlide(
                   duration: Duration(milliseconds: 300),
-                  opacity: isFabVisable ? 1.0 : 0.0,
-                  child: FloatingActionButton(
-                    onPressed: _options,
-                    child: Icon(Icons.menu_book),
+                  offset: isFabVisable ? Offset.zero : Offset(0, 2),
+                  child: AnimatedOpacity(
+                    duration: Duration(milliseconds: 300),
+                    opacity: isFabVisable ? 1.0 : 0.0,
+                    child: FloatingActionButton(
+                      onPressed: _options,
+                      child: Icon(Icons.menu_book),
+                    ),
                   ),
                 ),
-              ),
+        ),
       ),
     );
   }

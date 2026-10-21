@@ -101,9 +101,15 @@ final oddRowDark = readerColorsDark.onSurface.withAlpha(11); // ~0.045
 ThemeData buildTheme(
   BuildContext context,
   Brightness b,
-  AppSettingsController an,
-) {
-  final cs = ColorScheme.fromSeed(seedColor: an.seedColor, brightness: b);
+  AppSettingsController an, {
+  ReaderColors? rs,
+}) {
+  final csM3 = ColorScheme.fromSeed(seedColor: an.seedColor, brightness: b);
+
+  final cs = rs == null
+      ? csM3
+      : csM3.copyWith(surface: rs.surface, onSurface: rs.onSurface);
+
   var td = ThemeData.from(colorScheme: cs, useMaterial3: true);
 
   const uiEngFont = fontInter;

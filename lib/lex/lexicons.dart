@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:arabic_lexicons/conf.dart';
 import 'package:arabic_lexicons/data.dart';
+import 'package:arabic_lexicons/datas/word_store.dart';
 import 'package:arabic_lexicons/first_run.dart';
 import 'package:arabic_lexicons/key_shortcuts.dart';
 import 'package:arabic_lexicons/lex/data.dart';
@@ -13,11 +14,13 @@ import 'package:arabic_lexicons/lex/utils.dart';
 import 'package:arabic_lexicons/lex/widgets.dart';
 import 'package:arabic_lexicons/lex/word_dict_picker.dart';
 import 'package:arabic_lexicons/main_widgets.dart';
+import 'package:arabic_lexicons/reader/find_word.dart';
 import 'package:arabic_lexicons/utils.dart';
 import 'package:arabic_lexicons/utils/scroll_funcs.dart';
 import 'package:arabic_lexicons/widgets/lex_word_confirm.dart';
 import 'package:arabic_lexicons/widgets/reader_theme.dart';
 import 'package:arabic_lexicons/widgets/selection_chip.dart';
+import 'package:arabic_lexicons/widgets/small_icon_btns.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
@@ -521,10 +524,116 @@ class _SearchLexiconsState extends State<SearchLexicons>
     ColorScheme cs,
     bool willShowSugg,
   ) {
+    if (_datas.selectedWord.isEmpty) return SizedBox.shrink();
     final shouldShow =
+        true ||
         _datas.shouldShowUpDownArrow &&
-        !_datas.resultsAreEmpty &&
-        !willShowSugg;
+            !_datas.resultsAreEmpty &&
+            !willShowSugg;
+
+    final datas = _datas;
+    final bm =
+        datas.selectedWord.isNotEmpty && WordStore.isBm(datas.selectedWord);
+
+    Widget b({
+      required IconData icon,
+      required VoidCallback? onPressed,
+      VoidCallback? onLongPress,
+      required String tooltip,
+      final bool err = false,
+    }) => iconButtonSized(
+      context,
+      icon: icon,
+      tooltip: tooltip,
+      onPressed: onPressed,
+      onLongPress: onLongPress,
+      scheme: err ? IconButtonSizedColor.err : IconButtonSizedColor.normal,
+      size: 45,
+      iconSize: 25,
+    );
+
+    final btns = separatedList(
+      separatorBuilder: (_) {
+        return SizedBox(
+          height: 30,
+          child: VerticalDivider(
+            indent: 2,
+            thickness: 1.5,
+            color: cs.outlineVariant,
+          ),
+        );
+      },
+      list: [
+        b(
+          icon: datas.state.isSug ? Icons.directions : Icons.auto_awesome,
+          tooltip: 'Toggle search suggestions',
+          onPressed:
+              datas.selectedWord.isNotEmpty &&
+                  appConf.showSearchSugg &&
+                  !datas.state.isQuering
+              ? () async {
+                  final ss = datas.state.isSug;
+                  await datas.getAndShowResORSugg(
+                    context,
+                    forceSugg: !ss,
+                    forceRes: ss,
+                  );
+                }
+              : null,
+        ),
+        b(
+          icon: Icons.image_search_outlined,
+          tooltip: 'Search current word in saved book entries',
+          onPressed: datas.selectedWord.isEmpty
+              ? null
+              : () {
+                  FindWordReaderPage.open(context, datas.selectedWord);
+                },
+        ),
+        b(
+          icon: bm ? Icons.bookmark_remove : Icons.bookmark_add_outlined,
+          err: bm,
+          tooltip: bm ? 'Unbookmark' : 'BookMark',
+          onPressed: datas.selectedWord.isEmpty
+              ? null
+              : () async {
+                  if (bm) {
+                    final confirm = await showConfirmDialog(
+                      context,
+                      'Remove Bookmark',
+                      message: 'Remove: ${datas.selectedWord}',
+                      destructive: true,
+                      confirmText: 'Remove',
+                    );
+                    if (confirm != true) return;
+                    await WordStore.rmBM(datas.selectedWord);
+                  } else {
+                    await WordStore.addBM(datas.selectedWord);
+                  }
+                  if (mounted) setState(() {});
+                },
+        ),
+        b(
+          icon: willShowSugg ? Icons.arrow_downward : Icons.arrow_upward,
+          tooltip: 'Go top (or long press to go to bottom)',
+          onPressed: () {
+            postFrame((_) {
+              final sc = _datas.scrollController;
+              if (!sc.hasClients) return;
+
+              sc.animateTo(
+                0.0,
+                duration: const Duration(milliseconds: 400),
+                curve: Curves.easeOut,
+              );
+            });
+          },
+          onLongPress: () {
+            scrollToBottomSmooth(_datas.scrollController);
+          },
+        ),
+      ],
+    );
 
     return Align(
       alignment: Alignment.bottomCenter,
@@ -537,52 +646,28 @@ class _SearchLexiconsState extends State<SearchLexicons>
           transitionBuilder: (child, animation) =>
               ScaleTransition(scale: animation, child: child),
           child: (shouldShow)
-              ? DecoratedBox(
-                  key: const ValueKey('up-arrow'),
+              ? Container(
+                  key: const ValueKey('floating-options'),
                   decoration: BoxDecoration(
-                    shape: BoxShape.circle,
+                    borderRadius: BorderRadius.circular(12),
+                    color: cs.surfaceContainerHigh,
+                    // shape: BoxShape.rectangle,
                     boxShadow: [
                       BoxShadow(
                         color: cs.shadow.withValues(alpha: 0.20),
                         blurRadius: 12,
                       ),
                     ],
+                    border: BoxBorder.all(color: cs.outlineVariant, width: 1.5),
                   ),
-                  child: IconButton.filled(
-                    icon: const Icon(Icons.arrow_upward),
-                    tooltip: 'Go top (or long press to go to bottom)',
-                    onPressed: () {
-                      postFrame((_) {
-                        final sc = _datas.scrollController;
-                        if (!sc.hasClients) return;
-
-                        sc.animateTo(
-                          0.0,
-                          duration: const Duration(milliseconds: 400),
-                          curve: Curves.easeOut,
-                        );
-                      });
-                    },
-                    onLongPress: () {
-                      scrollToBottomSmooth(_datas.scrollController);
-                      // final sc = _datas.scrollController;
-                      // WidgetsBinding.instance.addPostFrameCallback((_) async {
-                      //   if (!sc.hasClients) return;
-
-                      //   double prePos = 0.0;
-                      //   while (prePos < sc.position.maxScrollExtent) {
-                      //     if (!sc.hasClients) return;
-
-                      //     prePos = sc.position.maxScrollExtent;
-
-                      //     await sc.animateTo(
-                      //       prePos,
-                      //       duration: const Duration(milliseconds: 400),
-                      //       curve: Curves.linear,
-                      //     );
-                      //   }
-                      // });
-                    },
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 6,
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    // spacing: 4,
+                    children: btns,
                   ),
                 )
               : const SizedBox.shrink(),
@@ -614,7 +699,7 @@ class _SearchLexiconsState extends State<SearchLexicons>
             padding: _datas.sugg.isEmpty && _datas.resultsAreEmpty
                 ? EdgeInsets.zero
                 : willShowSugg
-                ? padd.copyWith(bottom: 0)
+                ? padd.copyWith(bottom: 68)
                 : padd.copyWith(top: 12),
             sliver: _mainDict(context, cs, arTxtTheme),
           ),
@@ -764,7 +849,7 @@ class _SearchLexiconsState extends State<SearchLexicons>
         ? TextDirection.ltr
         : TextDirection.rtl;
 
-    final padd = appConf.readerPadd(context);
+    final padd = appConf.readerPadd(context, bottom: scrollPaddingBottom + 68);
 
     // if (kDebugMode) debugPrint('rebuild at: ${formatDateTime(context)}');
     return ReaderThemed(

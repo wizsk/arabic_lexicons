@@ -47,8 +47,7 @@ Widget lexAppBar(
       icon: datas.state.isSug
           ? const Icon(Icons.directions)
           : const Icon(Icons.auto_awesome),
-      tooltip:
-          'Toggle search suggestions. Long press to search current word in saved books',
+      tooltip: 'Toggle search suggestions',
       onPressed:
           datas.selectedWord.isNotEmpty &&
               appConf.showSearchSugg &&
@@ -63,6 +62,15 @@ Widget lexAppBar(
             }
           : null,
       onLongPress: datas.selectedWord.isEmpty
+          ? null
+          : () {
+              FindWordReaderPage.open(context, datas.selectedWord);
+            },
+    ),
+    IconButton(
+      icon: const Icon(Icons.image_search_outlined),
+      tooltip: 'Long press to search current word in saved books',
+      onPressed: datas.selectedWord.isEmpty
           ? null
           : () {
               FindWordReaderPage.open(context, datas.selectedWord);
@@ -95,11 +103,7 @@ Widget lexAppBar(
   ];
 
   return datas.state.isSug
-      ? AppBar(
-          title: title,
-          forceMaterialTransparency: true,
-          actions: actions,
-        )
+      ? AppBar(title: title, forceMaterialTransparency: true, actions: actions)
       : Directionality(
           textDirection: TextDirection.ltr,
           child: SliverAppBar(

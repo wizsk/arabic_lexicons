@@ -21,7 +21,7 @@ const lruCacheOff = kDebugMode && true;
 void main() {
   // WidgetsFlutterBinding.ensureInitialized();
   // await appSettingsNotifier.load();
-  if (lruCacheOff) print("--- Disabled lru cache ---");
+  if (lruCacheOff) debugPrint("--- Disabled lru cache ---");
 
   runApp(const MyApp());
 }

@@ -1,9 +1,6 @@
 import 'package:arabic_lexicons/conf.dart';
 import 'package:arabic_lexicons/data.dart';
-import 'package:arabic_lexicons/datas/word_store.dart';
 import 'package:arabic_lexicons/lex/data.dart';
-import 'package:arabic_lexicons/main_widgets.dart';
-import 'package:arabic_lexicons/reader/find_word.dart';
 import 'package:arabic_lexicons/utils.dart';
 import 'package:flutter/material.dart';
 
@@ -39,68 +36,70 @@ Widget lexAppBar(
       ],
     );
   }
-  final bm = WordStore.isBm(datas.selectedWord);
-  final cs = Theme.of(context).colorScheme;
 
-  final actions = <Widget>[
-    IconButton(
-      icon: datas.state.isSug
-          ? const Icon(Icons.directions)
-          : const Icon(Icons.auto_awesome),
-      tooltip: 'Toggle search suggestions',
-      onPressed:
-          datas.selectedWord.isNotEmpty &&
-              appConf.showSearchSugg &&
-              !datas.state.isQuering
-          ? () async {
-              final ss = datas.state.isSug;
-              await datas.getAndShowResORSugg(
-                context,
-                forceSugg: !ss,
-                forceRes: ss,
-              );
-            }
-          : null,
-      onLongPress: datas.selectedWord.isEmpty
-          ? null
-          : () {
-              FindWordReaderPage.open(context, datas.selectedWord);
-            },
-    ),
-    IconButton(
-      icon: const Icon(Icons.image_search_outlined),
-      tooltip: 'Long press to search current word in saved books',
-      onPressed: datas.selectedWord.isEmpty
-          ? null
-          : () {
-              FindWordReaderPage.open(context, datas.selectedWord);
-            },
-    ),
-    IconButton(
-      icon: bm
-          ? Icon(Icons.bookmark_remove, color: cs.error)
-          : Icon(Icons.bookmark_add_outlined),
-      tooltip: bm ? 'Unbookmark' : 'BookMark',
-      onPressed: datas.selectedWord.isEmpty
-          ? null
-          : () async {
-              if (bm) {
-                final confirm = await showConfirmDialog(
-                  context,
-                  'Remove Bookmark',
-                  message: 'Remove: ${datas.selectedWord}',
-                  destructive: true,
-                  confirmText: 'Remove',
-                );
-                if (confirm != true) return;
-                WordStore.rmBM(datas.selectedWord);
-              } else {
-                WordStore.addBM(datas.selectedWord);
-              }
-              onChange();
-            },
-    ),
-  ];
+  const actions = <Widget>[];
+
+  // final bm = WordStore.isBm(datas.selectedWord);
+  // final cs = Theme.of(context).colorScheme;
+  // final actions = <Widget>[
+  //   IconButton(
+  //     icon: datas.state.isSug
+  //         ? const Icon(Icons.directions)
+  //         : const Icon(Icons.auto_awesome),
+  //     tooltip: 'Toggle search suggestions',
+  //     onPressed:
+  //         datas.selectedWord.isNotEmpty &&
+  //             appConf.showSearchSugg &&
+  //             !datas.state.isQuering
+  //         ? () async {
+  //             final ss = datas.state.isSug;
+  //             await datas.getAndShowResORSugg(
+  //               context,
+  //               forceSugg: !ss,
+  //               forceRes: ss,
+  //             );
+  //           }
+  //         : null,
+  //     onLongPress: datas.selectedWord.isEmpty
+  //         ? null
+  //         : () {
+  //             FindWordReaderPage.open(context, datas.selectedWord);
+  //           },
+  //   ),
+  //   IconButton(
+  //     icon: const Icon(Icons.image_search_outlined),
+  //     tooltip: 'Long press to search current word in saved books',
+  //     onPressed: datas.selectedWord.isEmpty
+  //         ? null
+  //         : () {
+  //             FindWordReaderPage.open(context, datas.selectedWord);
+  //           },
+  //   ),
+  //   IconButton(
+  //     icon: bm
+  //         ? Icon(Icons.bookmark_remove, color: cs.error)
+  //         : Icon(Icons.bookmark_add_outlined),
+  //     tooltip: bm ? 'Unbookmark' : 'BookMark',
+  //     onPressed: datas.selectedWord.isEmpty
+  //         ? null
+  //         : () async {
+  //             if (bm) {
+  //               final confirm = await showConfirmDialog(
+  //                 context,
+  //                 'Remove Bookmark',
+  //                 message: 'Remove: ${datas.selectedWord}',
+  //                 destructive: true,
+  //                 confirmText: 'Remove',
+  //               );
+  //               if (confirm != true) return;
+  //               WordStore.rmBM(datas.selectedWord);
+  //             } else {
+  //               WordStore.addBM(datas.selectedWord);
+  //             }
+  //             onChange();
+  //           },
+  //   ),
+  // ];
 
   return datas.state.isSug
       ? AppBar(title: title, forceMaterialTransparency: true, actions: actions)

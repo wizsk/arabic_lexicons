@@ -685,8 +685,13 @@ class AppSettingsController extends ChangeNotifier {
     return _theme;
   }
 
-  EdgeInsets readerPadd(BuildContext context) =>
-      readerPadding(context, maxWidth: _maxWidth, sidePadd: _padding);
+  EdgeInsets readerPadd(BuildContext context, {double? bottom}) =>
+      readerPadding(
+        context,
+        maxWidth: _maxWidth,
+        sidePadd: _padding,
+        bottom: bottom,
+      );
 
   /// Reader Text Style
   TextStyle readerTS(BuildContext context) => TextStyle(

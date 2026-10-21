@@ -6,9 +6,10 @@ const double defaultReaderArabicFontSize = 20;
 const String defaultReaderArabicFont = fontKitab;
 const double defArabicFontHeihgt = 2.00;
 
-const Color uiSeedColorDefualt = Color(0xFF673AB7);
+const Color uiSeedColorDefualt = Color(0xFFFFC107);
 const uiSeedColors = [
   uiSeedColorDefualt,
+  Color(0xFF673AB7),
   Color(0xFF3A7BD4),
   Color(0xFF2A9D8E),
   Color(0xFF2ECC71),

@@ -7,6 +7,7 @@ Widget iconButtonSized(
   required IconData icon,
   String? tooltip,
   required VoidCallback? onPressed,
+  VoidCallback? onLongPress,
   final IconButtonSizedColor scheme = IconButtonSizedColor.normal,
   final double size = 40.00,
   final double iconSize = 20.00,
@@ -22,6 +23,7 @@ Widget iconButtonSized(
 
   return IconButton(
     onPressed: onPressed,
+    onLongPress: onLongPress,
     tooltip: tooltip,
     icon: Icon(icon, size: iconSize),
     color: color,

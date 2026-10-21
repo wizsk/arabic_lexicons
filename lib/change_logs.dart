@@ -13,6 +13,7 @@ final releases = [
     Set max UI-Width
     Improve book inspect functionalities
     Add Amber color and set it to default
+    Add floating editing menu in the bottom for easier navigations
   ''',
   ),
   Release(

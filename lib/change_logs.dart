@@ -12,6 +12,7 @@ final releases = [
     Update verb family info
     Set max UI-Width
     Improve book inspect functionalities
+    Add Amber color and set it to default
   ''',
   ),
   Release(

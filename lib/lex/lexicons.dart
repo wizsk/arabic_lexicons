@@ -665,7 +665,9 @@ class _SearchLexiconsState extends State<SearchLexicons>
     bool willShowSugg,
     EdgeInsets padd,
   ) {
-    if (_datas.selectedWord.isEmpty) return (false, SizedBox.shrink());
+    const empty = SizedBox.shrink(key: ValueKey("floating-btn-srink"));
+
+    if (!_floatingBtnExpanded) return (false, empty);
 
     const minSize = 44.00;
     const maxSize = 54.0;
@@ -678,10 +680,6 @@ class _SearchLexiconsState extends State<SearchLexicons>
     final hasSpaceinSides =
         sh > 520.0 &&
         padd.right - 16 > (appConf.readerSidePadd + totalIconListSize);
-
-    if (!hasSpaceinSides && !_floatingBtnExpanded) {
-      return (false, SizedBox.shrink());
-    }
 
     final iconBtnSize = hasSpaceinSides
         ? maxSize

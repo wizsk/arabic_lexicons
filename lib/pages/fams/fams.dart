@@ -10,6 +10,9 @@ class ArabicFamilyList extends StatefulWidget {
 
   @override
   State<ArabicFamilyList> createState() => _ArabicFamilyListState();
+
+  static Future<void> open(BuildContext c) async =>
+      Navigator.of(c).pushNamed(Routes.fams);
 }
 
 class _ArabicFamilyListState extends State<ArabicFamilyList> {

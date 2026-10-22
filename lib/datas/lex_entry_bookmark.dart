@@ -3,6 +3,8 @@ import 'package:arabic_lexicons/data.dart';
 import 'package:arabic_lexicons/datas/app_db.dart';
 import 'package:arabic_lexicons/lex/dicts/ar_en/ar_en.dart';
 import 'package:arabic_lexicons/lex/dicts/db.dart';
+import 'package:arabic_lexicons/lex/res.dart';
+import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 
 extension _LexEntryBookmarkExt on Dict {
@@ -57,7 +59,7 @@ abstract final class LexEntryBm {
       "lex_table": d.table,
       "meanings": meaning,
       'created_at': DateTime.now().millisecondsSinceEpoch,
-    }, conflictAlgorithm: ConflictAlgorithm.ignore);
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
 
     _entries.add(d.key(id));
   }
@@ -81,7 +83,26 @@ abstract final class LexEntryBm {
   static Future<List<LexEntryBmEnty>> getAll() async {
     final rows = await _db.query(t, orderBy: 'created_at ASC');
 
-    return rows.map(LexEntryBmEnty.fromMap).toList();
+    final List<LexEntryBmEnty> res = [];
+
+    loop:
+    for (final r in rows) {
+      final v = LexEntryBmEnty.fromMap(r);
+      if (v != null) {
+        res.add(v);
+        continue;
+      }
+
+      try {
+        final id = r['id'] as int?;
+        final tbl = r['lex_table'] as String?;
+
+        if (id == null || tbl == null) continue loop;
+        LexEntryBm.remove(tbl, id);
+      } catch (_) {}
+    }
+
+    return res;
   }
 }
 
@@ -100,7 +121,12 @@ class LexEntryBmEnty {
   String get word => r.word;
   String get meanings => r.meanings;
 
-  factory LexEntryBmEnty.fromMap(Map<String, Object?> map) {
+  bool get isSaved => LexEntryBm.containsId(dict, r.id);
+
+  Future<void> touggle() async =>
+      isSaved ? LexEntryBm.removeDbRow(dict, r) : LexEntryBm.addDbRow(dict, r);
+
+  static LexEntryBmEnty? fromMap(Map<String, Object?> map) {
     final tbl = map['lex_table'] as String;
     final dIdx = allDicts.indexWhere((d) => d.table == tbl);
     final m = map['meanings'] as String;
@@ -113,13 +139,11 @@ class LexEntryBmEnty {
 
     final String meanings;
     if (d == Dict.arEn) {
-      final e = ArEnEntry.fromJsonString(m);
-
-      const ltr = '\u202A';
-      const pop = '\u202C';
-
-      meanings =
-          '$ltr${e.word}${e.root.isEmpty ? "" : " ($ltr${e.root}$pop)"}$pop ${e.def}';
+      try {
+        meanings = ArEnEntry.fromJsonString(m).fmtStr;
+      } catch (_) {
+        return null;
+      }
     } else {
       meanings = m;
     }
@@ -133,5 +157,49 @@ class LexEntryBmEnty {
     return LexEntryBmEnty(r: r, lexTable: tbl, dict: d);
   }
 
+  factory LexEntryBmEnty.fromDR(Dict d, DbRow r) {
+    return LexEntryBmEnty(dict: d, lexTable: d.table, r: r);
+  }
+
+  Future<void> save() async => LexEntryBm.addDbRow(dict, r);
+
   Future<void> remove() async => LexEntryBm.remove(lexTable, id);
+
+  Widget formatDef(
+    BuildContext context, {
+    required TextStyle ts,
+    required String hlFont,
+    required double hlFontSize,
+    Color? hlhiColor,
+    double hlFontHeight = htmlFontHeight,
+    int? maxLines,
+    TextOverflow? overflow,
+  }) {
+    return dict.isArEn
+        ? Directionality(
+            textDirection: TextDirection.ltr,
+            child: Text(
+              meanings,
+              style: ts,
+              textAlign: TextAlign.left,
+              maxLines: maxLines,
+              overflow: overflow,
+            ),
+          )
+        : dict.isEng
+        ? r.engMeaningView(
+            fontSize: hlFontSize,
+            fontFam: hlFont,
+            maxlines: maxLines,
+            textOverFlow: overflow,
+            machHiColor: hlhiColor,
+          )
+        : r.arMeaningView(
+            context,
+            ts: ts,
+            hasRefs: dict.hasRefs,
+            maxlines: maxLines,
+            textOverFlow: overflow,
+          );
+  }
 }

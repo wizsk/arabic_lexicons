@@ -14,6 +14,7 @@ EdgeInsets readerPadding(
   BuildContext context, {
   required double maxWidth,
   required double sidePadd,
+  double? top,
   double? bottom,
 }) {
   final padd = maxWidth < 0
@@ -25,7 +26,7 @@ EdgeInsets readerPadding(
 
   return EdgeInsets.fromLTRB(
     padd,
-    scrollPaddingTop,
+    top ?? scrollPaddingTop,
     padd,
     bottom ?? scrollPaddingBottom,
   );

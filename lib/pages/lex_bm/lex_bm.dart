@@ -5,7 +5,6 @@ import 'package:arabic_lexicons/lex/res.dart';
 import 'package:arabic_lexicons/multi_selection.dart';
 import 'package:arabic_lexicons/pages/lex_bm/def.dart';
 import 'package:arabic_lexicons/pages/width_padd.dart';
-import 'package:arabic_lexicons/theme.dart';
 import 'package:arabic_lexicons/utils.dart';
 import 'package:arabic_lexicons/widgets/reader_theme.dart';
 import 'package:flutter/material.dart';
@@ -93,18 +92,17 @@ class _LexDefBmPageState extends State<LexDefBmPage> {
   @override
   Widget build(BuildContext context) {
     final padd = uiPadding(context);
-    final cs = Theme.of(context).colorScheme;
+    // final cs = Theme.of(context).colorScheme;
 
     final ts = appConf.readerTS(context);
 
-    final fontFam = appConf.useHansLaneDefRDStyle
-        ? appConf.readerFont
-        : fontAmiri;
+    final (fontFam, fontHeight) = appConf.useHansLaneDefRDStyle
+        ? (appConf.readerFont, appConf.readerFontHeight)
+        : (fontAmiri, htmlFontHeight);
 
     final fontSize = appConf.readerFontSize;
-    final fontHeight = htmlFontHeight;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final hiColor = isDark ? bookmarkWordBgDark : bookmarkWordBg;
+    // final isDark = Theme.of(context).brightness == Brightness.dark;
+    // final hiColor = isDark ? bookmarkWordBgDark : bookmarkWordBg;
 
     return PopScope(
       canPop: !_selection.hasSelection,
@@ -158,88 +156,36 @@ class _LexDefBmPageState extends State<LexDefBmPage> {
                                   : visualIndex;
 
                               final def = _defList[index];
+                              void onRemove() => _defList.removeAt(index);
 
-                              final isEng = def.dict.isEng;
+                              final child = def.formatDef(
+                                context,
+                                ts: ts,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                hlFont: fontFam,
+                                hlFontSize: fontSize,
+                              );
 
-                              final child = def.dict.isArEn
-                                  ? Directionality(
-                                      textDirection: TextDirection.ltr,
-                                      child: Text(
-                                        def.meanings,
-                                        style: ts,
-                                        textAlign: TextAlign.left,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    )
-                                  : isEng
-                                  ? engMeaningView(
-                                      def.meanings,
-                                      fontSize,
-                                      fontHeight,
-                                      fontFam,
-                                      cs,
-                                      false,
-                                      hiColor,
-                                      maxlines: 1,
-                                      textOverFlow: TextOverflow.ellipsis,
-                                    )
-                                  : def.r.arMeaningView(
-                                      context,
-                                      ts: ts,
-                                      hasRefs: def.dict.hasRefs,
-                                      maxlines: 1,
-                                      textOverFlow: TextOverflow.ellipsis,
-                                    );
-
-                              final dir = isEng
-                                  ? TextDirection.ltr
-                                  : TextDirection.rtl;
-
-                              final align = isEng
-                                  ? TextAlign.left
-                                  : TextAlign.right;
-
-                              final d = Directionality(
-                                textDirection: dir,
-                                child: definitonCardDbRow(
-                                  context,
-                                  def.dict,
-                                  def.r,
-                                  child,
-                                  // useM3Colors: true,
-                                  text: () =>
-                                      htmlToPlainTextWithLineBr(def.meanings),
-                                  rebuild: () {
-                                    if (context.mounted) setState(() {});
-                                  },
-                                  onRemove: () => _defList.removeAt(index),
-                                  fs: () {
-                                    final child = isEng
-                                        ? engMeaningView(
-                                            def.meanings,
-                                            fontSize,
-                                            fontHeight,
-                                            fontFam,
-                                            cs,
-                                            false,
-                                            hiColor,
-                                          )
-                                        : def.r.arMeaningView(
-                                            context,
-                                            ts: ts,
-                                            hasRefs: def.dict.hasRefs,
-                                          );
-
-                                    LexBnDefPage.open(
-                                      context,
-                                      en: def,
-                                      align: align,
-                                      dir: dir,
-                                      def: child,
-                                    );
-                                  },
-                                ),
+                              final d = definitonCardDbRow(
+                                context,
+                                def.dict,
+                                def.r,
+                                child,
+                                text: () =>
+                                    htmlToPlainTextWithLineBr(def.meanings),
+                                rebuild: () {
+                                  if (context.mounted) setState(() {});
+                                },
+                                onRemove: onRemove,
+                                fs: () {
+                                  LexBnDefPage.open(
+                                    context,
+                                    en: def,
+                                    onRemove: onRemove,
+                                    onAdd: () => _defList.add(def),
+                                  );
+                                },
                               );
 
                               return d;

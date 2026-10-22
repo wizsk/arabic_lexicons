@@ -22,6 +22,16 @@ const foreignWordBg = Color(0xA0D9F7BE);
 const bookmarkWordBgDark = Color(0xE0513f13);
 const foreignWordBgDark = Color(0xC025543b);
 
+Color getBookmarkBg(BuildContext context) =>
+    Theme.of(context).brightness == Brightness.dark
+    ? bookmarkWordBgDark
+    : bookmarkWordBg;
+
+(Color, Color) getBookmarkAndForeignBgs(BuildContext context) =>
+    Theme.of(context).brightness == Brightness.dark
+    ? (bookmarkWordBgDark, foreignWordBgDark)
+    : (bookmarkWordBg, foreignWordBg);
+
 class ReaderColors {
   final Color surface;
   final Color onSurface;

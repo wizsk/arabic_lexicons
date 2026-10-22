@@ -23,6 +23,7 @@ Widget definitonCard(
   VoidCallback? fs,
   (Dict, DbRow) Function()? report,
   final bool useM3Colors = false,
+  VoidCallback? onRemove,
 }) {
   final cs = Theme.of(context).colorScheme;
 
@@ -78,20 +79,11 @@ Widget definitonCard(
         tooltip: ebm ? 'Remove' : 'Save',
         onPressed: () async {
           if (ebm) {
-            final confirm = await showConfirmDialog(
-              context,
-              "Remove Bookmark",
-              scroolable: true,
-              message:
-                  'Do you want remove to lexcion entry “$word” from bookmarks?',
-              confirmText: 'Remove',
-              destructive: true,
-              constraints: true,
-              fontFam: L.arFont,
-            );
-            if (confirm != true) return;
+            final res = await showSavedDefRmConfirm(context, word, d);
+            if (res != true) return;
 
             await LexEntryBm.remove(d.table, id);
+            onRemove?.call();
             MsgSv.showSnackbarMsg("Definiton removed: $word");
           } else {
             await save();
@@ -123,15 +115,18 @@ Widget definitonCard(
   const sidesPadd = 12.0;
   final textWidget = Padding(
     padding: const EdgeInsets.fromLTRB(sidesPadd, 12, sidesPadd, 0),
-    child: Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        child,
-        DashedDivider(height: 8, color: cs.outlineVariant),
-        Padding(padding: EdgeInsets.symmetric(horizontal: 8), child: actions),
-        const SizedBox(height: 6),
-      ],
+    child: Directionality(
+      textDirection: d.dir,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          child,
+          DashedDivider(height: 8, color: cs.outlineVariant),
+          Padding(padding: EdgeInsets.symmetric(horizontal: 8), child: actions),
+          const SizedBox(height: 6),
+        ],
+      ),
     ),
   );
 
@@ -184,7 +179,24 @@ Widget definitonCardDbRow(
     rebuild: rebuild,
     report: () => (d, r),
     useM3Colors: useM3Colors,
+    onRemove: onRemove,
   );
 
   return res;
 }
+
+Future<bool?> showSavedDefRmConfirm(
+  BuildContext context,
+  String word,
+  Dict d,
+) => showConfirmDialog(
+  context,
+  'Remove Definition?',
+  message:
+      'Do you want to remove the saved definition of "$word" from "${d.name}"?',
+  scroolable: true,
+  confirmText: 'Remove',
+  destructive: true,
+  constraints: true,
+  fontFam: L.arFont,
+);

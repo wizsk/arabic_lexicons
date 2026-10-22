@@ -25,6 +25,9 @@ class DbRow {
   String? _formattedMeanings;
   int? _formattedSpacing;
 
+  String cleanedTxt(Dict d) =>
+      d.isHtml ? htmlToPlainTextWithLineBr(meanings) : meanings;
+
   String get formatMeanings {
     final spacing = appConf.wordSpacing;
 

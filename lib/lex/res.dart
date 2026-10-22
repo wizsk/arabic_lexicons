@@ -4,12 +4,13 @@ import 'package:arabic_lexicons/data.dart';
 import 'package:arabic_lexicons/datas/lex_entry_bookmark.dart';
 import 'package:arabic_lexicons/lex/data.dart';
 import 'package:arabic_lexicons/lex/def_card.dart';
+import 'package:arabic_lexicons/lex/dicts/ar_en/ar_en.dart';
 import 'package:arabic_lexicons/lex/dicts/db.dart';
 import 'package:arabic_lexicons/lex/ref.dart';
+import 'package:arabic_lexicons/pages/lex_bm/def.dart';
 import 'package:arabic_lexicons/theme.dart';
 import 'package:arabic_lexicons/utils.dart';
 import 'package:arabic_lexicons/utils/toast_snack.dart';
-import 'package:arabic_lexicons/widgets/selectable_text_screen.dart';
 import 'package:arabic_lexicons/widgets/small_icon_btns.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -420,18 +421,20 @@ Widget _hansLaneView(
   SearchLexiconsDatas datas,
   ColorScheme cs,
 ) {
-  final fontFam = appConf.useHansLaneDefRDStyle
-      ? appConf.readerFont
-      : fontAmiri;
+  final (fontFam, fontHeight) = appConf.useHansLaneDefRDStyle
+      ? (appConf.readerFont, appConf.readerFontHeight)
+      : (fontAmiri, htmlFontHeight);
+
+  // final fontFam = appConf.useHansLaneDefRDStyle
+  //     ? appConf.readerFont
+  //     : fontAmiri;
+  // final fontHeight = htmlFontHeight;
 
   final fontSize = appConf.readerFontSize;
-  // final fontHeight = appConf.useHansLaneDefRDStyle
-  //     ? appConf.readerFontHeight
-  //     : fontAmiriLineHeight;
 
-  final fontHeight = htmlFontHeight;
-  final isDark = Theme.of(context).brightness == Brightness.dark;
-  final hiColor = isDark ? bookmarkWordBgDark : bookmarkWordBg;
+  final d = datas.selectedDict;
+
+  final hiColor = getBookmarkBg(context);
 
   return SliverList.separated(
     itemCount: datas.dbRes.length,
@@ -439,6 +442,7 @@ Widget _hansLaneView(
     itemBuilder: (context, index) {
       final row = datas.dbRes[index];
       String txt = row.meanings;
+
       return AutoScrollTag(
         key: ValueKey(index),
         controller: datas.scrollController,
@@ -446,37 +450,21 @@ Widget _hansLaneView(
         child: definitonCardDbRow(
           context,
           datas.selectedDict,
-          datas.dbRes[index],
-          engMeaningView(
-            txt,
-            fontSize,
-            fontHeight,
-            fontFam,
-            cs,
-            row.isHi,
-            hiColor,
+          row,
+          row.engMeaningView(
+            fontSize: fontSize,
+            fontFam: fontFam,
+            fontHeihgt: fontHeight,
+            hiResultColor: cs.primary,
+            isHighResult: row.isHi,
+            machHiColor: hiColor,
           ),
           text: () => htmlToPlainTextWithLineBr(txt),
           rebuild: () {
             if (context.mounted) datas.rebuild();
           },
           fs: () {
-            SelectableTextScreen.show(
-              context,
-              title: datas.selectedWord,
-              fullTextFunc: (_) => htmlToPlainTextWithLineBr(txt),
-              textAlign: TextAlign.left,
-              dir: TextDirection.ltr,
-              textStyleBodyMedium: ts.copyWith(
-                fontFamily: fontFam,
-                // the html renderer and normal renderer not the same :)
-                height: appConf.useHansLaneDefRDStyle
-                    ? htmlFontHeight + 0.3
-                    : fontHeight,
-              ),
-              start: 0,
-              length: 1,
-            );
+            row.fs(context, d);
           },
         ),
       );
@@ -485,6 +473,7 @@ Widget _hansLaneView(
 }
 
 Widget _arabicLexView(TextStyle ts, SearchLexiconsDatas datas) {
+  final d = datas.selectedDict;
   return SliverList.separated(
     itemCount: datas.dbRes.length,
     separatorBuilder: (_, _) => spaceBetweenDefs,
@@ -511,23 +500,74 @@ Widget _arabicLexView(TextStyle ts, SearchLexiconsDatas datas) {
         },
         text: () => row.formatMeanings,
         fs: () {
-          SelectableTextScreen.show(
-            context,
-            title: datas.selectedWord,
-            fullTextFunc: (_) => row.formatMeanings,
-            textAlign: TextAlign.right,
-            dir: TextDirection.rtl,
-            textStyleBodyMedium: ts,
-            start: 0,
-            length: 1,
-          );
+          row.fs(context, d);
         },
       );
     },
   );
 }
 
+extension ArEnMeaning on ArEnEntry {
+  static const _ltr = '\u202A';
+  static const _pop = '\u202C';
+
+  String get fmtStr {
+    final e = this;
+    return '$_ltr${e.word}${e.root.isEmpty ? "" : " ($_ltr${e.root}$_pop)"}$_pop ${e.def}';
+  }
+
+  Widget fmtText({required TextStyle ts}) {
+    return Text(
+      fmtStr,
+      style: ts,
+      textAlign: TextAlign.left,
+      textDirection: TextDirection.ltr,
+    );
+  }
+
+  List<InlineSpan> fmtSpans({
+    required Color rootColor,
+    required VoidCallback onRootTap,
+  }) {
+    final e = this;
+
+    return [
+      TextSpan(text: '$_ltr${e.word}$_pop '),
+      if (e.root.isNotEmpty)
+        TextSpan(
+          text: '$_ltr(${e.root})$_pop ',
+          style: TextStyle(
+            // fontSize: (ts.fontSize ?? appConf.readerFontSize) * 0.85,
+            color: rootColor,
+          ),
+          recognizer: TapGestureRecognizer()..onTap = onRootTap,
+        ),
+      // const TextSpan(text: ' : '),
+      TextSpan(text: e.def),
+    ];
+  }
+
+  Widget fmtSelectable({
+    required TextStyle ts,
+    required Color rootColor,
+    required VoidCallback onRootTap,
+  }) {
+    return SelectableText.rich(
+      TextSpan(
+        children: fmtSpans(rootColor: rootColor, onRootTap: onRootTap),
+      ),
+      style: ts,
+      textAlign: TextAlign.left,
+      textDirection: TextDirection.ltr,
+    );
+  }
+}
+
 extension DbRowWidget on DbRow {
+  Future<void> fs(BuildContext context, Dict d) async {
+    await LexBnDefPage.open(context, en: LexEntryBmEnty.fromDR(d, this));
+  }
+
   Widget arMeaningView(
     BuildContext context, {
     required bool hasRefs,
@@ -559,37 +599,35 @@ extension DbRowWidget on DbRow {
             overflow: textOverFlow,
           );
   }
-}
 
-Widget engMeaningView(
-  String html,
-  // String fontFam,
-  double fontSize,
-  double fontHeihgt,
-  String fontFam,
-  ColorScheme cs,
-  bool isHighResult,
-  Color hiColor, {
-  final int? maxlines,
-  final TextOverflow? textOverFlow,
-}) {
-  return Html(
-    data: html,
-    style: {
-      'body': Style(
-        fontFamily: fontFam,
-        lineHeight: LineHeight.number(fontHeihgt),
-        direction: TextDirection.ltr,
-        textAlign: TextAlign.left,
-        fontSize: FontSize(fontSize),
-        color: isHighResult ? cs.primary : null,
-        maxLines: maxlines,
-        textOverflow: textOverFlow,
-      ),
-      'strong': Style(fontWeight: FontWeight.bold),
-      'i': Style(fontStyle: FontStyle.italic),
-      'center': Style(textAlign: TextAlign.center),
-      '.high': Style(backgroundColor: hiColor),
-    },
-  );
+  Widget engMeaningView({
+    required double fontSize,
+    String fontFam = fontAmiri,
+    double fontHeihgt = htmlFontHeight,
+    bool isHighResult = false,
+    Color? hiResultColor,
+    Color? machHiColor,
+    int? maxlines,
+    TextOverflow? textOverFlow,
+  }) {
+    return Html(
+      data: meanings,
+      style: {
+        'body': Style(
+          fontFamily: fontFam,
+          lineHeight: LineHeight.number(fontHeihgt),
+          direction: TextDirection.ltr,
+          textAlign: TextAlign.left,
+          fontSize: FontSize(fontSize),
+          color: isHighResult ? hiResultColor : null,
+          maxLines: maxlines,
+          textOverflow: textOverFlow,
+        ),
+        'strong': Style(fontWeight: FontWeight.bold),
+        'i': Style(fontStyle: FontStyle.italic),
+        'center': Style(textAlign: TextAlign.center),
+        '.high': Style(backgroundColor: machHiColor),
+      },
+    );
+  }
 }

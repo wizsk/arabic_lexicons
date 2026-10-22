@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:arabic_lexicons/utils.dart';
+import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 
@@ -34,11 +36,16 @@ class Prefs {
 
   /// Creates and loads the app's default preferences file.
   static Future<Prefs> al({
-    final String fileName = ".arabic_lexcions_prefs.json",
+    final String fileName = kDebugMode
+        ? ".arabic_lexcions_prefs_debug.json"
+        : ".arabic_lexcions_prefs.json",
   }) async {
     final dir = await getApplicationDocumentsDirectory();
-    final prefs = Prefs(path.join(dir.path, fileName));
+    final file = path.join(dir.path, fileName);
+    final prefs = Prefs(file);
     await prefs.load();
+
+    dp("Pref loaded from: $file");
     return prefs;
   }
 

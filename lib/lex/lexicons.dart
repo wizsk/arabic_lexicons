@@ -4,6 +4,7 @@ import 'package:arabic_lexicons/conf.dart';
 import 'package:arabic_lexicons/data.dart';
 import 'package:arabic_lexicons/datas/word_store.dart';
 import 'package:arabic_lexicons/first_run.dart';
+import 'package:arabic_lexicons/history/page.dart';
 import 'package:arabic_lexicons/key_shortcuts.dart';
 import 'package:arabic_lexicons/lex/data.dart';
 import 'package:arabic_lexicons/lex/isolate.dart';
@@ -11,9 +12,9 @@ import 'package:arabic_lexicons/lex/rearrange_dicts.dart';
 import 'package:arabic_lexicons/lex/res.dart';
 import 'package:arabic_lexicons/lex/sugg/widgets.dart';
 import 'package:arabic_lexicons/lex/utils.dart';
-import 'package:arabic_lexicons/lex/widgets.dart';
 import 'package:arabic_lexicons/lex/word_dict_picker.dart';
 import 'package:arabic_lexicons/main_widgets.dart';
+import 'package:arabic_lexicons/pages/fams/fams.dart';
 import 'package:arabic_lexicons/reader/find_word.dart';
 import 'package:arabic_lexicons/utils.dart';
 import 'package:arabic_lexicons/utils/scroll_funcs.dart';
@@ -481,6 +482,143 @@ class _SearchLexiconsState extends State<SearchLexicons>
     ];
   }
 
+  Widget _appbarPopupOptions(BuildContext context, bool hasSideActionButtons) {
+    return PopupMenuButton<String>(
+      icon: const Icon(Icons.more_vert),
+      onSelected: (value) async {
+        switch (value) {
+          case 'fam':
+            ArabicFamilyList.open(context);
+            break;
+
+          case 'hist':
+            HistPage.open(context);
+            break;
+
+          case 'hidef':
+            setState(() {
+              _floatingBtnExpanded = !_floatingBtnExpanded;
+            });
+            break;
+
+          case 'switch':
+            await appConf.saveScrollLexSelection(!appConf.scrollLexSelection);
+            if (context.mounted) setState(() {});
+            break;
+        }
+      },
+      itemBuilder: (context) => [
+        ...[
+          const PopupMenuItem(
+            value: 'fam',
+            child: Row(
+              children: [
+                Icon(Icons.account_tree_outlined),
+                SizedBox(width: 10),
+                Text("Verb Families"),
+              ],
+            ),
+          ),
+          const PopupMenuItem(
+            value: 'hist',
+            child: Row(
+              children: [
+                Icon(Icons.history),
+                SizedBox(width: 10),
+                Text("Search History"),
+              ],
+            ),
+          ),
+          const PopupMenuDivider(),
+        ],
+
+        PopupMenuItem(
+          value: 'switch',
+          child: Row(
+            children: [
+              Icon(
+                appConf.scrollLexSelection
+                    ? Icons.check_box_outlined
+                    : Icons.check_box_outline_blank,
+              ),
+              const SizedBox(width: 10),
+              Text('Scrollable selections'),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _lexAppBar(BuildContext context, bool hasSideActionButtons) {
+    final datas = _datas;
+    final noSelectedWord = datas.selectedWord.isEmpty;
+    final dictName = '${datas.selectedDict.name}${noSelectedWord ? '' : ':'}';
+
+    Widget title = Text(dictName, style: L.arStyleIf, textDirection: L.dir);
+
+    if (datas.selectedWord.isNotEmpty) {
+      title = Row(
+        textDirection: L.dir,
+        // textDirection: TextDirection.rtl,
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        spacing: 4.0,
+        children: [
+          title,
+          Flexible(
+            child: Text(
+              datas.selectedWord.replaceAll('_', ' ').takeMax(12),
+              style: L.arStyle,
+              textDirection: TextDirection.rtl,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      );
+    }
+
+    final actions = <Widget>[
+      if (!hasSideActionButtons)
+        IconButton(
+          tooltip:
+              '${_floatingBtnExpanded ? 'Hide' : 'Show'} floating action buttons',
+          icon: Icon(
+            _floatingBtnExpanded
+                ? Icons.visibility_outlined
+                : Icons.visibility_off_outlined,
+          ),
+          color: Theme.of(context).colorScheme.primary,
+          onPressed: () {
+            setState(() {
+              _floatingBtnExpanded = !_floatingBtnExpanded;
+            });
+          },
+        ),
+      _appbarPopupOptions(context, hasSideActionButtons),
+    ];
+
+    return datas.state.isSug
+        ? AppBar(
+            title: title,
+            forceMaterialTransparency: true,
+            actions: actions,
+          )
+        : Directionality(
+            textDirection: TextDirection.ltr,
+            child: SliverAppBar(
+              title: title,
+              titleSpacing: 0.0,
+              floating: true,
+              snap: appConf.hideAppbar,
+              pinned: !appConf.hideAppbar,
+              actions: actions,
+            ),
+          );
+  }
+
   void _deleteWord(
     final String word,
     final bool selected, {
@@ -736,7 +874,7 @@ class _SearchLexiconsState extends State<SearchLexicons>
         reverse: willShowSugg,
         controller: _datas.scrollController,
         slivers: [
-          if (!willShowSugg) lexAppBar(context, _datas, _setSate),
+          if (!willShowSugg) _lexAppBar(context, floatingBtnOnSides),
 
           SliverPadding(
             padding: _datas.sugg.isEmpty && _datas.resultsAreEmpty
@@ -925,7 +1063,7 @@ class _SearchLexiconsState extends State<SearchLexicons>
     return ReaderThemed(
       child: Scaffold(
         appBar: willShowSugg
-            ? lexAppBar(context, _datas, _setSate) as AppBar
+            ? _lexAppBar(context, floatingBtnOnSides) as AppBar
             : null,
         drawer: _isPopup ? null : buildDrawer(context),
         backgroundColor: bg,

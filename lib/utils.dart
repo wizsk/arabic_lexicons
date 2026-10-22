@@ -8,7 +8,17 @@ import 'package:flutter/services.dart';
 import 'package:html/parser.dart' as html_parser;
 
 void dp([Object? a, Object? b, Object? c, Object? d]) {
-  if (kDebugMode) debugPrint([a, b, c, d].where((x) => x != null).join(' '));
+  if (!kDebugMode) return;
+
+  final ar = [a, b, c, d];
+
+  final idx = ar.lastIndexWhere((e) => e != null);
+
+  if (idx == -1) {
+    debugPrint(ar.where((x) => x != null).join(' '));
+  } else {
+    debugPrint(ar.take(idx + 1).join(' '));
+  }
 }
 
 enum InitState {

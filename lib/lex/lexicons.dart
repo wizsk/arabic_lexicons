@@ -870,7 +870,7 @@ class _SearchLexiconsState extends State<SearchLexicons>
             ? Alignment.bottomCenter
             : Alignment.bottomRight,
         child: Container(
-          margin: EdgeInsetsGeometry.only(bottom: 16),
+          margin: EdgeInsetsGeometry.only(bottom: 10),
           key: const ValueKey('floating-options'),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
@@ -880,7 +880,7 @@ class _SearchLexiconsState extends State<SearchLexicons>
                 : [
                     BoxShadow(
                       color: cs.shadow.withValues(alpha: 0.1),
-                      blurRadius: 12,
+                      blurRadius: 8,
                     ),
                   ],
             border: BoxBorder.all(color: cs.outlineVariant, width: 1.5),
@@ -921,9 +921,10 @@ class _SearchLexiconsState extends State<SearchLexicons>
                 ? EdgeInsets.zero
                 : willShowSugg
                 ? padd.copyWith(
+                    top: 140,
                     bottom: floatingBtnOnSides || !_floatingBtnExpanded
                         ? 0
-                        : 68,
+                        : 58,
                   )
                 : padd.copyWith(top: 12),
             sliver: _mainDict(context, cs, arTxtTheme),

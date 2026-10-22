@@ -529,19 +529,28 @@ class _SearchLexiconsState extends State<SearchLexicons>
   ) {
     if (_datas.selectedWord.isEmpty) return (false, SizedBox.shrink());
 
-    final iconBtnSize = (L.fontSize == null ? 40.0 : L.fontSize! * 1.8).clamp(
-      40.0,
-      50.0,
-    );
+    const minSize = 44.00;
+    const maxSize = 54.0;
 
-    final totalIconListSize = iconBtnSize + 40;
+    // size icon total size
+    final totalIconListSize = maxSize + 50;
+
+    final sh = MediaQuery.sizeOf(context).height;
 
     final hasSpaceinSides =
-        padd.right > (appConf.readerSidePadd + totalIconListSize);
+        sh > 520.0 &&
+        padd.right - 16 > (appConf.readerSidePadd + totalIconListSize);
 
     if (!hasSpaceinSides && !_floatingBtnExpanded) {
       return (false, SizedBox.shrink());
     }
+
+    final iconBtnSize = hasSpaceinSides
+        ? maxSize
+        : (L.fontSize == null ? minSize : L.fontSize! * 1.85).clamp(
+            minSize,
+            maxSize,
+          );
 
     final datas = _datas;
     final bm =

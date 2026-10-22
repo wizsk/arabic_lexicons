@@ -697,12 +697,14 @@ class _SearchLexiconsState extends State<SearchLexicons>
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
             color: cs.surfaceContainer,
-            boxShadow: [
-              BoxShadow(
-                color: cs.shadow.withValues(alpha: 0.20),
-                blurRadius: 18,
-              ),
-            ],
+            boxShadow: hasSpaceinSides
+                ? null
+                : [
+                    BoxShadow(
+                      color: cs.shadow.withValues(alpha: 0.1),
+                      blurRadius: 12,
+                    ),
+                  ],
             border: BoxBorder.all(color: cs.outlineVariant, width: 1.5),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 2),

@@ -647,11 +647,7 @@ class _SearchLexiconsState extends State<SearchLexicons>
     ];
 
     return datas.state.isSug
-        ? AppBar(
-            title: title,
-            forceMaterialTransparency: true,
-            actions: actions,
-          )
+        ? AppBar(title: title, actions: actions)
         : Directionality(
             textDirection: TextDirection.ltr,
             child: SliverAppBar(

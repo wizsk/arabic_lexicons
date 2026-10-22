@@ -86,7 +86,7 @@ class AppSettingsController extends ChangeNotifier {
   static const _readerFontKey = 'ar_font_fam';
   static const _readerFontSizeKey = 'ar_font_size';
   static const _readerFontHeightKey = 'ar_font_hi';
-  static const _seedColorKey = 'seedc';
+  static const _seedColorKey = 'seedcol';
   static const _lastRouteKey = 'route';
   static const _lastBookKey = 'book';
   static const _readerIsOpenLexiconDireclyKey = 'reader_db_pop';

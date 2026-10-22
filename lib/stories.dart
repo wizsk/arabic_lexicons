@@ -91,6 +91,7 @@ Future<int?> showStoryPicker(BuildContext context) {
                           overflow: TextOverflow.ellipsis,
                           textDirection: TextDirection.rtl,
                           style: TextStyle(
+                            fontSize: L.fontSize,
                             color: cs.onSurfaceVariant,
                             height: 1.8,
                           ),

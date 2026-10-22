@@ -18,6 +18,7 @@ import 'package:arabic_lexicons/pages/fams/fams.dart';
 import 'package:arabic_lexicons/reader/find_word.dart';
 import 'package:arabic_lexicons/utils.dart';
 import 'package:arabic_lexicons/utils/scroll_funcs.dart';
+import 'package:arabic_lexicons/utils/toast_snack.dart';
 import 'package:arabic_lexicons/widgets/lex_word_confirm.dart';
 import 'package:arabic_lexicons/widgets/reader_theme.dart';
 import 'package:arabic_lexicons/widgets/selection_chip.dart';
@@ -504,6 +505,10 @@ class _SearchLexiconsState extends State<SearchLexicons>
           case 'switch':
             await appConf.saveScrollLexSelection(!appConf.scrollLexSelection);
             if (context.mounted) setState(() {});
+            MsgSv.showSnackbarMsg(
+              'Scrollable selections ${appConf.scrollLexSelection ? 'on' : 'off'}',
+              duration: const Duration(seconds: 0, milliseconds: 700),
+            );
             break;
         }
       },
@@ -542,7 +547,7 @@ class _SearchLexiconsState extends State<SearchLexicons>
                     : Icons.check_box_outline_blank,
               ),
               const SizedBox(width: 10),
-              Text('Scrollable selections'),
+              const Text('Scrollable selections'),
             ],
           ),
         ),

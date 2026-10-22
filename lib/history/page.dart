@@ -14,6 +14,9 @@ class HistPage extends StatefulWidget {
 
   @override
   State<HistPage> createState() => _HistPageState();
+
+  static Future<void> open(BuildContext c) async =>
+      Navigator.of(c).pushNamed(Routes.searhHist);
 }
 
 class _HistPageState extends State<HistPage> {

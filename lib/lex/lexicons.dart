@@ -15,6 +15,7 @@ import 'package:arabic_lexicons/lex/utils.dart';
 import 'package:arabic_lexicons/lex/word_dict_picker.dart';
 import 'package:arabic_lexicons/main_widgets.dart';
 import 'package:arabic_lexicons/pages/fams/fams.dart';
+import 'package:arabic_lexicons/pages/lex_bm/lex_bm.dart';
 import 'package:arabic_lexicons/reader/find_word.dart';
 import 'package:arabic_lexicons/utils.dart';
 import 'package:arabic_lexicons/utils/scroll_funcs.dart';
@@ -496,6 +497,10 @@ class _SearchLexiconsState extends State<SearchLexicons>
             HistPage.open(context);
             break;
 
+          case 'defs':
+            LexDefBmPage.open(context);
+            break;
+
           case 'hidef':
             setState(() {
               _floatingBtnExpanded = !_floatingBtnExpanded;
@@ -507,6 +512,17 @@ class _SearchLexiconsState extends State<SearchLexicons>
             if (context.mounted) setState(() {});
             MsgSv.showSnackbarMsg(
               'Scrollable selections ${appConf.scrollLexSelection ? 'on' : 'off'}',
+              duration: const Duration(seconds: 0, milliseconds: 700),
+            );
+            break;
+
+          case 'ar-en-table':
+            await appConf.saveArEnDefShowCard(!appConf.arEnDefShowCard);
+            if (context.mounted) setState(() {});
+            MsgSv.showSnackbarMsg(
+              appConf.arEnDefShowCard
+                  ? 'Showing cards view'
+                  : 'Showing table view',
               duration: const Duration(seconds: 0, milliseconds: 700),
             );
             break;
@@ -524,6 +540,18 @@ class _SearchLexiconsState extends State<SearchLexicons>
               ],
             ),
           ),
+
+          const PopupMenuItem(
+            value: 'defs',
+            child: Row(
+              children: [
+                Icon(Icons.collections_bookmark_outlined),
+                SizedBox(width: 10),
+                Text("Saved Definitions"),
+              ],
+            ),
+          ),
+
           const PopupMenuItem(
             value: 'hist',
             child: Row(
@@ -551,6 +579,20 @@ class _SearchLexiconsState extends State<SearchLexicons>
             ],
           ),
         ),
+
+        if (_datas.selectedDict.isArEn) ...[
+          const PopupMenuDivider(),
+          PopupMenuItem(
+            value: 'ar-en-table',
+            child: Row(
+              children: [
+                Icon(Icons.view_agenda_outlined),
+                const SizedBox(width: 10),
+                Text(appConf.arEnDefShowCard ? 'Show Table' : 'Show Cards'),
+              ],
+            ),
+          ),
+        ],
       ],
     );
   }

@@ -285,6 +285,13 @@ enum Dict {
 
   bool get isEng => this == arEn || this == hanswehr || this == laneLexicon;
 
+  bool get isHtml => this == hanswehr || this == laneLexicon;
+
+  bool get isAr => !isEng;
+
+  TextAlign get align => isAr ? TextAlign.right : TextAlign.left;
+  TextDirection get dir => isAr ? TextDirection.rtl : TextDirection.ltr;
+
   bool get isArEn => this == arEn;
 
   static String get reOrdLabel => L.p('Reorder', 'ترتيب');

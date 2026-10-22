@@ -161,12 +161,13 @@ class _HistPageState extends State<HistPage> {
                             horizontal: 12,
                             vertical: 4,
                           ),
-                          subtitle: Text(
-                            itm.dict.name,
-                            style: Theme.of(context).textTheme.bodySmall?.ar
-                                .copyWith(color: cs.secondary.withAlpha(230)),
-                            textAlign: TextAlign.right,
-                          ),
+                          subtitle: itm.dict.name,
+                          // subtitle: Text(
+                          //   itm.dict.name,
+                          //   style: Theme.of(context).textTheme.bodySmall?.ar
+                          //       .copyWith(color: cs.secondary.withAlpha(230)),
+                          //   textAlign: TextAlign.right,
+                          // ),
                           remove: () async => await WordStore.rmHistItem(itm),
                         );
                       },

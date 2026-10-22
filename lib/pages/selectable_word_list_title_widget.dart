@@ -14,7 +14,7 @@ class SelectableWordListTitle extends StatelessWidget {
   final String wordMatch;
   final SelectionController<String>? selection;
   final EdgeInsetsGeometry contentPadding;
-  final Widget? subtitle;
+  final String? subtitle;
   final Future<void> Function()? remove;
   final Dict? dict;
   final int index;
@@ -84,6 +84,11 @@ class SelectableWordListTitle extends StatelessWidget {
     final bm = isBm ?? WordStore.isBm(word);
     final selecting = selection?.hasSelection ?? false;
 
+    final titleStyle = L.fontSize == null ? null : L.arStyleSized;
+    final subtitleStyle = L.fontSize == null
+        ? null
+        : TextStyle(fontSize: L.fontSize! * 0.7);
+
     Widget title;
     if (wordMatch.isEmpty) {
       title = Text(
@@ -92,7 +97,7 @@ class SelectableWordListTitle extends StatelessWidget {
         overflow: TextOverflow.ellipsis,
         textDirection: TextDirection.rtl,
         textAlign: TextAlign.right,
-        style: L.arStyle,
+        style: titleStyle,
       );
     } else {
       final (:pre, :suf) = word.splitOnce(wordMatch);
@@ -113,7 +118,7 @@ class SelectableWordListTitle extends StatelessWidget {
         textDirection: TextDirection.rtl,
         textAlign: TextAlign.right,
 
-        style: L.arStyle,
+        style: titleStyle,
       );
     }
 
@@ -126,7 +131,9 @@ class SelectableWordListTitle extends StatelessWidget {
           : null,
       contentPadding: contentPadding,
       title: title,
-      subtitle: subtitle,
+      subtitle: subtitle == null
+          ? null
+          : Text(subtitle!, textAlign: TextAlign.right, style: subtitleStyle),
       onTap: () {
         if (selecting && canBeSelected) {
           selection!.toggle(word);

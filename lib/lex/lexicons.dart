@@ -637,7 +637,6 @@ class _SearchLexiconsState extends State<SearchLexicons>
                 ? Icons.visibility_outlined
                 : Icons.visibility_off_outlined,
           ),
-          color: Theme.of(context).colorScheme.primary,
           onPressed: () {
             setState(() {
               _floatingBtnExpanded = !_floatingBtnExpanded;

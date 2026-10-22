@@ -709,10 +709,12 @@ class _SearchLexiconsState extends State<SearchLexicons>
   ) {
     const empty = SizedBox.shrink(key: ValueKey("floating-btn-srink"));
 
-    if (!_floatingBtnExpanded) return (false, empty);
+    if (_datas.selectedWord.isEmpty) {
+      return (false, empty);
+    }
 
     const minSize = 44.00;
-    const maxSize = 54.0;
+    const maxSize = 50.00;
 
     // size icon total size
     final totalIconListSize = maxSize + 50;
@@ -722,6 +724,10 @@ class _SearchLexiconsState extends State<SearchLexicons>
     final hasSpaceinSides =
         sh > 520.0 &&
         padd.right - 16 > (appConf.readerSidePadd + totalIconListSize);
+
+    if (!hasSpaceinSides && !_floatingBtnExpanded) {
+      return (false, empty);
+    }
 
     final iconBtnSize = hasSpaceinSides
         ? maxSize
@@ -757,12 +763,12 @@ class _SearchLexiconsState extends State<SearchLexicons>
         maxHeight: iconBtnSize / 2,
       ),
       child: hasSpaceinSides
-          ? Divider(indent: 2, thickness: 1.5)
+          ? Divider(indent: 2, thickness: 1.5, color: cs.outline.withAlpha(200))
           : VerticalDivider(
               indent: 2,
               width: 6,
               thickness: 1.5,
-              color: cs.outlineVariant,
+              color: cs.outline.withAlpha(200),
             ),
     );
 
@@ -874,7 +880,7 @@ class _SearchLexiconsState extends State<SearchLexicons>
           key: const ValueKey('floating-options'),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
-            color: cs.surfaceContainer,
+            color: cs.surfaceBright,
             boxShadow: hasSpaceinSides
                 ? null
                 : [

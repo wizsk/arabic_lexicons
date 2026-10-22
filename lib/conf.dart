@@ -687,11 +687,12 @@ class AppSettingsController extends ChangeNotifier {
 
   double get readerSidePadd => _padding;
 
-  EdgeInsets readerPadd(BuildContext context, {double? bottom}) =>
+  EdgeInsets readerPadd(BuildContext context, {double? top, double? bottom}) =>
       readerPadding(
         context,
         maxWidth: _maxWidth,
         sidePadd: _padding,
+        top: top,
         bottom: bottom,
       );
 

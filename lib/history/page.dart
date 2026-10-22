@@ -68,7 +68,7 @@ class _HistPageState extends State<HistPage> {
   @override
   Widget build(BuildContext context) {
     final isFabVisable = appConf.hideAppbar ? _isFabVisable : true;
-    final cs = Theme.of(context).colorScheme;
+    // final cs = Theme.of(context).colorScheme;
 
     return PopScope(
       canPop: !_selection.hasSelection,

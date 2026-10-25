@@ -179,6 +179,20 @@ class _SettingsPageState extends State<SettingsPage> {
                             showDictReorderScreen(context, after: null),
                       ),
 
+                      SwitchListTile(
+                        secondary: const FilledIcon(Icons.dashboard_customize),
+                        title: const Text('Show Floating Buttons'),
+                        subtitle: const Text(
+                          'Show floating action buttons by default. If disabled, they will be hidden',
+                        ),
+                        value: appConf.showLexPgFABs,
+                        onChanged: (value) async {
+                          appConf.saveShowLexPgFABs(value).then((_) {
+                            if (context.mounted) setState(() {});
+                          });
+                        },
+                      ),
+
                       /// Suggestions
                       SwitchListTile(
                         secondary: const FilledIcon(Icons.auto_awesome),

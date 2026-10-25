@@ -107,6 +107,7 @@ class AppSettingsController extends ChangeNotifier {
   static const _wordSpacingKey = 'wspke';
   static const _reviewBookmarksFirstKey = 'revBMF';
   static const _arEnDefShowCardKey = 'arEnDCar';
+  static const _showLexPgFABsKey = 'lex-fab';
 
   int _playRate = 0;
   int get playRatelastShown => _playRate;
@@ -150,6 +151,9 @@ class AppSettingsController extends ChangeNotifier {
 
   static const bool _hideAppbarDef = true;
   bool _hideAppbar = _hideAppbarDef;
+
+  static const _showLexPgFABsDef = true;
+  bool _showLexPgFABs = _showLexPgFABsDef;
 
   static const Color _seedColorDef = uiSeedColorDefualt;
   Color _seedColor = _seedColorDef;
@@ -240,6 +244,8 @@ class AppSettingsController extends ChangeNotifier {
 
     _arEnDefShowCard =
         prefs.getBool(_arEnDefShowCardKey) ?? _arEnDefShowCardDef;
+
+    _showLexPgFABs = prefs.getBool(_showLexPgFABsKey) ?? _showLexPgFABsDef;
 
     _scrollLexSelection =
         prefs.getBool(_scrollLexSelectionKey) ?? _scrollLexSelectionDef;
@@ -471,6 +477,16 @@ class AppSettingsController extends ChangeNotifier {
 
   bool get arEnDefShowCard {
     return _arEnDefShowCard;
+  }
+
+  Future<void> saveShowLexPgFABs(bool v) async {
+    _showLexPgFABs = v;
+    notify();
+    await prefs.setBool(_showLexPgFABsKey, v);
+  }
+
+  bool get showLexPgFABs {
+    return _showLexPgFABs;
   }
 
   Future<void> saveScrollLexSelection(bool v) async {

@@ -699,7 +699,7 @@ class _SearchLexiconsState extends State<SearchLexicons>
     }
   }
 
-  bool _floatingBtnExpanded = true;
+  bool _floatingBtnExpanded = appConf.showLexPgFABs;
 
   (bool, Widget) _floatingBtn(
     BuildContext context,
@@ -855,7 +855,7 @@ class _SearchLexiconsState extends State<SearchLexicons>
         if (!hasSpaceinSides)
           b(
             icon: Icons.cancel_outlined,
-            tooltip: 'Minimize',
+            tooltip: 'Hide',
             onPressed: () {
               setState(() {
                 _floatingBtnExpanded = !_floatingBtnExpanded;
@@ -1046,7 +1046,7 @@ class _SearchLexiconsState extends State<SearchLexicons>
                       ? null
                       : IconButton(
                           tooltip: 'Show floating action buttons',
-                          icon: Icon(Icons.apps),
+                          icon: Icon(Icons.dashboard_customize_rounded),
                           onPressed: () {
                             setState(() {
                               _floatingBtnExpanded = true;

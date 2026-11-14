@@ -3,7 +3,7 @@ import 'package:arabic_lexicons/data.dart';
 import 'package:arabic_lexicons/pages/fams/fams_data.dart';
 import 'package:arabic_lexicons/pages/width_padd.dart';
 import 'package:arabic_lexicons/utils.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 class ArabicFamilyList extends StatefulWidget {
   const ArabicFamilyList({super.key});

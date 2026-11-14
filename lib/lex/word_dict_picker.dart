@@ -3,7 +3,7 @@ import 'package:arabic_lexicons/data.dart';
 import 'package:arabic_lexicons/lex/data.dart';
 import 'package:arabic_lexicons/widgets/selection_chip.dart';
 import 'package:arabic_lexicons/widgets/lex_word_confirm.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 class WordDictPickerResult {
   final bool? openSettings;

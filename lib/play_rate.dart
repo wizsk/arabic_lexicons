@@ -1,5 +1,5 @@
 import 'package:arabic_lexicons/data.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 // import 'package:in_app_review/in_app_review.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -122,8 +122,8 @@ Future<RatePromptResult?> showRatePromptBottomSheet(BuildContext context) {
 Widget elevatedIcon(
   ColorScheme cs,
   IconData iconData, {
-  final double iconSize = 38.00,
-  final double diemtion = 72.00,
+  double iconSize = 38.00,
+  double diemtion = 72.00,
   Color? fg,
   Color? bg,
 }) {

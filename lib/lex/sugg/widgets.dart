@@ -4,7 +4,7 @@ import 'package:arabic_lexicons/lex/data.dart';
 import 'package:arabic_lexicons/lex/res.dart';
 import 'package:arabic_lexicons/lex/sugg/data.dart';
 import 'package:arabic_lexicons/utils.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 Widget showSearchSugg(
   BuildContext context,

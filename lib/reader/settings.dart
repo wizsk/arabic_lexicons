@@ -7,7 +7,7 @@ import 'package:arabic_lexicons/reader/data.dart';
 import 'package:arabic_lexicons/reader/reader_utils.dart';
 import 'package:arabic_lexicons/reader/settings_class.dart';
 import 'package:arabic_lexicons/utils/toast_snack.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 class ReaderModeSettingsSheet extends StatefulWidget {
   final ReaderPageSettings original;

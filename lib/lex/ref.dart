@@ -1,7 +1,7 @@
 import 'package:arabic_lexicons/data.dart';
 import 'package:arabic_lexicons/utils.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// tafseer.app (maybe) thier refferences are like this...
 class ReferenceProcessor {

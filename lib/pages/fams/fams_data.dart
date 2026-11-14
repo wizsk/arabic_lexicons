@@ -1,6 +1,6 @@
 import 'package:arabic_lexicons/data.dart';
 import 'package:arabic_lexicons/pages/help/help.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 class VerbFamilyInfo {
   final String formName;

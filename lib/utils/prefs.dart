@@ -36,7 +36,7 @@ class Prefs {
 
   /// Creates and loads the app's default preferences file.
   static Future<Prefs> al({
-    final String fileName = kDebugMode
+    String fileName = kDebugMode
         ? ".arabic_lexcions_prefs_debug.json"
         : ".arabic_lexcions_prefs.json",
   }) async {

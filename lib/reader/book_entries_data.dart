@@ -187,7 +187,7 @@ abstract final class ReaderInputPageData {
 
   static Future<String> saveBookEntryWithData(
     PeraEntries peras, {
-    final bool pinned = false,
+    bool pinned = false,
   }) async {
     if (!inited || peras.isEmpty) {
       throw 'inited: $inited || paras empty: ${peras.isEmpty}';
@@ -210,7 +210,7 @@ abstract final class ReaderInputPageData {
   static Future<bool> add(
     BookEntry book,
     String data, {
-    final replace = true,
+    replace = true,
   }) async {
     if (book.sha.isEmpty) {
       throw Exception('Cannot save book without its hash');

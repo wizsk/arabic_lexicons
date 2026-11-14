@@ -8,7 +8,7 @@ import 'package:arabic_lexicons/reader/settings_class.dart';
 import 'package:arabic_lexicons/stories.dart';
 import 'package:arabic_lexicons/theme.dart';
 import 'package:arabic_lexicons/utils.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 EdgeInsets readerPadding(
   BuildContext context, {
@@ -34,10 +34,10 @@ EdgeInsets readerPadding(
 
 EdgeInsets uiPadding(
   BuildContext context, {
-  final double maxWidth = maxUiWidth,
-  final double side = scrollPaddingSides,
-  final double top = scrollPaddingTop,
-  final double bottom = scrollPaddingBottom,
+  double maxWidth = maxUiWidth,
+  double side = scrollPaddingSides,
+  double top = scrollPaddingTop,
+  double bottom = scrollPaddingBottom,
 }) {
   final double padd = ((MediaQuery.of(context).size.width - maxWidth) / 2)
       .clamp(side, double.infinity)

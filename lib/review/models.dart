@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:arabic_lexicons/data.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 enum RevOrder {
   old(

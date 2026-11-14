@@ -1,5 +1,5 @@
 import 'package:arabic_lexicons/main_widgets.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 class SelectionController<T> {
   final selected = <T>{};
@@ -22,7 +22,7 @@ class SelectionController<T> {
     afterChange();
   }
 
-  void clear({final bool runAfterChange = true}) {
+  void clear({bool runAfterChange = true}) {
     selected.clear();
     if (runAfterChange) afterChange();
   }

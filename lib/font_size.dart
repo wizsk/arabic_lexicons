@@ -2,7 +2,7 @@ import 'package:arabic_lexicons/conf.dart';
 import 'package:arabic_lexicons/data.dart';
 import 'package:arabic_lexicons/theme.dart';
 import 'package:arabic_lexicons/widgets/selection_chip.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// if [fontSize] is provided
 /// then size wont be saved in [appConf]

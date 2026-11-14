@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 
 abstract final class MsgSv {
@@ -14,8 +14,8 @@ abstract final class MsgSv {
   /// on android tries to show toast msg and else-where snakmsg
   static Future<void> showToast(
     String message, {
-    final bool shortDuration = true,
-    final Duration snackDuration = _defDuration,
+    bool shortDuration = true,
+    Duration snackDuration = _defDuration,
   }) async {
     if (Platform.isAndroid) {
       try {
@@ -33,9 +33,9 @@ abstract final class MsgSv {
 
   static void showSnackbarMsg(
     String message, {
-    final Duration duration = _defDuration,
-    final SnackBarAction? action,
-    final bool? showCloseIcon,
+    Duration duration = _defDuration,
+    SnackBarAction? action,
+    bool? showCloseIcon,
   }) => showSnackbar(
     Text(message),
     duration: duration,
@@ -48,9 +48,9 @@ abstract final class MsgSv {
 
   static void showSnackbar(
     Widget message, {
-    final Duration duration = _defDuration,
-    final SnackBarAction? action,
-    final bool? showCloseIcon,
+    Duration duration = _defDuration,
+    SnackBarAction? action,
+    bool? showCloseIcon,
   }) {
     _snackMsgTimmer?.cancel();
     _snackMsgTimmer = null;

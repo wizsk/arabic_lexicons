@@ -2,7 +2,7 @@ import 'package:arabic_lexicons/change_logs.dart';
 import 'package:arabic_lexicons/data.dart';
 import 'package:arabic_lexicons/pages/help/help.dart';
 import 'package:arabic_lexicons/play_rate.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 Future<void> showWhatsNewSheet(BuildContext context) async {
   await showModalBottomSheet(

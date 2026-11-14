@@ -12,7 +12,7 @@ import 'package:arabic_lexicons/utils.dart';
 import 'package:arabic_lexicons/utils/prefs.dart';
 import 'package:arabic_lexicons/widgets/change_logs_widget.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
 enum AppLang { en, ar }

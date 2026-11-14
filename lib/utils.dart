@@ -3,7 +3,7 @@ import 'package:arabic_lexicons/lex/lexicons.dart';
 import 'package:arabic_lexicons/main.dart';
 import 'package:collection/collection.dart' as collection;
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:html/parser.dart' as html_parser;
 
@@ -162,7 +162,7 @@ String htmlToPlainTextWithLineBr(String html) {
 }
 
 @pragma("vm:prefer-inline")
-void touggleFullScreen({final bool forceNonFs = false}) {
+void touggleFullScreen({bool forceNonFs = false}) {
   if (!forceNonFs && appConf.fullScreen) {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
   } else if (appConf.hideStatusbar) {
@@ -339,7 +339,7 @@ extension StringExtentions on String {
     return (pre: substring(0, idx), suf: suf.isEmpty ? null : suf);
   }
 
-  String takeMax(final int take, {final ellipsis = '…'}) {
+  String takeMax(int take, {ellipsis = '…'}) {
     if (length <= take) return this;
 
     return '${substring(0, take)}$ellipsis';
@@ -349,11 +349,11 @@ extension StringExtentions on String {
 Widget segmentedList({
   required Color bg,
   required List<Widget> list,
-  final double spacing = 4.00,
-  final MainAxisSize mainAxisSize = MainAxisSize.min,
-  final double firstLastRadious = 20.00,
-  final double middleRadious = 4.00,
-  final TextDirection? textDirection,
+  double spacing = 4.00,
+  MainAxisSize mainAxisSize = MainAxisSize.min,
+  double firstLastRadious = 20.00,
+  double middleRadious = 4.00,
+  TextDirection? textDirection,
 }) {
   final children = <Widget>[];
 
@@ -383,8 +383,8 @@ Widget segmentedListItem({
   required Widget item,
   required int index,
   required int length,
-  final double firstLastRadious = 20.00,
-  final double middleRadious = 4.00,
+  double firstLastRadious = 20.00,
+  double middleRadious = 4.00,
 }) {
   final r = BorderRadius.vertical(
     top: Radius.circular(index == 0 ? firstLastRadious : middleRadious),

@@ -1,6 +1,6 @@
 import 'package:arabic_lexicons/conf.dart';
 import 'package:arabic_lexicons/main_widgets.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:cupertino_ui/cupertino_ui.dart';
 
 class ArabicNormalizer {
   // arabic only numbers

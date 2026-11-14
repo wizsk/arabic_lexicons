@@ -2,7 +2,7 @@ import 'package:arabic_lexicons/conf.dart';
 import 'package:arabic_lexicons/data.dart';
 import 'package:arabic_lexicons/datas/stories_txts.dart';
 import 'package:arabic_lexicons/utils.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 Future<int?> showStoryPicker(BuildContext context) {
   return showModalBottomSheet<int?>(

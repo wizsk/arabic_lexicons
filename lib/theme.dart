@@ -1,6 +1,6 @@
 import 'package:arabic_lexicons/conf.dart';
 import 'package:arabic_lexicons/data.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 const double defaultReaderArabicFontSize = 20;
 const String defaultReaderArabicFont = fontKitab;

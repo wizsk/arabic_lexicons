@@ -7,7 +7,7 @@ import 'package:arabic_lexicons/pages/lex_bm/def.dart';
 import 'package:arabic_lexicons/pages/width_padd.dart';
 import 'package:arabic_lexicons/utils.dart';
 import 'package:arabic_lexicons/widgets/reader_theme.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 class LexDefBmPage extends StatefulWidget {
   const LexDefBmPage({super.key});

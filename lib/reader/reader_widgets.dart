@@ -10,7 +10,7 @@ import 'package:arabic_lexicons/utils.dart';
 import 'package:arabic_lexicons/utils/toast_snack.dart';
 import 'package:arabic_lexicons/widgets/selectable_text_screen.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 // const paraSpacerStart = WidgetSpan(child: SizedBox(width: 20));
 // const paraSpaceInbetween = EdgeInsets.symmetric(vertical: 8);

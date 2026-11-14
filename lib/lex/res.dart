@@ -13,7 +13,7 @@ import 'package:arabic_lexicons/utils.dart';
 import 'package:arabic_lexicons/utils/toast_snack.dart';
 import 'package:arabic_lexicons/widgets/small_icon_btns.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
@@ -572,8 +572,8 @@ extension DbRowWidget on DbRow {
     BuildContext context, {
     required bool hasRefs,
     required TextStyle ts,
-    final int? maxlines,
-    final TextOverflow? textOverFlow,
+    int? maxlines,
+    TextOverflow? textOverFlow,
   }) {
     final txt = formatMeanings;
 

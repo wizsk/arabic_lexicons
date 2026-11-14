@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 enum IconButtonSizedColor { normal, err, primary }
 
@@ -8,9 +8,9 @@ Widget iconButtonSized(
   String? tooltip,
   required VoidCallback? onPressed,
   VoidCallback? onLongPress,
-  final IconButtonSizedColor scheme = IconButtonSizedColor.normal,
-  final double size = 40.00,
-  final double iconSize = 20.00,
+  IconButtonSizedColor scheme = IconButtonSizedColor.normal,
+  double size = 40.00,
+  double iconSize = 20.00,
 }) {
   final theme = Theme.of(context);
   final cs = theme.colorScheme;

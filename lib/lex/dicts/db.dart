@@ -69,7 +69,7 @@ class DbService {
 
   static Future<Database> _openDb(
     String dbDir, {
-    final bool copy = false,
+    bool copy = false,
   }) async {
     final dbPath = join(dbDir, dbFileName);
     if (copy) {
@@ -129,7 +129,7 @@ class DbService {
     await tmp.rename(dbPath);
   }
 
-  static Future<void> init({String? path, final bool copy = false}) async {
+  static Future<void> init({String? path, bool copy = false}) async {
     path = path ?? (await getApplicationDocumentsDirectory()).path;
 
     /// Must be called once (Linux requirement)

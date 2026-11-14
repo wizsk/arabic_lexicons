@@ -1,5 +1,5 @@
 import 'package:arabic_lexicons/conf.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 class Selection extends StatelessWidget {
   final String label;

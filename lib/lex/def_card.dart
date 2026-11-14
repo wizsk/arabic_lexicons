@@ -8,7 +8,7 @@ import 'package:arabic_lexicons/theme.dart';
 import 'package:arabic_lexicons/utils/toast_snack.dart';
 import 'package:arabic_lexicons/widgets/dahsed_divider.dart';
 import 'package:arabic_lexicons/widgets/small_icon_btns.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 
 Widget definitonCard(
@@ -22,7 +22,7 @@ Widget definitonCard(
   required Future<void> Function() save,
   VoidCallback? fs,
   (Dict, DbRow) Function()? report,
-  final bool useM3Colors = false,
+  bool useM3Colors = false,
   VoidCallback? onRemove,
 }) {
   final cs = Theme.of(context).colorScheme;
@@ -163,7 +163,7 @@ Widget definitonCardDbRow(
   required VoidCallback fs,
   required VoidCallback rebuild,
   VoidCallback? onRemove,
-  final bool useM3Colors = false,
+  bool useM3Colors = false,
 }) {
   final res = definitonCard(
     context,

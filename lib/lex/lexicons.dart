@@ -24,7 +24,7 @@ import 'package:arabic_lexicons/widgets/lex_word_confirm.dart';
 import 'package:arabic_lexicons/widgets/reader_theme.dart';
 import 'package:arabic_lexicons/widgets/selection_chip.dart';
 import 'package:arabic_lexicons/widgets/small_icon_btns.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
@@ -336,7 +336,7 @@ class _SearchLexiconsState extends State<SearchLexicons>
 
   static const _chipContainerMainHeight = 38.00;
 
-  List<Widget> _scrolabeSelectors(final EdgeInsets padd, final Color bg) {
+  List<Widget> _scrolabeSelectors(EdgeInsets padd, Color bg) {
     final chipContainerHeight = L.fontSize == null
         ? _chipContainerMainHeight
         : (_chipContainerMainHeight * L.fontSize!) / 14;
@@ -662,9 +662,9 @@ class _SearchLexiconsState extends State<SearchLexicons>
   }
 
   void _deleteWord(
-    final String word,
-    final bool selected, {
-    final bool keyShort = false,
+    String word,
+    bool selected, {
+    bool keyShort = false,
   }) async {
     if (word.isEmpty) return;
 
@@ -745,7 +745,7 @@ class _SearchLexiconsState extends State<SearchLexicons>
       required VoidCallback? onPressed,
       VoidCallback? onLongPress,
       required String tooltip,
-      final IconButtonSizedColor scheme = IconButtonSizedColor.normal,
+      IconButtonSizedColor scheme = IconButtonSizedColor.normal,
     }) => iconButtonSized(
       context,
       icon: icon,

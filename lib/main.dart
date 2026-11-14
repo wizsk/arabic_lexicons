@@ -14,7 +14,7 @@ import 'package:arabic_lexicons/theme.dart';
 import 'package:arabic_lexicons/utils/toast_snack.dart';
 import 'package:arabic_lexicons/word_list/page.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 const lruCacheOff = kDebugMode && true;
 

@@ -4,7 +4,7 @@ import 'package:arabic_lexicons/datas/app_db.dart';
 import 'package:arabic_lexicons/lex/dicts/ar_en/ar_en.dart';
 import 'package:arabic_lexicons/lex/dicts/db.dart';
 import 'package:arabic_lexicons/lex/res.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:sqflite/sqflite.dart';
 
 extension _LexEntryBookmarkExt on Dict {

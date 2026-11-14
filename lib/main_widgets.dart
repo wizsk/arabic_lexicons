@@ -7,7 +7,7 @@ import 'package:arabic_lexicons/pages/help/help.dart';
 import 'package:arabic_lexicons/pages/lex_bm/lex_bm.dart';
 import 'package:arabic_lexicons/pages/settings/settings.dart';
 import 'package:arabic_lexicons/utils.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 Widget buildDrawer(BuildContext context) {
   final cs = Theme.of(context).colorScheme;

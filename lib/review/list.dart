@@ -13,7 +13,7 @@ import 'package:arabic_lexicons/review/utils.dart';
 import 'package:arabic_lexicons/utils.dart';
 import 'package:arabic_lexicons/utils/toast_snack.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 class RevWordListPage extends StatefulWidget {
   const RevWordListPage({super.key, required this.rr});

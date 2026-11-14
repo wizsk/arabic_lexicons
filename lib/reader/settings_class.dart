@@ -4,9 +4,9 @@ import 'dart:io';
 import 'package:arabic_lexicons/data.dart';
 import 'package:arabic_lexicons/pages/width_padd.dart';
 import 'package:arabic_lexicons/reader/book_entries_data.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:path/path.dart';
 
 const readerConfDirNameOld = 'reader_conf';

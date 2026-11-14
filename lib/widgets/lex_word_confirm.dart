@@ -1,12 +1,12 @@
 import 'package:arabic_lexicons/conf.dart';
 import 'package:arabic_lexicons/main_widgets.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 bool _showingLexWordDelConfirm = false;
 Future<bool?> showLexWordDelConfirm(
   BuildContext context,
   String word, {
-  final String extramsg = '',
+  String extramsg = '',
 }) async {
   if (_showingLexWordDelConfirm) return null;
   _showingLexWordDelConfirm = true;
@@ -28,7 +28,7 @@ Future<bool?> showLexWordDelConfirm(
 
 Future<bool?> showLexWordClearAllConfirm(
   BuildContext context, {
-  final String extramsg = '',
+  String extramsg = '',
 }) async {
   if (_showingLexWordDelConfirm) return null;
   _showingLexWordDelConfirm = true;

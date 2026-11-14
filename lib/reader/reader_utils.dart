@@ -8,7 +8,7 @@ import 'package:arabic_lexicons/pages/settings/settings.dart';
 import 'package:arabic_lexicons/reader/data.dart';
 import 'package:arabic_lexicons/utils/toast_snack.dart';
 import 'package:archive/archive.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 // const int _maxAppbarTitleLen = 40;
 const int readerAppbarMaxWordCount = 10;

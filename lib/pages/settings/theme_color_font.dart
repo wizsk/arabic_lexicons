@@ -3,7 +3,7 @@ import 'package:arabic_lexicons/pages/settings/settings.dart';
 import 'package:arabic_lexicons/pages/width_padd.dart';
 import 'package:arabic_lexicons/theme.dart';
 import 'package:arabic_lexicons/utils/toast_snack.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Color Picker
 const double themeColorOuter = 40;

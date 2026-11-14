@@ -5,7 +5,7 @@ import 'package:arabic_lexicons/lex/def_card.dart';
 import 'package:arabic_lexicons/theme.dart';
 import 'package:arabic_lexicons/utils/toast_snack.dart';
 import 'package:arabic_lexicons/widgets/reader_theme.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 
 class LexBnDefPage extends StatefulWidget {

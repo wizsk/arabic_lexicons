@@ -37,7 +37,7 @@ class ReviewRepo {
   /// Adds a word as due now (no-op if it already exists).
   Future<bool> add(
     String word, {
-    final ConflictAlgorithm conflictAlgorithm = ConflictAlgorithm.ignore,
+    ConflictAlgorithm conflictAlgorithm = ConflictAlgorithm.ignore,
   }) async {
     final n = await _db.insert(_t, {
       'word': word,

@@ -68,7 +68,7 @@ class SearchSuggestions {
   }
 
   /// Results must be cleaned
-  SuggestionEntries getSuggestions(String query, {final int limit = 10}) {
+  SuggestionEntries getSuggestions(String query, {int limit = 10}) {
     return getSuggestionsV2(query, limit: limit);
     // final arEnRes =
 
@@ -94,7 +94,7 @@ class SearchSuggestions {
     // return res;
   }
 
-  SuggestionEntries getSuggestionsV2(String query, {final int limit = 10}) {
+  SuggestionEntries getSuggestionsV2(String query, {int limit = 10}) {
     if (query.isEmpty) return {};
     final SuggestionEntries res = {
       for (final d in allDicts) d: <SuggestionEntry>{},

@@ -495,6 +495,7 @@ Widget _arabicLexView(TextStyle ts, SearchLexiconsDatas datas) {
         //   child:
         child,
         // ),
+        selectable: true,
         rebuild: () {
           if (context.mounted) datas.rebuild();
         },

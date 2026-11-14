@@ -24,6 +24,7 @@ Widget definitonCard(
   (Dict, DbRow) Function()? report,
   bool useM3Colors = false,
   VoidCallback? onRemove,
+  bool selectable = false,
 }) {
   final cs = Theme.of(context).colorScheme;
 
@@ -121,7 +122,12 @@ Widget definitonCard(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          child,
+          selectable
+              ? SelectionArea(
+                  magnifierConfiguration: TextMagnifierConfiguration.disabled,
+                  child: child,
+                )
+              : child,
           DashedDivider(height: 8, color: cs.outlineVariant),
           Padding(padding: EdgeInsets.symmetric(horizontal: 8), child: actions),
           const SizedBox(height: 6),
@@ -151,7 +157,7 @@ Widget definitonCard(
   );
 
   final b = DecoratedBox(decoration: decoration, child: textWidget);
-  return fs == null ? b : GestureDetector(onTap: fs, child: b);
+  return selectable || fs == null ? b : GestureDetector(onTap: fs, child: b);
 }
 
 Widget definitonCardDbRow(
@@ -164,6 +170,7 @@ Widget definitonCardDbRow(
   required VoidCallback rebuild,
   VoidCallback? onRemove,
   bool useM3Colors = false,
+  bool selectable = false,
 }) {
   final res = definitonCard(
     context,
@@ -180,6 +187,7 @@ Widget definitonCardDbRow(
     report: () => (d, r),
     useM3Colors: useM3Colors,
     onRemove: onRemove,
+    selectable: selectable,
   );
 
   return res;

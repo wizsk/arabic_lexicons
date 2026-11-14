@@ -2,6 +2,13 @@ import 'package:arabic_lexicons/key_shortcuts.dart';
 
 final releases = [
   Release(
+    version: 'v3.8.0',
+    changes: '''
+    Update flutter version
+    Make all Arabic dictionary texts selectable (as flutter has fixes/enhanced text selections)
+  ''',
+  ),
+  Release(
     version: 'v3.7.0',
     changes: '''
     Fixed settings save issues (Sorry for the reset)

@@ -38,7 +38,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
   bool _isPinned = false;
   bool _isShowEntrieNewToOld = true;
 
-  static const double _textFieldHeightMin = 200;
+  static const double _textFieldHeightMin = 100;
   static const double _textFieldHeightMax = 700;
   double _textFieldHeight = _textFieldHeightMin;
 
@@ -677,6 +677,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                                   ),
                                 ),
                               ),
+                              const SizedBox(height: 6),
                               GestureDetector(
                                 onVerticalDragUpdate: (details) {
                                   setState(() {
@@ -691,15 +692,15 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                                 child: MouseRegion(
                                   cursor: SystemMouseCursors.resizeUpDown,
                                   child: Container(
-                                    height: 28,
-                                    alignment: Alignment.center,
-                                    child: Container(
-                                      width: 40,
-                                      height: 6,
-                                      decoration: BoxDecoration(
-                                        color: Colors.grey,
-                                        borderRadius: BorderRadius.circular(4),
-                                      ),
+                                    width: 40,
+                                    height: 6,
+                                    margin: const EdgeInsets.all(10),
+                                    decoration: BoxDecoration(
+                                      color: cs.outlineVariant,
+                                      borderRadius:
+                                          const BorderRadiusGeometry.all(
+                                            Radius.circular(12),
+                                          ),
                                     ),
                                   ),
                                 ),

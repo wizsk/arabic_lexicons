@@ -206,7 +206,7 @@ class AppSettingsController extends ChangeNotifier {
   late final Prefs prefs;
 
   /// Load saved theme & font size from memory
-  Future<void> load() async {
+  Future<void> load({required bool shouldNotfy}) async {
     if (!_prefLoaded) {
       _prefLoaded = true;
       prefs = await Prefs.al();
@@ -296,6 +296,8 @@ class AppSettingsController extends ChangeNotifier {
     L.set(_useMoreArabic ? AppLang.ar : AppLang.en);
 
     await WakelockController.load(prefs.getBool(wakeLockKey));
+
+    if (shouldNotfy) notify();
   }
 
   Future<void> reset() async {
@@ -307,7 +309,7 @@ class AppSettingsController extends ChangeNotifier {
     await prefs.setString(_appVersionKey, appVersion);
     await saveFirstRun(false);
 
-    await load();
+    await load(shouldNotfy: true);
 
     touggleFullScreen();
     notify();

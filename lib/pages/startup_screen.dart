@@ -28,7 +28,7 @@ class _StartupScreenState extends State<StartupScreen> {
     try {
       // final s = Stopwatch()..start();
       await Future.wait([
-        appConf.load(),
+        appConf.load(shouldNotfy: true),
         setDictOrdFromFile(),
         DbService.init(copy: true),
         AppDb.init(),
@@ -40,8 +40,6 @@ class _StartupScreenState extends State<StartupScreen> {
       });
 
       // s.stop();
-
-      appConf.notify();
 
       // if (!mounted) return;
       // await showInfoDialog(

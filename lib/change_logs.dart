@@ -6,6 +6,7 @@ final releases = [
     changes: '''
     Update flutter version
     Make all Arabic dictionary texts selectable (as flutter has fixes/enhanced text selections)
+    Reader input-page text-area resizable
   ''',
   ),
   Release(

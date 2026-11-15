@@ -5,6 +5,7 @@ import 'package:arabic_lexicons/lex/dicts/db.dart';
 import 'package:arabic_lexicons/lex/isolate.dart';
 import 'package:arabic_lexicons/lex/rearrange_dicts.dart';
 import 'package:arabic_lexicons/main_widgets.dart';
+import 'package:arabic_lexicons/utils.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 
@@ -27,8 +28,9 @@ class _StartupScreenState extends State<StartupScreen> {
 
     try {
       // final s = Stopwatch()..start();
+      await appConf.load(shouldNotfy: true);
+
       await Future.wait([
-        appConf.load(shouldNotfy: true),
         setDictOrdFromFile(),
         DbService.init(copy: true),
         AppDb.init(),
@@ -51,7 +53,8 @@ class _StartupScreenState extends State<StartupScreen> {
       if (!mounted) return;
 
       final r = appConf.firstRun ? Routes.welcome : appConf.lastRoute;
-      Navigator.pushReplacementNamed(context, r);
+
+      postFrame((_) => Navigator.pushReplacementNamed(context, r));
     } catch (e) {
       if (mounted) {
         final msg = 'Could not read resources: \n$e';
